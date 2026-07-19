@@ -25,6 +25,8 @@ cd D:\myprofilegit\myprofile
 pnpm portfolio:start
 ```
 
+If a fresh Windows terminal does not recognize `pnpm`, use `npm run portfolio:start`. The desktop launcher uses this fallback automatically.
+
 The local Vite build retains owner and case-study editing controls. Production builds remove those controls.
 
 ## Local save is not online publishing
@@ -82,6 +84,8 @@ The importer:
 pnpm portfolio:check
 ```
 
+`npm run portfolio:check` is equivalent when pnpm is not on the terminal PATH.
+
 This command requires the official directory and `main`, shows Git status, rejects private or oversized files, runs typecheck and build, and scans the production build for local URLs, temporary blob/file URLs, Windows paths, and editing controls.
 
 ## Publish once per day
@@ -89,6 +93,8 @@ This command requires the official directory and `main`, shows Git status, rejec
 ```powershell
 pnpm portfolio:publish
 ```
+
+`npm run portfolio:publish` is equivalent when pnpm is not on the terminal PATH.
 
 `pnpm publish:daily` is an alias for the same guarded command. It performs all checks, lists the files, and requires typing `PUBLISH` before it commits and pushes. It never force-pushes and cannot commit after a failed typecheck, build, or safety scan.
 

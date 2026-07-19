@@ -16,9 +16,12 @@ function fail(message) {
 }
 
 function run(program, args, options = {}) {
-  const runPnpmThroughNode = program === "pnpm" && Boolean(process.env.npm_execpath);
-  const executable = runPnpmThroughNode ? process.execPath : program;
-  const commandArgs = runPnpmThroughNode ? [process.env.npm_execpath, ...args] : args;
+  const runPackageManagerThroughNode = program === "pnpm" && Boolean(process.env.npm_execpath);
+  const executable = runPackageManagerThroughNode ? process.execPath : program;
+  const packageManagerIsPnpm = /pnpm/i.test(path.basename(process.env.npm_execpath ?? ""));
+  const commandArgs = runPackageManagerThroughNode
+    ? [process.env.npm_execpath, ...(packageManagerIsPnpm ? args : ["run", ...args])]
+    : args;
   const result = spawnSync(executable, commandArgs, {
     cwd: OFFICIAL_ROOT,
     encoding: "utf8",

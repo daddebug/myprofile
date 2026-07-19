@@ -44,5 +44,11 @@ exit /b %errorlevel%
 title Portfolio Server - KEEP THIS OPEN
 color 0A
 cd /d "%PORTFOLIO_DIR%"
-call npm run portfolio:start
+where npm.cmd >nul 2>&1
+if not errorlevel 1 (
+  call npm run portfolio:start
+) else (
+  set "PATH=C:\Users\95799\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin;%PATH%"
+  call "C:\Users\95799\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\fallback\pnpm.cmd" portfolio:start
+)
 exit /b
