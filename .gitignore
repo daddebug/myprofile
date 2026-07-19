@@ -1,0 +1,20 @@
+node_modules
+dist
+.agents
+UI
+pic
+.env
+.env.*
+!.env.example
+.vercel
+.pnpm-store
+.local-backups
+.unity-upload
+.unity-upload-result.env
+.DS_Store
+*.tsbuildinfo
+
+# Unity payloads stay on the editing machine and are uploaded to Vercel Blob.
+public/games/afterwarm/Build/tem.data.br
+public/games/afterwarm/Build/tem.framework.js.br
+public/games/afterwarm/Build/tem.wasm.br

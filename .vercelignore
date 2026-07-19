@@ -1,0 +1,12 @@
+.env
+.env.*
+.agents
+UI
+pic
+.local-backups
+.pnpm-store
+.unity-upload
+.unity-upload-result.env
+public/games/afterwarm/Build/tem.data.br
+public/games/afterwarm/Build/tem.framework.js.br
+public/games/afterwarm/Build/tem.wasm.br

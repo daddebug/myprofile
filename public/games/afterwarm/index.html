@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
+    <title>Afterwarm</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-status" role="status" aria-live="polite"></div>
+      <div id="unity-warning"> </div>
+    </div>
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        var warningBanner = document.querySelector("#unity-warning");
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/tem.loader.js";
+      var query = new URLSearchParams(window.location.search);
+      var isLocalHost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+      var status = document.querySelector("#unity-status");
+
+      function reportToPortfolio(type, detail) {
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: "afterwarm-unity-" + type, ...detail }, window.location.origin);
+        }
+      }
+
+      function resolvePayloadUrl(parameter, localPath) {
+        var configured = query.get(parameter);
+        if (!configured) return isLocalHost ? localPath : "";
+        try {
+          var parsed = new URL(configured, window.location.href);
+          if (parsed.protocol !== "https:" && !isLocalHost) return "";
+          return parsed.href;
+        } catch {
+          return "";
+        }
+      }
+
+      var dataUrl = resolvePayloadUrl("dataUrl", buildUrl + "/tem.data.br");
+      var frameworkUrl = resolvePayloadUrl("frameworkUrl", buildUrl + "/tem.framework.js.br");
+      var codeUrl = resolvePayloadUrl("codeUrl", buildUrl + "/tem.wasm.br");
+      var streamingAssetsUrl = query.get("streamingAssetsUrl") || (isLocalHost ? "StreamingAssets" : "");
+      var config = {
+        arguments: [],
+        dataUrl: dataUrl,
+        frameworkUrl: frameworkUrl,
+        codeUrl: codeUrl,
+        streamingAssetsUrl: streamingAssetsUrl,
+        companyName: "DefaultCompany",
+        productName: "Afterwarm",
+        productVersion: "0.1.0",
+        showBanner: unityShowBanner,
+        // errorHandler: function(err, url, line) {
+        //    alert("error " + err + " occurred at line " + line);
+        //    // Return 'true' if you handled this error and don't want Unity
+        //    // to process it further, 'false' otherwise.
+        //    return true;
+        // },
+      };
+
+      // By default, Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      // If you would like all file writes inside Unity Application.persistentDataPath
+      // directory to automatically persist so that the contents are remembered when
+      // the user revisits the site the next time, uncomment the following line:
+      // config.autoSyncPersistentDataPath = true;
+      // This autosyncing is currently not the default behavior to avoid regressing
+      // existing user projects that might rely on the earlier manual
+      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
+      // expected to change.
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        document.querySelector("#unity-container").className = "unity-mobile";
+        canvas.className = "unity-mobile";
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
+
+      }
+
+      if (!dataUrl || !frameworkUrl || !codeUrl) {
+        canvas.style.display = "none";
+        status.style.display = "grid";
+        status.textContent = "Playable build is being configured.";
+        reportToPortfolio("error", { message: status.textContent, configurationMissing: true });
+      } else {
+        document.querySelector("#unity-loading-bar").style.display = "block";
+        status.style.display = "grid";
+        status.textContent = "Loading Afterwarm... 0%";
+
+        var script = document.createElement("script");
+        script.src = loaderUrl;
+        script.onload = () => {
+          createUnityInstance(canvas, config, (progress) => {
+            var percentage = Math.round(100 * progress);
+            document.querySelector("#unity-progress-bar-full").style.width = percentage + "%";
+            status.textContent = "Loading Afterwarm... " + percentage + "%";
+            reportToPortfolio("progress", { progress: progress });
+          }).then(() => {
+            document.querySelector("#unity-loading-bar").style.display = "none";
+            status.style.display = "none";
+            reportToPortfolio("ready", {});
+          }).catch((message) => {
+            status.style.display = "grid";
+            status.textContent = "Afterwarm could not be loaded.";
+            reportToPortfolio("error", { message: String(message) });
+          });
+        };
+        script.onerror = () => {
+          status.style.display = "grid";
+          status.textContent = "The Unity loader could not be loaded.";
+          reportToPortfolio("error", { message: status.textContent });
+        };
+
+        document.body.appendChild(script);
+      }
+
+    </script>
+  </body>
+</html>

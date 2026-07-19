@@ -1,0 +1,44 @@
+# Public deployment
+
+## Vercel project
+
+- Framework preset: Vite
+- Install command: `pnpm install --frozen-lockfile`
+- Build command: `pnpm build`
+- Output directory: `dist`
+- Node.js: 22.x
+
+`vercel.json` contains the SPA rewrite required for direct visits to localized project routes.
+
+## Afterwarm Unity payloads
+
+The original Brotli files remain in `public/games/afterwarm/Build` for local development. They are ignored by Git and Vercel deployment source uploads.
+
+The current Unity loader requires `Content-Encoding: br`. Vercel Blob does not use this project's `vercel.json` headers, so the upload script safely decompresses the three payloads into the ignored `.unity-upload` directory and uploads these public files instead:
+
+- `unity/afterwarm/0.1.0/tem.data`
+- `unity/afterwarm/0.1.0/tem.framework.js`
+- `unity/afterwarm/0.1.0/tem.wasm`
+
+Create a public Vercel Blob store and expose its write token only in the local terminal session. Never use a `VITE_` prefix for the token.
+
+```powershell
+$env:BLOB_READ_WRITE_TOKEN = "your-token"
+pnpm upload:unity
+pnpm upload:unity -- --confirm
+```
+
+The first command is a dry run. The confirmed command validates and decompresses the source files, uses multipart upload for payloads over 100 MB, skips unchanged remote files by pathname and size, and writes public read URLs to the ignored `.unity-upload-result.env` file.
+
+Copy these values from that result file into the Vercel project's Production environment settings:
+
+```text
+VITE_UNITY_DATA_URL=
+VITE_UNITY_FRAMEWORK_URL=
+VITE_UNITY_WASM_URL=
+VITE_UNITY_STREAMING_ASSETS_URL=
+```
+
+After upload, verify that each public URL responds over HTTPS with its expected content type. The deployed payloads are uncompressed, so they must not return a `Content-Encoding: br` header.
+
+Local `pnpm dev` continues to use the original local `.br` files. A production build without all three required public URLs shows a configuration message instead of a blank or permanently loading canvas.
