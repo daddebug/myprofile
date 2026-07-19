@@ -52,7 +52,7 @@
       var loaderUrl = buildUrl + "/tem.loader.js";
       var query = new URLSearchParams(window.location.search);
       var isLocalHost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-      var status = document.querySelector("#unity-status");
+      var statusElement = document.querySelector("#unity-status");
 
       function reportToPortfolio(type, detail) {
         if (window.parent !== window) {
@@ -122,13 +122,13 @@
 
       if (!dataUrl || !frameworkUrl || !codeUrl) {
         canvas.style.display = "none";
-        status.style.display = "grid";
-        status.textContent = "Playable build is being configured.";
-        reportToPortfolio("error", { message: status.textContent, configurationMissing: true });
+        statusElement.style.display = "grid";
+        statusElement.textContent = "Playable build is being configured.";
+        reportToPortfolio("error", { message: statusElement.textContent, configurationMissing: true });
       } else {
         document.querySelector("#unity-loading-bar").style.display = "block";
-        status.style.display = "grid";
-        status.textContent = "Loading Afterwarm... 0%";
+        statusElement.style.display = "grid";
+        statusElement.textContent = "Loading Afterwarm... 0%";
 
         var script = document.createElement("script");
         script.src = loaderUrl;
@@ -136,22 +136,22 @@
           createUnityInstance(canvas, config, (progress) => {
             var percentage = Math.round(100 * progress);
             document.querySelector("#unity-progress-bar-full").style.width = percentage + "%";
-            status.textContent = "Loading Afterwarm... " + percentage + "%";
+            statusElement.textContent = "Loading Afterwarm... " + percentage + "%";
             reportToPortfolio("progress", { progress: progress });
           }).then(() => {
             document.querySelector("#unity-loading-bar").style.display = "none";
-            status.style.display = "none";
+            statusElement.style.display = "none";
             reportToPortfolio("ready", {});
           }).catch((message) => {
-            status.style.display = "grid";
-            status.textContent = "Afterwarm could not be loaded.";
+            statusElement.style.display = "grid";
+            statusElement.textContent = "Afterwarm could not be loaded.";
             reportToPortfolio("error", { message: String(message) });
           });
         };
         script.onerror = () => {
-          status.style.display = "grid";
-          status.textContent = "The Unity loader could not be loaded.";
-          reportToPortfolio("error", { message: status.textContent });
+          statusElement.style.display = "grid";
+          statusElement.textContent = "The Unity loader could not be loaded.";
+          reportToPortfolio("error", { message: statusElement.textContent });
         };
 
         document.body.appendChild(script);
