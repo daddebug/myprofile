@@ -94,14 +94,19 @@ async function main() {
   }
 
   const token = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!token) {
-    throw new Error("BLOB_READ_WRITE_TOKEN is required when --confirm is used.");
+  const oidcToken = process.env.VERCEL_OIDC_TOKEN;
+  const storeId = process.env.BLOB_STORE_ID;
+  if (!token && !(oidcToken && storeId)) {
+    throw new Error(
+      "Set BLOB_READ_WRITE_TOKEN, or provide both VERCEL_OIDC_TOKEN and BLOB_STORE_ID, when --confirm is used.",
+    );
   }
+  const authentication = token ? { token } : { oidcToken, storeId };
 
   const prepared = [];
   for (const payload of inspected) prepared.push(await preparePayload(payload));
 
-  const existing = await list({ prefix: `${prefix}/`, token, limit: 1000 });
+  const existing = await list({ prefix: `${prefix}/`, ...authentication, limit: 1000 });
   const existingByPath = new Map(existing.blobs.map((blob) => [blob.pathname, blob]));
   const urls = new Map();
 
@@ -118,7 +123,7 @@ async function main() {
     let lastPercent = -10;
     const blob = await put(pathname, createReadStream(payload.outputPath), {
       access: "public",
-      token,
+      ...authentication,
       multipart: payload.outputStat.size > 100 * 1024 * 1024,
       addRandomSuffix: false,
       allowOverwrite: true,
