@@ -21,6 +21,7 @@ import {
 import { GAME_JAM_DRAFT_STORAGE_KEY } from "../lib/gameJamDraftStorage";
 import { caseStudyLayout } from "../lib/caseStudyLayout";
 import { setProjectPublicMetaOverride } from "../lib/projectMetadata";
+import { getPublishedProjectDraft } from "../lib/publishedPortfolio";
 
 export { GAME_JAM_DRAFT_STORAGE_KEY } from "../lib/gameJamDraftStorage";
 const AUTOSAVE_DELAY_MS = 400;
@@ -525,17 +526,20 @@ export function mergeGameJamDraft(value: unknown): GameJamDraft {
 }
 
 function loadDraft() {
-  if (typeof window === "undefined") return defaultGameJamDraft;
+  const publishedDraft = getPublishedProjectDraft("from-theme-to-playable-rule");
+  const publicDefault = publishedDraft ? mergeGameJamDraft(publishedDraft) : defaultGameJamDraft;
+  if (typeof window === "undefined") return publicDefault;
+  if (!import.meta.env.DEV) return publicDefault;
   try {
     // IMPORTANT:
     // User-authored local Game Jam case-study content.
     // Do not rename the storage key or reset persisted content during layout-only refactors.
     const stored = window.localStorage.getItem(GAME_JAM_DRAFT_STORAGE_KEY);
-    if (!stored) return defaultGameJamDraft;
+    if (!stored) return publicDefault;
     const parsed = JSON.parse(stored) as unknown;
     return mergeGameJamDraft(parsed);
   } catch {
-    return defaultGameJamDraft;
+    return publicDefault;
   }
 }
 

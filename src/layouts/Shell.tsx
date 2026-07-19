@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { useLocale } from "../locales/LocaleContext";
+import { ProductionExportDock } from "../components/ProductionExportDock";
 
 export function Shell({ children }: PropsWithChildren) {
   const [open, setOpen] = useState(false);
@@ -140,29 +141,49 @@ export function Shell({ children }: PropsWithChildren) {
 
       {children}
 
+      <ProductionExportDock />
+
       {!isHome ? (
       <footer className="border-t border-softWhite/10 bg-deepIndigo">
-        <div className="site-container grid gap-8 py-14 md:grid-cols-[1.2fr_0.8fr]">
-          <div>
-            <p className="font-display text-4xl text-softWhite">Let’s Make Something Playable</p>
-            <p className="mt-3 max-w-2xl text-softWhite/68">
-              {messages.footer.description}
-            </p>
+        <div className="site-container py-14">
+          <div className="grid gap-8 md:grid-cols-[1.2fr_0.8fr]">
+            <div>
+              <p className="font-display text-4xl text-softWhite">Let’s Make Something Playable</p>
+              <p className="mt-3 max-w-2xl text-softWhite/68">
+                {messages.footer.description}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 md:justify-end">
+              <a className="pill-link" href="mailto:hello@example.com">
+                {messages.footer.email}
+              </a>
+              <a className="pill-link" href="https://www.behance.net/" target="_blank" rel="noreferrer">
+                Behance
+              </a>
+              <a className="pill-link" href="https://github.com/" target="_blank" rel="noreferrer">
+                GitHub
+              </a>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-3 md:justify-end">
-            <a className="pill-link" href="mailto:hello@example.com">
-              {messages.footer.email}
-            </a>
-            <a className="pill-link" href="https://www.behance.net/" target="_blank" rel="noreferrer">
-              Behance
-            </a>
-            <a className="pill-link" href="https://github.com/" target="_blank" rel="noreferrer">
-              GitHub
-            </a>
-          </div>
+          <SiteCredit credit={messages.footer.credit} stack={messages.footer.stack} />
         </div>
       </footer>
-      ) : null}
+      ) : (
+        <footer className="border-t border-softWhite/8 bg-deepIndigo">
+          <div className="site-container py-8">
+            <SiteCredit credit={messages.footer.credit} stack={messages.footer.stack} compact />
+          </div>
+        </footer>
+      )}
+    </div>
+  );
+}
+
+function SiteCredit({ credit, stack, compact = false }: { credit: string; stack: string; compact?: boolean }) {
+  return (
+    <div className={`${compact ? "" : "mt-10 border-t border-softWhite/8 pt-6"} flex flex-col gap-2 text-softWhite/42 sm:flex-row sm:items-center sm:justify-between`}>
+      <p className="text-xs leading-5">{credit}</p>
+      <p className="font-mono text-[10px] leading-5 tracking-[0.04em]">{stack}</p>
     </div>
   );
 }

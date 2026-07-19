@@ -3,6 +3,7 @@ import {
   getProjectCover,
   PROJECT_COVER_CHANGED_EVENT,
 } from "../lib/projectCoverDb";
+import { getPublishedProjectCover } from "../lib/publishedPortfolio";
 
 type ProjectCoverState = {
   image: string;
@@ -10,8 +11,10 @@ type ProjectCoverState = {
 };
 
 export function useProjectCover(projectId: string, publicPath: string) {
+  const publishedPath = getPublishedProjectCover(projectId);
+  const fallbackPath = publishedPath || publicPath;
   const [revision, setRevision] = useState(0);
-  const [state, setState] = useState<ProjectCoverState>({ image: publicPath, hasLocalCover: false });
+  const [state, setState] = useState<ProjectCoverState>({ image: fallbackPath, hasLocalCover: false });
 
   useEffect(() => {
     const handleCoverChange = (event: Event) => {
@@ -27,7 +30,9 @@ export function useProjectCover(projectId: string, publicPath: string) {
     let cancelled = false;
     let objectUrl = "";
 
-    setState({ image: publicPath, hasLocalCover: false });
+    setState({ image: fallbackPath, hasLocalCover: false });
+    if (!import.meta.env.DEV) return undefined;
+
     getProjectCover(projectId)
       .then((record) => {
         if (cancelled || !record) return;
@@ -35,14 +40,14 @@ export function useProjectCover(projectId: string, publicPath: string) {
         setState({ image: objectUrl, hasLocalCover: true });
       })
       .catch(() => {
-        if (!cancelled) setState({ image: publicPath, hasLocalCover: false });
+        if (!cancelled) setState({ image: fallbackPath, hasLocalCover: false });
       });
 
     return () => {
       cancelled = true;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [projectId, publicPath, revision]);
+  }, [projectId, fallbackPath, revision]);
 
   return state;
 }

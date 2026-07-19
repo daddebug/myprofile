@@ -18,6 +18,7 @@ import { getProjectTranslation } from "../content/projects/translations";
 import { CROSS_PLATFORM_DRAFT_STORAGE_KEY } from "../lib/crossPlatformDraftStorage";
 import { caseStudyLayout } from "../lib/caseStudyLayout";
 import { setProjectPublicMetaOverride } from "../lib/projectMetadata";
+import { getPublishedProjectDraft } from "../lib/publishedPortfolio";
 import { useLocale } from "../locales/LocaleContext";
 
 export { CROSS_PLATFORM_DRAFT_STORAGE_KEY } from "../lib/crossPlatformDraftStorage";
@@ -1386,9 +1387,12 @@ export function mergeCrossPlatformDraft(value: unknown): CrossPlatformDraft {
 }
 
 function loadDraft() {
+  const publishedDraft = getPublishedProjectDraft("cross-platform-game-ux");
+  const publicDefault = publishedDraft ? mergeCrossPlatformDraft(publishedDraft) : defaultCrossPlatformDraft;
   if (typeof window === "undefined") {
-    return defaultCrossPlatformDraft;
+    return publicDefault;
   }
+  if (!import.meta.env.DEV) return publicDefault;
 
   try {
     // IMPORTANT:
@@ -1397,13 +1401,13 @@ function loadDraft() {
     const storedDraft = window.localStorage.getItem(CROSS_PLATFORM_DRAFT_STORAGE_KEY);
 
     if (!storedDraft) {
-      return defaultCrossPlatformDraft;
+      return publicDefault;
     }
 
     const parsedDraft = JSON.parse(storedDraft) as unknown;
     return mergeCrossPlatformDraft(parsedDraft);
   } catch {
-    return defaultCrossPlatformDraft;
+    return publicDefault;
   }
 }
 

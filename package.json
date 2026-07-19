@@ -12,7 +12,13 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "tsc -b",
-    "upload:unity": "node scripts/upload-unity-to-vercel-blob.mjs"
+    "upload:unity": "node scripts/upload-unity-to-vercel-blob.mjs",
+    "portfolio:start": "vite",
+    "portfolio:check": "node scripts/portfolio-workflow.mjs check",
+    "portfolio:publish": "node scripts/portfolio-workflow.mjs publish",
+    "publish:daily": "node scripts/portfolio-workflow.mjs publish",
+    "portfolio:import": "node scripts/import-production-bundle.mjs",
+    "portfolio:verify": "node scripts/portfolio-workflow.mjs verify"
   },
   "dependencies": {
     "framer-motion": "^12.23.12",

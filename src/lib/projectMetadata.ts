@@ -2,6 +2,7 @@ import { projects } from "../data/projects";
 import { CROSS_PLATFORM_DRAFT_STORAGE_KEY } from "./crossPlatformDraftStorage";
 import { GAME_JAM_DRAFT_STORAGE_KEY } from "./gameJamDraftStorage";
 import { THREE_D_CHARACTER_DRAFT_STORAGE_KEY } from "./threeDCharacterDraftStorage";
+import { getPublishedPublicMetadata } from "./publishedPortfolio";
 
 export const PROJECT_PUBLIC_META_STORAGE_KEY = "dilida-portfolio:project-public-meta:v1";
 export const PROJECT_PUBLIC_META_CHANGED_EVENT = "dilida-portfolio:project-public-meta-changed";
@@ -282,15 +283,33 @@ function readDraftOverrides(): Record<string, ProjectPublicMetaOverride> {
 }
 
 export function readProjectPublicMetaOverrides(): Record<string, ProjectPublicMetaOverride> {
+  const publishedOverrides = getPublishedPublicMetadata();
+  if (!import.meta.env.DEV) return publishedOverrides;
+
   const draftOverrides = readDraftOverrides();
   const stored = readJson(PROJECT_PUBLIC_META_STORAGE_KEY);
   const storedProjects = stored?.version === 1 && isRecord(stored.projects) ? stored.projects : {};
 
-  return Object.entries(storedProjects).reduce<Record<string, ProjectPublicMetaOverride>>((result, [projectId, value]) => {
+  const storedOverrides = Object.entries(storedProjects).reduce<Record<string, ProjectPublicMetaOverride>>((result, [projectId, value]) => {
     if (!isRecord(value)) return result;
-    result[projectId] = { ...value, ...draftOverrides[projectId], projectId } as ProjectPublicMetaOverride;
+    result[projectId] = { ...value, projectId } as ProjectPublicMetaOverride;
     return result;
-  }, { ...draftOverrides });
+  }, {});
+
+  const projectIds = new Set([
+    ...Object.keys(publishedOverrides),
+    ...Object.keys(storedOverrides),
+    ...Object.keys(draftOverrides),
+  ]);
+  return Object.fromEntries([...projectIds].map((projectId) => [
+    projectId,
+    {
+      ...publishedOverrides[projectId],
+      ...storedOverrides[projectId],
+      ...draftOverrides[projectId],
+      projectId,
+    },
+  ]));
 }
 
 export function setProjectPublicMetaOverride(

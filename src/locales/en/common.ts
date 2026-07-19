@@ -35,5 +35,7 @@ export const enCommon: CommonMessages = {
     title: "Let’s Make Something Playable",
     description: "Open to UX, Game UX, interaction design, and playful little-world projects.",
     email: "Email",
+    credit: "Designed and developed by Dilida Duman",
+    stack: "React · TypeScript · Vite · Framer Motion · Unity WebGL",
   },
 };

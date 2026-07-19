@@ -40,5 +40,5 @@ export type CommonMessages = {
     homepageCoverHelper: string;
     emptyCover: string;
   };
-  footer: { title: string; description: string; email: string };
+  footer: { title: string; description: string; email: string; credit: string; stack: string };
 };

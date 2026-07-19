@@ -7,6 +7,7 @@ import { ProjectCoverEditor } from "../components/ProjectCoverEditor";
 import { caseStudyLayout } from "../lib/caseStudyLayout";
 import { INTERACTION_PROFILE_AGENT_DRAFT_STORAGE_KEY } from "../lib/interactionProfileAgentDraftStorage";
 import { setProjectPublicMetaOverride } from "../lib/projectMetadata";
+import { getPublishedProjectDraft } from "../lib/publishedPortfolio";
 import { useLocale } from "../locales/LocaleContext";
 
 type Locale = "zh" | "en";
@@ -193,12 +194,23 @@ function mergeAgentLocale(value: unknown, fallback: EditableAgentCopy): Editable
 }
 
 function loadAgentDraft(): InteractionAgentDraft {
-  if (typeof window === "undefined") return defaultAgentDraft;
+  const publishedDraft = getPublishedProjectDraft("interaction-profile-agent");
+  const publicDefault = isRecord(publishedDraft) && publishedDraft.version === 1
+    ? {
+        ...publishedDraft,
+        version: 1 as const,
+        zh: mergeAgentLocale(publishedDraft.zh, defaultAgentDraft.zh),
+        en: mergeAgentLocale(publishedDraft.en, defaultAgentDraft.en),
+        updatedAt: readString(publishedDraft.updatedAt, defaultAgentDraft.updatedAt),
+      }
+    : defaultAgentDraft;
+  if (typeof window === "undefined") return publicDefault;
+  if (!import.meta.env.DEV) return publicDefault;
   try {
     const raw = window.localStorage.getItem(INTERACTION_PROFILE_AGENT_DRAFT_STORAGE_KEY);
-    if (!raw) return defaultAgentDraft;
+    if (!raw) return publicDefault;
     const saved = JSON.parse(raw) as unknown;
-    if (!isRecord(saved) || saved.version !== 1) return defaultAgentDraft;
+    if (!isRecord(saved) || saved.version !== 1) return publicDefault;
     return {
       ...saved,
       version: 1,
@@ -207,7 +219,7 @@ function loadAgentDraft(): InteractionAgentDraft {
       updatedAt: readString(saved.updatedAt, defaultAgentDraft.updatedAt),
     };
   } catch {
-    return defaultAgentDraft;
+    return publicDefault;
   }
 }
 

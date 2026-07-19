@@ -28,6 +28,7 @@ import {
 import { THREE_D_CHARACTER_DRAFT_STORAGE_KEY } from "../lib/threeDCharacterDraftStorage";
 import { caseStudyLayout } from "../lib/caseStudyLayout";
 import { setProjectPublicMetaOverride } from "../lib/projectMetadata";
+import { getPublishedProjectDraft } from "../lib/publishedPortfolio";
 
 const AUTOSAVE_DELAY_MS = 400;
 const ACCEPTED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/avif", "image/gif"];
@@ -645,12 +646,15 @@ function mergeDraft(value: unknown): ThreeDCharacterDraft {
 }
 
 function loadDraft() {
-  if (typeof window === "undefined") return defaultDraft;
+  const publishedDraft = getPublishedProjectDraft("3d-character-ui-rhythm");
+  const publicDefault = publishedDraft ? mergeDraft(publishedDraft) : defaultDraft;
+  if (typeof window === "undefined") return publicDefault;
+  if (!import.meta.env.DEV) return publicDefault;
   try {
     const stored = window.localStorage.getItem(THREE_D_CHARACTER_DRAFT_STORAGE_KEY);
-    return stored ? mergeDraft(JSON.parse(stored) as unknown) : defaultDraft;
+    return stored ? mergeDraft(JSON.parse(stored) as unknown) : publicDefault;
   } catch {
-    return defaultDraft;
+    return publicDefault;
   }
 }
 

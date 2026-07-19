@@ -42,3 +42,7 @@ VITE_UNITY_STREAMING_ASSETS_URL=
 After upload, verify that each public URL responds over HTTPS with its expected content type. The deployed payloads are uncompressed, so they must not return a `Content-Encoding: br` header.
 
 Local `pnpm dev` continues to use the original local `.br` files. A production build without all three required public URLs shows a configuration message instead of a blank or permanently loading canvas.
+
+## Daily editing and publishing
+
+See `DAILY_WORKFLOW.md`. Use `D:\myprofilegit\myprofile` as the only working directory, keep the canonical local origin at `http://localhost:5173`, and run `pnpm portfolio:check` before `pnpm portfolio:publish`.
