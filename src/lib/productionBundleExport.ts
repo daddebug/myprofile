@@ -4,6 +4,7 @@ import { GAME_COVER_DB_NAME, GAME_COVER_STORE_NAME } from "./gameCoverDb";
 import { getGameExperienceStore } from "./gameExperience";
 import { getProjectDocumentsExportStore } from "./projectDocuments";
 import { getProjectCollectionExportStore } from "./projectMetadata";
+import uiPracticeMetadata from "../data/uiPracticeMetadata.json";
 
 type ExportedImage = {
   database: string;
@@ -36,6 +37,7 @@ const draftSources: readonly { projectId: string; key: string; database: string;
 // portfolioContentPlugin.ts wrote under public/portfolio-assets/, so the only
 // way to get the bytes here is to fetch that already-serving local URL.
 const templateImageSource = { database: "dilida-portfolio-template-images", store: "images" };
+const UI_PRACTICE_PROJECT_ID = "ui-personal-practice";
 
 function collectTemplateImageRefs(value: unknown, refs = new Map<string, string>()): Map<string, string> {
   if (!value || typeof value !== "object") return refs;
@@ -276,6 +278,21 @@ export async function exportProductionBundle(): Promise<ProductionExportSummary>
       }
     }
   }
+
+  // UI Personal Practice is a source-controlled gallery rather than a
+  // dynamic-project draft, but its newer items use the same disk-staged
+  // imageId/publicPath shape. Export those bytes through the same published
+  // image channel so its canonical metadata never points at local-only
+  // /portfolio-assets files in production.
+  const uiPractice = structuredClone(uiPracticeMetadata) as unknown;
+  const uiPracticeImageRefs = collectTemplateImageRefs(uiPractice);
+  for (const [imageId, publicPath] of uiPracticeImageRefs) {
+    try {
+      images.push(await fetchTemplateImage(UI_PRACTICE_PROJECT_ID, imageId, publicPath));
+    } catch (error) {
+      missingReferences.push(`${UI_PRACTICE_PROJECT_ID}: ${imageId} (could not fetch ${publicPath}: ${error instanceof Error ? error.message : String(error)})`);
+    }
+  }
   if (dynamicProjectWarnings.length) {
     console.warn("[Portfolio export] dynamic project draft warnings:", dynamicProjectWarnings);
   }
@@ -327,6 +344,7 @@ export async function exportProductionBundle(): Promise<ProductionExportSummary>
     projectCatalog,
     projectDocuments,
     gameExperience,
+    uiPractice,
     images,
     diagnostics: {
       missingReferences,

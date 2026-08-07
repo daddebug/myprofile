@@ -4,6 +4,7 @@ import process from "node:process";
 
 const OFFICIAL_ROOT = path.resolve("D:/myprofilegit/myprofile");
 const OUTPUT_DATA = path.join("src", "data", "publishedPortfolio.json");
+const OUTPUT_UI_PRACTICE_DATA = path.join("src", "data", "uiPracticeMetadata.json");
 const OUTPUT_ASSET_ROOT = path.join("public", "images", "published");
 const CONFIRM_FLAG = "--confirm";
 
@@ -260,6 +261,11 @@ const projectDocuments = {
 };
 if (missing.size) fail(`Referenced project-body image data is missing from the bundle:\n- ${[...missing].join("\n- ")}`);
 
+const uiPractice = bundle.uiPractice?.version === 1 && Array.isArray(bundle.uiPractice.items)
+  ? replaceImagePaths(bundle.uiPractice, templateImagePaths, missing)
+  : undefined;
+if (missing.size) fail(`Referenced UI Practice image data is missing from the bundle:\n- ${[...missing].join("\n- ")}`);
+
 const rawGameExperience = bundle.gameExperience?.schemaVersion === 1 && Array.isArray(bundle.gameExperience.records)
   ? bundle.gameExperience
   : null;
@@ -314,6 +320,7 @@ console.log(`  Images: ${assets.length}`);
 console.log(`  Homepage covers: ${Object.keys(covers).length}`);
 console.log(`  Canonical projects: ${Object.keys(storedCatalog).length}`);
 console.log(`  Data-driven project documents: ${Object.keys(projectDocuments.documents).length}`);
+console.log(`  UI Practice items: ${uiPractice?.items.length ?? 0}`);
 console.log(`  Game Experience records: ${gameExperience?.records?.length ?? 0}`);
 if (ignoredProjectIds.length) console.log(`  Ignored legacy project IDs: ${ignoredProjectIds.join(", ")}`);
 if (ignoredCoverIds.length) console.log(`  Ignored non-canonical cover IDs: ${ignoredCoverIds.join(", ")}`);
@@ -331,6 +338,7 @@ if (!confirm) {
 const backupTimestamp = new Date().toISOString().replace(/[:.]/g, "-");
 const backupRoot = path.join(cwd, ".local-backups", `production-import-${backupTimestamp}`);
 await backupIfPresent(cwd, OUTPUT_DATA, backupRoot);
+if (uiPractice) await backupIfPresent(cwd, OUTPUT_UI_PRACTICE_DATA, backupRoot);
 for (const asset of assets) await backupIfPresent(cwd, asset.relativePath, backupRoot);
 
 for (const asset of assets) {
@@ -340,6 +348,9 @@ for (const asset of assets) {
 }
 await mkdir(path.dirname(path.join(cwd, OUTPUT_DATA)), { recursive: true });
 await writeFile(path.join(cwd, OUTPUT_DATA), `${JSON.stringify(output, null, 2)}\n`, "utf8");
+if (uiPractice) {
+  await writeFile(path.join(cwd, OUTPUT_UI_PRACTICE_DATA), `${JSON.stringify(uiPractice, null, 2)}\n`, "utf8");
+}
 
 console.log(`\nImported safely. Backup snapshot: ${backupRoot}`);
 console.log("Run pnpm portfolio:check before publishing.");
