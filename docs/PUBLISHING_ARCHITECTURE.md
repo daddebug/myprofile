@@ -16,8 +16,8 @@ The generated preflight is `output/publishing-preflight-manifest.json`. It is lo
 | `ui-practice-metadata` | `uiPracticeMetadata.json` plus owner edits | UI Practice collector | `uiPracticeMetadata.json` | New image refs to published paths | Item count/order and visible images |
 | `ui-practice-bundled-images` | `src/assets/ui-practice-optimized` | Vite `import.meta.glob` | Hashed `dist/assets` | Vite URL | Every metadata filename resolves |
 | `game-experience-records` | Browser Game Experience store | Game Experience exporter | `publishedPortfolio.json#gameExperience` | Cover IDs to published cover paths | Every configured cover decodes |
-| `project-covers-indexeddb` | Project-cover IndexedDB | Read-only browser collector | `public/images/published/covers` | Published cover URL | Archive and hero cover decode |
-| `project-covers-disk` | `content/projects/project-covers.json` | Disk manifest collector | `public/images/published/covers` | Published cover URL | Manifest hash/size/file |
+| `project-covers-indexeddb` | Project-cover IndexedDB | Read-only browser collector (currently unused — see note) | `public/images/published/covers` | Published cover URL | Archive and hero cover decode |
+| `project-covers-disk` | `content/projects/project-covers.json` | Per-project `getDiskProjectCover()` resolve fetch (`productionBundleExport.ts`) | `public/images/published/covers` | Published cover URL | Archive/homepage card decode + visible render |
 | `project-body-indexeddb-assets` | Project-body IndexedDB | Referenced `assetId`, `posterAssetId`, legacy `localImageId` | `public/images/published/project-body/<projectId>` | Published body URL | Every reference resolves and decodes |
 | `dynamic-template-images` | `content/projects/<projectId>/project-images.json` | `imageId` + `publicPath` collector | `public/images/published/template-images/<projectId>` | Published image URL | Mapping, bytes, MIME, dimensions, visibility |
 | `ui-practice-images` | UI Practice project-image manifest | UI Practice `imageId` collector | Published UI template-image directory | Published image URL | Metadata/mapping agree; image visible |
@@ -29,6 +29,8 @@ The generated preflight is `output/publishing-preflight-manifest.json`. It is lo
 | `published-assets` | Generated data and published files | Post-rewrite collector | Production build | None | Every metadata path has an output file |
 
 The detailed discovery, missing policy, output strategy, rewrite strategy, and verification strategy for every row live in the registry itself.
+
+**Rule discovered 2026-08-07 (project covers)**: a registry row and a working importer/rewrite branch (`import-production-bundle.mjs`) do not prove a source is actually publishing anything — `project-covers-disk` had both, correctly, for a while with zero real covers ever reaching production, because `src/lib/productionBundleExport.ts` (the browser-side exporter) never implemented a collector for it; it only ever collected the long-dead `project-covers-indexeddb` store. When auditing whether a registered source family actually works end to end, check the **exporter** (does it really collect this adapter's data into the bundle?) with the same scrutiny as the importer — a "registered but never collected" adapter fails silently (empty output, no preflight error) rather than loudly, since preflight only validates what's present in a bundle, not what's missing from it entirely.
 
 ## Manifest
 
@@ -64,6 +66,8 @@ Unknown resource fields are errors. They are never silently skipped.
 5. The importer rewrites through registry output strategies and validates the rewritten result again.
 6. Only after both checks pass may `--confirm` write production files.
 7. Run typecheck/build and source-specific live verification, including actual image decoding and visibility.
+
+If a specific project has an unrelated, already-known blocker (e.g. Playable Game hosting), pass `--exclude-project=<id>[,<id>...]` so the rest of the bundle can still publish. Excluded projects' current published state is preserved unchanged (read back from the existing `publishedPortfolio.json` and merged into the output, excluded from rewrite-revalidation) — never silently dropped, never a default.
 
 ## DILIDA DESK
 

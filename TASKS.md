@@ -2,7 +2,7 @@
 
 ## Unresolved
 
-- **Playable Game embeds do not yet have a complete production handler.** Their `entryPublicPath` and cover URL can still point at local-only `/portfolio-assets/playable-games/<projectId>/...`. The authoritative registry/preflight now inventories each entry, cover, and recursive build file and blocks publishing rather than omitting them. Choose and implement a production destination for the 100MB+ builds, then add the importer and live verifier; do not bypass the manifest.
+- **Playable Game embeds do not yet have a complete production handler.** Their `entryPublicPath` and cover URL can still point at local-only `/portfolio-assets/playable-games/<projectId>/...`. The authoritative registry/preflight now inventories each entry, cover, and recursive build file and blocks publishing rather than omitting them. Choose and implement a production destination for the 100MB+ builds, then add the importer and live verifier; do not bypass the manifest. **Confirmed real-blocking case (2026-08-07)**: `game-jam-8lzejf` and `3d-vdr4qg` both have a `PlayableGameTemplate` instance with an embedded cover (`{coverId, publicUrl}`) whose `publicUrl` is still `/portfolio-assets/playable-games/<projectId>/covers/...` — this now correctly fails the rewrite-validation preflight (`published-assets: still contains a local or development-only reference`) instead of silently publishing a broken image. These 2 projects were excluded from the 2026-08-07 cover-fix publish (`--exclude-project`, see `CHANGELOG.md`) and are still running whatever their last successfully-published state was; fix this task before their content can be updated again.
 - **DILIDA DESK online sync remains paused.** It must call the repository's registry/preflight workflow and display source-level results. It must not duplicate discovery or path rewriting. The same constraint now also applies to a future DILIDA DESK `COLLECTION PDF` action against `docs/PDF_EXPORT_ARCHITECTURE.md`'s workflow — not implemented yet.
 - **PDF viewer performance still unverified.** Not measured against a real generated PDF since the architecture/registry work landed.
 - **Project trailing blank space still unverified.** `scripts/pdf-export-postflight-lib.mjs`'s project blank-tail rule now exists to check this automatically, but has not yet been run against a real regenerated Collection PDF.
@@ -12,7 +12,6 @@
 
 ## Pending verification
 
-- Generate a fresh export from the owner's real browser with publishing registry version 1, run the dry import, and review the complete source-level preflight. Older exports intentionally fail because they do not identify source adapters.
 - Generate a real Collection PDF and run it through `buildPdfExportPreflight`/`buildPdfExportPostflight` end to end at least once to confirm the libraries work against real data, not just the registry-loading smoke check performed so far.
 - Root-cause the actual `captureHeight` vs. `page.pdf()` print-layout mismatch behind the blank-segment bug (see above) rather than relying on the `maxSegmentHeightPx=16000` stopgap indefinitely.
 

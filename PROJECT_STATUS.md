@@ -37,6 +37,8 @@ The old one-off bespoke draft pages (own hardcoded storage key + own dedicated I
 - Production import runs the same preflight before writes and after path rewriting. Unknown sources, missing configured covers/assets, local/dev paths, and published references without intended output are blocking errors.
 - `docs/PUBLISHING_ARCHITECTURE.md` documents the inventory and verification rules. DILIDA DESK sync is paused and must consume this manifest rather than duplicate discovery.
 - Playable Game files are now discovered and listed, but large-build production hosting/import remains unresolved and blocks publishing instead of being silently omitted.
+- **Project covers publish correctly now** (2026-08-07, commit `8a57564`, verified live). `src/lib/productionBundleExport.ts` collects covers from `content/projects/project-covers.json` (the `project-covers-disk` adapter — the real, currently-used owner-editing path via `ProjectCoverEditor.tsx`), not the long-dead `project-covers-indexeddb` store. A registry row having a real importer implementation does not guarantee it has a real exporter/collector implementation — both ends must be checked when auditing a source family, not just one.
+- `import-production-bundle.mjs` supports an explicit `--exclude-project=<id>[,<id>...]` flag for excluding specific projects from one publish run while preserving (not deleting) their existing published state — used when a project has an unrelated, already-known blocker (see Playable Game hosting below). Never a silent default; always logged when used.
 
 ## XMind Breakdown template
 

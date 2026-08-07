@@ -13,6 +13,12 @@ Stable workflow for moving owner drafts and every supported asset source into so
 7. Run `pnpm typecheck` and `pnpm build`.
 8. Review the exact `git diff` and staged file list before committing anything.
 
+## Verifying a source family actually works
+
+A registry row plus a working import/rewrite branch does not prove a source publishes anything — check that `src/lib/productionBundleExport.ts` (the browser exporter) actually has a real collector for that `sourceAdapterId` too. A "registered but never collected" adapter produces empty output with no preflight error, since preflight only validates what's present in a bundle, not what's silently missing from it. (Discovered 2026-08-07: `project-covers-disk` had a working registry row and importer for a while but zero real collector, so project covers never reached production — see `CHANGELOG.md`.)
+
+If one specific project has an unrelated, already-known blocker, use `--exclude-project=<id>[,<id>...]` on `import-production-bundle.mjs` rather than waiting on it or working around the check. It preserves that project's existing published state unchanged and excludes it from rewrite-revalidation; never a silent default, always logged.
+
 ## Mandatory Source Coverage
 
 The manifest covers dynamic drafts, `imageId`, legacy `localImageId`, Project Document assets, UI Practice metadata/bundled/new images, Game Experience records and covers, browser and disk project covers, Playable Game builds and covers, external embeds, disk `/portfolio-assets` references, and generated `/images/published` references.
