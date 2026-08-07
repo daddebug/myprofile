@@ -6,7 +6,7 @@
 
 ## Pending verification
 
-(none)
+(none — the UI Practice production-image gap was fixed in `50ff4e3` and verified visually in the owner's real Chrome; this supersedes the earlier URL-only image check.)
 
 ## Deferred
 
