@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-07T02:08:07.121Z",
+  "generatedAt": "2026-08-07T02:43:03.679Z",
   "drafts": {
     "interaction-intelligence-system": {
       "version": 1,
@@ -55,7 +55,7 @@
                 },
                 "image": {
                   "imageId": "image-0be30ac9-6cea-4aa6-b1f2-e36da30b932b",
-                  "publicPath": "/portfolio-assets/project-images/interaction-intelligence-system/image-0be30ac9-6cea-4aa6-b1f2-e36da30b932b.png"
+                  "publicPath": "/images/published/template-images-interaction-intelligence-system/image-0be30ac9-6cea-4aa6-b1f2-e36da30b932b.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -71,7 +71,7 @@
                 },
                 "image": {
                   "imageId": "image-84a21e7a-805d-4b28-a14a-6833513b526c",
-                  "publicPath": "/portfolio-assets/project-images/interaction-intelligence-system/image-84a21e7a-805d-4b28-a14a-6833513b526c.png"
+                  "publicPath": "/images/published/template-images-interaction-intelligence-system/image-84a21e7a-805d-4b28-a14a-6833513b526c.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -87,7 +87,7 @@
                 },
                 "image": {
                   "imageId": "image-6e329cc2-258d-41f6-8ca2-ba631c7d4780",
-                  "publicPath": "/portfolio-assets/project-images/interaction-intelligence-system/image-6e329cc2-258d-41f6-8ca2-ba631c7d4780.png"
+                  "publicPath": "/images/published/template-images-interaction-intelligence-system/image-6e329cc2-258d-41f6-8ca2-ba631c7d4780.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -103,7 +103,7 @@
                 },
                 "image": {
                   "imageId": "image-36031fb4-fdc4-4ea5-88ec-4b0065e92d7f",
-                  "publicPath": "/portfolio-assets/project-images/interaction-intelligence-system/image-36031fb4-fdc4-4ea5-88ec-4b0065e92d7f.jpg"
+                  "publicPath": "/images/published/template-images-interaction-intelligence-system/image-36031fb4-fdc4-4ea5-88ec-4b0065e92d7f.jpg"
                 },
                 "imageDisplayMode": "cover"
               }
@@ -704,7 +704,7 @@
                 "suggestedImageCount": 1,
                 "image": {
                   "imageId": "image-353880fd-7b1c-4dec-bab4-923db08339c0",
-                  "publicPath": "/portfolio-assets/project-images/interaction-intelligence-system/image-353880fd-7b1c-4dec-bab4-923db08339c0.png"
+                  "publicPath": "/images/published/template-images-interaction-intelligence-system/image-353880fd-7b1c-4dec-bab4-923db08339c0.png"
                 },
                 "imageDisplayMode": "cover"
               }
@@ -743,7 +743,7 @@
                 "suggestedImageCount": 1,
                 "image": {
                   "imageId": "image-1fc4df94-c172-45a4-a138-8dc31babfb13",
-                  "publicPath": "/portfolio-assets/project-images/interaction-intelligence-system/image-1fc4df94-c172-45a4-a138-8dc31babfb13.png"
+                  "publicPath": "/images/published/template-images-interaction-intelligence-system/image-1fc4df94-c172-45a4-a138-8dc31babfb13.png"
                 },
                 "imageDisplayMode": "cover",
                 "hoverPreviewMode": "floating"
@@ -766,7 +766,7 @@
                 "suggestedImageCount": 1,
                 "image": {
                   "imageId": "image-e62d5a6b-c737-4f81-84c9-8a66a3512301",
-                  "publicPath": "/portfolio-assets/project-images/interaction-intelligence-system/image-e62d5a6b-c737-4f81-84c9-8a66a3512301.png"
+                  "publicPath": "/images/published/template-images-interaction-intelligence-system/image-e62d5a6b-c737-4f81-84c9-8a66a3512301.png"
                 },
                 "imageDisplayMode": "cover",
                 "hoverPreviewMode": "floating"
@@ -789,7 +789,7 @@
                 "suggestedImageCount": 1,
                 "image": {
                   "imageId": "image-6d213651-ec49-4cb7-bf27-80907a6e36a3",
-                  "publicPath": "/portfolio-assets/project-images/interaction-intelligence-system/image-6d213651-ec49-4cb7-bf27-80907a6e36a3.png"
+                  "publicPath": "/images/published/template-images-interaction-intelligence-system/image-6d213651-ec49-4cb7-bf27-80907a6e36a3.png"
                 },
                 "imageDisplayMode": "cover",
                 "hoverPreviewMode": "floating"
@@ -812,7 +812,7 @@
                 "suggestedImageCount": 1,
                 "image": {
                   "imageId": "image-ccfbfc31-9e80-4d55-a671-d577388128dd",
-                  "publicPath": "/portfolio-assets/project-images/interaction-intelligence-system/image-ccfbfc31-9e80-4d55-a671-d577388128dd.png"
+                  "publicPath": "/images/published/template-images-interaction-intelligence-system/image-ccfbfc31-9e80-4d55-a671-d577388128dd.png"
                 },
                 "imageDisplayMode": "cover",
                 "hoverPreviewMode": "floating"
@@ -1378,7 +1378,7 @@
                 },
                 "image": {
                   "imageId": "image-2ada7937-0fed-4283-b1d1-970c677340db",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-2ada7937-0fed-4283-b1d1-970c677340db.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-2ada7937-0fed-4283-b1d1-970c677340db.png"
                 },
                 "imageDisplayMode": "cover",
                 "imageWidthMode": "card",
@@ -1396,7 +1396,7 @@
                 },
                 "image": {
                   "imageId": "image-4a5ccf58-48dc-4ece-bc8e-02d709c51ee1",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-4a5ccf58-48dc-4ece-bc8e-02d709c51ee1.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-4a5ccf58-48dc-4ece-bc8e-02d709c51ee1.png"
                 },
                 "imageDisplayMode": "cover",
                 "imageWidthMode": "card",
@@ -1414,7 +1414,7 @@
                 },
                 "image": {
                   "imageId": "image-130b9d3c-d87a-4f38-bac1-6ed3e11cc6bc",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-130b9d3c-d87a-4f38-bac1-6ed3e11cc6bc.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-130b9d3c-d87a-4f38-bac1-6ed3e11cc6bc.png"
                 },
                 "imageDisplayMode": "cover",
                 "imageWidthMode": "card",
@@ -1432,7 +1432,7 @@
                 },
                 "image": {
                   "imageId": "image-711f2fcf-440d-44ea-89df-b92af190786e",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-711f2fcf-440d-44ea-89df-b92af190786e.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-711f2fcf-440d-44ea-89df-b92af190786e.png"
                 },
                 "imageDisplayMode": "cover",
                 "imageWidthMode": "card",
@@ -1459,7 +1459,7 @@
                 "id": "image-row-item-0e7d5b2c-54a5-4f74-b50d-0231cca78cb0",
                 "image": {
                   "imageId": "image-7333f920-ad7d-4324-a246-77cbc52e79c5",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-7333f920-ad7d-4324-a246-77cbc52e79c5.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-7333f920-ad7d-4324-a246-77cbc52e79c5.png"
                 },
                 "imageDisplayMode": "natural",
                 "hoverPreviewMode": "none",
@@ -1485,7 +1485,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-43cf3e00-5c39-4e32-ab9c-ab20c6f54b2a",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-43cf3e00-5c39-4e32-ab9c-ab20c6f54b2a.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-43cf3e00-5c39-4e32-ab9c-ab20c6f54b2a.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -1502,7 +1502,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-b4634560-ad75-40fa-9005-171f18b0931f",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-b4634560-ad75-40fa-9005-171f18b0931f.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-b4634560-ad75-40fa-9005-171f18b0931f.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -1519,7 +1519,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-7f3236ec-b38a-4cf6-9ac3-83812818b78f",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-7f3236ec-b38a-4cf6-9ac3-83812818b78f.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-7f3236ec-b38a-4cf6-9ac3-83812818b78f.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -1537,7 +1537,7 @@
                 "startNewRow": true,
                 "image": {
                   "imageId": "image-c5804824-9366-40f4-b243-36c459944ad1",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-c5804824-9366-40f4-b243-36c459944ad1.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-c5804824-9366-40f4-b243-36c459944ad1.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -1554,7 +1554,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-4b1680af-7f8b-4895-8b76-281ba1294132",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-4b1680af-7f8b-4895-8b76-281ba1294132.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-4b1680af-7f8b-4895-8b76-281ba1294132.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -1571,7 +1571,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-b6426632-aa40-461b-8397-5baf7f045dfd",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-b6426632-aa40-461b-8397-5baf7f045dfd.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-b6426632-aa40-461b-8397-5baf7f045dfd.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -1588,7 +1588,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-ed5b8b33-7540-4637-bf91-b60d121d3a27",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-ed5b8b33-7540-4637-bf91-b60d121d3a27.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-ed5b8b33-7540-4637-bf91-b60d121d3a27.png"
                 },
                 "imageDisplayMode": "natural"
               }
@@ -1648,7 +1648,7 @@
                 "startNewRow": true,
                 "image": {
                   "imageId": "image-5d026146-bc8d-4c2d-ab1d-b5f2eb780f84",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-5d026146-bc8d-4c2d-ab1d-b5f2eb780f84.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-5d026146-bc8d-4c2d-ab1d-b5f2eb780f84.png"
                 },
                 "imageDisplayMode": "cover",
                 "imageWidthMode": "card"
@@ -1666,7 +1666,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-f30932bf-341a-4e8f-9963-8ce9190ffaa9",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-f30932bf-341a-4e8f-9963-8ce9190ffaa9.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-f30932bf-341a-4e8f-9963-8ce9190ffaa9.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -1683,7 +1683,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-720c2c9d-a1a0-4eff-8585-dbc3cd8b72eb",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-720c2c9d-a1a0-4eff-8585-dbc3cd8b72eb.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-720c2c9d-a1a0-4eff-8585-dbc3cd8b72eb.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -1701,7 +1701,7 @@
                 "startNewRow": true,
                 "image": {
                   "imageId": "image-b4082355-96e3-43c0-ad4a-4cb5376e1726",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-b4082355-96e3-43c0-ad4a-4cb5376e1726.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-b4082355-96e3-43c0-ad4a-4cb5376e1726.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -1718,7 +1718,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-aafe101a-8bf2-499f-bed4-945d0a8083f9",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-aafe101a-8bf2-499f-bed4-945d0a8083f9.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-aafe101a-8bf2-499f-bed4-945d0a8083f9.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -1735,7 +1735,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-82eb8558-d240-4fe8-b62c-8da7421a0da0",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-82eb8558-d240-4fe8-b62c-8da7421a0da0.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-82eb8558-d240-4fe8-b62c-8da7421a0da0.png"
                 },
                 "imageDisplayMode": "cover"
               }
@@ -1760,7 +1760,7 @@
                 "id": "image-row-item-8e581dbd-326d-40c8-94be-ed9fa6cca1aa",
                 "image": {
                   "imageId": "image-65e49412-b5f5-4bb6-a06b-d4f74f8e1413",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-65e49412-b5f5-4bb6-a06b-d4f74f8e1413.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-65e49412-b5f5-4bb6-a06b-d4f74f8e1413.png"
                 },
                 "imageDisplayMode": "natural",
                 "hoverPreviewMode": "none",
@@ -1786,7 +1786,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-50f6cbc4-a6ed-4b19-8c30-e44a9cabd9c8",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-50f6cbc4-a6ed-4b19-8c30-e44a9cabd9c8.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-50f6cbc4-a6ed-4b19-8c30-e44a9cabd9c8.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -1803,7 +1803,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-575d0ad1-3db8-4895-a7a6-b7848d338312",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-575d0ad1-3db8-4895-a7a6-b7848d338312.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-575d0ad1-3db8-4895-a7a6-b7848d338312.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -1820,7 +1820,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-cf748bd6-c746-4a17-8a79-380a383f0633",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-cf748bd6-c746-4a17-8a79-380a383f0633.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-cf748bd6-c746-4a17-8a79-380a383f0633.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -1838,7 +1838,7 @@
                 "startNewRow": true,
                 "image": {
                   "imageId": "image-3eea06a5-cf67-437b-930d-1cedeb1a0232",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-3eea06a5-cf67-437b-930d-1cedeb1a0232.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-3eea06a5-cf67-437b-930d-1cedeb1a0232.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -1855,7 +1855,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-7f553d30-670d-4b95-9db2-af7576dc072e",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-7f553d30-670d-4b95-9db2-af7576dc072e.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-7f553d30-670d-4b95-9db2-af7576dc072e.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -1872,7 +1872,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-1f831a8b-84cc-45cd-a587-1ecf2b339aff",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-1f831a8b-84cc-45cd-a587-1ecf2b339aff.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-1f831a8b-84cc-45cd-a587-1ecf2b339aff.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -1889,7 +1889,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-e12fd427-9704-41ab-9186-55f73d19d255",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-e12fd427-9704-41ab-9186-55f73d19d255.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-e12fd427-9704-41ab-9186-55f73d19d255.png"
                 },
                 "imageDisplayMode": "natural"
               }
@@ -1938,7 +1938,7 @@
                 "id": "image-row-item-abf53aac-81a9-4743-ac8b-944ed27164c7",
                 "image": {
                   "imageId": "image-55b5e6aa-a8a9-455c-b171-95d8de96c1c9",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-55b5e6aa-a8a9-455c-b171-95d8de96c1c9.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-55b5e6aa-a8a9-455c-b171-95d8de96c1c9.png"
                 },
                 "imageDisplayMode": "cover",
                 "hoverPreviewMode": "none",
@@ -1965,7 +1965,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-f7a3b53f-9d25-48b2-9a06-31a85b1215bb",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-f7a3b53f-9d25-48b2-9a06-31a85b1215bb.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-f7a3b53f-9d25-48b2-9a06-31a85b1215bb.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -1982,7 +1982,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-6cebcd26-1996-4931-be7e-4390e53708b5",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-6cebcd26-1996-4931-be7e-4390e53708b5.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-6cebcd26-1996-4931-be7e-4390e53708b5.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -1999,7 +1999,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-f11e81f3-c86a-49ff-8439-9b0c451716a5",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-f11e81f3-c86a-49ff-8439-9b0c451716a5.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-f11e81f3-c86a-49ff-8439-9b0c451716a5.png"
                 },
                 "imageDisplayMode": "natural"
               }
@@ -2033,7 +2033,7 @@
                 "id": "image-row-item-9b79b5d3-cdc4-4bf2-8dc9-fa1e93cb4791",
                 "image": {
                   "imageId": "image-dc840f70-1453-46cf-ab9a-d8d4c8d223a6",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-dc840f70-1453-46cf-ab9a-d8d4c8d223a6.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-dc840f70-1453-46cf-ab9a-d8d4c8d223a6.png"
                 },
                 "imageDisplayMode": "natural",
                 "hoverPreviewMode": "none",
@@ -2059,7 +2059,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-dbdf22fb-73b6-461d-b342-e7fb2ab1eacf",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-dbdf22fb-73b6-461d-b342-e7fb2ab1eacf.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-dbdf22fb-73b6-461d-b342-e7fb2ab1eacf.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -2076,7 +2076,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-04b1ac9f-353c-453f-96a3-a340b28667f8",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-04b1ac9f-353c-453f-96a3-a340b28667f8.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-04b1ac9f-353c-453f-96a3-a340b28667f8.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -2093,7 +2093,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-df4b2070-56a7-4084-8a08-617bd31509b9",
-                  "publicPath": "/portfolio-assets/project-images/ai-assisted-ui-environment-design/image-df4b2070-56a7-4084-8a08-617bd31509b9.png"
+                  "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-df4b2070-56a7-4084-8a08-617bd31509b9.png"
                 },
                 "imageDisplayMode": "natural"
               }
@@ -2522,7 +2522,7 @@
                 "id": "image-row-item-6a451b26-3c12-4ccc-a268-6a94982543ab",
                 "image": {
                   "imageId": "image-3e66c1f3-6182-46a2-a7ae-c7f76669f1a1",
-                  "publicPath": "/portfolio-assets/project-images/game-jam-8lzejf/image-3e66c1f3-6182-46a2-a7ae-c7f76669f1a1.png"
+                  "publicPath": "/images/published/template-images-game-jam-8lzejf/image-3e66c1f3-6182-46a2-a7ae-c7f76669f1a1.png"
                 },
                 "alt": {
                   "zh": "Flip The Script 主题脑暴与玩法方向",
@@ -2594,7 +2594,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-a93a7c0b-42fd-4512-82a9-9cfff4f46712",
-                  "publicPath": "/portfolio-assets/project-images/game-jam-8lzejf/image-a93a7c0b-42fd-4512-82a9-9cfff4f46712.png"
+                  "publicPath": "/images/published/template-images-game-jam-8lzejf/image-a93a7c0b-42fd-4512-82a9-9cfff4f46712.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -2611,7 +2611,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-71a0f0a3-f594-4e26-98c6-8a79b5182882",
-                  "publicPath": "/portfolio-assets/project-images/game-jam-8lzejf/image-71a0f0a3-f594-4e26-98c6-8a79b5182882.png"
+                  "publicPath": "/images/published/template-images-game-jam-8lzejf/image-71a0f0a3-f594-4e26-98c6-8a79b5182882.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -2628,7 +2628,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-cc135262-0268-408f-a095-44ac5cb9924e",
-                  "publicPath": "/portfolio-assets/project-images/game-jam-8lzejf/image-cc135262-0268-408f-a095-44ac5cb9924e.png"
+                  "publicPath": "/images/published/template-images-game-jam-8lzejf/image-cc135262-0268-408f-a095-44ac5cb9924e.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -2636,7 +2636,7 @@
                 "id": "image-row-item-dc5e6740-5faa-48e3-b661-2a206cc22137",
                 "image": {
                   "imageId": "image-f248cae0-b3f5-46eb-bee1-72569b8097a4",
-                  "publicPath": "/portfolio-assets/project-images/game-jam-8lzejf/image-f248cae0-b3f5-46eb-bee1-72569b8097a4.png"
+                  "publicPath": "/images/published/template-images-game-jam-8lzejf/image-f248cae0-b3f5-46eb-bee1-72569b8097a4.png"
                 },
                 "imageDisplayMode": "cover",
                 "hoverPreviewMode": "none",
@@ -2956,7 +2956,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-d41a18d5-0541-49b8-ae46-fd13f4227a20",
-                  "publicPath": "/portfolio-assets/project-images/3d-vdr4qg/image-d41a18d5-0541-49b8-ae46-fd13f4227a20.png"
+                  "publicPath": "/images/published/template-images-3d-vdr4qg/image-d41a18d5-0541-49b8-ae46-fd13f4227a20.png"
                 },
                 "imageCropRatio": "16:9"
               },
@@ -2981,7 +2981,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-1b218f11-2920-4ef9-ac7f-1c18cfc4526f",
-                  "publicPath": "/portfolio-assets/project-images/3d-vdr4qg/image-1b218f11-2920-4ef9-ac7f-1c18cfc4526f.png"
+                  "publicPath": "/images/published/template-images-3d-vdr4qg/image-1b218f11-2920-4ef9-ac7f-1c18cfc4526f.png"
                 },
                 "imageCropRatio": "16:9"
               },
@@ -3006,7 +3006,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-6c4f41ee-68e1-4f4e-a71c-76c1acc15ec3",
-                  "publicPath": "/portfolio-assets/project-images/3d-vdr4qg/image-6c4f41ee-68e1-4f4e-a71c-76c1acc15ec3.png"
+                  "publicPath": "/images/published/template-images-3d-vdr4qg/image-6c4f41ee-68e1-4f4e-a71c-76c1acc15ec3.png"
                 }
               }
             ]
@@ -3075,12 +3075,12 @@
             },
             "leftImage": {
               "imageId": "image-108f3f03-492e-47f3-ac30-bcf261797e17",
-              "publicPath": "/portfolio-assets/project-images/3d-vdr4qg/image-108f3f03-492e-47f3-ac30-bcf261797e17.png",
+              "publicPath": "/images/published/template-images-3d-vdr4qg/image-108f3f03-492e-47f3-ac30-bcf261797e17.png",
               "hoverPreviewMode": "none"
             },
             "rightImage": {
               "imageId": "image-1c56bb5b-47b6-4c01-912c-8debc61e7df4",
-              "publicPath": "/portfolio-assets/project-images/3d-vdr4qg/image-1c56bb5b-47b6-4c01-912c-8debc61e7df4.png",
+              "publicPath": "/images/published/template-images-3d-vdr4qg/image-1c56bb5b-47b6-4c01-912c-8debc61e7df4.png",
               "hoverPreviewMode": "none"
             },
             "direction": "left-to-right"
@@ -3125,12 +3125,12 @@
             },
             "leftImage": {
               "imageId": "image-b8c2ee01-94f6-41e1-86ca-9bba0f8d1e62",
-              "publicPath": "/portfolio-assets/project-images/3d-vdr4qg/image-b8c2ee01-94f6-41e1-86ca-9bba0f8d1e62.png",
+              "publicPath": "/images/published/template-images-3d-vdr4qg/image-b8c2ee01-94f6-41e1-86ca-9bba0f8d1e62.png",
               "hoverPreviewMode": "none"
             },
             "rightImage": {
               "imageId": "image-ea38e8ba-ead1-4929-b4f6-42bbf3a921c2",
-              "publicPath": "/portfolio-assets/project-images/3d-vdr4qg/image-ea38e8ba-ead1-4929-b4f6-42bbf3a921c2.png",
+              "publicPath": "/images/published/template-images-3d-vdr4qg/image-ea38e8ba-ead1-4929-b4f6-42bbf3a921c2.png",
               "hoverPreviewMode": "none"
             },
             "direction": "left-to-right"
@@ -3154,7 +3154,7 @@
                 "id": "image-row-item-5e0aa0ed-dbb7-4975-a4c0-d94a05f3b4b2",
                 "image": {
                   "imageId": "image-e62bb9df-ac64-41cd-b673-70d0857bb305",
-                  "publicPath": "/portfolio-assets/project-images/3d-vdr4qg/image-e62bb9df-ac64-41cd-b673-70d0857bb305.png"
+                  "publicPath": "/images/published/template-images-3d-vdr4qg/image-e62bb9df-ac64-41cd-b673-70d0857bb305.png"
                 },
                 "imageDisplayMode": "cover",
                 "hoverPreviewMode": "none",
@@ -3181,7 +3181,7 @@
                 "imageDisplayMode": "cover",
                 "image": {
                   "imageId": "image-542a66c2-cfc8-4e6d-893c-5f6d3ad61216",
-                  "publicPath": "/portfolio-assets/project-images/3d-vdr4qg/image-542a66c2-cfc8-4e6d-893c-5f6d3ad61216.png"
+                  "publicPath": "/images/published/template-images-3d-vdr4qg/image-542a66c2-cfc8-4e6d-893c-5f6d3ad61216.png"
                 }
               },
               {
@@ -3197,7 +3197,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-4ad4a745-1bfd-4470-8caa-3e59b75ab534",
-                  "publicPath": "/portfolio-assets/project-images/3d-vdr4qg/image-4ad4a745-1bfd-4470-8caa-3e59b75ab534.png"
+                  "publicPath": "/images/published/template-images-3d-vdr4qg/image-4ad4a745-1bfd-4470-8caa-3e59b75ab534.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -3214,7 +3214,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-31c2020b-6e83-45b5-b94a-b804aadc4bf5",
-                  "publicPath": "/portfolio-assets/project-images/3d-vdr4qg/image-31c2020b-6e83-45b5-b94a-b804aadc4bf5.png"
+                  "publicPath": "/images/published/template-images-3d-vdr4qg/image-31c2020b-6e83-45b5-b94a-b804aadc4bf5.png"
                 },
                 "imageDisplayMode": "cover"
               }
@@ -4496,7 +4496,7 @@
                 "id": "image-row-item-5cdb8234-3af4-462b-93e2-fe90e36ae689",
                 "image": {
                   "imageId": "image-507b25fd-dcb4-49ba-9cc9-89606f652360",
-                  "publicPath": "/portfolio-assets/project-images/ui-16ienxj/image-507b25fd-dcb4-49ba-9cc9-89606f652360.png"
+                  "publicPath": "/images/published/template-images-ui-16ienxj/image-507b25fd-dcb4-49ba-9cc9-89606f652360.png"
                 },
                 "imageDisplayMode": "cover",
                 "hoverPreviewMode": "none",
@@ -4522,7 +4522,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-18155569-bb55-4d95-8a6a-e5a4ccb7f1e7",
-                  "publicPath": "/portfolio-assets/project-images/ui-16ienxj/image-18155569-bb55-4d95-8a6a-e5a4ccb7f1e7.png"
+                  "publicPath": "/images/published/template-images-ui-16ienxj/image-18155569-bb55-4d95-8a6a-e5a4ccb7f1e7.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -4539,7 +4539,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-009b73f9-72f1-4b5f-b1ce-7dc6fa16967f",
-                  "publicPath": "/portfolio-assets/project-images/ui-16ienxj/image-009b73f9-72f1-4b5f-b1ce-7dc6fa16967f.png"
+                  "publicPath": "/images/published/template-images-ui-16ienxj/image-009b73f9-72f1-4b5f-b1ce-7dc6fa16967f.png"
                 },
                 "imageDisplayMode": "cover"
               }
@@ -4872,7 +4872,7 @@
                 "id": "image-row-item-fb7a402d-a4a9-4b65-ab03-5656d492ad9f",
                 "image": {
                   "imageId": "image-1f229841-ad60-4ae9-a6f9-ae2b8c93a50b",
-                  "publicPath": "/portfolio-assets/project-images/ui-16ienxj/image-1f229841-ad60-4ae9-a6f9-ae2b8c93a50b.png"
+                  "publicPath": "/images/published/template-images-ui-16ienxj/image-1f229841-ad60-4ae9-a6f9-ae2b8c93a50b.png"
                 },
                 "imageDisplayMode": "cover",
                 "hoverPreviewMode": "none",
@@ -4898,7 +4898,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-e56dcd9e-f485-4691-9743-91be6edc2bb2",
-                  "publicPath": "/portfolio-assets/project-images/ui-16ienxj/image-e56dcd9e-f485-4691-9743-91be6edc2bb2.png"
+                  "publicPath": "/images/published/template-images-ui-16ienxj/image-e56dcd9e-f485-4691-9743-91be6edc2bb2.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -4916,7 +4916,7 @@
                 "startNewRow": true,
                 "image": {
                   "imageId": "image-1d430a93-3241-4afc-a2cb-62d5a329bb15",
-                  "publicPath": "/portfolio-assets/project-images/ui-16ienxj/image-1d430a93-3241-4afc-a2cb-62d5a329bb15.png"
+                  "publicPath": "/images/published/template-images-ui-16ienxj/image-1d430a93-3241-4afc-a2cb-62d5a329bb15.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -4933,7 +4933,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-36844170-ff55-4e11-a743-b666fff0abd5",
-                  "publicPath": "/portfolio-assets/project-images/ui-16ienxj/image-36844170-ff55-4e11-a743-b666fff0abd5.png"
+                  "publicPath": "/images/published/template-images-ui-16ienxj/image-36844170-ff55-4e11-a743-b666fff0abd5.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -4951,7 +4951,7 @@
                 "startNewRow": true,
                 "image": {
                   "imageId": "image-60eb50b5-89d9-4ea5-a8ec-38fde092b542",
-                  "publicPath": "/portfolio-assets/project-images/ui-16ienxj/image-60eb50b5-89d9-4ea5-a8ec-38fde092b542.png"
+                  "publicPath": "/images/published/template-images-ui-16ienxj/image-60eb50b5-89d9-4ea5-a8ec-38fde092b542.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -4968,7 +4968,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-cc272662-dfef-4c48-9ffa-2b6a7a1158d8",
-                  "publicPath": "/portfolio-assets/project-images/ui-16ienxj/image-cc272662-dfef-4c48-9ffa-2b6a7a1158d8.png"
+                  "publicPath": "/images/published/template-images-ui-16ienxj/image-cc272662-dfef-4c48-9ffa-2b6a7a1158d8.png"
                 },
                 "imageDisplayMode": "cover"
               }
@@ -5223,7 +5223,7 @@
                 "id": "image-row-item-9fc010bc-ca26-4701-874f-2709bb50cc4a",
                 "image": {
                   "imageId": "image-582a7b5e-6eaf-4020-acda-b0a1837b54e1",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-582a7b5e-6eaf-4020-acda-b0a1837b54e1.jpg"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-582a7b5e-6eaf-4020-acda-b0a1837b54e1.jpg"
                 },
                 "imageDisplayMode": "cover",
                 "hoverPreviewMode": "none",
@@ -5249,7 +5249,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-f75395ad-780c-44e0-92ea-843854ebebad",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-f75395ad-780c-44e0-92ea-843854ebebad.jpg"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-f75395ad-780c-44e0-92ea-843854ebebad.jpg"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -5266,7 +5266,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-cf17b766-9296-4612-ae5c-68e03fa7e849",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-cf17b766-9296-4612-ae5c-68e03fa7e849.jpg"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-cf17b766-9296-4612-ae5c-68e03fa7e849.jpg"
                 },
                 "imageDisplayMode": "cover"
               }
@@ -5312,7 +5312,7 @@
                 "id": "image-row-item-f4531138-5792-407c-806b-b5df62276a2e",
                 "image": {
                   "imageId": "image-81b9b65a-266a-4b5f-aac2-dc5515d09bbc",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-81b9b65a-266a-4b5f-aac2-dc5515d09bbc.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-81b9b65a-266a-4b5f-aac2-dc5515d09bbc.png"
                 },
                 "imageDisplayMode": "natural",
                 "hoverPreviewMode": "floating",
@@ -5339,7 +5339,7 @@
                 "hoverPreviewMode": "floating",
                 "image": {
                   "imageId": "image-ebf9040a-0920-4a62-88bb-1dcf6a969225",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-ebf9040a-0920-4a62-88bb-1dcf6a969225.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-ebf9040a-0920-4a62-88bb-1dcf6a969225.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -5356,7 +5356,7 @@
                 "hoverPreviewMode": "floating",
                 "image": {
                   "imageId": "image-aa39d15b-80a6-4cdb-ba5c-70008d8f6bce",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-aa39d15b-80a6-4cdb-ba5c-70008d8f6bce.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-aa39d15b-80a6-4cdb-ba5c-70008d8f6bce.png"
                 },
                 "imageDisplayMode": "natural"
               },
@@ -5373,7 +5373,7 @@
                 "hoverPreviewMode": "floating",
                 "image": {
                   "imageId": "image-0e017be5-f833-48b4-921b-d208ad5303bb",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-0e017be5-f833-48b4-921b-d208ad5303bb.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-0e017be5-f833-48b4-921b-d208ad5303bb.png"
                 },
                 "imageDisplayMode": "natural"
               }
@@ -5461,12 +5461,12 @@
             },
             "leftImage": {
               "imageId": "image-716b6e4b-037c-4879-a46b-c2956207515c",
-              "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-716b6e4b-037c-4879-a46b-c2956207515c.png",
+              "publicPath": "/images/published/template-images-project-1ua2677/image-716b6e4b-037c-4879-a46b-c2956207515c.png",
               "hoverPreviewMode": "none"
             },
             "rightImage": {
               "imageId": "image-adf54a95-1cef-4260-875a-f4a8eed9fccc",
-              "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-adf54a95-1cef-4260-875a-f4a8eed9fccc.png",
+              "publicPath": "/images/published/template-images-project-1ua2677/image-adf54a95-1cef-4260-875a-f4a8eed9fccc.png",
               "hoverPreviewMode": "none"
             },
             "direction": "left-to-right"
@@ -5508,12 +5508,12 @@
             },
             "leftImage": {
               "imageId": "image-d09c61b7-cb2a-476d-99cf-4a8e14784932",
-              "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-d09c61b7-cb2a-476d-99cf-4a8e14784932.png",
+              "publicPath": "/images/published/template-images-project-1ua2677/image-d09c61b7-cb2a-476d-99cf-4a8e14784932.png",
               "hoverPreviewMode": "none"
             },
             "rightImage": {
               "imageId": "image-fea47f73-5aca-4095-94e6-c51927adb342",
-              "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-fea47f73-5aca-4095-94e6-c51927adb342.png",
+              "publicPath": "/images/published/template-images-project-1ua2677/image-fea47f73-5aca-4095-94e6-c51927adb342.png",
               "hoverPreviewMode": "none"
             },
             "direction": "left-to-right"
@@ -5555,12 +5555,12 @@
             },
             "leftImage": {
               "imageId": "image-23b662af-c3d9-458b-8ed9-249097c7c89c",
-              "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-23b662af-c3d9-458b-8ed9-249097c7c89c.png",
+              "publicPath": "/images/published/template-images-project-1ua2677/image-23b662af-c3d9-458b-8ed9-249097c7c89c.png",
               "hoverPreviewMode": "none"
             },
             "rightImage": {
               "imageId": "image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0",
-              "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0.png",
+              "publicPath": "/images/published/template-images-project-1ua2677/image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0.png",
               "hoverPreviewMode": "none"
             },
             "direction": "left-to-right"
@@ -5593,7 +5593,7 @@
                 "id": "image-row-item-4566d166-91d0-49c4-9cc3-09b9f5442127",
                 "image": {
                   "imageId": "image-9dd922b4-cf29-4657-9e62-5298249cce68",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-9dd922b4-cf29-4657-9e62-5298249cce68.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-9dd922b4-cf29-4657-9e62-5298249cce68.png"
                 },
                 "imageDisplayMode": "cover",
                 "hoverPreviewMode": "floating",
@@ -5619,7 +5619,7 @@
                 "hoverPreviewMode": "floating",
                 "image": {
                   "imageId": "image-349eba40-bb5f-4a44-87f1-d65c4dc69070",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-349eba40-bb5f-4a44-87f1-d65c4dc69070.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-349eba40-bb5f-4a44-87f1-d65c4dc69070.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -5636,7 +5636,7 @@
                 "hoverPreviewMode": "floating",
                 "image": {
                   "imageId": "image-9525cb26-54fc-469b-9482-3e6b75727d69",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-9525cb26-54fc-469b-9482-3e6b75727d69.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-9525cb26-54fc-469b-9482-3e6b75727d69.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -5653,7 +5653,7 @@
                 "hoverPreviewMode": "floating",
                 "image": {
                   "imageId": "image-bebf04da-6b18-4181-a3c7-bb0fc80ca398",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-bebf04da-6b18-4181-a3c7-bb0fc80ca398.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-bebf04da-6b18-4181-a3c7-bb0fc80ca398.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -5671,7 +5671,7 @@
                 "startNewRow": true,
                 "image": {
                   "imageId": "image-c0434cbf-c8e4-4444-b76b-d9bf6fe46fbf",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-c0434cbf-c8e4-4444-b76b-d9bf6fe46fbf.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-c0434cbf-c8e4-4444-b76b-d9bf6fe46fbf.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -5688,7 +5688,7 @@
                 "hoverPreviewMode": "floating",
                 "image": {
                   "imageId": "image-15f0bb99-c1c0-4b77-a5a8-e1a266629d88",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-15f0bb99-c1c0-4b77-a5a8-e1a266629d88.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-15f0bb99-c1c0-4b77-a5a8-e1a266629d88.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -5705,7 +5705,7 @@
                 "hoverPreviewMode": "floating",
                 "image": {
                   "imageId": "image-90fbb4b6-acd5-4c07-b27c-44a83f523784",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-90fbb4b6-acd5-4c07-b27c-44a83f523784.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-90fbb4b6-acd5-4c07-b27c-44a83f523784.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -5722,7 +5722,7 @@
                 "hoverPreviewMode": "floating",
                 "image": {
                   "imageId": "image-75c6ad2f-c9fa-47b6-95e4-1998213a59e2",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-75c6ad2f-c9fa-47b6-95e4-1998213a59e2.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-75c6ad2f-c9fa-47b6-95e4-1998213a59e2.png"
                 },
                 "imageDisplayMode": "cover"
               }
@@ -5744,7 +5744,7 @@
                 "id": "image-row-item-e4522e9a-e528-40f5-b392-7c27471d7f60",
                 "image": {
                   "imageId": "image-bccae830-475e-486d-ad25-cedf55e8caae",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-bccae830-475e-486d-ad25-cedf55e8caae.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-bccae830-475e-486d-ad25-cedf55e8caae.png"
                 },
                 "imageDisplayMode": "cover",
                 "hoverPreviewMode": "none",
@@ -5770,7 +5770,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-bb088f9f-b663-4be3-b8b4-462a6c2667b5",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-bb088f9f-b663-4be3-b8b4-462a6c2667b5.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-bb088f9f-b663-4be3-b8b4-462a6c2667b5.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -5788,7 +5788,7 @@
                 "startNewRow": true,
                 "image": {
                   "imageId": "image-3179a673-28c8-436c-b2da-3ffc84739a88",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-3179a673-28c8-436c-b2da-3ffc84739a88.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-3179a673-28c8-436c-b2da-3ffc84739a88.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -5805,7 +5805,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4",
-                  "publicPath": "/portfolio-assets/project-images/project-1ua2677/image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4.png"
+                  "publicPath": "/images/published/template-images-project-1ua2677/image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4.png"
                 },
                 "imageDisplayMode": "cover"
               }
@@ -6062,7 +6062,6 @@
   "gameExperience": {
     "schemaVersion": 1,
     "homepageLimit": 6,
-    "updatedAt": "2026-07-20T00:00:00.000Z",
     "records": [
       {
         "schemaVersion": 1,
@@ -6906,10 +6905,569 @@
         "createdAt": "2026-07-20T00:00:00.000Z",
         "updatedAt": "2026-07-20T00:00:00.000Z"
       }
-    ]
+    ],
+    "updatedAt": "2026-07-20T00:00:00.000Z"
   },
   "covers": {},
   "assets": [
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-0be30ac9-6cea-4aa6-b1f2-e36da30b932b",
+      "publicPath": "/images/published/template-images-interaction-intelligence-system/image-0be30ac9-6cea-4aa6-b1f2-e36da30b932b.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-84a21e7a-805d-4b28-a14a-6833513b526c",
+      "publicPath": "/images/published/template-images-interaction-intelligence-system/image-84a21e7a-805d-4b28-a14a-6833513b526c.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-6e329cc2-258d-41f6-8ca2-ba631c7d4780",
+      "publicPath": "/images/published/template-images-interaction-intelligence-system/image-6e329cc2-258d-41f6-8ca2-ba631c7d4780.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-36031fb4-fdc4-4ea5-88ec-4b0065e92d7f",
+      "publicPath": "/images/published/template-images-interaction-intelligence-system/image-36031fb4-fdc4-4ea5-88ec-4b0065e92d7f.jpg"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-353880fd-7b1c-4dec-bab4-923db08339c0",
+      "publicPath": "/images/published/template-images-interaction-intelligence-system/image-353880fd-7b1c-4dec-bab4-923db08339c0.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-1fc4df94-c172-45a4-a138-8dc31babfb13",
+      "publicPath": "/images/published/template-images-interaction-intelligence-system/image-1fc4df94-c172-45a4-a138-8dc31babfb13.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-e62d5a6b-c737-4f81-84c9-8a66a3512301",
+      "publicPath": "/images/published/template-images-interaction-intelligence-system/image-e62d5a6b-c737-4f81-84c9-8a66a3512301.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-6d213651-ec49-4cb7-bf27-80907a6e36a3",
+      "publicPath": "/images/published/template-images-interaction-intelligence-system/image-6d213651-ec49-4cb7-bf27-80907a6e36a3.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-ccfbfc31-9e80-4d55-a671-d577388128dd",
+      "publicPath": "/images/published/template-images-interaction-intelligence-system/image-ccfbfc31-9e80-4d55-a671-d577388128dd.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-2ada7937-0fed-4283-b1d1-970c677340db",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-2ada7937-0fed-4283-b1d1-970c677340db.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-4a5ccf58-48dc-4ece-bc8e-02d709c51ee1",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-4a5ccf58-48dc-4ece-bc8e-02d709c51ee1.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-130b9d3c-d87a-4f38-bac1-6ed3e11cc6bc",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-130b9d3c-d87a-4f38-bac1-6ed3e11cc6bc.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-711f2fcf-440d-44ea-89df-b92af190786e",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-711f2fcf-440d-44ea-89df-b92af190786e.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-7333f920-ad7d-4324-a246-77cbc52e79c5",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-7333f920-ad7d-4324-a246-77cbc52e79c5.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-43cf3e00-5c39-4e32-ab9c-ab20c6f54b2a",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-43cf3e00-5c39-4e32-ab9c-ab20c6f54b2a.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-b4634560-ad75-40fa-9005-171f18b0931f",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-b4634560-ad75-40fa-9005-171f18b0931f.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-7f3236ec-b38a-4cf6-9ac3-83812818b78f",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-7f3236ec-b38a-4cf6-9ac3-83812818b78f.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-c5804824-9366-40f4-b243-36c459944ad1",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-c5804824-9366-40f4-b243-36c459944ad1.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-4b1680af-7f8b-4895-8b76-281ba1294132",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-4b1680af-7f8b-4895-8b76-281ba1294132.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-b6426632-aa40-461b-8397-5baf7f045dfd",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-b6426632-aa40-461b-8397-5baf7f045dfd.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-ed5b8b33-7540-4637-bf91-b60d121d3a27",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-ed5b8b33-7540-4637-bf91-b60d121d3a27.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-5d026146-bc8d-4c2d-ab1d-b5f2eb780f84",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-5d026146-bc8d-4c2d-ab1d-b5f2eb780f84.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-f30932bf-341a-4e8f-9963-8ce9190ffaa9",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-f30932bf-341a-4e8f-9963-8ce9190ffaa9.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-720c2c9d-a1a0-4eff-8585-dbc3cd8b72eb",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-720c2c9d-a1a0-4eff-8585-dbc3cd8b72eb.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-b4082355-96e3-43c0-ad4a-4cb5376e1726",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-b4082355-96e3-43c0-ad4a-4cb5376e1726.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-aafe101a-8bf2-499f-bed4-945d0a8083f9",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-aafe101a-8bf2-499f-bed4-945d0a8083f9.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-82eb8558-d240-4fe8-b62c-8da7421a0da0",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-82eb8558-d240-4fe8-b62c-8da7421a0da0.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-65e49412-b5f5-4bb6-a06b-d4f74f8e1413",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-65e49412-b5f5-4bb6-a06b-d4f74f8e1413.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-50f6cbc4-a6ed-4b19-8c30-e44a9cabd9c8",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-50f6cbc4-a6ed-4b19-8c30-e44a9cabd9c8.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-575d0ad1-3db8-4895-a7a6-b7848d338312",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-575d0ad1-3db8-4895-a7a6-b7848d338312.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-cf748bd6-c746-4a17-8a79-380a383f0633",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-cf748bd6-c746-4a17-8a79-380a383f0633.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-3eea06a5-cf67-437b-930d-1cedeb1a0232",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-3eea06a5-cf67-437b-930d-1cedeb1a0232.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-7f553d30-670d-4b95-9db2-af7576dc072e",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-7f553d30-670d-4b95-9db2-af7576dc072e.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-1f831a8b-84cc-45cd-a587-1ecf2b339aff",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-1f831a8b-84cc-45cd-a587-1ecf2b339aff.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-e12fd427-9704-41ab-9186-55f73d19d255",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-e12fd427-9704-41ab-9186-55f73d19d255.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-55b5e6aa-a8a9-455c-b171-95d8de96c1c9",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-55b5e6aa-a8a9-455c-b171-95d8de96c1c9.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-f7a3b53f-9d25-48b2-9a06-31a85b1215bb",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-f7a3b53f-9d25-48b2-9a06-31a85b1215bb.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-6cebcd26-1996-4931-be7e-4390e53708b5",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-6cebcd26-1996-4931-be7e-4390e53708b5.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-f11e81f3-c86a-49ff-8439-9b0c451716a5",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-f11e81f3-c86a-49ff-8439-9b0c451716a5.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-dc840f70-1453-46cf-ab9a-d8d4c8d223a6",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-dc840f70-1453-46cf-ab9a-d8d4c8d223a6.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-dbdf22fb-73b6-461d-b342-e7fb2ab1eacf",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-dbdf22fb-73b6-461d-b342-e7fb2ab1eacf.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-04b1ac9f-353c-453f-96a3-a340b28667f8",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-04b1ac9f-353c-453f-96a3-a340b28667f8.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-df4b2070-56a7-4084-8a08-617bd31509b9",
+      "publicPath": "/images/published/template-images-ai-assisted-ui-environment-design/image-df4b2070-56a7-4084-8a08-617bd31509b9.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-3e66c1f3-6182-46a2-a7ae-c7f76669f1a1",
+      "publicPath": "/images/published/template-images-game-jam-8lzejf/image-3e66c1f3-6182-46a2-a7ae-c7f76669f1a1.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-a93a7c0b-42fd-4512-82a9-9cfff4f46712",
+      "publicPath": "/images/published/template-images-game-jam-8lzejf/image-a93a7c0b-42fd-4512-82a9-9cfff4f46712.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-71a0f0a3-f594-4e26-98c6-8a79b5182882",
+      "publicPath": "/images/published/template-images-game-jam-8lzejf/image-71a0f0a3-f594-4e26-98c6-8a79b5182882.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-cc135262-0268-408f-a095-44ac5cb9924e",
+      "publicPath": "/images/published/template-images-game-jam-8lzejf/image-cc135262-0268-408f-a095-44ac5cb9924e.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-f248cae0-b3f5-46eb-bee1-72569b8097a4",
+      "publicPath": "/images/published/template-images-game-jam-8lzejf/image-f248cae0-b3f5-46eb-bee1-72569b8097a4.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-d41a18d5-0541-49b8-ae46-fd13f4227a20",
+      "publicPath": "/images/published/template-images-3d-vdr4qg/image-d41a18d5-0541-49b8-ae46-fd13f4227a20.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-1b218f11-2920-4ef9-ac7f-1c18cfc4526f",
+      "publicPath": "/images/published/template-images-3d-vdr4qg/image-1b218f11-2920-4ef9-ac7f-1c18cfc4526f.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-6c4f41ee-68e1-4f4e-a71c-76c1acc15ec3",
+      "publicPath": "/images/published/template-images-3d-vdr4qg/image-6c4f41ee-68e1-4f4e-a71c-76c1acc15ec3.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-108f3f03-492e-47f3-ac30-bcf261797e17",
+      "publicPath": "/images/published/template-images-3d-vdr4qg/image-108f3f03-492e-47f3-ac30-bcf261797e17.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-1c56bb5b-47b6-4c01-912c-8debc61e7df4",
+      "publicPath": "/images/published/template-images-3d-vdr4qg/image-1c56bb5b-47b6-4c01-912c-8debc61e7df4.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-b8c2ee01-94f6-41e1-86ca-9bba0f8d1e62",
+      "publicPath": "/images/published/template-images-3d-vdr4qg/image-b8c2ee01-94f6-41e1-86ca-9bba0f8d1e62.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-ea38e8ba-ead1-4929-b4f6-42bbf3a921c2",
+      "publicPath": "/images/published/template-images-3d-vdr4qg/image-ea38e8ba-ead1-4929-b4f6-42bbf3a921c2.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-e62bb9df-ac64-41cd-b673-70d0857bb305",
+      "publicPath": "/images/published/template-images-3d-vdr4qg/image-e62bb9df-ac64-41cd-b673-70d0857bb305.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-542a66c2-cfc8-4e6d-893c-5f6d3ad61216",
+      "publicPath": "/images/published/template-images-3d-vdr4qg/image-542a66c2-cfc8-4e6d-893c-5f6d3ad61216.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-4ad4a745-1bfd-4470-8caa-3e59b75ab534",
+      "publicPath": "/images/published/template-images-3d-vdr4qg/image-4ad4a745-1bfd-4470-8caa-3e59b75ab534.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-31c2020b-6e83-45b5-b94a-b804aadc4bf5",
+      "publicPath": "/images/published/template-images-3d-vdr4qg/image-31c2020b-6e83-45b5-b94a-b804aadc4bf5.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-507b25fd-dcb4-49ba-9cc9-89606f652360",
+      "publicPath": "/images/published/template-images-ui-16ienxj/image-507b25fd-dcb4-49ba-9cc9-89606f652360.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-18155569-bb55-4d95-8a6a-e5a4ccb7f1e7",
+      "publicPath": "/images/published/template-images-ui-16ienxj/image-18155569-bb55-4d95-8a6a-e5a4ccb7f1e7.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-009b73f9-72f1-4b5f-b1ce-7dc6fa16967f",
+      "publicPath": "/images/published/template-images-ui-16ienxj/image-009b73f9-72f1-4b5f-b1ce-7dc6fa16967f.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-1f229841-ad60-4ae9-a6f9-ae2b8c93a50b",
+      "publicPath": "/images/published/template-images-ui-16ienxj/image-1f229841-ad60-4ae9-a6f9-ae2b8c93a50b.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-e56dcd9e-f485-4691-9743-91be6edc2bb2",
+      "publicPath": "/images/published/template-images-ui-16ienxj/image-e56dcd9e-f485-4691-9743-91be6edc2bb2.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-1d430a93-3241-4afc-a2cb-62d5a329bb15",
+      "publicPath": "/images/published/template-images-ui-16ienxj/image-1d430a93-3241-4afc-a2cb-62d5a329bb15.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-36844170-ff55-4e11-a743-b666fff0abd5",
+      "publicPath": "/images/published/template-images-ui-16ienxj/image-36844170-ff55-4e11-a743-b666fff0abd5.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-60eb50b5-89d9-4ea5-a8ec-38fde092b542",
+      "publicPath": "/images/published/template-images-ui-16ienxj/image-60eb50b5-89d9-4ea5-a8ec-38fde092b542.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-cc272662-dfef-4c48-9ffa-2b6a7a1158d8",
+      "publicPath": "/images/published/template-images-ui-16ienxj/image-cc272662-dfef-4c48-9ffa-2b6a7a1158d8.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-582a7b5e-6eaf-4020-acda-b0a1837b54e1",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-582a7b5e-6eaf-4020-acda-b0a1837b54e1.jpg"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-f75395ad-780c-44e0-92ea-843854ebebad",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-f75395ad-780c-44e0-92ea-843854ebebad.jpg"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-cf17b766-9296-4612-ae5c-68e03fa7e849",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-cf17b766-9296-4612-ae5c-68e03fa7e849.jpg"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-81b9b65a-266a-4b5f-aac2-dc5515d09bbc",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-81b9b65a-266a-4b5f-aac2-dc5515d09bbc.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-ebf9040a-0920-4a62-88bb-1dcf6a969225",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-ebf9040a-0920-4a62-88bb-1dcf6a969225.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-aa39d15b-80a6-4cdb-ba5c-70008d8f6bce",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-aa39d15b-80a6-4cdb-ba5c-70008d8f6bce.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-0e017be5-f833-48b4-921b-d208ad5303bb",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-0e017be5-f833-48b4-921b-d208ad5303bb.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-716b6e4b-037c-4879-a46b-c2956207515c",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-716b6e4b-037c-4879-a46b-c2956207515c.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-adf54a95-1cef-4260-875a-f4a8eed9fccc",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-adf54a95-1cef-4260-875a-f4a8eed9fccc.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-d09c61b7-cb2a-476d-99cf-4a8e14784932",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-d09c61b7-cb2a-476d-99cf-4a8e14784932.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-fea47f73-5aca-4095-94e6-c51927adb342",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-fea47f73-5aca-4095-94e6-c51927adb342.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-23b662af-c3d9-458b-8ed9-249097c7c89c",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-23b662af-c3d9-458b-8ed9-249097c7c89c.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-9dd922b4-cf29-4657-9e62-5298249cce68",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-9dd922b4-cf29-4657-9e62-5298249cce68.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-349eba40-bb5f-4a44-87f1-d65c4dc69070",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-349eba40-bb5f-4a44-87f1-d65c4dc69070.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-9525cb26-54fc-469b-9482-3e6b75727d69",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-9525cb26-54fc-469b-9482-3e6b75727d69.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-bebf04da-6b18-4181-a3c7-bb0fc80ca398",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-bebf04da-6b18-4181-a3c7-bb0fc80ca398.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-c0434cbf-c8e4-4444-b76b-d9bf6fe46fbf",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-c0434cbf-c8e4-4444-b76b-d9bf6fe46fbf.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-15f0bb99-c1c0-4b77-a5a8-e1a266629d88",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-15f0bb99-c1c0-4b77-a5a8-e1a266629d88.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-90fbb4b6-acd5-4c07-b27c-44a83f523784",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-90fbb4b6-acd5-4c07-b27c-44a83f523784.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-75c6ad2f-c9fa-47b6-95e4-1998213a59e2",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-75c6ad2f-c9fa-47b6-95e4-1998213a59e2.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-bccae830-475e-486d-ad25-cedf55e8caae",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-bccae830-475e-486d-ad25-cedf55e8caae.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-bb088f9f-b663-4be3-b8b4-462a6c2667b5",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-bb088f9f-b663-4be3-b8b4-462a6c2667b5.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-3179a673-28c8-436c-b2da-3ffc84739a88",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-3179a673-28c8-436c-b2da-3ffc84739a88.png"
+    },
+    {
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4",
+      "publicPath": "/images/published/template-images-project-1ua2677/image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4.png"
+    },
     {
       "sourceDatabase": "dilida-portfolio-project-body-assets",
       "sourceStore": "assets",

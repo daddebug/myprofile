@@ -29,6 +29,45 @@ type IndexedImageRecord = {
 
 const draftSources: readonly { projectId: string; key: string; database: string; store: string }[] = [];
 
+// Symbolic source tag (matched by scripts/import-production-bundle.mjs) for
+// template-instance images staged via stageDynamicProjectImage() —
+// TemplateInstancesSection.tsx's imageId/publicPath pair. These are never an
+// IndexedDB blob: publicPath already points at a real file the dev server's
+// portfolioContentPlugin.ts wrote under public/portfolio-assets/, so the only
+// way to get the bytes here is to fetch that already-serving local URL.
+const templateImageSource = { database: "dilida-portfolio-template-images", store: "images" };
+
+function collectTemplateImageRefs(value: unknown, refs = new Map<string, string>()): Map<string, string> {
+  if (!value || typeof value !== "object") return refs;
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectTemplateImageRefs(item, refs));
+    return refs;
+  }
+  const record = value as Record<string, unknown>;
+  if (typeof record.imageId === "string" && record.imageId && typeof record.publicPath === "string" && record.publicPath) {
+    refs.set(record.imageId, record.publicPath);
+  }
+  Object.values(record).forEach((item) => collectTemplateImageRefs(item, refs));
+  return refs;
+}
+
+async function fetchTemplateImage(projectId: string, imageId: string, publicPath: string): Promise<ExportedImage> {
+  const response = await fetch(publicPath, { credentials: "same-origin", cache: "no-store" });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const blob = await response.blob();
+  const fileName = publicPath.split("/").pop() || `${imageId}.bin`;
+  return {
+    database: templateImageSource.database,
+    store: templateImageSource.store,
+    id: imageId,
+    projectId,
+    fileName,
+    mimeType: blob.type || response.headers.get("content-type") || "application/octet-stream",
+    size: blob.size,
+    dataBase64: bytesToBase64(await blob.arrayBuffer()),
+  };
+}
+
 function parseStoredJson(key: string): unknown {
   const raw = window.localStorage.getItem(key);
   if (!raw) return undefined;
@@ -227,6 +266,15 @@ export async function exportProductionBundle(): Promise<ProductionExportSummary>
     if (draft === undefined) continue;
     drafts[projectId] = draft;
     collectLocalImageIds(draft).forEach((id) => bodyAssetIds.add(id));
+
+    const templateImageRefs = collectTemplateImageRefs(draft);
+    for (const [imageId, publicPath] of templateImageRefs) {
+      try {
+        images.push(await fetchTemplateImage(projectId, imageId, publicPath));
+      } catch (error) {
+        missingReferences.push(`${projectId}: ${imageId} (could not fetch ${publicPath}: ${error instanceof Error ? error.message : String(error)})`);
+      }
+    }
   }
   if (dynamicProjectWarnings.length) {
     console.warn("[Portfolio export] dynamic project draft warnings:", dynamicProjectWarnings);

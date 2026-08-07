@@ -29,6 +29,16 @@ const gameCoverSource = {
   store: "covers",
 };
 
+// Matches templateImageSource in src/lib/productionBundleExport.ts — the
+// symbolic tag for template-instance images staged via
+// stageDynamicProjectImage() (imageId/publicPath pairs), fetched from the
+// dev server's already-serving public/portfolio-assets/ URL rather than read
+// from an IndexedDB blob.
+const templateImageSource = {
+  database: "dilida-portfolio-template-images",
+  store: "images",
+};
+
 function fail(message) {
   console.error(`\nERROR: ${message}\n`);
   process.exit(1);
@@ -67,10 +77,15 @@ function replaceImagePaths(value, imagePathById, missing) {
     output[key] = replaceImagePaths(item, imagePathById, missing);
   }
 
-  if (typeof value.localImageId === "string" && value.localImageId) {
-    const publicPath = imagePathById.get(value.localImageId);
+  const refId = typeof value.localImageId === "string" && value.localImageId
+    ? value.localImageId
+    : typeof value.imageId === "string" && value.imageId
+      ? value.imageId
+      : null;
+  if (refId) {
+    const publicPath = imagePathById.get(refId);
     if (publicPath) output.publicPath = publicPath;
-    else missing.add(value.localImageId);
+    else missing.add(refId);
   }
   return output;
 }
@@ -164,6 +179,7 @@ const storedCatalog = catalogStore.projects && typeof catalogStore.projects === 
 const assets = [];
 const imagePathsByProject = new Map();
 const projectBodyPaths = new Map();
+const templateImagePaths = new Map();
 const gameCoverPaths = new Map();
 const covers = {};
 
@@ -174,9 +190,13 @@ for (const image of bundle.images) {
   const isCover = image.database === coverSource.database && image.store === coverSource.store;
   const isProjectBody = image.database === projectBodySource.database && image.store === projectBodySource.store;
   const isGameCover = image.database === gameCoverSource.database && image.store === gameCoverSource.store;
+  const isTemplateImage = image.database === templateImageSource.database && image.store === templateImageSource.store;
   if (isCover && !canonicalProjectIds.has(image.id)) {
     ignoredCoverIds.push(image.id);
     continue;
+  }
+  if (isTemplateImage && !(typeof image.projectId === "string" && canonicalProjectIds.has(image.projectId))) {
+    fail(`Template image ${image.id} is not attached to a canonical project (projectId: ${image.projectId ?? "<missing>"}).`);
   }
   const owner = isCover
     ? "covers"
@@ -184,6 +204,8 @@ for (const image of bundle.images) {
       ? "game-covers"
     : isProjectBody && typeof image.projectId === "string" && canonicalProjectIds.has(image.projectId)
       ? path.posix.join("project-body", image.projectId)
+    : isTemplateImage
+      ? path.posix.join("template-images", image.projectId)
     : Object.entries(draftImageSources).find(([, source]) => source.database === image.database && source.store === image.store)?.[0];
   if (!owner) fail(`Unknown image source: ${image.database}/${image.store}/${image.id}`);
 
@@ -205,6 +227,7 @@ for (const image of bundle.images) {
   if (isCover) covers[image.id] = publicPath;
   else if (isGameCover) gameCoverPaths.set(image.id, publicPath);
   else if (isProjectBody) projectBodyPaths.set(image.id, publicPath);
+  else if (isTemplateImage) templateImagePaths.set(image.id, publicPath);
   else {
     if (!imagePathsByProject.has(owner)) imagePathsByProject.set(owner, new Map());
     imagePathsByProject.get(owner).set(image.id, publicPath);
@@ -217,10 +240,10 @@ for (const [projectId, draft] of Object.entries(bundle.drafts)) {
   // Some template-instance images (e.g. older image-row items on dynamic
   // projects) reference localImageId values that live in the project-body
   // asset store (projectBodyPaths) rather than a per-project
-  // draftImageSources bucket. Merging both lookups here is additive only —
-  // it changes nothing for existing static-project drafts that have no
-  // project-body images.
-  const projectImagePaths = new Map([...(imagePathsByProject.get(projectId) ?? new Map()), ...projectBodyPaths]);
+  // draftImageSources bucket; others reference imageId values staged to disk
+  // (templateImagePaths). Merging all three lookups here is additive only —
+  // it changes nothing for existing static-project drafts that have neither.
+  const projectImagePaths = new Map([...(imagePathsByProject.get(projectId) ?? new Map()), ...projectBodyPaths, ...templateImagePaths]);
   drafts[projectId] = replaceImagePaths(draft, projectImagePaths, missing);
 }
 if (missing.size) fail(`Referenced image data is missing from the bundle:\n- ${[...missing].join("\n- ")}`);
