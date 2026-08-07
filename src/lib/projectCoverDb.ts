@@ -1,3 +1,5 @@
+import { optimizeUploadedImage } from "./imageOptimization";
+
 export const PROJECT_COVER_DB_NAME = "dilida-portfolio-public-project-assets";
 export const PROJECT_COVER_STORE_NAME = "projectCovers";
 export const PROJECT_COVER_CHANGED_EVENT = "dilida-portfolio:project-cover-changed";
@@ -66,12 +68,13 @@ export function getProjectCover(projectId: string) {
 }
 
 export async function setProjectCover(projectId: string, file: File) {
+  const optimized = await optimizeUploadedImage(file);
   const record: ProjectCoverRecord = {
     projectId,
-    blob: file,
+    blob: optimized,
     fileName: file.name,
-    mimeType: file.type,
-    size: file.size,
+    mimeType: optimized.type || file.type,
+    size: optimized.size,
     updatedAt: Date.now(),
   };
 

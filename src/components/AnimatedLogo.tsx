@@ -33,10 +33,8 @@ function getTransformOrigin(element: SVGGraphicsElement) {
 }
 
 function setLayerTransform(element: SVGGraphicsElement, x: number, y: number, scale: number, centerX: number, centerY: number) {
-  element.setAttribute(
-    "transform",
-    `translate(${x} ${y}) translate(${centerX} ${centerY}) scale(${scale}) translate(${-centerX} ${-centerY})`,
-  );
+  element.style.transform =
+    `translate(${x}px, ${y}px) translate(${centerX}px, ${centerY}px) scale(${scale}) translate(${-centerX}px, ${-centerY}px)`;
 }
 
 function getPanelGroups(svg: SVGSVGElement) {
@@ -151,6 +149,7 @@ export function AnimatedLogo() {
     parts.forEach(({ element }) => {
       element.style.willChange = reduceMotion ? "opacity" : "opacity, transform";
       element.style.opacity = "0";
+      element.style.transformOrigin = "0px 0px";
       element.removeAttribute("transform");
     });
 
@@ -238,10 +237,22 @@ export function AnimatedLogo() {
       frame = requestAnimationFrame(render);
     };
 
-    frame = requestAnimationFrame(render);
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (!frame) frame = requestAnimationFrame(render);
+        } else if (frame) {
+          cancelAnimationFrame(frame);
+          frame = 0;
+        }
+      },
+      { threshold: 0 },
+    );
+    visibilityObserver.observe(container);
 
     return () => {
       active = false;
+      visibilityObserver.disconnect();
       cancelAnimationFrame(frame);
       if (canParallax) {
         window.removeEventListener("pointermove", handlePointerMove);

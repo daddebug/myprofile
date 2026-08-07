@@ -1,7 +1,18 @@
-import { useMemo, useState } from "react";
-import { AlertCircle, Check, Edit3, GripVertical, Save, Trash2 } from "lucide-react";
+import { useMemo, useRef, useState, type ChangeEvent } from "react";
+import { AlertCircle, Check, Edit3, GripVertical, Plus, Save, Trash2 } from "lucide-react";
 import { PageTransition } from "../components/PageTransition";
+import { ProjectHeroTitleSummary } from "../components/ProjectHeroTitleSummary";
+import { projectHeroTextWidth } from "../lib/caseStudyLayout";
 import metadata from "../data/uiPracticeMetadata.json";
+import {
+  abortDynamicProjectImageStage,
+  commitDynamicProjectImage,
+  decodeDynamicProjectImage,
+  getDynamicProjectImageMapping,
+  stageDynamicProjectImage,
+  unbindDynamicProjectImages,
+} from "../lib/portfolioContentClient";
+import { stemOf, UI_PRACTICE_DIMENSIONS } from "../lib/uiPracticeDimensions";
 
 type UIPracticeMetadata = {
   id?: string;
@@ -17,6 +28,15 @@ type UIPracticeItem = {
   title: string;
   description: string;
   order?: number;
+  width?: number;
+  height?: number;
+  image?: {
+    imageId: string;
+    publicPath: string;
+  };
+  imageDisplayMode?: "cover" | "natural";
+  imageWidthMode?: "card" | "wide" | "full";
+  startNewRow?: boolean;
 };
 
 type SaveState = "idle" | "saving" | "saved" | "error";
@@ -29,12 +49,25 @@ type UIPracticeCollection = {
     title: string;
     description: string;
     order: number;
+    image?: {
+      imageId: string;
+      publicPath: string;
+    };
+    imageDisplayMode?: "cover" | "natural";
+    imageWidthMode?: "card" | "wide" | "full";
+    startNewRow?: boolean;
   }>;
 };
 
 const canEdit = import.meta.env.DEV;
+const UI_PRACTICE_PROJECT_ID = "ui-personal-practice";
+const UI_PRACTICE_GALLERY_INSTANCE_ID = "ui-practice-gallery";
+const UI_PRACTICE_GALLERY_REGION_ID = "ui-practice:gallery";
 const persistedMetadata = metadata as unknown;
-const imageModules = import.meta.glob("../assets/ui-practice/*.{png,jpg,jpeg,webp,avif}", {
+// Points at the optimized WebP display assets (src/assets/ui-practice-optimized/),
+// not the raw originals in src/assets/ui-practice/ — those stay in the repo
+// untouched but are no longer imported, so they aren't part of the production build.
+const imageModules = import.meta.glob("../assets/ui-practice-optimized/*.{png,jpg,jpeg,webp,avif}", {
   eager: true,
   query: "?url",
   import: "default",
@@ -64,22 +97,33 @@ function isPersistedCollection(value: unknown): value is UIPracticeCollection {
 }
 
 function buildInitialItems(): UIPracticeItem[] {
-  const modulesByFilename = new Map(
-    Object.entries(imageModules).map(([path, src]) => [filenameFromPath(path), src]),
+  // Matched by filename stem (no extension) so metadata entries like
+  // "Y3K尝试1.png" still resolve to the optimized "Y3K尝试1.webp" asset.
+  const modulesByStem = new Map(
+    Object.entries(imageModules).map(([path, src]) => [stemOf(filenameFromPath(path)), src]),
   );
 
   if (isPersistedCollection(persistedMetadata)) {
     return persistedMetadata.items
       .reduce<UIPracticeItem[]>((items, savedItem, index) => {
-        const src = modulesByFilename.get(savedItem.filename);
+        const persisted = savedItem as UIPracticeCollection["items"][number];
+        const stem = stemOf(persisted.filename);
+        const src = persisted.image?.publicPath ?? modulesByStem.get(stem);
         if (!src) return items;
+        const dimensions = UI_PRACTICE_DIMENSIONS[stem];
         items.push({
-          id: savedItem.id,
-          filename: savedItem.filename,
+          id: persisted.id,
+          filename: persisted.filename,
           src,
-          title: savedItem.title,
-          description: savedItem.description,
-          order: Number.isFinite(savedItem.order) ? savedItem.order : index + 1,
+          title: persisted.title,
+          description: persisted.description,
+          order: Number.isFinite(persisted.order) ? persisted.order : index + 1,
+          width: dimensions?.width,
+          height: dimensions?.height,
+          ...(persisted.image ? { image: persisted.image } : {}),
+          ...(persisted.imageDisplayMode ? { imageDisplayMode: persisted.imageDisplayMode } : {}),
+          ...(persisted.imageWidthMode ? { imageWidthMode: persisted.imageWidthMode } : {}),
+          ...(persisted.startNewRow === true ? { startNewRow: true } : {}),
         });
         return items;
       }, [])
@@ -89,7 +133,9 @@ function buildInitialItems(): UIPracticeItem[] {
   const metadataByFilename = persistedMetadata as Record<string, UIPracticeMetadata>;
   const items = Object.entries(imageModules).map(([path, src]) => {
     const filename = filenameFromPath(path);
+    const stem = stemOf(filename);
     const itemMetadata = metadataByFilename[filename] ?? {};
+    const dimensions = UI_PRACTICE_DIMENSIONS[stem];
 
     return {
       id: itemMetadata.id ?? stableItemId(filename),
@@ -98,6 +144,8 @@ function buildInitialItems(): UIPracticeItem[] {
       title: itemMetadata.title ?? "",
       description: itemMetadata.description ?? "",
       order: itemMetadata.order,
+      width: dimensions?.width,
+      height: dimensions?.height,
     };
   });
 
@@ -111,7 +159,10 @@ function buildInitialItems(): UIPracticeItem[] {
   return [...ordered, ...discovered];
 }
 
-function createCollection(items: UIPracticeItem[], { trimText }: { trimText: boolean }): UIPracticeCollection {
+function createCollection(
+  items: UIPracticeItem[],
+  { trimText }: { trimText: boolean },
+): UIPracticeCollection {
   return {
     version: 1,
     items: items.map((item, index) => ({
@@ -120,8 +171,36 @@ function createCollection(items: UIPracticeItem[], { trimText }: { trimText: boo
       order: index + 1,
       title: trimText ? item.title.trim() : item.title,
       description: trimText ? item.description.trim() : item.description,
+      ...(item.image ? { image: item.image } : {}),
+      ...(item.imageDisplayMode ? { imageDisplayMode: item.imageDisplayMode } : {}),
+      ...(item.imageWidthMode ? { imageWidthMode: item.imageWidthMode } : {}),
+      ...(item.startNewRow === true ? { startNewRow: true } : {}),
     })),
   };
+}
+
+function createDiskGalleryItems(items: UIPracticeItem[]) {
+  return items.flatMap((item) => item.image ? [{
+    id: item.id,
+    image: item.image,
+    imageDisplayMode: item.imageDisplayMode ?? "cover",
+    alt: { zh: item.title, en: "" },
+    caption: { zh: item.description, en: "" },
+    ...(item.imageWidthMode ? { imageWidthMode: item.imageWidthMode } : {}),
+    ...(item.startNewRow === true ? { startNewRow: true } : {}),
+  }] : []);
+}
+
+async function writeCollection(collection: UIPracticeCollection) {
+  const response = await fetch("/__ui-practice-metadata", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ collection }),
+  });
+  if (!response.ok) {
+    const result = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(result?.error ?? "Unable to write metadata.");
+  }
 }
 
 export function UIPracticePage() {
@@ -133,6 +212,9 @@ export function UIPracticePage() {
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [saveError, setSaveError] = useState("");
+  const [uploadState, setUploadState] = useState<"idle" | "uploading" | "saved" | "error">("idle");
+  const [uploadError, setUploadError] = useState("");
+  const addImageInputRef = useRef<HTMLInputElement>(null);
   const hasImages = items.length > 0;
   const isEditing = mode === "edit";
   const isSorting = mode === "sort";
@@ -198,6 +280,88 @@ export function UIPracticePage() {
     }
   };
 
+  const addImage = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !canEdit) return;
+
+    const itemId = `ui-practice-item-${crypto.randomUUID()}`;
+    let staged: Awaited<ReturnType<typeof stageDynamicProjectImage>> | null = null;
+    let committedImageId: string | null = null;
+    let previousDiskInstance: Record<string, unknown> | null = null;
+    let uploadStage: "staging" | "decoding" | "committing" = "staging";
+    const fileDescription = `${file.name}（${file.type.replace("image/", "").toUpperCase()}, ${(file.size / 1024).toFixed(0)}KB）`;
+    try {
+      setUploadState("uploading");
+      setUploadError("");
+      const mappingBefore = await getDynamicProjectImageMapping(UI_PRACTICE_PROJECT_ID);
+      previousDiskInstance = mappingBefore.instances[UI_PRACTICE_GALLERY_INSTANCE_ID] ?? null;
+      staged = await stageDynamicProjectImage(
+        UI_PRACTICE_PROJECT_ID,
+        UI_PRACTICE_GALLERY_INSTANCE_ID,
+        itemId,
+        file,
+      );
+      uploadStage = "decoding";
+      await decodeDynamicProjectImage(staged.publicUrl);
+      uploadStage = "committing";
+
+      const extension = staged.format === "jpeg" ? "jpeg" : staged.format;
+      const newItem: UIPracticeItem = {
+        id: itemId,
+        filename: `${staged.imageId}.${extension}`,
+        src: staged.publicUrl,
+        title: "",
+        description: "",
+        order: items.length + 1,
+        width: staged.width,
+        height: staged.height,
+        image: { imageId: staged.imageId, publicPath: staged.publicUrl },
+        imageDisplayMode: "cover",
+      };
+      const nextItems = [...items, newItem];
+      const instance = {
+        instanceId: UI_PRACTICE_GALLERY_INSTANCE_ID,
+        templateId: "image-row",
+        regionId: UI_PRACTICE_GALLERY_REGION_ID,
+        anchorId: "__end__",
+        content: { heading: { zh: "", en: "" }, items: createDiskGalleryItems(nextItems) },
+        order: 0,
+      };
+      const committed = await commitDynamicProjectImage({
+        projectId: UI_PRACTICE_PROJECT_ID,
+        commitToken: staged.commitToken,
+        itemId,
+        instance,
+      });
+      committedImageId = committed.image.imageId;
+      staged = null;
+
+      await writeCollection(createCollection(nextItems, { trimText: false }));
+      setItems(nextItems);
+      setSortItems((current) => [...current, newItem]);
+      setUploadState("saved");
+      window.setTimeout(() => setUploadState("idle"), 2200);
+    } catch (error) {
+      if (staged) {
+        await abortDynamicProjectImageStage(UI_PRACTICE_PROJECT_ID, staged.commitToken).catch(() => undefined);
+      }
+      if (committedImageId) {
+        await unbindDynamicProjectImages({
+          projectId: UI_PRACTICE_PROJECT_ID,
+          instanceId: UI_PRACTICE_GALLERY_INSTANCE_ID,
+          imageIds: [committedImageId],
+          instance: previousDiskInstance,
+        }).catch(() => undefined);
+      }
+      setUploadState("error");
+      const detail = error instanceof Error ? error.message : String(error);
+      const dimensions = staged ? `${staged.width}×${staged.height}` : "未读取到尺寸";
+      const stageLabel = { staging: "上传阶段", decoding: "浏览器重新解码阶段", committing: "写入项目目录阶段" }[uploadStage];
+      setUploadError(`${fileDescription}（${dimensions}）在${stageLabel}失败：${detail}${staged ? "；已暂存的文件已回滚，原有图片未被修改。" : "；原有图片未被修改。"}`);
+    }
+  };
+
   const saveMetadata = async (exitAfterSave = false) => {
     if (!canEdit) return;
 
@@ -206,16 +370,7 @@ export function UIPracticePage() {
 
     try {
       const nextCollection = createCollection(items, { trimText: true });
-      const response = await fetch("/__ui-practice-metadata", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ collection: nextCollection }),
-      });
-
-      if (!response.ok) {
-        const result = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(result?.error ?? "Unable to write metadata.");
-      }
+      await writeCollection(nextCollection);
 
       setItems((currentItems) =>
         currentItems.map((item, index) => ({
@@ -247,16 +402,7 @@ export function UIPracticePage() {
     try {
       const nextItems = sortItems.map((item, index) => ({ ...item, order: index + 1 }));
       const nextCollection = createCollection(nextItems, { trimText: false });
-      const response = await fetch("/__ui-practice-metadata", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ collection: nextCollection }),
-      });
-
-      if (!response.ok) {
-        const result = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(result?.error ?? "Unable to write metadata.");
-      }
+      await writeCollection(nextCollection);
 
       setItems(nextItems);
       setSortItems([]);
@@ -283,12 +429,14 @@ export function UIPracticePage() {
                 <p className="font-mono text-xs font-bold uppercase tracking-[0.24em] text-acidGreen/88">
                   visual archive / {imageCountLabel}
                 </p>
-                <h1 className="mt-4 max-w-4xl font-display text-[clamp(3rem,8vw,7.5rem)] leading-none text-softWhite">
-                  UI Personal Practice
-                </h1>
-                <p className="mt-6 max-w-2xl text-base leading-8 text-softWhite/66 md:text-lg">
-                  Interface studies, game UI explorations, and small visual systems collected as a running practice shelf.
-                </p>
+                <ProjectHeroTitleSummary>
+                  <h1 className={`mt-4 font-display text-[clamp(3rem,8vw,7.5rem)] leading-none text-softWhite ${projectHeroTextWidth.title}`}>
+                    UI Personal Practice
+                  </h1>
+                  <p className={`mt-6 text-base leading-8 text-softWhite/66 md:text-lg ${projectHeroTextWidth.summary}`}>
+                    Interface studies, game UI explorations, and small visual systems collected as a running practice shelf.
+                  </p>
+                </ProjectHeroTitleSummary>
               </div>
 
               {canEdit ? (
@@ -375,6 +523,22 @@ export function UIPracticePage() {
                       ) : null}
                     </p>
                     <div className="flex items-center gap-3">
+                      <input
+                        ref={addImageInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="sr-only"
+                        onChange={addImage}
+                      />
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-2 rounded-full border border-acidGreen/55 bg-acidGreen px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.16em] text-deepIndigo transition hover:brightness-110 disabled:cursor-wait disabled:opacity-60"
+                        onClick={() => addImageInputRef.current?.click()}
+                        disabled={saveState === "saving" || uploadState === "uploading"}
+                      >
+                        <Plus className="h-4 w-4" aria-hidden="true" />
+                        {uploadState === "uploading" ? "正在保存" : "添加图片"}
+                      </button>
                       <button
                         type="button"
                         className="rounded-full border border-softWhite/16 bg-deepIndigo/35 px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.16em] text-softWhite/72 transition hover:border-acidGreen/50 hover:text-acidGreen disabled:cursor-wait disabled:opacity-60"
@@ -393,6 +557,12 @@ export function UIPracticePage() {
                       </button>
                     </div>
                   </div>
+
+                  {uploadState === "saved" ? (
+                    <p className="mb-4 font-mono text-xs font-bold text-acidGreen">已保存到本地项目目录</p>
+                  ) : uploadState === "error" ? (
+                    <p className="mb-4 font-mono text-xs font-bold text-peach">{uploadError}</p>
+                  ) : null}
 
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6">
                     {sortItems.map((item, index) => (
@@ -486,6 +656,7 @@ export function UIPracticePage() {
                             alt={item.title || readableName(item.filename)}
                             className="h-full w-full object-contain"
                             loading="lazy"
+                            decoding="async"
                           />
                         </div>
                       </article>
@@ -504,7 +675,10 @@ export function UIPracticePage() {
                       alt={item.title || readableName(item.filename)}
                       className="mx-auto block h-auto rounded-[8px] border border-softWhite/10 object-contain"
                       style={{ maxWidth: "min(100%, 980px)" }}
+                      width={item.width}
+                      height={item.height}
                       loading="lazy"
+                      decoding="async"
                     />
 
                     {isEditing ? (
@@ -552,6 +726,7 @@ export function UIPracticePage() {
             )}
           </div>
         </section>
+
       </main>
     </PageTransition>
   );

@@ -8,14 +8,6 @@ const OUTPUT_ASSET_ROOT = path.join("public", "images", "published");
 const CONFIRM_FLAG = "--confirm";
 
 const draftImageSources = {
-  "cross-platform-game-ux": {
-    database: "dilida-portfolio-cross-platform-draft-assets",
-    store: "images",
-  },
-  "3d-character-ui-rhythm": {
-    database: "dilida-portfolio-3d-character-ui-assets",
-    store: "images",
-  },
   "from-theme-to-playable-rule": {
     database: "dilida-portfolio-game-jam-draft-assets",
     store: "images",
@@ -25,6 +17,16 @@ const draftImageSources = {
 const coverSource = {
   database: "dilida-portfolio-public-project-assets",
   store: "projectCovers",
+};
+
+const projectBodySource = {
+  database: "dilida-portfolio-project-body-assets",
+  store: "assets",
+};
+
+const gameCoverSource = {
+  database: "dilida-portfolio-game-assets",
+  store: "covers",
 };
 
 function fail(message) {
@@ -73,6 +75,20 @@ function replaceImagePaths(value, imagePathById, missing) {
   return output;
 }
 
+function replaceDocumentAssetPaths(value, imagePathById, missing) {
+  if (!value || typeof value !== "object") return value;
+  if (Array.isArray(value)) return value.map((item) => replaceDocumentAssetPaths(item, imagePathById, missing));
+  const output = Object.fromEntries(
+    Object.entries(value).map(([key, item]) => [key, replaceDocumentAssetPaths(item, imagePathById, missing)]),
+  );
+  if (typeof value.assetId === "string" && value.assetId) {
+    const publicPath = imagePathById.get(value.assetId);
+    if (publicPath) output.publicPath = publicPath;
+    else if (!value.publicPath) missing.add(value.assetId);
+  }
+  return output;
+}
+
 async function backupIfPresent(root, relativePath, backupRoot) {
   const source = path.join(root, relativePath);
   try {
@@ -116,8 +132,39 @@ if (reportedMissing.length) {
   fail(`The browser export reported missing image references:\n- ${reportedMissing.join("\n- ")}`);
 }
 
+const catalogStore = bundle.projectCatalog?.version === 1
+  ? bundle.projectCatalog
+  : bundle.publicMetadata?.version === 1
+    ? bundle.publicMetadata
+    : { version: 1, projects: {} };
+const retiredProjectIds = new Set([
+  "game-ux-case-study",
+  "ktv-tablet-interface",
+  "playable-web-game-prototype",
+  "visual-system-ui-art",
+]);
+const exportedProjectIds = Array.isArray(catalogStore.projectIds)
+  ? catalogStore.projectIds
+  : Object.keys(catalogStore.projects ?? {});
+const canonicalProjectIds = new Set(exportedProjectIds.filter((projectId) => typeof projectId === "string"));
+const ignoredProjectIds = [];
+const ignoredCoverIds = [];
+const storedCatalog = catalogStore.projects && typeof catalogStore.projects === "object"
+  ? Object.fromEntries(Object.entries(catalogStore.projects).flatMap(([projectId, project]) => {
+      if (retiredProjectIds.has(projectId) || !canonicalProjectIds.has(projectId)) {
+        ignoredProjectIds.push(projectId);
+        return [];
+      }
+      if (!project || typeof project !== "object" || Array.isArray(project)) return [[projectId, project]];
+      const { homepageGroup: _legacyHomepageGroup, homepageOrder: _legacyHomepageOrder, ...canonicalProject } = project;
+      return [[projectId, canonicalProject]];
+    }))
+  : {};
+
 const assets = [];
 const imagePathsByProject = new Map();
+const projectBodyPaths = new Map();
+const gameCoverPaths = new Map();
 const covers = {};
 
 for (const image of bundle.images) {
@@ -125,8 +172,18 @@ for (const image of bundle.images) {
     fail("The export contains an invalid image record.");
   }
   const isCover = image.database === coverSource.database && image.store === coverSource.store;
+  const isProjectBody = image.database === projectBodySource.database && image.store === projectBodySource.store;
+  const isGameCover = image.database === gameCoverSource.database && image.store === gameCoverSource.store;
+  if (isCover && !canonicalProjectIds.has(image.id)) {
+    ignoredCoverIds.push(image.id);
+    continue;
+  }
   const owner = isCover
     ? "covers"
+    : isGameCover
+      ? "game-covers"
+    : isProjectBody && typeof image.projectId === "string" && canonicalProjectIds.has(image.projectId)
+      ? path.posix.join("project-body", image.projectId)
     : Object.entries(draftImageSources).find(([, source]) => source.database === image.database && source.store === image.store)?.[0];
   if (!owner) fail(`Unknown image source: ${image.database}/${image.store}/${image.id}`);
 
@@ -146,6 +203,8 @@ for (const image of bundle.images) {
   };
   assets.push(asset);
   if (isCover) covers[image.id] = publicPath;
+  else if (isGameCover) gameCoverPaths.set(image.id, publicPath);
+  else if (isProjectBody) projectBodyPaths.set(image.id, publicPath);
   else {
     if (!imagePathsByProject.has(owner)) imagePathsByProject.set(owner, new Map());
     imagePathsByProject.get(owner).set(image.id, publicPath);
@@ -155,19 +214,68 @@ for (const image of bundle.images) {
 const missing = new Set();
 const drafts = {};
 for (const [projectId, draft] of Object.entries(bundle.drafts)) {
-  drafts[projectId] = replaceImagePaths(draft, imagePathsByProject.get(projectId) ?? new Map(), missing);
+  // Some template-instance images (e.g. older image-row items on dynamic
+  // projects) reference localImageId values that live in the project-body
+  // asset store (projectBodyPaths) rather than a per-project
+  // draftImageSources bucket. Merging both lookups here is additive only —
+  // it changes nothing for existing static-project drafts that have no
+  // project-body images.
+  const projectImagePaths = new Map([...(imagePathsByProject.get(projectId) ?? new Map()), ...projectBodyPaths]);
+  drafts[projectId] = replaceImagePaths(draft, projectImagePaths, missing);
 }
 if (missing.size) fail(`Referenced image data is missing from the bundle:\n- ${[...missing].join("\n- ")}`);
 
-const storedMetadata = bundle.publicMetadata?.version === 1 && bundle.publicMetadata.projects && typeof bundle.publicMetadata.projects === "object"
-  ? bundle.publicMetadata.projects
+const rawProjectDocuments = bundle.projectDocuments?.version === 1 && bundle.projectDocuments.documents && typeof bundle.projectDocuments.documents === "object"
+  ? bundle.projectDocuments.documents
   : {};
+const projectDocuments = {
+  version: 1,
+  documents: Object.fromEntries(Object.entries(rawProjectDocuments).flatMap(([projectId, document]) => {
+    if (!canonicalProjectIds.has(projectId) || !document || typeof document !== "object" || document.schemaVersion !== 1) return [];
+    return [[projectId, replaceDocumentAssetPaths(document, projectBodyPaths, missing)]];
+  })),
+};
+if (missing.size) fail(`Referenced project-body image data is missing from the bundle:\n- ${[...missing].join("\n- ")}`);
+
+const rawGameExperience = bundle.gameExperience?.schemaVersion === 1 && Array.isArray(bundle.gameExperience.records)
+  ? bundle.gameExperience
+  : null;
+const ignoredGameRecordIds = [];
+const seenGameRecordIds = new Set();
+const gameExperience = rawGameExperience
+  ? {
+      ...rawGameExperience,
+      records: rawGameExperience.records.flatMap((record) => {
+        if (!record || typeof record !== "object" || typeof record.id !== "string" || !record.id || record.schemaVersion !== 1 || seenGameRecordIds.has(record.id)) {
+          ignoredGameRecordIds.push(typeof record?.id === "string" ? record.id : "<invalid>");
+          return [];
+        }
+        seenGameRecordIds.add(record.id);
+        const presentation = record.presentation && typeof record.presentation === "object" ? record.presentation : {};
+        const detail = record.detail && typeof record.detail === "object" ? record.detail : {};
+        const coverAssetId = typeof presentation.coverAssetId === "string" ? presentation.coverAssetId : "";
+        const coverPublicPath = coverAssetId ? gameCoverPaths.get(coverAssetId) : undefined;
+        if (coverAssetId && !coverPublicPath && !presentation.coverPublicPath) missing.add(coverAssetId);
+        return [{
+          ...record,
+          detail: {
+            zh: typeof detail.zh === "string" ? detail.zh : "",
+            en: typeof detail.en === "string" ? detail.en : "",
+          },
+          presentation: { ...presentation, ...(coverPublicPath ? { coverPublicPath } : {}) },
+        }];
+      }),
+    }
+  : undefined;
+if (missing.size) fail(`Referenced game-cover data is missing from the bundle:\n- ${[...missing].join("\n- ")}`);
 
 const output = {
   version: 1,
   generatedAt: bundle.exportedAt || new Date().toISOString(),
   drafts,
-  publicMetadata: storedMetadata,
+  projectCatalog: storedCatalog,
+  projectDocuments,
+  ...(gameExperience ? { gameExperience } : {}),
   covers,
   assets: assets.map(({ sourceDatabase, sourceStore, sourceId, publicPath }) => ({
     sourceDatabase,
@@ -181,6 +289,12 @@ console.log("\nPortfolio production import review");
 console.log(`  Drafts: ${Object.keys(drafts).length}`);
 console.log(`  Images: ${assets.length}`);
 console.log(`  Homepage covers: ${Object.keys(covers).length}`);
+console.log(`  Canonical projects: ${Object.keys(storedCatalog).length}`);
+console.log(`  Data-driven project documents: ${Object.keys(projectDocuments.documents).length}`);
+console.log(`  Game Experience records: ${gameExperience?.records?.length ?? 0}`);
+if (ignoredProjectIds.length) console.log(`  Ignored legacy project IDs: ${ignoredProjectIds.join(", ")}`);
+if (ignoredCoverIds.length) console.log(`  Ignored non-canonical cover IDs: ${ignoredCoverIds.join(", ")}`);
+if (ignoredGameRecordIds.length) console.log(`  Ignored invalid/duplicate game records: ${ignoredGameRecordIds.join(", ")}`);
 console.log(`  Output data: ${OUTPUT_DATA}`);
 console.log(`  Asset root: ${OUTPUT_ASSET_ROOT}`);
 console.log("  Original browser data: unchanged");

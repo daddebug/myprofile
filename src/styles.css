@@ -7,8 +7,51 @@
 :root {
   color-scheme: dark;
   background: #181743;
-  --site-content-max-width: 80rem;
+  /*
+   * Single source of truth for the whole site's main-content width, used
+   * by .site-container below and (via alias) by every Template Library
+   * template's own outer container. Widened from 80rem: at 80rem, a real
+   * desktop monitor (e.g. 1920px) left ~320px of empty margin on each
+   * side — the actual cause of the "content feels squeezed into the
+   * middle" complaint, not the small fixed gutter. Raising the cap here
+   * (rather than each page guessing its own value) widens old project
+   * pages and every template together automatically.
+   */
+  --site-content-max-width: 96rem;
   --site-page-gutter: 1rem;
+  /*
+   * Three-tier width system for project/case-study page BODY content
+   * (intervention sections, timelines, cards, and every Template Library
+   * template rendered inside a project page) — deliberately separate from
+   * --site-content-max-width above, which stays the marketing/nav/hero
+   * width. Widening the site-wide token was the wrong lever last round:
+   * it dragged project content up to 96rem, which is wider than these
+   * sections actually want.
+   * - page rail: the section-level container (two-column sections, image
+   *   rows, timelines, card rows). Narrower than --site-content-max-width,
+   *   wider than the original unlinked 80rem several components had
+   *   hardcoded independently of any token.
+   * - reading rail: long-form text columns only (major-copy body copy,
+   *   supporting notes, statement paragraphs, project header summaries).
+   *   Matches the pre-existing majorCopy max-w-[52rem] value exactly —
+   *   tokenized, not changed.
+   * - focus rail: single-purpose focused components (XMind, Decision
+   *   Table, Figma Prototype, one large media block) that stay visibly
+   *   narrower than the page rail even while centered inside it.
+   */
+  --case-study-page-rail: 88rem;
+  --case-study-reading-rail: 52rem;
+  --case-study-focus-rail: 64rem;
+  --portfolio-accent-green: #34f025;
+  /* Real, fixed height of Shell.tsx's <header> nav row (h-[68px] + 1px border-b).
+     Single source of truth so editor toolbars can stack underneath it instead of
+     each guessing their own "clear the header" offset. */
+  --site-header-height: 69px;
+  /* Live bottom edge (in px, viewport-relative) of the owner toolbar rendered by
+     CaseStudyEditorDock, kept in sync by a ResizeObserver in CaseStudyEditor.tsx.
+     The static fallback here only applies for the first paint before that
+     ResizeObserver has run once, or on pages where the dock never mounts. */
+  --owner-dock-bottom: 132px;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -81,6 +124,116 @@ body {
   background-size: auto;
 }
 
+.custom-cursor-layer {
+  position: fixed;
+  z-index: 2147483000;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease-out;
+}
+
+.custom-cursor-layer.is-visible {
+  opacity: 1;
+}
+
+.custom-cursor-main,
+.custom-cursor-trail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: block;
+  box-sizing: border-box;
+  border-radius: 999px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  will-change: top, left, transform;
+}
+
+.custom-cursor-main {
+  width: 9px;
+  height: 9px;
+  border: 1px solid transparent;
+  background: var(--portfolio-accent-green);
+  box-shadow: 0 0 0 1px rgb(24 23 67 / 0.2);
+  transition:
+    width 150ms ease,
+    height 150ms ease,
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 180ms ease,
+    transform 110ms ease;
+}
+
+.custom-cursor-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--portfolio-accent-green);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 120ms ease;
+}
+
+.custom-cursor-layer.is-interactive .custom-cursor-main {
+  width: 24px;
+  height: 24px;
+  border-color: rgb(52 240 37 / 0.72);
+  background: rgb(24 23 67 / 0.54);
+  box-shadow: 0 0 0 1px rgb(244 245 250 / 0.06);
+}
+
+.custom-cursor-layer.is-interactive .custom-cursor-center {
+  opacity: 1;
+}
+
+.custom-cursor-layer.is-pressed .custom-cursor-main {
+  transform: translate(-50%, -50%) scale(0.72);
+}
+
+.custom-cursor-layer.is-released .custom-cursor-main {
+  animation: custom-cursor-release 210ms ease-out;
+}
+
+.custom-cursor-trail {
+  background: var(--portfolio-accent-green);
+}
+
+.custom-cursor-trail-1 { width: 5px; height: 5px; opacity: 0.32; }
+.custom-cursor-trail-2 { width: 4.4px; height: 4.4px; opacity: 0.24; }
+.custom-cursor-trail-3 { width: 3.8px; height: 3.8px; opacity: 0.18; }
+.custom-cursor-trail-4 { width: 3.2px; height: 3.2px; opacity: 0.12; }
+.custom-cursor-trail-5 { width: 2.6px; height: 2.6px; opacity: 0.07; }
+
+@keyframes custom-cursor-release {
+  0% { transform: translate(-50%, -50%) scale(0.72); }
+  58% { transform: translate(-50%, -50%) scale(1.12); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html.custom-cursor-active,
+  html.custom-cursor-active body,
+  html.custom-cursor-active body * {
+    cursor: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse) {
+  .custom-cursor-layer {
+    display: none !important;
+  }
+}
+
+@media print {
+  .custom-cursor-layer {
+    display: none !important;
+  }
+}
+
 a {
   color: inherit;
 }
@@ -97,6 +250,18 @@ a {
     margin-inline: auto;
   }
 
+  /*
+   * Page rail (Tier A) for project/case-study body content — same gutter
+   * formula as .site-container, but capped at --case-study-page-rail
+   * instead of the wider site-wide max-width. See the token comment in
+   * :root for the three-tier rationale.
+   */
+  .case-study-rail {
+    width: calc(100% - (var(--site-page-gutter) + var(--site-page-gutter)));
+    max-width: var(--case-study-page-rail);
+    margin-inline: auto;
+  }
+
   .case-study-media-frame {
     position: relative;
     display: grid;
@@ -110,15 +275,25 @@ a {
   }
 
   .case-study-media-image {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  /* Opt-in square crop for icon/asset imagery (Image Row's "图标裁切" mode).
+     Kept separate from .case-study-media-frame so every other consumer of
+     that class keeps its existing 16:9 aspect ratio unchanged. */
+  .case-study-media-frame--square {
+    aspect-ratio: 1 / 1;
   }
 
   .case-study-media-placeholder {
+    position: absolute;
+    inset: 0;
     display: grid;
-    width: 100%;
-    height: 100%;
     place-items: center;
     color: rgba(244, 245, 250, 0.24);
     font-family: "IBM Plex Mono", monospace;
@@ -141,6 +316,58 @@ a {
   .project-archive-title {
     font-size: clamp(3.5rem, 7vw, 7rem);
     line-height: 0.95;
+  }
+
+  .home-project-rail {
+    width: calc(100% + var(--site-page-gutter));
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: 0 var(--site-page-gutter);
+    scrollbar-width: none;
+    touch-action: pan-x pan-y;
+    -webkit-overflow-scrolling: touch;
+    /* Owned here instead of via a `pb-2` utility class: Tailwind's
+       utilities layer always wins over this components-layer rule
+       regardless of specificity, so a `pb-2` class would silently clobber
+       the 1280px+ padding-block override below. */
+    padding-bottom: 8px;
+  }
+
+  .home-project-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .home-project-slide {
+    flex: 0 0 min(84vw, 365px);
+    min-width: 0;
+  }
+
+  @media (min-width: 768px) {
+    .home-project-rail {
+      width: 100%;
+      scroll-padding-inline: 0;
+    }
+
+    .home-project-slide {
+      flex-basis: calc((100% - 1.75rem) / 2);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .home-project-rail {
+      /* overflow-x: auto forces the browser to also clip the block axis
+         (there is no such thing as "clip x, stay visible on y"), which cuts
+         off each card's hover glow before it can bleed above the cover.
+         This padding/margin pair gives the clip box real room on that axis
+         without shifting where the rail visually sits or touching
+         horizontal scroll. Scoped to the breakpoint where the side nav
+         buttons (and this hover glow) actually appear. */
+      padding-block: 110px 80px;
+      margin-block: -110px -80px;
+    }
+
+    .home-project-slide {
+      flex-basis: calc((100% - 4rem) / 3);
+    }
   }
 
   .project-archive-row {
@@ -243,6 +470,19 @@ a {
     @apply h-3.5 w-3.5;
   }
 
+  .editor-label {
+    @apply mb-1.5 block font-mono text-[9px] font-bold uppercase tracking-[0.1em] text-white/40;
+  }
+
+  .editor-input,
+  .editor-select {
+    @apply min-h-9 w-full min-w-0 rounded-[6px] border border-white/10 bg-deepIndigo/70 px-3 py-2 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-acidGreen/60;
+  }
+
+  textarea.editor-input {
+    @apply min-h-24 resize-y leading-6;
+  }
+
   .primary-button:hover {
     background-color: #f4f5fa;
   }
@@ -334,4 +574,135 @@ a {
 
 @media (prefers-reduced-motion: reduce) {
   .intervention-node-pulse { animation: none; }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+
+  html[data-project-print="true"],
+  html[data-project-print="true"] body,
+  html[data-project-print="true"] #root {
+    background: #181743 !important;
+    color: #f4f5fa !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  html[data-project-print="true"] body > #root > div > header,
+  html[data-project-print="true"] body > #root > div > footer,
+  html[data-project-print="true"] [data-project-print-control],
+  html[data-project-print="true"] [data-project-back-to-top],
+  html[data-project-print="true"] [data-project-bottom-navigation],
+  html[data-project-print="true"] [data-project-route-shell] > .fixed,
+  html[data-project-print="true"] [data-project-route-shell] a[href$="/work"] {
+    display: none !important;
+  }
+
+  html[data-project-print="true"] [data-project-route-shell],
+  html[data-project-print="true"] [data-project-route-shell] article,
+  html[data-project-print="true"] [data-project-route-shell] main {
+    background: #181743 !important;
+    color: #f4f5fa !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    width: 100% !important;
+  }
+
+  html[data-project-print="true"] [data-project-route-shell] .site-container,
+  html[data-project-print="true"] [data-project-route-shell] .case-study-rail {
+    margin-inline: auto !important;
+    max-width: none !important;
+    width: calc(100% - 8mm) !important;
+  }
+
+  html[data-project-print="true"] [data-project-route-shell] article > section,
+  html[data-project-print="true"] [data-project-route-shell] main > section {
+    padding-bottom: 10mm !important;
+    padding-top: 10mm !important;
+  }
+
+  html[data-project-print="true"] [data-project-route-shell] img,
+  html[data-project-print="true"] [data-project-route-shell] video,
+  html[data-project-print="true"] [data-project-route-shell] canvas,
+  html[data-project-print="true"] [data-project-route-shell] svg {
+    max-width: 100% !important;
+  }
+
+  html[data-project-print="true"] [data-project-route-shell] figure,
+  html[data-project-print="true"] [data-project-route-shell] table,
+  html[data-project-print="true"] [data-project-route-shell] img {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  html[data-project-print="true"] [data-project-route-shell] h1,
+  html[data-project-print="true"] [data-project-route-shell] h2,
+  html[data-project-print="true"] [data-project-route-shell] h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  html[data-project-print="true"] [data-project-route-shell] *,
+  html[data-project-print="true"] [data-project-route-shell] *::before,
+  html[data-project-print="true"] [data-project-route-shell] *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Figma prototype blocks must never print their live cross-origin iframe,
+   regardless of how printing was triggered — swap to the poster + link. */
+@media print {
+  [data-figma-prototype-interactive] {
+    display: none !important;
+  }
+
+  [data-figma-prototype-print] {
+    display: block !important;
+  }
+}
+
+/* Portfolio Collection export only (html[data-collection-export-capture],
+   set by ProjectPage.tsx's readiness effect only when isCollectionExportCapture()
+   is true — never present on the normal site or for the owner). The
+   collection pipeline now captures each project via Chromium's own
+   page.pdf() print pipeline (vector text/shapes, not a screenshot), which
+   auto-paginates when content is taller than the requested page height —
+   break-inside: avoid on every top-level module tells it to prefer breaking
+   between modules rather than through one, matching the requirement that a
+   heading and its body never get split unless a single module alone
+   exceeds a whole segment. The glow lives here (not drawn on top of the
+   screenshot in the pdf-lib compositor anymore) as a soft two-blob radial
+   gradient behind the project content, at very low opacity so it never
+   visibly tints text/images sitting on top of it. */
+html[data-collection-export-capture] [data-template-instance-id],
+html[data-collection-export-capture] [data-document-section] {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+html[data-collection-export-capture] [data-project-route-shell] {
+  position: relative;
+}
+
+html[data-collection-export-capture] [data-project-route-shell]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 6%, rgba(42, 67, 199, 0.1), transparent 55%),
+    radial-gradient(circle at 86% 14%, rgba(52, 240, 37, 0.045), transparent 40%);
+}
+
+html[data-collection-export-capture] [data-project-route-shell] > * {
+  position: relative;
+  z-index: 1;
 }

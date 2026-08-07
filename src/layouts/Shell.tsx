@@ -1,13 +1,15 @@
 import type { PropsWithChildren } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { useLocale } from "../locales/LocaleContext";
 import { ProductionExportDock } from "../components/ProductionExportDock";
+import { CustomCursor } from "../components/CustomCursor";
 
 export function Shell({ children }: PropsWithChildren) {
   const [open, setOpen] = useState(false);
   const [homeHeaderVisible, setHomeHeaderVisible] = useState(false);
+  const headerRef = useRef<HTMLElement | null>(null);
   const location = useLocation();
   const { locale, messages, pathFor } = useLocale();
   const isHome = location.pathname === `/${locale}` || location.pathname === `/${locale}/`;
@@ -46,9 +48,27 @@ export function Shell({ children }: PropsWithChildren) {
 
   const showHeader = !isHome || homeHeaderVisible || open;
 
+  // Publishes the header's real rendered height as a CSS variable so any
+  // sticky/fixed UI elsewhere on the page (e.g. the owner editor toolbars on
+  // project pages) can stack directly underneath it instead of each hand-typing
+  // its own "clear the header" pixel guess.
+  useLayoutEffect(() => {
+    const node = headerRef.current;
+    if (!node || typeof ResizeObserver === "undefined") return undefined;
+    const publish = () => {
+      document.documentElement.style.setProperty("--site-header-height", `${Math.ceil(node.getBoundingClientRect().height)}px`);
+    };
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [isHome, showHeader]);
+
   return (
-    <div className="min-h-screen bg-deepIndigo text-softWhite">
+    <div className="ambient-public-shell relative z-[1] min-h-screen bg-transparent text-softWhite">
+      {/* Temporarily disabled for lag diagnosis — do not delete. <CustomCursor /> */}
       <header
+        ref={headerRef}
         className={`top-0 z-50 border-b border-softWhite/12 bg-deepIndigo/92 text-softWhite backdrop-blur-xl transition duration-500 ease-out ${
           isHome ? "fixed left-0 right-0" : "sticky"
         } ${showHeader ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-3 opacity-0"}`}

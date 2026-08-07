@@ -1,4 +1,6 @@
 node_modules
+private/*.private.json
+private/*.private.txt
 dist
 .agents
 UI
@@ -18,3 +20,25 @@ pic
 public/games/afterwarm/Build/tem.data.br
 public/games/afterwarm/Build/tem.framework.js.br
 public/games/afterwarm/Build/tem.wasm.br
+
+# Live Template Builder preview source is generated locally by Vite.
+src/templates/__TemplatePreview*.tsx
+
+# Local Template Builder source backups.
+.template-backups/
+
+# Private local backup snapshots must never be committed.
+/backups/
+
+# Local editor tooling, never part of the deployed site.
+.claude/
+.vs/
+
+# Local dev-server content staging (portfolioContentPlugin.ts) and its
+# served asset directory. Production reads only from public/images/published,
+# written by scripts/import-production-bundle.mjs.
+/content/
+public/portfolio-assets/
+
+# Local script/test output (audits, PDF diagnostics, etc.), never published.
+/output/

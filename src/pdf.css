@@ -1,0 +1,358 @@
+.portfolio-pdf-document {
+  color: #181743;
+  font-family: Inter, "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", "Segoe UI", Arial, sans-serif;
+}
+
+.pdf-builder-button { display: inline-flex; align-items: center; gap: 0.45rem; border: 1px solid rgba(244,245,250,0.16); border-radius: 999px; padding: 0.55rem 0.85rem; font-size: 0.7rem; font-weight: 700; color: rgba(244,245,250,0.8); }
+.pdf-builder-button-primary { border-color: rgba(52,240,37,0.55); background: #34f025; color: #181743; }
+.pdf-config-row, .pdf-config-card { border: 1px solid rgba(244,245,250,0.09); border-radius: 8px; background: rgba(244,245,250,0.035); padding: 0.7rem; }
+.pdf-config-row { display: flex; align-items: center; gap: 0.5rem; }
+.pdf-config-card summary { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; cursor: pointer; list-style: none; }
+.pdf-config-card summary::-webkit-details-marker { display: none; }
+.pdf-config-card summary label { display: flex; min-width: 0; flex: 1; align-items: center; gap: 0.6rem; font-size: 0.78rem; }
+.pdf-icon-button { display: grid; width: 1.8rem; height: 1.8rem; place-items: center; color: rgba(244,245,250,0.55); }
+.pdf-icon-button:disabled { opacity: 0.18; }
+.pdf-field { display: block; font-size: 0.7rem; color: rgba(244,245,250,0.5); }
+.pdf-field > span { display: block; margin-bottom: 0.35rem; }
+.pdf-field input, .pdf-field select { width: 100%; border-radius: 6px; border: 1px solid rgba(244,245,250,0.1); background: #0b1035; padding: 0.65rem 0.75rem; color: #f4f5fa; font-size: 0.78rem; }
+.pdf-mini-action { display: inline-flex; align-items: center; gap: 0.35rem; border: 1px solid rgba(244,245,250,0.12); border-radius: 999px; padding: 0.38rem 0.62rem; color: rgba(244,245,250,0.66); font-size: 0.65rem; font-weight: 650; }
+.pdf-mini-action:hover, .pdf-mini-action:focus-visible { border-color: rgba(52,240,37,0.45); color: #34f025; }
+.pdf-mini-action-danger:hover, .pdf-mini-action-danger:focus-visible { border-color: rgba(255,120,140,0.45); color: #ff94a5; }
+.pdf-mini-action:disabled { opacity: 0.25; pointer-events: none; }
+.pdf-composition-page-card { border: 1px solid rgba(244,245,250,0.08); border-radius: 8px; background: rgba(4,8,36,0.24); padding: 0.6rem; }
+.pdf-composition-page-card > summary { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; cursor: pointer; list-style: none; }
+.pdf-composition-page-card > summary::-webkit-details-marker { display: none; }
+.pdf-composition-page-card > summary > span:first-child { display: grid; min-width: 0; grid-template-columns: auto minmax(0,1fr); align-items: baseline; gap: 0.2rem 0.55rem; font-size: 0.75rem; }
+.pdf-composition-page-card > summary b { color: #34f025; font-family: "IBM Plex Mono", Consolas, monospace; font-size: 0.62rem; }
+.pdf-composition-page-card > summary small { grid-column: 2; overflow: hidden; color: rgba(244,245,250,0.35); font-size: 0.58rem; text-overflow: ellipsis; white-space: nowrap; }
+.pdf-preview-stage { min-height: calc(100vh - 7.25rem); overflow: auto; padding: 2rem; }
+.pdf-preview-stage .portfolio-pdf-document { display: grid; justify-content: center; gap: 1.5rem; }
+.pdf-preview-fit .portfolio-pdf-document { zoom: min(1, calc((100vw - 470px) / 794)); }
+
+@media (max-width: 1023px) {
+  .pdf-preview-stage { padding: 1rem; }
+  .pdf-preview-fit .portfolio-pdf-document { zoom: min(1, calc((100vw - 32px) / 794)); }
+}
+
+.portfolio-pdf-page {
+  position: relative;
+  box-sizing: border-box;
+  width: 210mm;
+  height: 297mm;
+  min-height: 297mm;
+  overflow: hidden;
+  break-after: page;
+  page-break-after: always;
+  background: #f8f9fc;
+  color: #181743;
+  padding: 14mm 14mm 13mm;
+  box-shadow: 0 18px 50px rgba(8, 10, 42, 0.22);
+}
+
+.portfolio-pdf-page:last-child { break-after: auto; page-break-after: auto; }
+.portfolio-pdf-page-content { min-height: 263mm; }
+.portfolio-pdf-footer { position: absolute; bottom: 6mm; left: 14mm; right: 14mm; display: flex; justify-content: space-between; border-top: 0.25mm solid rgba(24, 23, 67, 0.18); padding-top: 2.5mm; font-size: 7pt; color: rgba(24, 23, 67, 0.55); }
+
+.pdf-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 8mm; border-bottom: 0.4mm solid #181743; padding-bottom: 3mm; margin-bottom: 7mm; break-after: avoid; }
+.pdf-section-heading p, .pdf-kicker { margin: 0; color: #2a43c7; font-family: "IBM Plex Mono", Consolas, monospace; font-size: 7.5pt; font-weight: 700; letter-spacing: 0.12em; }
+.pdf-section-heading h1 { max-width: 145mm; margin: 0; font-size: 18pt; line-height: 1.12; text-align: right; }
+
+.pdf-cover-page { min-height: 256mm; display: flex; flex-direction: column; justify-content: space-between; padding: 15mm 4mm 6mm; }
+.pdf-cover-page h1 { margin: 9mm 0 0; max-width: 160mm; font-size: 34pt; line-height: 1; }
+.pdf-cover-page h2 { margin: 4mm 0 0; font-size: 16pt; color: #2a43c7; }
+.pdf-cover-positioning { margin-top: 5mm; font-size: 10pt; color: rgba(24, 23, 67, 0.7); }
+.pdf-cover-meta { border-top: 0.4mm solid #181743; padding-top: 5mm; display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; font-size: 8.5pt; }
+.pdf-cover-meta p { margin: 0; }
+
+.pdf-profile-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 12mm; }
+.pdf-profile-grid h2 { margin: 0; font-size: 20pt; }
+.pdf-profile-grid h3, .pdf-profile-list h3 { margin: 0 0 3mm; font-size: 10pt; text-transform: uppercase; letter-spacing: 0.08em; color: #2a43c7; }
+.pdf-profile-grid p { margin: 3mm 0 0; font-size: 9.5pt; line-height: 1.55; }
+.pdf-profile-grid .pdf-lead { color: #2a43c7; font-weight: 700; }
+.pdf-skill-list { display: flex; flex-wrap: wrap; gap: 2mm; }
+.pdf-skill-list span, .pdf-project-tags span, .pdf-game-tags span { border-radius: 999px; background: rgba(42, 67, 199, 0.09); padding: 1.4mm 2.5mm; font-size: 7.5pt; }
+.pdf-profile-list { margin-top: 10mm; }
+.pdf-profile-list article { display: grid; grid-template-columns: 1fr auto; gap: 2mm 5mm; border-top: 0.25mm solid rgba(24, 23, 67, 0.16); padding: 3mm 0; font-size: 8.5pt; break-inside: avoid; }
+.pdf-profile-list article p { grid-column: 1 / -1; margin: 0; line-height: 1.45; }
+
+.pdf-project-meta { display: flex; flex-wrap: wrap; gap: 2mm 6mm; margin-bottom: 5mm; font-size: 8pt; font-weight: 600; color: rgba(24, 23, 67, 0.68); }
+.pdf-image { display: grid; place-items: center; overflow: hidden; border-radius: 2.5mm; background: #e7e9f3; color: rgba(24, 23, 67, 0.35); font-family: "IBM Plex Mono", Consolas, monospace; font-size: 7pt; }
+.pdf-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pdf-image img.pdf-image-contain { object-fit: contain; }
+.pdf-project-cover { width: 100%; aspect-ratio: 16 / 9; max-height: 125mm; }
+.pdf-project-cover.pdf-image-missing { height: 18mm; aspect-ratio: auto; }
+.pdf-project-summary { margin-top: 7mm; border-top: 0.3mm solid rgba(24, 23, 67, 0.18); padding-top: 5mm; }
+.pdf-project-summary h2, .pdf-project-detail-grid h2 { margin: 0; font-size: 10pt; color: #2a43c7; }
+.pdf-project-summary p { margin: 0; font-size: 9.5pt; line-height: 1.55; white-space: pre-wrap; }
+.pdf-project-tags, .pdf-game-tags { display: flex; flex-wrap: wrap; gap: 2mm; margin-top: 5mm; }
+.pdf-project-detail-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 10mm; }
+.pdf-project-text-block { margin-top: 5mm; break-inside: avoid; }
+.pdf-project-text-block h3 { margin: 0 0 2mm; font-size: 11pt; }
+.pdf-project-text-block p { margin: 0; font-size: 8.8pt; line-height: 1.5; white-space: pre-wrap; }
+.pdf-project-media-stack { display: grid; align-content: start; gap: 5mm; }
+.pdf-project-media-stack figure { margin: 0; break-inside: avoid; }
+.pdf-project-media-stack .pdf-image { aspect-ratio: 16 / 9; }
+.pdf-project-media-stack figcaption { margin-top: 2mm; font-size: 7.5pt; line-height: 1.35; color: rgba(24, 23, 67, 0.65); }
+
+.pdf-ui-grid { display: grid; gap: 5mm; }
+.pdf-ui-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.pdf-ui-grid-4, .pdf-ui-grid-6 { grid-template-columns: repeat(2, 1fr); }
+.pdf-ui-grid figure { margin: 0; break-inside: avoid; }
+.pdf-ui-grid .pdf-image { width: 100%; aspect-ratio: 16 / 10; }
+.pdf-ui-grid-2 .pdf-image { aspect-ratio: 4 / 3; max-height: 100mm; }
+.pdf-ui-grid figcaption { display: grid; gap: 1mm; margin-top: 2mm; font-size: 7.5pt; line-height: 1.35; }
+.pdf-ui-grid figcaption strong { font-size: 8.5pt; }
+.pdf-ui-grid figcaption span { color: rgba(24, 23, 67, 0.62); }
+
+.pdf-game-list { display: grid; gap: 6mm; }
+.pdf-game-record { display: grid; grid-template-columns: 42mm 1fr; gap: 6mm; border-bottom: 0.25mm solid rgba(24, 23, 67, 0.15); padding-bottom: 6mm; break-inside: avoid; }
+.pdf-game-cover { aspect-ratio: 16 / 9; width: 42mm; }
+.pdf-game-title-row { display: flex; justify-content: space-between; gap: 5mm; align-items: baseline; }
+.pdf-game-title-row h2 { margin: 0; font-size: 13pt; }
+.pdf-game-title-row span { font-size: 7.5pt; color: rgba(24, 23, 67, 0.6); text-align: right; }
+.pdf-game-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin-top: 3mm; }
+.pdf-game-summary p { margin: 0; font-size: 7.8pt; line-height: 1.4; }
+.pdf-game-summary strong { display: block; margin-bottom: 1mm; color: #2a43c7; font-size: 7pt; text-transform: uppercase; }
+.pdf-game-detail { margin: 4mm 0 0; border-top: 0.25mm solid rgba(24, 23, 67, 0.14); padding-top: 3mm; font-size: 8pt; line-height: 1.5; white-space: pre-wrap; }
+
+.pdf-contact-page { min-height: 245mm; display: flex; flex-direction: column; justify-content: space-between; }
+.pdf-contact-page > div:last-child { border-top: 0.5mm solid #181743; padding-top: 8mm; }
+.pdf-contact-page h2 { margin: 0; font-size: 26pt; }
+.pdf-contact-page p, .pdf-contact-page a { display: block; margin: 3mm 0 0; font-size: 10pt; color: #181743; text-decoration: none; }
+
+.pdf-project-section-list { display: grid; gap: 7mm; }
+.pdf-project-content-section { break-inside: avoid; }
+.pdf-project-content-section > h2 { margin: 0 0 3mm; border-bottom: 0.3mm solid rgba(24, 23, 67, 0.18); padding-bottom: 2mm; font-size: 13pt; }
+.pdf-project-content-grid { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr); gap: 7mm; }
+.pdf-project-content-grid > div:only-child { grid-column: 1 / -1; }
+.pdf-project-text-block:first-child { margin-top: 0; }
+.pdf-project-text-block > p + p { margin-top: 2mm; }
+.pdf-block-eyebrow { margin: 0 0 1.2mm !important; font-family: "IBM Plex Mono", Consolas, monospace; font-size: 6.8pt !important; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.pdf-project-text-block small { display: block; margin-top: 1.5mm; font-size: 6.8pt; opacity: 0.58; }
+.pdf-structured-items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2mm; margin-top: 2.5mm; }
+.pdf-structured-items > div { border-top: 0.25mm solid rgba(24, 23, 67, 0.16); padding-top: 1.5mm; }
+.pdf-structured-items strong, .pdf-structured-items span { display: block; }
+.pdf-structured-items strong { font-size: 7.7pt; }
+.pdf-structured-items span { margin-top: 0.8mm; font-size: 7.2pt; line-height: 1.4; opacity: 0.72; }
+.pdf-diagram-flow { display: flex; flex-wrap: wrap; gap: 1.5mm 2mm; margin-top: 2.5mm; }
+.pdf-diagram-flow span { display: inline-flex; align-items: center; gap: 1.5mm; font-size: 7.2pt; font-weight: 650; }
+.pdf-diagram-flow i { color: #2a43c7; font-style: normal; }
+
+.pdf-authored-heading { margin: 0 0 2.5mm; max-width: 165mm; font-size: 11.5pt; line-height: 1.3; }
+.pdf-authored-body { display: grid; gap: 2mm; }
+.pdf-authored-body p, .pdf-block-body { margin: 0; font-size: 8.5pt; line-height: 1.48; white-space: pre-line; }
+.pdf-authored-blocks { display: grid; gap: 4mm; margin-top: 4mm; }
+.pdf-authored-block { break-inside: avoid; }
+.pdf-authored-block h3, .pdf-project-text-block h3 { margin: 0 0 1.5mm; font-size: 10pt; line-height: 1.25; }
+.pdf-authored-media-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3.5mm; margin-top: 2.5mm; }
+.pdf-authored-media-1 { grid-template-columns: 1fr; }
+.pdf-authored-media-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.pdf-authored-media-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pdf-authored-media-grid figure { min-width: 0; margin: 0; break-inside: avoid; }
+.pdf-authored-media-grid .pdf-image { aspect-ratio: 16 / 9; }
+.pdf-authored-media-grid figcaption { display: grid; gap: 0.8mm; margin-top: 1.4mm; font-size: 7pt; line-height: 1.35; }
+.pdf-authored-media-grid figcaption strong { font-size: 7.6pt; }
+.pdf-authored-media-grid figcaption span { opacity: 0.64; }
+.pdf-figma-placeholder { display: grid; place-items: center; min-height: 40mm; margin-top: 2.5mm; padding: 6mm; border: 0.3mm dashed currentColor; opacity: 0.7; font-size: 9pt; text-align: center; }
+.pdf-figma-link { margin-top: 2.5mm; font-size: 8.5pt; }
+.pdf-figma-link a { font-weight: 600; }
+.pdf-figma-link small { display: block; margin-top: 0.8mm; opacity: 0.6; font-size: 7pt; word-break: break-all; }
+.pdf-comparison-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4mm; }
+.pdf-comparison-grid article { min-width: 0; border-top: 0.3mm solid rgba(24, 23, 67, 0.18); padding-top: 2.5mm; }
+.pdf-comparison-grid article > span { font-family: "IBM Plex Mono", Consolas, monospace; font-size: 6.8pt; font-weight: 700; }
+.pdf-comparison-grid h4, .pdf-content-grid h4 { margin: 1mm 0; font-size: 8.5pt; }
+.pdf-comparison-grid p, .pdf-content-grid p { margin: 0; font-size: 7.5pt; line-height: 1.42; white-space: pre-line; }
+.pdf-comparison-grid figure { margin: 2.5mm 0 0; }
+.pdf-comparison-grid .pdf-image { aspect-ratio: 16 / 9; }
+.pdf-compact-flow { display: flex; align-items: stretch; gap: 2mm; }
+.pdf-compact-flow > div { position: relative; min-width: 0; flex: 1; border-radius: 2mm; background: rgba(42, 67, 199, 0.08); padding: 2.5mm; }
+.pdf-compact-flow > div:not(:last-child)::after { position: absolute; top: 50%; right: -1.8mm; content: "→"; transform: translateY(-50%); font-size: 7pt; }
+.pdf-compact-flow span { font-family: "IBM Plex Mono", Consolas, monospace; font-size: 6.8pt; font-weight: 700; }
+.pdf-compact-flow p { margin: 1mm 0 0; font-size: 7.2pt; line-height: 1.35; }
+.pdf-content-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.5mm; margin-top: 2.5mm; }
+.pdf-content-grid article { border-radius: 2mm; background: rgba(42, 67, 199, 0.07); padding: 2.5mm; }
+.pdf-content-grid strong { display: block; margin-top: 1mm; font-size: 7pt; }
+.pdf-content-matrix { width: 100%; margin-top: 2mm; table-layout: fixed; border-collapse: collapse; font-size: 6.7pt; line-height: 1.32; }
+.pdf-content-matrix th, .pdf-content-matrix td { border-top: 0.25mm solid rgba(24, 23, 67, 0.17); padding: 1.7mm; text-align: left; vertical-align: top; }
+.pdf-content-matrix th { font-size: 6.4pt; text-transform: uppercase; }
+.pdf-authored-quote { margin: 0; border-left: 0.6mm solid #2a43c7; padding: 2.5mm 0 2.5mm 4mm; }
+.pdf-authored-quote p { margin: 0; font-size: 9pt; font-weight: 600; line-height: 1.45; }
+.pdf-block-fallback { border: 0.25mm dashed rgba(24, 23, 67, 0.24); border-radius: 2mm; padding: 2.5mm; }
+
+/* Designed project pages use constrained editorial compositions rather than the automatic document flow. */
+.pdf-composed-page-shell { background: var(--project-background) !important; color: var(--project-text) !important; }
+.pdf-composed-page-shell .portfolio-pdf-footer { border-color: color-mix(in srgb, var(--project-accent-secondary) 30%, transparent); color: var(--project-muted); }
+.pdf-composed-project-page { position: relative; min-height: 258mm; color: var(--project-text); }
+.pdf-composed-project-page h1, .pdf-composed-project-page h2, .pdf-composed-project-page h3, .pdf-composed-project-page h4, .pdf-composed-project-page p { text-wrap: pretty; }
+.pdf-composed-page-index { position: absolute; right: 0; bottom: 1mm; left: 0; display: flex; justify-content: space-between; border-top: 0.25mm solid color-mix(in srgb, var(--project-accent-secondary) 24%, transparent); padding-top: 2mm; color: var(--project-muted); font-family: "IBM Plex Mono", Consolas, monospace; font-size: 6.3pt; }
+.pdf-designed-header { display: flex; align-items: end; justify-content: space-between; gap: 8mm; margin-bottom: 8mm; border-bottom: 0.35mm solid color-mix(in srgb, var(--project-accent-secondary) 35%, transparent); padding-bottom: 4mm; }
+.pdf-designed-header > div { min-width: 0; }
+.pdf-designed-header p, .pdf-designed-kicker { margin: 0 0 2mm; color: var(--project-accent); font-family: "IBM Plex Mono", Consolas, monospace; font-size: 7pt; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.pdf-designed-header h2 { margin: 0; max-width: 145mm; font-size: 22pt; line-height: 1.08; letter-spacing: 0; }
+.pdf-designed-header > span { flex: none; padding-bottom: 1mm; color: var(--project-muted); font-size: 7pt; }
+.pdf-designed-copy h3, .pdf-designed-grid-intro h3, .pdf-designed-comparison-intro h3, .pdf-designed-process-copy h3, .pdf-designed-overview-copy h3, .pdf-designed-insight h3 { margin: 0 0 4mm; color: var(--project-accent-secondary); font-size: 14pt; line-height: 1.28; }
+.pdf-designed-copy p, .pdf-designed-grid-intro p, .pdf-designed-comparison-intro p, .pdf-designed-process-copy p, .pdf-designed-overview-copy p, .pdf-designed-insight p { margin: 0; color: var(--project-muted); font-size: 9pt; line-height: 1.62; }
+.pdf-designed-copy p + p, .pdf-designed-overview-copy p + p, .pdf-designed-insight p + p { margin-top: 3mm; }
+.pdf-composed-project-page figure { margin: 0; }
+.pdf-composed-project-page .pdf-image { border: 0.25mm solid var(--project-media-border); border-radius: 3.5mm; background: var(--project-panel); }
+.pdf-composed-project-page figcaption { display: grid; gap: 1mm; margin-top: 2mm; color: var(--project-muted); font-size: 7.2pt; line-height: 1.4; }
+.pdf-composed-project-page figcaption strong { color: var(--project-text); font-size: 8pt; }
+.pdf-designed-media-placeholder { min-height: 95mm; border: 0.25mm solid var(--project-media-border); border-radius: 3.5mm; background: linear-gradient(145deg, var(--project-panel), color-mix(in srgb, var(--project-background) 76%, var(--project-accent-secondary))); }
+
+.pdf-designed-hero { display: grid; min-height: 250mm; grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr); grid-template-rows: auto 1fr auto; gap: 9mm 12mm; padding-top: 7mm; }
+.pdf-designed-hero-copy { align-self: start; padding-top: 8mm; }
+.pdf-designed-hero-copy h1 { margin: 0; max-width: 76mm; font-size: 31pt; line-height: 1.04; }
+.pdf-designed-hero-summary { margin: 6mm 0 0; max-width: 72mm; color: var(--project-muted); font-size: 9.2pt; line-height: 1.55; }
+.pdf-designed-hero-meta { display: flex; flex-wrap: wrap; gap: 2mm; margin-top: 7mm; }
+.pdf-designed-hero-meta span { border-top: 0.35mm solid var(--project-accent); padding: 2mm 3mm 0 0; color: var(--project-muted); font-size: 7pt; }
+.pdf-designed-hero-visual { min-width: 0; align-self: stretch; }
+.pdf-designed-hero-visual > .pdf-image, .pdf-designed-hero-visual > figure, .pdf-designed-hero-visual figure .pdf-image { width: 100%; height: 164mm; }
+.pdf-designed-hero-placeholder { height: 164mm; border-radius: 4mm; background: linear-gradient(155deg, var(--project-panel), color-mix(in srgb, var(--project-background) 64%, var(--project-accent-secondary))); }
+.pdf-designed-highlights { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5mm; border-top: 0.35mm solid color-mix(in srgb, var(--project-accent-secondary) 34%, transparent); padding-top: 5mm; }
+.pdf-designed-highlights div { display: grid; gap: 1.5mm; }
+.pdf-designed-highlights span { color: var(--project-accent); font-family: "IBM Plex Mono", Consolas, monospace; font-size: 7pt; }
+.pdf-designed-highlights strong { font-size: 8pt; line-height: 1.35; }
+
+.pdf-designed-split { display: grid; grid-template-columns: minmax(0, 0.4fr) minmax(0, 0.6fr); gap: 12mm; align-items: start; }
+.pdf-designed-split.is-reversed { grid-template-columns: minmax(0, 0.6fr) minmax(0, 0.4fr); }
+.pdf-designed-split.is-reversed .pdf-designed-copy { order: 2; }
+.pdf-designed-split.is-reversed .pdf-designed-main-media { order: 1; }
+.pdf-designed-copy { padding-top: 5mm; }
+.pdf-designed-main-media > figure > .pdf-image, .pdf-designed-main-media > .pdf-designed-media-placeholder { width: 100%; height: 144mm; }
+.pdf-designed-support-media { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4mm; margin-top: 5mm; }
+.pdf-designed-support-media .pdf-image { aspect-ratio: 16 / 9; }
+
+.pdf-designed-grid-intro, .pdf-designed-comparison-intro { max-width: 140mm; margin: -2mm 0 7mm; }
+.pdf-designed-grid-intro h3, .pdf-designed-comparison-intro h3 { font-size: 11.5pt; }
+.pdf-designed-grid-intro p, .pdf-designed-comparison-intro p { font-size: 8pt; line-height: 1.48; }
+.pdf-designed-four-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6mm 7mm; }
+.pdf-designed-screen { position: relative; min-width: 0; }
+.pdf-designed-screen > span { position: absolute; z-index: 2; top: 3mm; left: 3mm; display: grid; width: 8mm; height: 8mm; place-items: center; border-radius: 999px; background: var(--project-accent); color: var(--project-background); font-family: "IBM Plex Mono", Consolas, monospace; font-size: 6.5pt; font-weight: 800; }
+.pdf-designed-screen .pdf-image { width: 100%; aspect-ratio: 16 / 9; }
+
+.pdf-designed-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10mm; }
+.pdf-designed-comparison article { min-width: 0; }
+.pdf-designed-comparison-label { min-height: 22mm; border-left: 0.6mm solid var(--project-accent); padding-left: 4mm; }
+.pdf-designed-comparison-label span { color: var(--project-accent); font-family: "IBM Plex Mono", Consolas, monospace; font-size: 6.5pt; font-weight: 700; }
+.pdf-designed-comparison-label h3 { margin: 2mm 0 0; font-size: 13pt; line-height: 1.2; }
+.pdf-designed-comparison article > figure, .pdf-designed-comparison article > .pdf-designed-media-placeholder { margin-top: 5mm; }
+.pdf-designed-comparison .pdf-image { width: 100%; aspect-ratio: 16 / 9; }
+.pdf-designed-comparison article > p { margin: 4mm 0 0; color: var(--project-muted); font-size: 8pt; line-height: 1.5; }
+
+.pdf-designed-process { display: grid; grid-template-columns: 55mm 1fr; gap: 7mm 11mm; }
+.pdf-designed-process-copy { grid-row: span 2; padding-top: 3mm; }
+.pdf-designed-process-media .pdf-image { width: 100%; height: 105mm; }
+.pdf-designed-process-steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2.5mm; }
+.pdf-designed-process-steps div { position: relative; min-height: 30mm; border-top: 0.45mm solid var(--project-accent); padding: 3mm 2mm 0 0; }
+.pdf-designed-process-steps div:not(:last-child)::after { position: absolute; top: -2.2mm; right: -2mm; content: "→"; color: var(--project-accent); font-size: 8pt; }
+.pdf-designed-process-steps span { color: var(--project-accent); font-family: "IBM Plex Mono", Consolas, monospace; font-size: 6.5pt; }
+.pdf-designed-process-steps strong { display: block; margin-top: 2mm; font-size: 7.8pt; line-height: 1.35; }
+.pdf-designed-process > .pdf-authored-block { grid-column: 2; }
+
+.pdf-designed-full-media { display: grid; gap: 6mm; }
+.pdf-designed-full-media-1 { grid-template-columns: 1fr; }
+.pdf-designed-full-media-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pdf-designed-full-media-3 { grid-template-columns: 1.35fr 0.65fr; }
+.pdf-designed-full-media-3 figure:first-child { grid-row: span 2; }
+.pdf-designed-full-media-1 .pdf-image { width: 100%; height: 169mm; }
+.pdf-designed-full-media-2 .pdf-image { width: 100%; height: 148mm; }
+.pdf-designed-full-media-3 .pdf-image { width: 100%; height: 70mm; }
+.pdf-designed-full-media-3 figure:first-child .pdf-image { height: 153mm; }
+.pdf-designed-insight { max-width: 145mm; margin-top: 7mm; border-left: 0.6mm solid var(--project-accent); padding-left: 5mm; }
+.pdf-designed-insight h3 { font-size: 11pt; }
+.pdf-designed-insight p { font-size: 8.2pt; }
+
+.pdf-designed-overview { display: grid; grid-template-columns: 55mm minmax(0, 1fr); gap: 10mm; align-items: start; }
+.pdf-designed-overview-copy { position: sticky; top: 0; padding-top: 2mm; }
+.pdf-designed-overview-copy h3 { font-size: 11.5pt; }
+.pdf-designed-overview-copy p { font-size: 7.8pt; line-height: 1.5; }
+.pdf-designed-overview-structure { display: grid; gap: 5mm; }
+.pdf-designed-overview-media { display: grid; grid-template-columns: 1fr; gap: 4mm; }
+.pdf-designed-overview-media-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.pdf-designed-overview-media .pdf-image { width: 100%; aspect-ratio: 16 / 9; }
+.pdf-designed-overview-structure .pdf-content-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3mm; }
+.pdf-designed-overview-structure .pdf-content-grid article { border-radius: 0; border-top: 0.35mm solid var(--project-accent-secondary); background: transparent !important; padding: 3mm 0 0; }
+.pdf-designed-overview-structure .pdf-content-grid h4 { color: var(--project-text); font-size: 8.3pt; }
+.pdf-designed-overview-structure .pdf-content-grid p { color: var(--project-muted); font-size: 7pt; }
+.pdf-designed-overview-structure .pdf-content-matrix { font-size: 6.4pt; }
+.pdf-designed-overview-structure .pdf-authored-block h3 { color: var(--project-accent-secondary); font-size: 10pt; }
+.pdf-composed-project-page .pdf-authored-quote { border-color: var(--project-accent); background: color-mix(in srgb, var(--project-panel) 70%, transparent); }
+
+/* Website Dark reuses the public portfolio's deep indigo, acid green, cobalt and soft-white language. */
+.pdf-theme-website-dark {
+  color: #f4f5fa;
+  --pdf-page: #0b1035;
+  --pdf-panel: #12194a;
+  --pdf-panel-soft: rgba(244, 245, 250, 0.045);
+  --pdf-text: #f4f5fa;
+  --pdf-muted: rgba(244, 245, 250, 0.66);
+  --pdf-faint: rgba(244, 245, 250, 0.42);
+  --pdf-line: rgba(136, 164, 255, 0.28);
+  --pdf-blue: #85a5ff;
+  --pdf-cobalt: #4969ef;
+  --pdf-green: #34f025;
+}
+.pdf-theme-website-dark .portfolio-pdf-page { background: var(--pdf-page); color: var(--pdf-text); box-shadow: 0 18px 52px rgba(1, 3, 20, 0.52); }
+.pdf-theme-website-dark .portfolio-pdf-footer { border-color: var(--pdf-line); color: var(--pdf-faint); }
+.pdf-theme-website-dark .pdf-section-heading { border-color: var(--pdf-line); }
+.pdf-theme-website-dark .pdf-section-heading p,
+.pdf-theme-website-dark .pdf-kicker,
+.pdf-theme-website-dark .pdf-block-eyebrow { color: var(--pdf-green); }
+.pdf-theme-website-dark .pdf-section-heading h1 { color: var(--pdf-text); }
+.pdf-theme-website-dark .pdf-cover-page { border-left: 0.6mm solid var(--pdf-green); padding-left: 9mm; }
+.pdf-theme-website-dark .pdf-cover-page h1 { color: var(--pdf-text); }
+.pdf-theme-website-dark .pdf-cover-page h2,
+.pdf-theme-website-dark .pdf-profile-grid .pdf-lead,
+.pdf-theme-website-dark .pdf-profile-grid h3,
+.pdf-theme-website-dark .pdf-profile-list h3,
+.pdf-theme-website-dark .pdf-project-summary h2,
+.pdf-theme-website-dark .pdf-project-detail-grid h2 { color: var(--pdf-green); }
+.pdf-theme-website-dark .pdf-cover-positioning,
+.pdf-theme-website-dark .pdf-project-meta,
+.pdf-theme-website-dark .pdf-project-media-stack figcaption,
+.pdf-theme-website-dark .pdf-ui-grid figcaption span,
+.pdf-theme-website-dark .pdf-game-title-row span { color: var(--pdf-muted); }
+.pdf-theme-website-dark .pdf-cover-meta,
+.pdf-theme-website-dark .pdf-profile-list article,
+.pdf-theme-website-dark .pdf-project-summary,
+.pdf-theme-website-dark .pdf-game-record,
+.pdf-theme-website-dark .pdf-game-detail,
+.pdf-theme-website-dark .pdf-project-content-section > h2,
+.pdf-theme-website-dark .pdf-structured-items > div { border-color: var(--pdf-line); }
+.pdf-theme-website-dark .pdf-image { border: 0.25mm solid rgba(133, 165, 255, 0.22); background: var(--pdf-panel); color: var(--pdf-faint); }
+.pdf-theme-website-dark .pdf-skill-list span,
+.pdf-theme-website-dark .pdf-project-tags span,
+.pdf-theme-website-dark .pdf-game-tags span { background: rgba(73, 105, 239, 0.2); color: rgba(244, 245, 250, 0.82); }
+.pdf-theme-website-dark .pdf-project-summary { border-radius: 2.5mm; background: var(--pdf-panel-soft); padding: 4mm; }
+.pdf-theme-website-dark .pdf-project-content-section { border-left: 0.5mm solid rgba(52, 240, 37, 0.52); padding-left: 4mm; }
+.pdf-theme-website-dark .pdf-project-content-section > h2 { color: var(--pdf-text); }
+.pdf-theme-website-dark .pdf-authored-heading { color: var(--pdf-blue); }
+.pdf-theme-website-dark .pdf-project-text-block h3 { color: var(--pdf-blue); }
+.pdf-theme-website-dark .pdf-comparison-grid article,
+.pdf-theme-website-dark .pdf-content-matrix th,
+.pdf-theme-website-dark .pdf-content-matrix td { border-color: var(--pdf-line); }
+.pdf-theme-website-dark .pdf-comparison-grid article > span,
+.pdf-theme-website-dark .pdf-compact-flow span { color: var(--pdf-green); }
+.pdf-theme-website-dark .pdf-compact-flow > div,
+.pdf-theme-website-dark .pdf-content-grid article { background: rgba(73, 105, 239, 0.16); }
+.pdf-theme-website-dark .pdf-compact-flow > div:not(:last-child)::after { color: var(--pdf-green); }
+.pdf-theme-website-dark .pdf-authored-quote { border-color: var(--pdf-green); background: var(--pdf-panel-soft); }
+.pdf-theme-website-dark .pdf-block-fallback { border-color: rgba(133, 165, 255, 0.3); }
+.pdf-theme-website-dark .pdf-diagram-flow span { border-radius: 999px; background: rgba(73, 105, 239, 0.17); padding: 1mm 2mm; }
+.pdf-theme-website-dark .pdf-diagram-flow i { color: var(--pdf-green); }
+.pdf-theme-website-dark .pdf-ui-grid figure { border-radius: 2.5mm; background: var(--pdf-panel-soft); padding: 2.5mm; }
+.pdf-theme-website-dark .pdf-game-record { border: 0.25mm solid var(--pdf-line); border-radius: 3mm; background: var(--pdf-panel-soft); padding: 4mm; }
+.pdf-theme-website-dark .pdf-game-summary strong { color: var(--pdf-green); }
+.pdf-theme-website-dark .pdf-contact-page > div:last-child { border-color: var(--pdf-green); }
+.pdf-theme-website-dark .pdf-contact-page p,
+.pdf-theme-website-dark .pdf-contact-page a { color: var(--pdf-text); }
+
+@media print {
+  @page { size: A4 portrait; margin: 0; }
+
+  html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+  body * { visibility: hidden; }
+  .portfolio-pdf-document, .portfolio-pdf-document * { visibility: visible; }
+  .portfolio-pdf-document { position: absolute; inset: 0; display: block !important; width: 210mm; gap: 0 !important; zoom: 1 !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .portfolio-pdf-page { height: 297mm; min-height: 297mm; box-shadow: none; margin: 0; break-inside: avoid-page; }
+}

@@ -1,18 +1,9 @@
-import { CROSS_PLATFORM_DRAFT_STORAGE_KEY } from "./crossPlatformDraftStorage";
-import {
-  CROSS_PLATFORM_IMAGE_DB_NAME,
-  CROSS_PLATFORM_IMAGE_STORE_NAME,
-} from "./crossPlatformImageDraftDb";
-import { GAME_JAM_DRAFT_STORAGE_KEY } from "./gameJamDraftStorage";
-import { GAME_JAM_IMAGE_DB_NAME, GAME_JAM_IMAGE_STORE_NAME } from "./gameJamImageDraftDb";
-import { INTERACTION_PROFILE_AGENT_DRAFT_STORAGE_KEY } from "./interactionProfileAgentDraftStorage";
 import { PROJECT_COVER_DB_NAME, PROJECT_COVER_STORE_NAME } from "./projectCoverDb";
-import { PROJECT_PUBLIC_META_STORAGE_KEY } from "./projectMetadata";
-import { THREE_D_CHARACTER_DRAFT_STORAGE_KEY } from "./threeDCharacterDraftStorage";
-import {
-  THREE_D_CHARACTER_IMAGE_DB_NAME,
-  THREE_D_CHARACTER_IMAGE_STORE_NAME,
-} from "./threeDCharacterImageDraftDb";
+import { PROJECT_BODY_ASSET_DB_NAME, PROJECT_BODY_ASSET_STORE_NAME } from "./projectBodyAssetDb";
+import { GAME_COVER_DB_NAME, GAME_COVER_STORE_NAME } from "./gameCoverDb";
+import { getGameExperienceStore } from "./gameExperience";
+import { getProjectDocumentsExportStore } from "./projectDocuments";
+import { getProjectCollectionExportStore } from "./projectMetadata";
 
 type ExportedImage = {
   database: string;
@@ -22,6 +13,7 @@ type ExportedImage = {
   mimeType: string;
   size: number;
   updatedAt?: string;
+  projectId?: string;
   dataBase64: string;
 };
 
@@ -35,30 +27,7 @@ type IndexedImageRecord = {
   blob?: unknown;
 };
 
-const draftSources = [
-  {
-    projectId: "cross-platform-game-ux",
-    key: CROSS_PLATFORM_DRAFT_STORAGE_KEY,
-    database: CROSS_PLATFORM_IMAGE_DB_NAME,
-    store: CROSS_PLATFORM_IMAGE_STORE_NAME,
-  },
-  {
-    projectId: "3d-character-ui-rhythm",
-    key: THREE_D_CHARACTER_DRAFT_STORAGE_KEY,
-    database: THREE_D_CHARACTER_IMAGE_DB_NAME,
-    store: THREE_D_CHARACTER_IMAGE_STORE_NAME,
-  },
-  {
-    projectId: "from-theme-to-playable-rule",
-    key: GAME_JAM_DRAFT_STORAGE_KEY,
-    database: GAME_JAM_IMAGE_DB_NAME,
-    store: GAME_JAM_IMAGE_STORE_NAME,
-  },
-  {
-    projectId: "interaction-profile-agent",
-    key: INTERACTION_PROFILE_AGENT_DRAFT_STORAGE_KEY,
-  },
-] as const;
+const draftSources: readonly { projectId: string; key: string; database: string; store: string }[] = [];
 
 function parseStoredJson(key: string): unknown {
   const raw = window.localStorage.getItem(key);
@@ -137,6 +106,7 @@ async function serializeImage(
     mimeType: typeof record.mimeType === "string" && record.mimeType ? record.mimeType : blob.type || "application/octet-stream",
     size: typeof record.size === "number" ? record.size : blob.size,
     ...(typeof record.updatedAt === "string" ? { updatedAt: record.updatedAt } : {}),
+    ...(typeof record.projectId === "string" ? { projectId: record.projectId } : {}),
     dataBase64: bytesToBase64(await blob.arrayBuffer()),
   };
 }
@@ -158,12 +128,57 @@ export type ProductionExportSummary = {
   draftCount: number;
   imageCount: number;
   missingReferences: string[];
+  dynamicProjectWarnings: string[];
 };
+
+// Must match DynamicProjectPage.tsx's own (unexported) draftStorageKey().
+// Dynamic-project template instances already carry a stable, standalone
+// publicPath on each image reference (no localImageId/IndexedDB blob), so
+// unlike draftSources below, this draft is exported as-is — no image
+// collection step is needed for it.
+function dynamicProjectDraftStorageKey(projectId: string) {
+  return `dilida-portfolio:dynamic-project:${projectId}:draft:v1`;
+}
+
+function readDynamicProjectDraft(projectId: string, warnings: string[]): unknown {
+  const key = dynamicProjectDraftStorageKey(projectId);
+  const raw = window.localStorage.getItem(key);
+  if (!raw) {
+    warnings.push(`${projectId}: no draft found at "${key}".`);
+    return undefined;
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    warnings.push(`${projectId}: draft at "${key}" is not valid JSON.`);
+    return undefined;
+  }
+
+  if (
+    !parsed
+    || typeof parsed !== "object"
+    || Array.isArray(parsed)
+    || (parsed as Record<string, unknown>).version !== 1
+    || !Array.isArray((parsed as Record<string, unknown>).templateInstances)
+  ) {
+    warnings.push(`${projectId}: draft at "${key}" has an unrecognised shape (expected {version:1, templateInstances:[...]}).`);
+    return undefined;
+  }
+
+  if ((parsed as { templateInstances: unknown[] }).templateInstances.length === 0) {
+    warnings.push(`${projectId}: draft found but templateInstances is empty.`);
+  }
+
+  return parsed;
+}
 
 export async function exportProductionBundle(): Promise<ProductionExportSummary> {
   const drafts: Record<string, unknown> = {};
   const images: ExportedImage[] = [];
   const missingReferences: string[] = [];
+  const dynamicProjectWarnings: string[] = [];
 
   for (const source of draftSources) {
     const draft = parseStoredJson(source.key);
@@ -187,25 +202,91 @@ export async function exportProductionBundle(): Promise<ProductionExportSummary>
     }
   }
 
+  const projectCatalog = getProjectCollectionExportStore();
+
+  // Some template-instance images (e.g. older image-row items) were saved
+  // via the same localImageId + project-body-asset IndexedDB store used by
+  // ProjectDocument media, rather than the newer disk-staged
+  // imageId/publicPath pair — both shapes coexist across instances, so both
+  // must be collected. bodyAssetIds is resolved against
+  // PROJECT_BODY_ASSET_DB_NAME once, below, after every source (project
+  // documents and now dynamic-project drafts) has added its referenced ids.
+  const bodyAssetIds = new Set<string>();
+
+  // Every catalog project marked isDynamic keeps its real template-instance
+  // content in its own dilida-portfolio:dynamic-project:<id>:draft:v1 key —
+  // discovered here from the current catalog, never hardcoded, so newly
+  // created projects are picked up automatically and retired ones (like the
+  // now-deleted cross-platform-game-ux, which was never dynamic and is no
+  // longer in the catalog at all) are never included.
+  const staticSourceIds = new Set<string>(draftSources.map((source) => source.projectId));
+  for (const projectId of projectCatalog.projectIds) {
+    if (staticSourceIds.has(projectId)) continue;
+    if (!projectCatalog.projects[projectId]?.isDynamic) continue;
+    const draft = readDynamicProjectDraft(projectId, dynamicProjectWarnings);
+    if (draft === undefined) continue;
+    drafts[projectId] = draft;
+    collectLocalImageIds(draft).forEach((id) => bodyAssetIds.add(id));
+  }
+  if (dynamicProjectWarnings.length) {
+    console.warn("[Portfolio export] dynamic project draft warnings:", dynamicProjectWarnings);
+  }
+
+  const projectDocuments = getProjectDocumentsExportStore();
+  const gameExperience = getGameExperienceStore();
+  const canonicalProjectIds = new Set(projectCatalog.projectIds);
   const coverRecords = await readStore(PROJECT_COVER_DB_NAME, PROJECT_COVER_STORE_NAME);
   for (const record of coverRecords) {
+    const projectId = typeof record.projectId === "string"
+      ? record.projectId
+      : typeof record.id === "string"
+        ? record.id
+        : "";
+    if (!canonicalProjectIds.has(projectId)) continue;
     images.push(await serializeImage(PROJECT_COVER_DB_NAME, PROJECT_COVER_STORE_NAME, record));
   }
 
-  const publicMetadata = parseStoredJson(PROJECT_PUBLIC_META_STORAGE_KEY);
+  Object.values(projectDocuments.documents).forEach((document) => {
+    document.sections.forEach((section) => section.blocks.forEach((block) => {
+      block.content.media?.forEach((item) => { if (item.assetId) bodyAssetIds.add(item.assetId); });
+    }));
+  });
+  const bodyRecords = await readStore(PROJECT_BODY_ASSET_DB_NAME, PROJECT_BODY_ASSET_STORE_NAME);
+  const bodyRecordsById = new Map(bodyRecords.map((record) => [typeof record.id === "string" ? record.id : "", record]));
+  for (const id of bodyAssetIds) {
+    const record = bodyRecordsById.get(id);
+    if (!record) { missingReferences.push(`project-body: ${id}`); continue; }
+    images.push(await serializeImage(PROJECT_BODY_ASSET_DB_NAME, PROJECT_BODY_ASSET_STORE_NAME, record));
+  }
+
+  const gameCoverIds = new Set(gameExperience.records.flatMap((record) => [
+    record.presentation.coverAssetId,
+    record.presentation.detectedCoverAssetId,
+  ].filter((id): id is string => Boolean(id))));
+  const gameCoverRecords = await readStore(GAME_COVER_DB_NAME, GAME_COVER_STORE_NAME);
+  const gameCoverRecordsById = new Map(gameCoverRecords.map((record) => [typeof record.id === "string" ? record.id : "", record]));
+  for (const id of gameCoverIds) {
+    const record = gameCoverRecordsById.get(id);
+    if (!record) { missingReferences.push(`game-cover: ${id}`); continue; }
+    images.push(await serializeImage(GAME_COVER_DB_NAME, GAME_COVER_STORE_NAME, record));
+  }
+
   const bundle = {
     version: 1,
     exportedAt: new Date().toISOString(),
     origin: window.location.origin,
     drafts,
-    publicMetadata: publicMetadata ?? { version: 1, projects: {} },
+    projectCatalog,
+    projectDocuments,
+    gameExperience,
     images,
     diagnostics: {
       missingReferences,
+      dynamicProjectWarnings,
       note: "This is a read-only export. Original localStorage and IndexedDB records remain unchanged.",
     },
   };
 
   downloadJson(bundle);
-  return { draftCount: Object.keys(drafts).length, imageCount: images.length, missingReferences };
+  return { draftCount: Object.keys(drafts).length, imageCount: images.length, missingReferences, dynamicProjectWarnings };
 }

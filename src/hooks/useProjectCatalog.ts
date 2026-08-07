@@ -5,15 +5,9 @@ import {
   resolveProjectCatalog,
   type ProjectLocale,
 } from "../lib/projectMetadata";
-import { CROSS_PLATFORM_DRAFT_STORAGE_KEY } from "../lib/crossPlatformDraftStorage";
-import { GAME_JAM_DRAFT_STORAGE_KEY } from "../lib/gameJamDraftStorage";
-import { THREE_D_CHARACTER_DRAFT_STORAGE_KEY } from "../lib/threeDCharacterDraftStorage";
 
 const watchedStorageKeys = new Set([
   PROJECT_PUBLIC_META_STORAGE_KEY,
-  CROSS_PLATFORM_DRAFT_STORAGE_KEY,
-  THREE_D_CHARACTER_DRAFT_STORAGE_KEY,
-  GAME_JAM_DRAFT_STORAGE_KEY,
 ]);
 
 export function useProjectCatalog(locale: ProjectLocale) {

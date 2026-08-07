@@ -1,0 +1,134 @@
+:root {
+  --ambient-green-rgb: 69 255 59;
+  --ambient-blue-rgb: 50 88 255;
+  --ambient-blue-soft-rgb: 35 180 255;
+  --ambient-green-opacity: 0.35;
+  --ambient-blue-opacity: 0.38;
+  --ambient-cyan-opacity: 0.12;
+  --ambient-blur: 72px;
+  --ambient-section-surface: rgb(24 23 67 / 0.4);
+}
+
+.ambient-light-background {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  contain: strict;
+  overflow: hidden;
+  background: #181743;
+  pointer-events: none;
+}
+
+.ambient-light-background::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 66% 58% at 78% 18%,
+      rgb(var(--ambient-green-rgb) / 0.34) 0%,
+      rgb(var(--ambient-green-rgb) / 0.18) 24%,
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 78% 72% at 78% 84%,
+      rgb(var(--ambient-blue-rgb) / 0.46) 0%,
+      rgb(var(--ambient-blue-rgb) / 0.24) 34%,
+      transparent 70%
+    );
+  content: "";
+  pointer-events: none;
+}
+
+/*
+ * Static ambient light spots — fixed position, no keyframes, no rAF/pointer
+ * tracking. Values match what this file previously used as the
+ * prefers-reduced-motion resting frame, so the composition looks the same
+ * as before, it just no longer moves.
+ */
+.ambient-light {
+  position: absolute;
+  z-index: 1;
+  border-radius: 44% 56% 63% 37% / 52% 43% 57% 48%;
+  filter: blur(var(--ambient-blur)) saturate(1.25) brightness(1.15);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  backface-visibility: hidden;
+}
+
+.ambient-light--green {
+  top: -18vw;
+  right: -16vw;
+  width: 78vw;
+  height: 58vw;
+  background: radial-gradient(ellipse at 48% 44%, rgb(var(--ambient-green-rgb) / 0.96) 0%, rgb(var(--ambient-green-rgb) / 0.58) 40%, rgb(var(--ambient-green-rgb) / 0.18) 62%, transparent 78%);
+  opacity: var(--ambient-green-opacity);
+  transform: translate3d(2vw, 2vh, 0) scale(1);
+}
+
+.ambient-light--blue {
+  right: -24vw;
+  bottom: -32vw;
+  width: 84vw;
+  height: 64vw;
+  border-radius: 58% 42% 38% 62% / 46% 57% 43% 54%;
+  background: radial-gradient(ellipse at 44% 48%, rgb(var(--ambient-blue-rgb) / 0.98) 0%, rgb(var(--ambient-blue-rgb) / 0.62) 42%, rgb(var(--ambient-blue-rgb) / 0.2) 64%, transparent 80%);
+  opacity: var(--ambient-blue-opacity);
+  transform: translate3d(-4vw, -2vh, 0) scale(1);
+}
+
+.ambient-light--secondary {
+  top: 24vh;
+  left: -22vw;
+  width: 56vw;
+  height: 43vw;
+  border-radius: 36% 64% 55% 45% / 62% 42% 58% 38%;
+  background: radial-gradient(ellipse at 52% 48%, rgb(var(--ambient-blue-soft-rgb) / 0.84) 0%, rgb(var(--ambient-blue-soft-rgb) / 0.42) 44%, rgb(var(--ambient-blue-soft-rgb) / 0.12) 64%, transparent 78%);
+  opacity: var(--ambient-cyan-opacity);
+  transform: translate3d(4vw, 2vh, 0) scale(1);
+}
+
+.ambient-public-shell > main > main.bg-deepIndigo,
+.ambient-public-shell > [data-project-route-shell] > main > main.bg-deepIndigo,
+.ambient-public-shell > [data-project-route-shell] > main > article.bg-deepIndigo {
+  background-color: transparent !important;
+}
+
+.ambient-public-shell > main > section.bg-deepIndigo,
+.ambient-public-shell > main > main.bg-deepIndigo > section.bg-deepIndigo,
+.ambient-public-shell > [data-project-route-shell] > main > main.bg-deepIndigo > section.bg-deepIndigo,
+.ambient-public-shell > [data-project-route-shell] > main > article.bg-deepIndigo > section.bg-deepIndigo,
+.ambient-public-shell > [data-project-route-shell] > main > article.bg-deepIndigo > nav.bg-deepIndigo {
+  background-color: var(--ambient-section-surface) !important;
+}
+
+[data-exact-web-export] .ambient-light-background {
+  pointer-events: none !important;
+}
+
+[data-portfolio-collection-builder] .ambient-light-background,
+[data-standalone-resume-export-root] .ambient-light-background,
+[data-private-resume-workspace] .ambient-light-background {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --ambient-blur: 64px;
+    --ambient-green-opacity: 0.22;
+    --ambient-blue-opacity: 0.25;
+  }
+
+  .ambient-light--green { width: 116vw; height: 92vw; }
+  .ambient-light--blue { width: 126vw; height: 104vw; }
+
+  .ambient-light--secondary {
+    display: none;
+  }
+}
+
+@media print {
+  .ambient-light-background {
+    display: none !important;
+  }
+}

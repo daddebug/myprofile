@@ -137,8 +137,6 @@ async function verifyProduction() {
     "/en",
     "/zh/work",
     "/zh/play",
-    "/zh/work/cross-platform-game-ux",
-    "/zh/work/3d-character-ui-rhythm",
     "/zh/work/from-theme-to-playable-rule",
     "/zh/work/interaction-profile-agent",
   ];

@@ -29,8 +29,8 @@ export function XMindBranchViewer({ rootTitle, branches, locale }: XMindBranchVi
   }, [branches, selectedBranchId]);
 
   return (
-    <section className="overflow-hidden rounded-[22px] border border-softWhite/10 bg-[#111746]/88 shadow-[0_24px_70px_rgba(3,5,26,0.28),inset_0_1px_0_rgba(244,245,250,0.06)]">
-      <div className="border-b border-softWhite/10 px-5 py-5 md:px-7 md:py-6">
+    <section className="overflow-hidden rounded-[22px] border border-[rgba(85,145,255,0.62)] bg-[rgba(43,67,156,0.28)] shadow-[0_0_0_1px_rgba(80,135,255,0.16),0_0_28px_rgba(55,115,255,0.28),inset_0_0_32px_rgba(60,100,230,0.08)] backdrop-blur-lg">
+      <div className="border-b border-[rgba(145,178,255,0.18)] px-5 py-5 md:px-7 md:py-6">
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-acidGreen/72">
           {locale === "zh" ? "系统分支" : "System branches"}
         </p>
@@ -58,9 +58,9 @@ export function XMindBranchViewer({ rootTitle, branches, locale }: XMindBranchVi
       </div>
 
       {selectedBranch ? (
-        <div className="px-5 py-7 md:px-7 md:py-9">
+        <div className="rounded-b-[20px] border-t border-[rgba(125,165,255,0.22)] bg-[rgba(25,42,112,0.32)] px-5 py-7 md:px-7 md:py-9">
           <div className="grid min-w-0 items-center gap-5 lg:min-h-[24rem] lg:grid-cols-[minmax(15rem,0.3fr)_2rem_minmax(0,0.7fr)] lg:gap-7">
-            <div className="w-full max-w-[20rem] justify-self-center rounded-[14px] bg-acidGreen/10 px-6 py-8 text-center ring-1 ring-inset ring-acidGreen/24">
+            <div className="w-full max-w-[20rem] justify-self-center rounded-[14px] border border-[rgba(76,166,255,0.68)] bg-[rgba(39,82,156,0.36)] px-6 py-8 text-center shadow-[0_0_18px_rgba(52,145,255,0.24),inset_0_0_18px_rgba(60,130,255,0.08)]">
               <p className="font-display text-lg font-semibold leading-snug text-acidGreen md:text-xl">
                 {localized(selectedBranch.label, locale)}
               </p>
@@ -76,11 +76,11 @@ export function XMindBranchViewer({ rootTitle, branches, locale }: XMindBranchVi
                   animate={{ opacity: 1, y: 0 }}
                   exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
                   transition={{ duration: shouldReduceMotion ? 0 : 0.2, ease: "easeOut" }}
-                  className="divide-y divide-softWhite/10 border-y border-softWhite/10"
+                  className="divide-y divide-[rgba(145,178,255,0.18)] border-y border-[rgba(145,178,255,0.18)]"
                 >
                   {selectedBranch.groups.map((group, groupIndex) => (
                     <div key={group.id} className="grid min-w-0 gap-3 py-5 md:grid-cols-[2rem_minmax(11rem,0.68fr)_minmax(0,1.32fr)] md:gap-5">
-                      <span className="font-mono text-[10px] leading-6 text-[#9FAAD2]/52">
+                      <span className="font-mono text-[10px] leading-6 text-white/[0.58]">
                         {String(groupIndex + 1).padStart(2, "0")}
                       </span>
                       <h4 className="font-display text-base font-semibold leading-6 text-softWhite/88">
@@ -88,7 +88,7 @@ export function XMindBranchViewer({ rootTitle, branches, locale }: XMindBranchVi
                       </h4>
                       <ul className="grid min-w-0 gap-2">
                         {group.items.map((item, itemIndex) => (
-                          <li key={`${group.id}-${itemIndex}`} className="relative pl-4 text-sm leading-6 text-[#9FAAD2] before:absolute before:left-0 before:top-[0.68rem] before:h-1 before:w-1 before:rounded-full before:bg-acidGreen/68">
+                          <li key={`${group.id}-${itemIndex}`} className="relative pl-4 text-sm leading-6 text-white/[0.78] before:absolute before:left-0 before:top-[0.68rem] before:h-1 before:w-1 before:rounded-full before:bg-acidGreen/68">
                             {localized(item, locale)}
                           </li>
                         ))}

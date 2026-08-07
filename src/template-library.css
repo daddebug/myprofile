@@ -1,0 +1,180 @@
+/*
+ * Shared responsive foundation for the new Template Library only.
+ * Template-specific source controls set CSS variables; breakpoints, gutters,
+ * width containment, media safety, column collapse, and mobile rhythm live here.
+ */
+.template-library-surface {
+  width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+  background: transparent;
+}
+
+.template-library-surface,
+.template-library-surface * {
+  box-sizing: border-box;
+}
+
+/*
+ * Width is controlled by exactly one number: --template-horizontal-inset
+ * (px), set inline per-render by TemplateContent from the resolved
+ * horizontalInset (instance override -> template saved default -> 0). No
+ * per-template-type tiers, no rail selection — every template uses this
+ * same formula. On narrow screens the effective inset is capped so a large
+ * configured value can never push the content to a negative/near-zero
+ * width or drop the page's safe margin; the *stored* value itself is never
+ * rewritten, only this rendered CSS variable is clamped.
+ *
+ * --case-study-header-inset / --case-study-header-title-max: set once, on a
+ * page-level wrapper (see DynamicProjectPage), to Project Header's own
+ * current effective inset and its title's own max-width — the two numbers
+ * that already define Header's real rendered rail. --case-study-master-rail
+ * recomputes that same rail here so every other template's own width is
+ * additionally clamped to it, so nothing can render wider than Header no
+ * matter how small that template's own inset is. Both custom properties are
+ * undefined for any page that doesn't set them (project 1/2's legacy
+ * pages), where the var() fallbacks make this whole block a no-op and width
+ * is exactly the old calc(100% - inset*2) — unchanged there.
+ */
+.template-library-content {
+  --template-effective-inset: var(--template-horizontal-inset, 0px);
+  --case-study-master-rail-inset: var(--case-study-header-inset, 0px);
+  --case-study-master-rail: min(
+    calc(100% - (var(--case-study-master-rail-inset) * 2)),
+    var(--case-study-header-title-max, 999999px)
+  );
+  width: min(
+    calc(100% - (var(--template-effective-inset) * 2)),
+    var(--case-study-master-rail)
+  );
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+@media (max-width: 640px) {
+  .template-library-content {
+    --template-effective-inset: min(var(--template-horizontal-inset, 0px), 16px);
+    --case-study-master-rail-inset: min(var(--case-study-header-inset, 0px), 16px);
+  }
+}
+
+/*
+ * Owner-only "template boundary debug mode" (see TemplateDebugProvider in
+ * TemplateResponsiveFoundation.tsx). outline (not border) so it never
+ * participates in the box model — it can't change a template's width,
+ * height, or the spacing between stacked instances. Only ever applied when
+ * a debug label is actively provided; otherwise these classes are never
+ * added to the DOM at all.
+ */
+.template-library-surface--debug {
+  position: relative;
+  outline: 1px solid rgba(244, 245, 250, 0.4);
+  outline-offset: -1px;
+}
+
+/* Gallery-only: the currently selected template's outer boundary, applied
+   alongside --debug so it wins the cascade (defined after the base rule). */
+.template-library-surface--debug-selected {
+  outline: 1.5px solid rgba(140, 255, 189, 0.85);
+  outline-offset: -1.5px;
+}
+
+/* Sits just above the box (not overlapping its content) via bottom:100%,
+   so it never presses down on the template's own top edge. */
+.template-library-debug-label {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin-bottom: 4px;
+  z-index: 40;
+  padding: 2px 7px;
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  line-height: 1.5;
+  white-space: nowrap;
+  color: rgba(244, 245, 250, 0.8);
+  background: rgba(10, 12, 40, 0.7);
+  pointer-events: none;
+}
+
+.template-library-debug-label--selected {
+  color: rgba(140, 255, 189, 0.96);
+  background: rgba(10, 12, 40, 0.86);
+}
+
+.template-library-content--debug {
+  outline: 1px solid rgba(140, 255, 189, 0.55);
+  outline-offset: -1px;
+}
+
+.template-library-surface img,
+.template-library-surface video,
+.template-library-surface iframe,
+.template-library-surface svg {
+  display: block;
+  max-width: 100%;
+}
+
+.template-library-surface p,
+.template-library-surface h1,
+.template-library-surface h2,
+.template-library-surface h3 {
+  overflow-wrap: anywhere;
+}
+
+.template-library-project-title {
+  font-size: clamp(
+    3rem,
+    7vw,
+    var(--template-title-font-size, 7.25rem)
+  );
+}
+
+.template-library-longform-title {
+  font-size: clamp(1.5rem, 2.4vw, 2.75rem);
+}
+
+.template-library-responsive-columns {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 1fr;
+}
+
+.template-library-surface {
+  --template-library-section-spacing: 3rem;
+  /*
+   * The single shared vertical rhythm between two stacked template
+   * instances (project pages only — see TemplateInstancesSection's
+   * InstanceBlock, the only consumer). Matches caseStudyLayout.blocks'
+   * existing gap-12 (3rem), the same rhythm already used between old
+   * legacy content blocks in these same lists, so instances read as part
+   * of the same rhythm rather than inventing a second one. "Standard" is
+   * the only tier actually wired up; compact/wide are documented here as
+   * the intended next values if a denser or looser mode is ever needed.
+   * compact: 2rem · standard: 3rem · wide: 4rem
+   */
+  --template-library-instance-gap: 3rem;
+  --template-library-adjacent-instance-gap: max(
+    0px,
+    calc(var(--template-library-instance-gap) - 20px)
+  );
+}
+
+@media (min-width: 768px) {
+  .template-library-surface {
+    --template-library-section-spacing: 4rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .template-library-surface {
+    --template-library-section-spacing: 6rem;
+  }
+
+  .template-library-responsive-columns {
+    grid-template-columns:
+      minmax(240px, 0.72fr)
+      minmax(0, 1.62fr);
+  }
+}
