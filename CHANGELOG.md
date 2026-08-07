@@ -4,6 +4,18 @@ Only work that was actually completed and verified (passed the required check, o
 
 ## 2026-08-07
 
+### PDF export architecture
+
+- Added `docs/PDF_EXPORT_ARCHITECTURE.md`, `src/lib/pdf/pdfExportRegistry.json`, `scripts/pdf-export-preflight-lib.mjs`, and `scripts/pdf-export-postflight-lib.mjs` documenting/registering every Collection PDF content family (cover, TOC, dynamic project pages, UI Personal Practice, UI Works, Game Experience, Contact, template images, project covers, Figma/external previews, every `src/templates/*.tsx` template) with source-of-truth, renderer, sizing, safe-area, and verification rules. Verified with `pnpm typecheck` and `pnpm build` (both pass) once a working Node/pnpm runtime was located (`D:\dilida-desk\runtime\node-v22.23.1-win-x64`, referenced in `.claude/launch.json`).
+- Fixed the real project-page pagination bug (segment-count mismatch) for an emergency export. Real repro: `project-1ua2677` generated 4 PDF segments for 3 planned slices, then `interaction-intelligence-system` generated 5 for 4. Ruled out the previously-suspected `data-project-print`-scoped `figure/table/img` CSS rule (its only setter, the owner-only manual print button, is never triggered during collection capture) and two break-inside CSS variants (forcing `auto`, forcing `avoid` on top-level modules) — both reproduced the identical failure, proving break-inside CSS was never the actual lever. Applied a stopgap instead: raised `maxSegmentHeightPx` in `scripts/portfolioCollectionExportPlugin.ts` from 3000 to 16000 so most real projects need only a single segment, sidestepping the bug class. Verified against real generated PDFs (`portfolio-collection-en-2026-08-07T06-05-42-388Z.pdf` and a full-selection run) opened in a real PDF viewer: no segment-count error, cover/TOC readable and unclipped, project title/body/images render cleanly, Contact page intact. The true root cause (likely a `page.pdf()` print-layout vs. on-screen `captureHeight` measurement mismatch) is not yet fixed — see `TASKS.md` for the remaining exposure on projects tall enough to still need multiple segments.
+
+### Publishing architecture
+
+- Added one authoritative publishing source registry and documented every currently discovered content/asset family in `docs/PUBLISHING_ARCHITECTURE.md`, including browser drafts and IndexedDB assets, disk project images/covers, UI Practice, Game Experience, Playable Game trees/covers, external embeds, and production assets.
+- Added generated source-level preflight manifests and focused tests. Production import now fails before writes for unknown adapters, missing referenced/configured assets, local/dev-only references after rewriting, and published paths not represented in intended output.
+- Browser exports now identify every exported image with `sourceAdapterId` and registry version. DILIDA DESK sync remains paused until it calls this workflow; no publish, content change, or deployment was performed.
+- Playable Game production hosting remains unresolved and is now reported as a blocking source instead of being silently omitted.
+
 ### Verified
 
 - XMind single-display-mode layout: the instance was replaced with the optimized JSON and the real project page was confirmed to display correctly. Resolves the Template-Gallery-only verification gap and the optimized-JSON confirmation noted previously in `TASKS.md`.

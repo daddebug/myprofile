@@ -2,6 +2,8 @@
 
 Applies to the multi-project "Portfolio Collection" PDF export pipeline (`/:locale/export` editor → Playwright/pdf-lib capture → merged collection PDF).
 
+**Read `docs/PDF_EXPORT_ARCHITECTURE.md` before touching this pipeline.** It is the authoritative registry of every content family (cover, TOC, project pages, UI Personal Practice, UI Works, Game Experience, Contact, template images, Figma/external previews, every template type), backed by `src/lib/pdf/pdfExportRegistry.json`, `scripts/pdf-export-preflight-lib.mjs`, and `scripts/pdf-export-postflight-lib.mjs`.
+
 ## Workflow
 
 - `PORTFOLIO COLLECTION` opens the `/export` selection editor.
@@ -44,3 +46,16 @@ Applies to the multi-project "Portfolio Collection" PDF export pipeline (`/:loca
 - Check the final PDF visually, page by page.
 - Target under 10 MB through asset optimization (mozjpeg/WebP re-encoding of staged images), not full-page blur or heavy downscaling.
 - Do not call the result complete based only on a diagnostics JSON file — open and inspect the actual PDF.
+
+## Long-term rule: register every discovered PDF bug, don't patch in isolation
+
+Whenever a new PDF bug reveals a missing content type, template behavior, sizing rule, asset source, or validation rule:
+
+1. Fix the immediate cause.
+2. Register the discovered case as a row (or an update to an existing row) in `src/lib/pdf/pdfExportRegistry.json`.
+3. Add its preflight and/or postflight validation in `scripts/pdf-export-preflight-lib.mjs` / `scripts/pdf-export-postflight-lib.mjs`.
+4. Update this skill file.
+5. Update `TASKS.md` / `PROJECT_STATUS.md`.
+6. Record the fix in `CHANGELOG.md` only after it is verified against a real generated PDF opened in a real viewer — a passing postflight report alone is not verification.
+
+Do not repeatedly solve PDF failures as isolated one-off exceptions. See `docs/PDF_EXPORT_ARCHITECTURE.md` for the full registry, preflight/postflight rules, and the confirmed engine quirk that `page.pdf()` always evaluates `@media print` regardless of `emulateMedia`.

@@ -131,6 +131,30 @@ function buildCoverFooterLabel() {
   return "D.D / PORTFOLIO COLLECTION";
 }
 
+// Emergency website-slice export's own cover: a plain HTML/CSS page (same
+// renderSectionPdf path as Contact/UI Works, not the SVG dot-timeline
+// renderer above) — explicitly no TOC, no project-navigation dots/lines,
+// per that mode's own spec. Entries are listed as plain numbered text only.
+const simpleCoverPageCss = `${coverPageCss}
+  .cx-page { justify-content: center; }
+  .cx-brand { position: absolute; right: ${SAFE_MARGIN_PX}px; bottom: ${Math.round(SAFE_MARGIN_PX * 0.6)}px; font: 700 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; color: rgba(244,245,250,0.34); }
+  .cx-simple-subtitle { font: 500 14px/1.6 system-ui, sans-serif; color: rgba(244,245,250,0.6); margin: 0 0 40px; }
+  .cx-simple-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .cx-simple-list li { font: 600 15px/1.4 system-ui, sans-serif; color: rgba(244,245,250,0.85); }
+  .cx-simple-list li span { color: #34f025; font: 700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; margin-right: 10px; }
+`;
+
+function buildSimpleCoverHtml(entries: CoverTocEntry[], locale: Locale) {
+  const items = entries.map((entry, index) => `<li><span>${String(index + 1).padStart(2, "0")}</span>${escapeHtml(entry.title)}</li>`).join("");
+  const body = `<p class="cx-eyebrow">${escapeHtml(locale === "zh" ? "作品集合集" : "PORTFOLIO COLLECTION")}</p>
+    <h1 class="cx-title">${escapeHtml(portfolioProfile.name)}</h1>
+    <p class="cx-simple-subtitle">${escapeHtml(portfolioProfile.positioning[locale])}</p>
+    <ul class="cx-simple-list">${items}</ul>
+    ${brandFooterHtml}`;
+  return `<!doctype html><html lang="${locale}"><head><meta charset="utf-8">${absoluteStylesheetMarkup()}<style>${simpleCoverPageCss}</style></head>
+    <body><div data-collection-export-section><div class="cx-page" style="position:relative;">${body}</div></div></body></html>`;
+}
+
 // --- Image downscale before embedding into a section's HTML ---
 //
 // UI Works / Game Experience sections are still rendered via Chromium's
@@ -319,10 +343,28 @@ async function stageSection(payload: Record<string, unknown>, signal?: AbortSign
 
 const DEFAULT_SECTION_ORDER: PortfolioCollectionSectionId[] = ["cover", "projects", "ui-works", "game-experience", "contact"];
 
+
 export async function runPortfolioCollectionExport(
   projects: ResolvedProjectMetadata[],
   locale: Locale,
   selection: PortfolioCollectionSelection,
+  // Explicit, caller-supplied override — real React state from the /export
+  // editor's own "Emergency export" checkbox (PortfolioPdfBuilderPage.tsx),
+  // not parsed from window.location. When true, the server keeps whatever
+  // PDF segments Chromium actually generated for a project instead of
+  // hard-failing on a segment-count mismatch (see captureProjectPage in
+  // scripts/portfolioCollectionExportPlugin.ts). Every other export-
+  // blocking check (missing draft, missing images, clipped content, failed
+  // rendering, empty body) is unaffected. Defaults to false.
+  emergencyPdfExport = false,
+  // Separate, independent emergency mode: renders each project's REAL
+  // website layout and slices it into landscape-A4-ratio physical PDF
+  // pages via manual clip+shift, never Chromium's print auto-pagination
+  // (see captureProjectPageWebsiteSlice in
+  // scripts/portfolioCollectionExportPlugin.ts). Uses a plain-text cover
+  // (no TOC/dots) and suppresses live Figma iframes. Independent of
+  // emergencyPdfExport — the two are not meant to be combined.
+  websiteSlice = false,
   onProgress?: (progress: CollectionExportProgress) => void,
   signal?: AbortSignal,
 ): Promise<CollectionExportResult> {
@@ -410,10 +452,12 @@ export async function runPortfolioCollectionExport(
     for (const section of sectionOrder) {
       checkCancelled();
       if (section === "cover") {
-        const { token } = await stageSection({
-          sectionId: "cover", label: "Cover", kind: "cover",
-          entries: coverEntries, brandLine: buildCoverBrandLine(locale), footerLabel: buildCoverFooterLabel(),
-        }, signal);
+        const { token } = websiteSlice
+          ? await stageSection({ sectionId: "cover", label: "Cover", kind: "section", html: buildSimpleCoverHtml(coverEntries, locale) }, signal)
+          : await stageSection({
+            sectionId: "cover", label: "Cover", kind: "cover",
+            entries: coverEntries, brandLine: buildCoverBrandLine(locale), footerLabel: buildCoverFooterLabel(),
+          }, signal);
         staged.push({ sectionId: "cover", label: "Cover", token });
         completed += 1;
         report("staging");
@@ -421,9 +465,10 @@ export async function runPortfolioCollectionExport(
         for (const project of visible) {
           checkCancelled();
           report("staging", project.title);
-          const path = `${localizePath(project.route ?? `/work/${project.slug}`, locale)}?collectionExport=1${jobCreated ? `&collectionJob=${jobId}` : ""}`;
+          const path = `${localizePath(project.route ?? `/work/${project.slug}`, locale)}?collectionExport=1${websiteSlice ? "&websiteSliceExport=1" : ""}${jobCreated ? `&collectionJob=${jobId}` : ""}`;
           const url = `${window.location.origin}${path}`;
-          const { token } = await stageSection({ sectionId: project.id, label: project.title, kind: "project", url, projectId: project.id }, signal);
+          console.info("[collection export] staging project", project.id, "emergencyPdfExport =", emergencyPdfExport, "websiteSlice =", websiteSlice);
+          const { token } = await stageSection({ sectionId: project.id, label: project.title, kind: "project", url, projectId: project.id, emergencyPdfExport, websiteSlice }, signal);
           staged.push({ sectionId: project.id, label: project.title, token });
           completed += 1;
           report("staging", project.title);

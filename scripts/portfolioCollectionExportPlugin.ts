@@ -2,7 +2,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { execFile } from "node:child_process";
-import { PDFArray, PDFDocument, PDFHexString, PDFName, PDFNumber, rgb } from "pdf-lib";
+import { PDFArray, PDFDocument, PDFHexString, PDFName, PDFNumber, type PDFPage, PDFRawStream, rgb } from "pdf-lib";
 import { chromium, type Browser } from "playwright-core";
 import sharp from "sharp";
 import type { Plugin } from "vite";
@@ -68,10 +68,25 @@ function hexToPdfColor(hex: string) {
 // sitting on top of it.
 // Maximum height, in CSS px, of a single page.pdf() segment — comfortably
 // inside Chromium's reliably-supported custom page height (well-tested up
-// to roughly 200in/19200px; this is a fraction of that) while still keeping
-// each segment small enough that break-inside: avoid has room to place a
-// break between modules rather than through one.
-const maxSegmentHeightPx = 3000;
+// to roughly 200in/19200px; this stays well under that with margin).
+//
+// EMERGENCY FIX (2026-08-07, real repro: project-1ua2677 "4 segments for 3
+// planned", then interaction-intelligence-system "5 for 4"): the original
+// 3000px value assumed break-inside: avoid on top-level modules would keep
+// Chromium's auto-pagination exactly matching Math.ceil(captureHeight /
+// maxSegmentHeightPx). Tested against real generated PDFs with (a) no
+// break-inside rule at all, and (b) break-inside: avoid restored on every
+// [data-template-instance-id]/[data-document-section] module — both
+// produced the identical extra-segment mismatch. break-inside CSS is not
+// the actual lever; the true cause (page.pdf()'s print layout pass
+// reflowing slightly differently than the on-screen measurement that
+// produced captureHeight) is not yet root-caused. Raising this value so
+// most real projects need only a single segment (segmentCount === 1, no
+// internal auto-pagination at all — the entire bug class requires at least
+// 2 requested segments) sidesteps the mismatch for typical content today.
+// Projects tall enough to still need multiple segments remain exposed to
+// the underlying bug — see TASKS.md; this is not the root-cause fix.
+const maxSegmentHeightPx = 16000;
 
 let collectionBrowserPromise: Promise<Browser> | null = null;
 async function getCollectionBrowser() {
@@ -166,6 +181,7 @@ type ImageOptimizationStat = {
   originalDimensions: string;
   renderedDimensions: string;
   encoding: string;
+  hasAlpha: boolean;
 };
 
 // Now that project pages capture as real vector PDF (page.pdf()), any <img>
@@ -184,8 +200,8 @@ type ImageOptimizationStat = {
 // already-published (/portfolio-assets/...) assets alike, since both are
 // fetched over HTTP by this same page and neither's real file is ever
 // modified.
-const imageOptimizationMaxDimensionPx = 1600;
-const imageOptimizationQuality = 86;
+const imageOptimizationMaxDimensionPx = 1440;
+const imageOptimizationQuality = 82;
 // Below this, an image's own bytes are already a trivial contribution to
 // the final PDF (icons, small UI chrome) — skip the decode/re-encode round
 // trip entirely rather than spend time on it for no real size benefit.
@@ -219,13 +235,14 @@ async function installImageOptimizationRoute(page: import("playwright-core").Pag
       // images alone still produced a 51MB PDF. Forcing a known, controlled
       // mozjpeg encoding here (still resized down if it's also oversized in
       // pixels) is what actually keeps the final embedded size predictable.
+      const hasAlpha = metadata.hasAlpha === true;
       const needsResize = width > imageOptimizationMaxDimensionPx || height > imageOptimizationMaxDimensionPx;
       const pipeline = needsResize
         ? image.resize({ width: imageOptimizationMaxDimensionPx, height: imageOptimizationMaxDimensionPx, fit: "inside", withoutEnlargement: true })
         : image;
-      const resized = await pipeline
-        .jpeg({ quality: imageOptimizationQuality, mozjpeg: true, chromaSubsampling: "4:4:4" })
-        .toBuffer();
+      const resized = hasAlpha
+        ? await pipeline.png({ compressionLevel: 9, adaptiveFiltering: true }).toBuffer()
+        : await pipeline.jpeg({ quality: imageOptimizationQuality, mozjpeg: true, chromaSubsampling: "4:4:4" }).toBuffer();
       const resizedMetadata = await sharp(resized).metadata();
       stats.push({
         url: request.url(),
@@ -233,7 +250,8 @@ async function installImageOptimizationRoute(page: import("playwright-core").Pag
         optimizedBytes: resized.byteLength,
         originalDimensions: `${width}x${height}`,
         renderedDimensions: `${resizedMetadata.width ?? "?"}x${resizedMetadata.height ?? "?"}`,
-        encoding: "mozjpeg",
+        encoding: hasAlpha ? "png-alpha" : "mozjpeg",
+        hasAlpha,
       });
       console.info(`[collection export] optimized image for "${projectId}"`, {
         url: request.url(), originalBytes: original.byteLength, optimizedBytes: resized.byteLength,
@@ -250,7 +268,28 @@ async function installImageOptimizationRoute(page: import("playwright-core").Pag
   });
 }
 
-async function captureProjectPage(url: string, projectId: string, aborted: { value: boolean }, outputRoot: string) {
+// Used only by the emergencyPdfExport override, to decide whether a
+// trailing segment beyond the planned count is safe to drop. A page whose
+// content stream(s) total well under what a plain background-fill (the one
+// operator sequence every segment always emits via printBackground) would
+// need real drawn content — text, images, vector shapes — to exceed. Errs
+// toward "has content" (keeps it) whenever unsure; only an unambiguously
+// tiny stream is trimmed, matching "trim only a completely blank trailing
+// segment."
+function isBlankSegmentPage(page: PDFPage): boolean {
+  try {
+    const contents = page.node.Contents();
+    const streams = contents instanceof PDFArray
+      ? Array.from({ length: contents.size() }, (_, index) => contents.lookup(index)).filter((item): item is PDFRawStream => item instanceof PDFRawStream)
+      : contents instanceof PDFRawStream ? [contents] : [];
+    const totalBytes = streams.reduce((sum, stream) => sum + stream.contents.length, 0);
+    return totalBytes < 600;
+  } catch {
+    return false;
+  }
+}
+
+async function captureProjectPage(url: string, projectId: string, aborted: { value: boolean }, outputRoot: string, emergencyPdfExport = false) {
   if (!isLocalCollectionUrl(url)) throw new Error(`Refusing to capture a non-local project URL for "${projectId}".`);
   const browser = await getCollectionBrowser();
   const page = await browser.newPage({ viewport: { width: projectCaptureViewportWidth, height: 900 }, deviceScaleFactor: 1 });
@@ -371,6 +410,38 @@ async function captureProjectPage(url: string, projectId: string, aborted: { val
         );
       }
 
+      const layoutAudit = await page.evaluate(() => {
+        const root = document.querySelector<HTMLElement>("[data-project-route-shell]");
+        if (!root) return { measuredContentBottom: 0, finalVisibleTemplateInstanceId: null, intendedBottomPadding: 0, emptyTemplateWrappers: [] as string[] };
+        const rootRect = root.getBoundingClientRect();
+        const candidates = Array.from(root.querySelectorAll<HTMLElement>("[data-template-instance-id], [data-document-section]"));
+        const visible = candidates.filter((node) => {
+          const style = window.getComputedStyle(node);
+          const rect = node.getBoundingClientRect();
+          return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+        });
+        const finalNode = visible.reduce<HTMLElement | null>((latest, node) => (
+          !latest || node.getBoundingClientRect().bottom > latest.getBoundingClientRect().bottom ? node : latest
+        ), null);
+        const finalRect = finalNode?.getBoundingClientRect();
+        const containingSection = finalNode?.closest<HTMLElement>("section");
+        const intendedBottomPadding = containingSection ? Number.parseFloat(window.getComputedStyle(containingSection).paddingBottom) || 0 : 0;
+        const emptyTemplateWrappers = candidates.flatMap((node) => {
+          const rect = node.getBoundingClientRect();
+          const hasVisibleContent = (node.innerText ?? "").trim().length > 0 || Boolean(node.querySelector("img,svg,canvas,iframe,[data-media-slot-state=filled]"));
+          return rect.height > 1 && !hasVisibleContent ? [node.getAttribute("data-template-instance-id") ?? node.getAttribute("data-document-section") ?? "unknown"] : [];
+        });
+        return {
+          measuredContentBottom: Math.round((finalRect?.bottom ?? rootRect.bottom) - rootRect.top),
+          finalVisibleTemplateInstanceId: finalNode?.getAttribute("data-template-instance-id") ?? finalNode?.getAttribute("data-document-section") ?? null,
+          intendedBottomPadding: Math.round(intendedBottomPadding),
+          emptyTemplateWrappers,
+        };
+      });
+      if (layoutAudit.emptyTemplateWrappers.length > 0) {
+        throw new Error(`"${projectId}" has empty template wrapper(s) that still reserve height: ${layoutAudit.emptyTemplateWrappers.join(", ")}.`);
+      }
+
       const jobId = jobIdFromCaptureUrl(url);
       const templateImageAudit = await readTemplateImageAudit(outputRoot, jobId, projectId);
       if (mediaSlotAudit.failed > 0) {
@@ -396,6 +467,13 @@ async function captureProjectPage(url: string, projectId: string, aborted: { val
       });
       const captureWidth = trimmed.width || diagnostics.exportRootWidth;
       const captureHeight = trimmed.height || diagnostics.exportRootHeight;
+      const trailingBlankHeight = Math.max(0, captureHeight - layoutAudit.measuredContentBottom);
+      const maximumExpectedTrailingBlank = layoutAudit.intendedBottomPadding + 32;
+      if (trailingBlankHeight > maximumExpectedTrailingBlank) {
+        throw new Error(
+          `"${projectId}" has ${trailingBlankHeight}px of trailing blank space after ${layoutAudit.finalVisibleTemplateInstanceId ?? "the final visible module"}; expected at most ${maximumExpectedTrailingBlank}px including bottom padding.`,
+        );
+      }
 
       // Deterministic alignment contract: every project is captured at a
       // fixed 1440px viewport width, so its content width must always come
@@ -446,9 +524,56 @@ async function captureProjectPage(url: string, projectId: string, aborted: { val
       // one PDF page per project, matching the pre-existing contract, even
       // though Chromium generated several segments to get here.
       const segmentSourceDocument = await PDFDocument.load(vectorPdfBytes);
-      const segmentSourcePages = segmentSourceDocument.getPages();
+      let segmentSourcePages = segmentSourceDocument.getPages();
+      const segmentCountMismatch = segmentSourcePages.length !== segmentCount;
+      if (segmentCountMismatch && !emergencyPdfExport) {
+        throw new Error(
+          `"${projectId}" generated ${segmentSourcePages.length} PDF segments for ${segmentCount} planned slices. A pagination rule introduced blank segment space.`,
+        );
+      }
+      if (segmentCountMismatch) {
+        // Explicit, opt-in-only override — driven by real React state from
+        // the /export editor's "Emergency export" checkbox
+        // (PortfolioPdfBuilderPage.tsx → runPortfolioCollectionExport →
+        // stageSection's emergencyPdfExport field), never a URL query param.
+        // Every other export-blocking check above (missing draft, missing
+        // images, clipped/overflowing content, empty template wrappers) has
+        // already run and would still throw normally — only this specific
+        // segment-count mismatch is downgraded to a warning, and only for
+        // this request. Normal exports (checkbox off) keep the strict check
+        // unchanged; there is no other way to reach this branch.
+        console.warn(
+          `[collection export] EMERGENCY OVERRIDE: "${projectId}" generated ${segmentSourcePages.length} PDF segments for ${segmentCount} planned slices; keeping the generated segments instead of failing (emergencyPdfExport=true).`,
+        );
+        // Trim only a genuinely blank trailing segment (beyond the planned
+        // count): its content stream is checked for any real drawing
+        // operator beyond the plain background-fill Chromium always emits.
+        // Any segment with real content is always kept, in full, uncropped.
+        while (segmentSourcePages.length > segmentCount && isBlankSegmentPage(segmentSourcePages[segmentSourcePages.length - 1])) {
+          const dropped = segmentSourcePages.length;
+          segmentSourcePages = segmentSourcePages.slice(0, -1);
+          console.warn(`[collection export] EMERGENCY OVERRIDE: "${projectId}" trimmed a completely blank trailing segment (was segment ${dropped}).`);
+        }
+      }
       const pageWidthPt = projectCaptureViewportWidth * cssPxToPdfPt;
-      const totalHeightPt = segmentSourcePages.reduce((sum, sourcePage) => sum + sourcePage.getHeight(), 0);
+      const segmentScale = segmentSourcePages[0].getHeight() / segmentHeightPx;
+
+      // Per-segment used height: segments within the originally planned
+      // count use the pre-existing remaining-height math unchanged. Any
+      // segment beyond that (only possible under the emergency override) is
+      // real overflow content Chromium's print layout produced beyond the
+      // measured captureHeight — embedded at its own full native height
+      // rather than cropped, so no visible content is clipped. This is the
+      // one deliberately relaxed rule; every other guard above still applies.
+      const usedHeightsPt = segmentSourcePages.map((sourcePage, index) => {
+        if (index < segmentCount) {
+          const remainingHeightPx = captureHeight - index * segmentHeightPx;
+          const usedHeightPx = Math.max(0, Math.min(segmentHeightPx, remainingHeightPx));
+          return Math.min(sourcePage.getHeight(), usedHeightPx * segmentScale);
+        }
+        return sourcePage.getHeight();
+      });
+      const totalHeightPt = usedHeightsPt.reduce((sum, height) => sum + height, 0);
 
       const contentWidth = captureWidth;
       const contentHeight = captureHeight;
@@ -457,7 +582,6 @@ async function captureProjectPage(url: string, projectId: string, aborted: { val
       const canvasHeight = contentHeight;
 
       const projectDocument = await PDFDocument.create();
-      const embeddedSegments = await projectDocument.embedPages(segmentSourcePages);
       const projectPdfPage = projectDocument.addPage([pageWidthPt, totalHeightPt]);
       // Base fill only guards against any transparent gap at the very
       // bottom of the last segment (Chromium always emits a full
@@ -470,7 +594,14 @@ async function captureProjectPage(url: string, projectId: string, aborted: { val
         color: hexToPdfColor(collectionCanvasBackground),
       });
       let cursorFromTopPt = 0;
-      for (const embeddedSegment of embeddedSegments) {
+      for (const [index, sourcePage] of segmentSourcePages.entries()) {
+        const usedHeightPt = usedHeightsPt[index];
+        const embeddedSegment = await projectDocument.embedPage(sourcePage, {
+          left: 0,
+          bottom: sourcePage.getHeight() - usedHeightPt,
+          right: sourcePage.getWidth(),
+          top: sourcePage.getHeight(),
+        });
         const segmentHeightPt = embeddedSegment.height;
         const y = totalHeightPt - cursorFromTopPt - segmentHeightPt;
         projectPdfPage.drawPage(embeddedSegment, { x: 0, y, width: embeddedSegment.width, height: segmentHeightPt });
@@ -505,11 +636,144 @@ async function captureProjectPage(url: string, projectId: string, aborted: { val
           ...diagnostics, scalePercent: 100, contentWidth, contentHeight, contentX, canvasWidth, canvasHeight,
           overflowLeft: 0, overflowRight,
           segments: segmentSourcePages.length, segmentHeightPx, vectorPdfBytes: vectorPdfBytes.byteLength,
+          plannedSegments: segmentCount, segmentCountMismatch, emergencyPdfExportApplied: segmentCountMismatch && emergencyPdfExport,
+          measuredContentBottom: layoutAudit.measuredContentBottom,
+          finalPageHeight: captureHeight,
+          trailingBlankHeight,
+          intendedBottomPadding: layoutAudit.intendedBottomPadding,
+          finalVisibleTemplateInstanceId: layoutAudit.finalVisibleTemplateInstanceId,
           mediaAudit,
           templateFit: templateFitAudit,
           imageOptimization: imageOptimizationStats,
         },
         pdfHeight: canvasHeight,
+      };
+    })(), projectCaptureTimeouts.render, "render", projectId);
+    return rendered;
+  } finally {
+    await page.close().catch(() => undefined);
+  }
+}
+
+// Emergency "website-slice" export mode (2026-08-07): a deliberately
+// separate, narrow capture path that never lets Chromium's print
+// pagination decide where a page breaks — see docs discussion in this
+// session for why captureProjectPage's approach (ask page.pdf() for N
+// auto-paginated segments, expect exactly N back) kept mismatching in ways
+// that resisted every CSS-level fix. Instead of asking Chromium to
+// paginate, this renders the project's REAL on-screen layout once, then
+// manually shifts the rendered content up by one slice height at a time
+// inside a hard-clipped (overflow: hidden) wrapper before each individual
+// page.pdf() call — so at the moment each call runs, there is physically
+// no content beyond the requested single-page height for Chromium's
+// fragmentation logic to react to. Structurally cannot produce more or
+// fewer pages than planned. Each slice becomes its own physical PDF page
+// (not merged into one continuous page like captureProjectPage) — the
+// final collection's project section is however many A4-landscape-ratio
+// pages that project's real content needs, mergeCollection() already
+// copies every page from a stage's bytes, so multi-page project records
+// need no change there.
+const a4LandscapeAspectRatio = 297 / 210; // ISO 216 A4, landscape (width:height)
+
+async function captureProjectPageWebsiteSlice(url: string, projectId: string, aborted: { value: boolean }) {
+  if (!isLocalCollectionUrl(url)) throw new Error(`Refusing to capture a non-local project URL for "${projectId}".`);
+  const browser = await getCollectionBrowser();
+  const page = await browser.newPage({ viewport: { width: projectCaptureViewportWidth, height: 900 }, deviceScaleFactor: 1 });
+  const imageOptimizationStats: ImageOptimizationStat[] = [];
+  try {
+    await installImageOptimizationRoute(page, projectId, imageOptimizationStats);
+    if (aborted.value) throw new Error("Collection export was cancelled.");
+    await withStepTimeout(page.goto(url, { waitUntil: "domcontentloaded" }), projectCaptureTimeouts.navigate, "navigate", projectId);
+    if (aborted.value) throw new Error("Collection export was cancelled.");
+    try {
+      await withStepTimeout(
+        page.waitForSelector('[data-project-route-shell][data-project-export-ready="true"]', { state: "attached", timeout: projectCaptureTimeouts.ready }),
+        projectCaptureTimeouts.ready,
+        "ready",
+        projectId,
+      );
+    } catch (error) {
+      const currentUrl = page.url();
+      const shellExists = await page.evaluate(() => Boolean(document.querySelector("[data-project-route-shell]"))).catch(() => false);
+      const message = error instanceof Error ? error.message : String(error);
+      if (!shellExists) throw new Error(`${message} The project route never mounted — current URL is "${currentUrl}".`);
+      throw error;
+    }
+    if (aborted.value) throw new Error("Collection export was cancelled.");
+    const rendered = await withStepTimeout((async () => {
+      await page.emulateMedia({ media: "screen" });
+      // Same trim as captureProjectPage — drops fixed docks/nav chrome
+      // (never visible, real website content underneath is untouched), not
+      // a print redesign.
+      await page.evaluate(() => {
+        const root = document.querySelector<HTMLElement>("[data-project-route-shell]");
+        if (!root) return;
+        document.body.replaceChildren(root);
+        document.body.style.margin = "0";
+      });
+      const trimmed = await page.evaluate(() => {
+        const root = document.querySelector<HTMLElement>("[data-project-route-shell]");
+        const rect = root?.getBoundingClientRect();
+        return { width: Math.round(rect?.width ?? 0), height: Math.round(rect?.height ?? 0) };
+      });
+      const captureWidth = trimmed.width || projectCaptureViewportWidth;
+      const captureHeight = trimmed.height;
+      if (captureHeight < 100) throw new Error(`"${projectId}" rendered an invalid height (${captureHeight}px).`);
+      if (captureHeight > maximumContinuousProjectHeight) {
+        throw new Error(`"${projectId}" is ${captureHeight}px tall, over the ${maximumContinuousProjectHeight}px capture limit.`);
+      }
+
+      const sliceHeightPx = Math.round(captureWidth / a4LandscapeAspectRatio);
+      const sliceCount = Math.max(1, Math.ceil(captureHeight / sliceHeightPx));
+
+      const projectDocument = await PDFDocument.create();
+      for (let index = 0; index < sliceCount; index += 1) {
+        if (aborted.value) throw new Error("Collection export was cancelled.");
+        const offsetPx = index * sliceHeightPx;
+        const thisSliceHeightPx = Math.min(sliceHeightPx, captureHeight - offsetPx);
+        // Hard-clip the content to exactly this slice's height BEFORE
+        // asking Chromium to print it — overflow: hidden genuinely removes
+        // anything past the box from layout/paint (including print
+        // layout), so there is nothing left for auto-pagination to react
+        // to. transform: translateY shifts the desired slice up to y=0
+        // without altering any element's own layout/measurements (unlike
+        // scrollTop, which page.pdf() does not respect anyway).
+        await page.evaluate(({ offsetPx, heightPx, widthPx }) => {
+          const root = document.querySelector<HTMLElement>("[data-project-route-shell]");
+          if (!root) return;
+          let clip = document.getElementById("__website-slice-clip__");
+          if (!clip) {
+            clip = document.createElement("div");
+            clip.id = "__website-slice-clip__";
+            clip.style.overflow = "hidden";
+            clip.style.position = "relative";
+            clip.style.width = `${widthPx}px`;
+            root.parentElement?.insertBefore(clip, root);
+            clip.appendChild(root);
+          }
+          clip.style.height = `${heightPx}px`;
+          root.style.transform = `translateY(-${offsetPx}px)`;
+        }, { offsetPx, heightPx: thisSliceHeightPx, widthPx: captureWidth });
+        const sliceBytes = await page.pdf({
+          width: `${captureWidth}px`,
+          height: `${thisSliceHeightPx}px`,
+          margin: { top: "0", right: "0", bottom: "0", left: "0" },
+          printBackground: true,
+          preferCSSPageSize: false,
+        });
+        const sliceDocument = await PDFDocument.load(sliceBytes);
+        const [copiedPage] = await projectDocument.copyPages(sliceDocument, [0]);
+        projectDocument.addPage(copiedPage);
+      }
+      const bytes = await projectDocument.save();
+      return {
+        bytes,
+        diagnostics: {
+          mode: "website-slice", captureWidth, captureHeight, sliceHeightPx, sliceCount,
+          pages: projectDocument.getPageCount(),
+          imageOptimization: imageOptimizationStats,
+        },
+        pdfHeight: captureHeight,
       };
     })(), projectCaptureTimeouts.render, "render", projectId);
     return rendered;
@@ -904,11 +1168,22 @@ export function portfolioCollectionExportPlugin(): Plugin {
           if (value.kind === "project") {
             const url = value.url; const projectId = value.projectId;
             if (typeof url !== "string" || !safeId(projectId)) throw new Error("Invalid project capture request.");
+            const websiteSlice = value.websiteSlice === true;
             const started = Date.now();
-            const result = await captureProjectPage(url, projectId, aborted, server.config.root);
-            bytes = result.bytes;
-            diagnostics = { ...result.diagnostics, captureMs: Date.now() - started, pdfHeight: result.pdfHeight, result: "passed" };
-            console.info("[Collection export] captured project", projectId, diagnostics);
+            if (websiteSlice) {
+              console.info(`[collection export] "${projectId}" websiteSlice (server, received) = true — using captureProjectPageWebsiteSlice, no print-pagination path.`);
+              const result = await captureProjectPageWebsiteSlice(url, projectId, aborted);
+              bytes = result.bytes;
+              diagnostics = { ...result.diagnostics, captureMs: Date.now() - started, pdfHeight: result.pdfHeight, result: "passed" };
+              console.info("[Collection export] captured project (website-slice)", projectId, diagnostics);
+            } else {
+              const emergencyPdfExport = value.emergencyPdfExport === true;
+              console.info(`[collection export] "${projectId}" emergencyPdfExport (server, received) =`, emergencyPdfExport, "raw value.emergencyPdfExport =", value.emergencyPdfExport);
+              const result = await captureProjectPage(url, projectId, aborted, server.config.root, emergencyPdfExport);
+              bytes = result.bytes;
+              diagnostics = { ...result.diagnostics, captureMs: Date.now() - started, pdfHeight: result.pdfHeight, result: "passed" };
+              console.info("[Collection export] captured project", projectId, diagnostics);
+            }
           } else if (value.kind === "cover") {
             const entries = value.entries;
             if (!Array.isArray(entries) || !entries.every(isSafeTocEntry) || typeof value.brandLine !== "string" || typeof value.footerLabel !== "string") {

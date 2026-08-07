@@ -295,6 +295,19 @@ export function isCollectionExportCapture(): boolean {
   return new URLSearchParams(window.location.search).has("collectionExport");
 }
 
+// Separate, independent marker for the emergency "website-slice" export
+// mode (scripts/portfolioCollectionExportPlugin.ts's
+// captureProjectPageWebsiteSlice) — always set together with
+// collectionExport so the normal readiness/staging machinery above still
+// runs, but checked independently so templates can react to this specific
+// mode without changing behavior for the existing (default) collection
+// pipeline or the normal site. Currently used only to suppress live Figma
+// iframes, which page.pdf() cannot render meaningfully either way.
+export function isWebsiteSliceExportCapture(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).has("websiteSliceExport");
+}
+
 // Fetches this job's staged data for the CURRENT project only (the one
 // route.tsx is about to render) — one small request instead of the whole
 // job, since a job can cover many projects but a page only ever needs its

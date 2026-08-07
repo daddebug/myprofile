@@ -1,44 +1,13 @@
 import { mkdir, readFile, writeFile, copyFile, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { buildPublishingPreflight, getPublishedAssetLocation, readPublishSourceRegistry } from "./publishing-preflight-lib.mjs";
 
 const OFFICIAL_ROOT = path.resolve("D:/myprofilegit/myprofile");
 const OUTPUT_DATA = path.join("src", "data", "publishedPortfolio.json");
 const OUTPUT_UI_PRACTICE_DATA = path.join("src", "data", "uiPracticeMetadata.json");
 const OUTPUT_ASSET_ROOT = path.join("public", "images", "published");
 const CONFIRM_FLAG = "--confirm";
-
-const draftImageSources = {
-  "from-theme-to-playable-rule": {
-    database: "dilida-portfolio-game-jam-draft-assets",
-    store: "images",
-  },
-};
-
-const coverSource = {
-  database: "dilida-portfolio-public-project-assets",
-  store: "projectCovers",
-};
-
-const projectBodySource = {
-  database: "dilida-portfolio-project-body-assets",
-  store: "assets",
-};
-
-const gameCoverSource = {
-  database: "dilida-portfolio-game-assets",
-  store: "covers",
-};
-
-// Matches templateImageSource in src/lib/productionBundleExport.ts — the
-// symbolic tag for template-instance images staged via
-// stageDynamicProjectImage() (imageId/publicPath pairs), fetched from the
-// dev server's already-serving public/portfolio-assets/ URL rather than read
-// from an IndexedDB blob.
-const templateImageSource = {
-  database: "dilida-portfolio-template-images",
-  store: "images",
-};
 
 function fail(message) {
   console.error(`\nERROR: ${message}\n`);
@@ -118,12 +87,26 @@ async function backupIfPresent(root, relativePath, backupRoot) {
   await copyFile(source, destination);
 }
 
+const EXCLUDE_PROJECT_PREFIX = "--exclude-project=";
+
 const args = process.argv.slice(2);
 const confirm = args.includes(CONFIRM_FLAG);
-const bundleArgument = args.find((argument) => argument !== CONFIRM_FLAG && argument !== "--");
+const bundleArgument = args.find((argument) => argument !== CONFIRM_FLAG && argument !== "--" && !argument.startsWith(EXCLUDE_PROJECT_PREFIX));
 if (!bundleArgument) {
   fail("Provide the downloaded export JSON path. Example: pnpm portfolio:import -- C:\\Users\\you\\Downloads\\portfolio-production-export.json");
 }
+// Explicit, per-run, CLI-visible exclusion — never a silent default. Used
+// when a specific project's content is known-blocked by an unrelated,
+// already-tracked issue (e.g. Playable Game production hosting is
+// unresolved — see TASKS.md) and the rest of the bundle should still
+// publish. Excluded projects are removed from the bundle entirely before
+// preflight/rewrite ever sees them, so today's publish neither includes nor
+// silently drops/corrupts their content — their currently-live production
+// state (already-published data) is simply left untouched by this run.
+const excludeProjectIds = new Set(
+  args.filter((argument) => argument.startsWith(EXCLUDE_PROJECT_PREFIX))
+    .flatMap((argument) => argument.slice(EXCLUDE_PROJECT_PREFIX.length).split(",").map((id) => id.trim()).filter(Boolean)),
+);
 
 const cwd = path.resolve(process.cwd());
 if (cwd.toLowerCase() !== OFFICIAL_ROOT.toLowerCase()) {
@@ -139,6 +122,36 @@ try {
 
 if (!bundle || bundle.version !== 1 || typeof bundle.drafts !== "object" || !Array.isArray(bundle.images)) {
   fail("The selected file is not a supported version-1 portfolio production export.");
+}
+
+if (excludeProjectIds.size) {
+  const missingFromBundle = [...excludeProjectIds].filter((id) => !(id in bundle.drafts) && !bundle.images.some((image) => image.projectId === id));
+  if (missingFromBundle.length) fail(`--exclude-project referenced a project not present in this export: ${missingFromBundle.join(", ")}`);
+  console.log(`Excluding from this publish (explicit --exclude-project): ${[...excludeProjectIds].join(", ")}`);
+  for (const id of excludeProjectIds) delete bundle.drafts[id];
+  bundle.images = bundle.images.filter((image) => image.projectId === undefined || !excludeProjectIds.has(image.projectId));
+  if (bundle.projectCatalog?.projectIds) bundle.projectCatalog.projectIds = bundle.projectCatalog.projectIds.filter((id) => !excludeProjectIds.has(id));
+  if (bundle.projectCatalog?.projects) for (const id of excludeProjectIds) delete bundle.projectCatalog.projects[id];
+  if (bundle.projectDocuments?.documents) for (const id of excludeProjectIds) delete bundle.projectDocuments.documents[id];
+  if (Array.isArray(bundle.diagnostics?.missingReferences)) {
+    bundle.diagnostics.missingReferences = bundle.diagnostics.missingReferences.filter((entry) => ![...excludeProjectIds].some((id) => entry.startsWith(`${id}:`)));
+  }
+}
+
+const registry = await readPublishSourceRegistry(cwd);
+if (bundle.publishingRegistryVersion !== registry.version) {
+  fail(`The export was not generated with publishing registry version ${registry.version}. Create a fresh browser export before publishing.`);
+}
+const adapterById = new Map(registry.sources.map((source) => [source.id, source]));
+const preflight = await buildPublishingPreflight({ root: cwd, bundle });
+const preflightPath = path.join(cwd, "output", "publishing-preflight-manifest.json");
+await mkdir(path.dirname(preflightPath), { recursive: true });
+await writeFile(preflightPath, `${JSON.stringify(preflight, null, 2)}\n`, "utf8");
+if (!preflight.ok) {
+  const failures = preflight.issues
+    .filter((issue) => issue.severity === "error")
+    .map((issue) => `${issue.sourceAdapterId}: ${issue.message}`);
+  fail(`Publishing preflight failed. No production files were changed.\nManifest: ${preflightPath}\n- ${failures.join("\n- ")}`);
 }
 
 const reportedMissing = Array.isArray(bundle.diagnostics?.missingReferences)
@@ -188,10 +201,12 @@ for (const image of bundle.images) {
   if (!image || typeof image.id !== "string" || typeof image.dataBase64 !== "string") {
     fail("The export contains an invalid image record.");
   }
-  const isCover = image.database === coverSource.database && image.store === coverSource.store;
-  const isProjectBody = image.database === projectBodySource.database && image.store === projectBodySource.store;
-  const isGameCover = image.database === gameCoverSource.database && image.store === gameCoverSource.store;
-  const isTemplateImage = image.database === templateImageSource.database && image.store === templateImageSource.store;
+  const adapter = typeof image.sourceAdapterId === "string" ? adapterById.get(image.sourceAdapterId) : undefined;
+  if (!adapter) fail(`Unknown or missing source adapter for ${image.database}/${image.store}/${image.id}.`);
+  const isCover = adapter.id === "project-covers-indexeddb" || adapter.id === "project-covers-disk";
+  const isProjectBody = adapter.id === "project-body-indexeddb-assets";
+  const isGameCover = adapter.id === "game-experience-covers";
+  const isTemplateImage = adapter.id === "dynamic-template-images" || adapter.id === "ui-practice-images";
   if (isCover && !canonicalProjectIds.has(image.id)) {
     ignoredCoverIds.push(image.id);
     continue;
@@ -207,16 +222,12 @@ for (const image of bundle.images) {
       ? path.posix.join("project-body", image.projectId)
     : isTemplateImage
       ? path.posix.join("template-images", image.projectId)
-    : Object.entries(draftImageSources).find(([, source]) => source.database === image.database && source.store === image.store)?.[0];
+    : undefined;
   if (!owner) fail(`Unknown image source: ${image.database}/${image.store}/${image.id}`);
 
-  const relativePath = path.posix.join(
-    OUTPUT_ASSET_ROOT.replaceAll("\\", "/"),
-    safeSegment(owner),
-    `${safeSegment(image.id)}${extensionFor(image)}`,
-  );
-  const publicPath = `/${relativePath.replace(/^public\//, "")}`;
+  const { relativePath, publicPath } = getPublishedAssetLocation(adapter.id, image.projectId, image.id, `${safeSegment(image.id)}${extensionFor(image)}`);
   const asset = {
+    sourceAdapterId: adapter.id,
     sourceDatabase: image.database,
     sourceStore: image.store,
     sourceId: image.id,
@@ -298,6 +309,26 @@ const gameExperience = rawGameExperience
   : undefined;
 if (missing.size) fail(`Referenced game-cover data is missing from the bundle:\n- ${[...missing].join("\n- ")}`);
 
+// Restore each excluded project's CURRENT published state exactly as-is —
+// this run's bundle never contained their content past this point (see the
+// exclusion filter above), so without this they would simply vanish from
+// publishedPortfolio.json instead of staying untouched.
+if (excludeProjectIds.size) {
+  let currentPublished = null;
+  try {
+    currentPublished = JSON.parse(await readFile(path.join(cwd, OUTPUT_DATA), "utf8"));
+  } catch (error) {
+    fail(`--exclude-project requires the current ${OUTPUT_DATA} to be readable, to preserve excluded projects' existing state: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  for (const id of excludeProjectIds) {
+    if (currentPublished?.projectCatalog?.[id]) storedCatalog[id] = currentPublished.projectCatalog[id];
+    if (currentPublished?.drafts?.[id]) drafts[id] = currentPublished.drafts[id];
+    if (currentPublished?.projectDocuments?.documents?.[id]) projectDocuments.documents[id] = currentPublished.projectDocuments.documents[id];
+    if (currentPublished?.covers?.[id]) covers[id] = currentPublished.covers[id];
+  }
+  console.log(`Preserved existing published state for excluded project(s): ${[...excludeProjectIds].join(", ")}`);
+}
+
 const output = {
   version: 1,
   generatedAt: bundle.exportedAt || new Date().toISOString(),
@@ -306,13 +337,38 @@ const output = {
   projectDocuments,
   ...(gameExperience ? { gameExperience } : {}),
   covers,
-  assets: assets.map(({ sourceDatabase, sourceStore, sourceId, publicPath }) => ({
+  assets: assets.map(({ sourceAdapterId, sourceDatabase, sourceStore, sourceId, publicPath }) => ({
+    sourceAdapterId,
     sourceDatabase,
     sourceStore,
     sourceId,
     publicPath,
   })),
 };
+
+// Validate only what THIS run actually produced — an excluded project's
+// merged-back existing state (see above) is untouched legacy data, not
+// something this run rewrote, so it must not be re-validated here (it may
+// legitimately still contain the very local references this check exists
+// to catch — that is exactly the already-known, separately-tracked issue
+// this run is deliberately not touching).
+const outputForValidation = excludeProjectIds.size
+  ? {
+      ...output,
+      projectCatalog: Object.fromEntries(Object.entries(output.projectCatalog).filter(([id]) => !excludeProjectIds.has(id))),
+      drafts: Object.fromEntries(Object.entries(output.drafts).filter(([id]) => !excludeProjectIds.has(id))),
+      projectDocuments: { ...output.projectDocuments, documents: Object.fromEntries(Object.entries(output.projectDocuments.documents).filter(([id]) => !excludeProjectIds.has(id))) },
+      covers: Object.fromEntries(Object.entries(output.covers).filter(([id]) => !excludeProjectIds.has(id))),
+    }
+  : output;
+const rewrittenPreflight = await buildPublishingPreflight({ root: cwd, bundle, rewrittenOutput: { output: outputForValidation, uiPractice } });
+await writeFile(preflightPath, `${JSON.stringify(rewrittenPreflight, null, 2)}\n`, "utf8");
+if (!rewrittenPreflight.ok) {
+  const failures = rewrittenPreflight.issues
+    .filter((issue) => issue.severity === "error")
+    .map((issue) => `${issue.sourceAdapterId}: ${issue.message}`);
+  fail(`Publishing rewrite validation failed. No production files were changed.\nManifest: ${preflightPath}\n- ${failures.join("\n- ")}`);
+}
 
 console.log("\nPortfolio production import review");
 console.log(`  Drafts: ${Object.keys(drafts).length}`);

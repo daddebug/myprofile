@@ -128,6 +128,20 @@ function CollectionGenerateAction({ locale, projects, config }: { locale: "zh" |
   const [phase, setPhase] = useState<CollectionExportPhase>("idle");
   const [message, setMessage] = useState("");
   const [outputPath, setOutputPath] = useState("");
+  // Temporary, explicit, UI-driven override — replaces the earlier
+  // ?emergencyPdfExport=1 query-param approach, which did not reliably
+  // reach the actual Generate request (client-side route/tab-switching in
+  // this page can rewrite the URL and silently drop unrelated query
+  // params). This is real React state read directly at request time, not
+  // parsed from window.location, so it cannot be lost that way.
+  const [emergencyPdfExport, setEmergencyPdfExport] = useState(false);
+  // A second, independent emergency mode — never combined with the one
+  // above. Renders each project's real website layout and slices it into
+  // landscape-A4-ratio physical pages without ever letting Chromium's print
+  // pagination decide a page break (captureProjectPageWebsiteSlice). See
+  // the state comment above for why this is real React state, not a URL
+  // query param.
+  const [websiteSlice, setWebsiteSlice] = useState(false);
   const controllerRef = useRef<AbortController | null>(null);
 
   const runExport = async () => {
@@ -140,10 +154,15 @@ function CollectionGenerateAction({ locale, projects, config }: { locale: "zh" |
     const controller = new AbortController();
     controllerRef.current = controller;
     setPhase("staging");
-    setMessage(locale === "zh" ? "正在抓取项目页面…" : "Capturing project pages...");
+    console.info("[collection export] emergencyPdfExport (client, about to send) =", emergencyPdfExport, "websiteSlice =", websiteSlice);
+    setMessage(
+      (emergencyPdfExport ? (locale === "zh" ? "紧急导出：开启\n" : "Emergency export: ON\n") : "")
+      + (websiteSlice ? (locale === "zh" ? "网站切片导出：开启\n" : "Website-slice export: ON\n") : "")
+      + (locale === "zh" ? "正在抓取项目页面…" : "Capturing project pages..."),
+    );
     setOutputPath("");
     try {
-      const result = await runPortfolioCollectionExport(projects, locale, selection, (progress) => {
+      const result = await runPortfolioCollectionExport(projects, locale, selection, emergencyPdfExport, websiteSlice, (progress) => {
         setPhase(progress.phase);
         if (progress.phase === "staging") {
           setMessage(
@@ -188,6 +207,33 @@ function CollectionGenerateAction({ locale, projects, config }: { locale: "zh" |
           </button>
         ) : null}
       </div>
+      {/* Temporary emergency override control — see the state comment above.
+          Not gated behind DEV/owner mode beyond whatever already gates this
+          whole editor; intentionally visible and explicit rather than a
+          hidden query param, per its own purpose. */}
+      <label className={`mt-2 flex w-fit items-center gap-2 rounded border px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wide ${emergencyPdfExport ? "border-peach/60 bg-peach/10 text-peach" : "border-softWhite/15 text-softWhite/55"}`}>
+        <input type="checkbox" checked={emergencyPdfExport} onChange={(event) => setEmergencyPdfExport(event.target.checked)} disabled={busy || websiteSlice} />
+        {locale === "zh" ? "紧急导出：允许额外的 Chromium 分段" : "Emergency export: allow extra Chromium segments"}
+      </label>
+      {emergencyPdfExport ? (
+        <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-peach">
+          {locale === "zh" ? "紧急导出：开启" : "Emergency export: ON"}
+        </p>
+      ) : null}
+      {/* Second, independent emergency mode — see the state comment above.
+          Mutually exclusive with the segment-count override above (both
+          solve the same underlying symptom differently); disabling one
+          while the other is on keeps that explicit rather than silently
+          letting both apply at once. */}
+      <label className={`mt-2 flex w-fit items-center gap-2 rounded border px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wide ${websiteSlice ? "border-acidGreen/60 bg-acidGreen/10 text-acidGreen" : "border-softWhite/15 text-softWhite/55"}`}>
+        <input type="checkbox" checked={websiteSlice} onChange={(event) => setWebsiteSlice(event.target.checked)} disabled={busy || emergencyPdfExport} />
+        {locale === "zh" ? "紧急导出：网站切片模式（A4 横向）" : "Emergency export: website-slice mode (A4 landscape)"}
+      </label>
+      {websiteSlice ? (
+        <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-acidGreen">
+          {locale === "zh" ? "网站切片导出：开启" : "Website-slice export: ON"}
+        </p>
+      ) : null}
       {message ? (
         <div
           className={`absolute right-0 top-full z-50 mt-2 w-80 rounded-lg border bg-[#0b1035] px-3 py-2 text-xs leading-5 shadow-archive ${

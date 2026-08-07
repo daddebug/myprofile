@@ -58,7 +58,7 @@
       "description": "",
       "image": {
         "imageId": "image-5b213db4-14a6-4201-8001-46f697386042",
-        "publicPath": "/images/published/template-images-ui-personal-practice/image-5b213db4-14a6-4201-8001-46f697386042.png"
+        "publicPath": "/images/published/template-images/ui-personal-practice/image-5b213db4-14a6-4201-8001-46f697386042.png"
       },
       "imageDisplayMode": "cover"
     },
@@ -70,7 +70,7 @@
       "description": "",
       "image": {
         "imageId": "image-56a5e020-73e6-48e4-a98e-c59661832da3",
-        "publicPath": "/images/published/template-images-ui-personal-practice/image-56a5e020-73e6-48e4-a98e-c59661832da3.png"
+        "publicPath": "/images/published/template-images/ui-personal-practice/image-56a5e020-73e6-48e4-a98e-c59661832da3.png"
       },
       "imageDisplayMode": "cover",
       "startNewRow": true

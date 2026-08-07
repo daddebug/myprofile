@@ -10,7 +10,7 @@ import type {
   TemplateMeta,
   TemplateProps,
 } from "../lib/templateLibrary";
-import { isCollectionExportCapture } from "../lib/collectionExportStaging";
+import { isCollectionExportCapture, isWebsiteSliceExportCapture } from "../lib/collectionExportStaging";
 import { recordEmptySlotCollapsed, recordEmptySlotFound } from "../lib/collectionMediaDiagnostics";
 
 // How long to wait for the iframe's own `load` event before treating the
@@ -130,6 +130,17 @@ export default function FigmaPrototypeTemplate({ content, locale, horizontalInse
     recordEmptySlotFound(figmaSlotId);
     recordEmptySlotCollapsed(figmaSlotId);
   }
+  // Emergency website-slice export mode: page.pdf() cannot render a live
+  // cross-origin Figma iframe meaningfully (it prints blank or hangs), and
+  // this mode has no print-media CSS swap to fall back on. Never show the
+  // iframe here — use the static fallback image if one is configured,
+  // otherwise omit the whole media frame (zero height), matching a
+  // genuinely empty slot. Normal website/owner-mode rendering (this flag
+  // off) is completely unaffected.
+  const websiteSliceMode = isWebsiteSliceExportCapture();
+  const showIframe = Boolean(embedUrl) && !websiteSliceMode;
+  const websiteSliceFallbackSrc = websiteSliceMode && !embedUrl ? fallbackImage?.publicPath : undefined;
+  const suppressForWebsiteSlice = websiteSliceMode && embedUrl && !fallbackImage?.publicPath;
 
   // Tracks the iframe's own load outcome so the permission/starting-point
   // hint only shows for a genuine failure (never loaded within the
@@ -170,14 +181,14 @@ export default function FigmaPrototypeTemplate({ content, locale, horizontalInse
             </h2>
           ) : null}
 
-          {suppressFigmaPlaceholder ? null : (
+          {suppressFigmaPlaceholder || suppressForWebsiteSlice ? null : (
           <div
             className="case-study-media-frame"
             style={{ marginTop: inlineEditor || heading ? headingGap : 0 }}
             data-media-slot-state={figmaMediaSlotState}
             data-media-slot-id={figmaSlotId}
           >
-            {embedUrl ? (
+            {showIframe ? (
               <iframe
                 key={embedUrl}
                 src={embedUrl}
@@ -187,6 +198,15 @@ export default function FigmaPrototypeTemplate({ content, locale, horizontalInse
                 allowFullScreen
                 onLoad={() => setLoadState("loaded")}
               />
+            ) : websiteSliceMode ? (
+              websiteSliceFallbackSrc ? (
+                <img
+                  src={websiteSliceFallbackSrc}
+                  alt={heading || "Figma prototype fallback"}
+                  className="case-study-media-image"
+                  loading="lazy"
+                />
+              ) : null
             ) : fallbackImage?.publicPath ? (
               <img
                 src={fallbackImage.publicPath}
@@ -230,7 +250,7 @@ export default function FigmaPrototypeTemplate({ content, locale, horizontalInse
           </p>
         ) : null}
 
-        {loadState === "failed" ? (
+        {loadState === "failed" && !websiteSliceMode ? (
           <p className="mx-auto mt-3 max-w-md text-center text-xs leading-5 text-softWhite/40">
             {locale === "zh"
               ? "Figma 原型未能加载，请检查分享权限（Anyone with the link can view）和原型起点（Prototype Flow starting point）。"

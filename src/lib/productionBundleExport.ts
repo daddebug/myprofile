@@ -5,8 +5,11 @@ import { getGameExperienceStore } from "./gameExperience";
 import { getProjectDocumentsExportStore } from "./projectDocuments";
 import { getProjectCollectionExportStore } from "./projectMetadata";
 import uiPracticeMetadata from "../data/uiPracticeMetadata.json";
+import { getPublishSourceAdapter, publishSourceRegistry } from "./publishing/publishSourceRegistry";
+import { getDiskProjectCover } from "./portfolioContentClient";
 
 type ExportedImage = {
+  sourceAdapterId: string;
   database: string;
   store: string;
   id: string;
@@ -36,7 +39,8 @@ const draftSources: readonly { projectId: string; key: string; database: string;
 // IndexedDB blob: publicPath already points at a real file the dev server's
 // portfolioContentPlugin.ts wrote under public/portfolio-assets/, so the only
 // way to get the bytes here is to fetch that already-serving local URL.
-const templateImageSource = { database: "dilida-portfolio-template-images", store: "images" };
+const templateImageSource = getPublishSourceAdapter("dynamic-template-images").storage!;
+const uiPracticeImageSource = getPublishSourceAdapter("ui-practice-images").storage!;
 const UI_PRACTICE_PROJECT_ID = "ui-personal-practice";
 
 function collectTemplateImageRefs(value: unknown, refs = new Map<string, string>()): Map<string, string> {
@@ -53,19 +57,48 @@ function collectTemplateImageRefs(value: unknown, refs = new Map<string, string>
   return refs;
 }
 
-async function fetchTemplateImage(projectId: string, imageId: string, publicPath: string): Promise<ExportedImage> {
+async function fetchTemplateImage(sourceAdapterId: string, projectId: string, imageId: string, publicPath: string): Promise<ExportedImage> {
   const response = await fetch(publicPath, { credentials: "same-origin", cache: "no-store" });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const blob = await response.blob();
   const fileName = publicPath.split("/").pop() || `${imageId}.bin`;
   return {
-    database: templateImageSource.database,
-    store: templateImageSource.store,
+    sourceAdapterId,
+    database: sourceAdapterId === "ui-practice-images" ? uiPracticeImageSource.database : templateImageSource.database,
+    store: sourceAdapterId === "ui-practice-images" ? uiPracticeImageSource.store : templateImageSource.store,
     id: imageId,
     projectId,
     fileName,
     mimeType: blob.type || response.headers.get("content-type") || "application/octet-stream",
     size: blob.size,
+    dataBase64: bytesToBase64(await blob.arrayBuffer()),
+  };
+}
+
+// project-covers-disk: ProjectCoverEditor.tsx (DEV-only) saves a project's
+// cover to content/projects/project-covers.json via the dev server's
+// stage/commit endpoints — never to the project-covers-indexeddb store the
+// collector above reads (that store has had zero writers for a while; see
+// projectCoverDb.ts). getDiskProjectCover() is the same per-project resolve
+// endpoint the live site's own useProjectCover() hook already uses in DEV,
+// re-fetched here purely to get the real bytes into the export bundle.
+// image.id must equal the projectId — import-production-bundle.mjs keys its
+// covers map by image.id and requires it to be a canonical project ID.
+async function fetchDiskProjectCover(projectId: string, publicUrl: string, format: string, size: number, updatedAt: string): Promise<ExportedImage> {
+  const response = await fetch(publicUrl, { credentials: "same-origin", cache: "no-store" });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const blob = await response.blob();
+  const fileName = publicUrl.split("/").pop() || `${projectId}.${format}`;
+  return {
+    sourceAdapterId: "project-covers-disk",
+    database: "disk",
+    store: "project-covers",
+    id: projectId,
+    projectId,
+    fileName,
+    mimeType: blob.type || `image/${format === "jpeg" ? "jpeg" : format}`,
+    size: blob.size || size,
+    updatedAt,
     dataBase64: bytesToBase64(await blob.arrayBuffer()),
   };
 }
@@ -132,6 +165,7 @@ function bytesToBase64(buffer: ArrayBuffer) {
 }
 
 async function serializeImage(
+  sourceAdapterId: string,
   database: string,
   store: string,
   record: IndexedImageRecord,
@@ -140,6 +174,7 @@ async function serializeImage(
   const id = typeof record.id === "string" ? record.id : typeof record.projectId === "string" ? record.projectId : "";
   if (!id || !(blob instanceof Blob)) throw new Error(`Invalid image record in ${database}/${store}.`);
   return {
+    sourceAdapterId,
     database,
     store,
     id,
@@ -239,7 +274,9 @@ export async function exportProductionBundle(): Promise<ProductionExportSummary>
         missingReferences.push(`${source.projectId}: ${id}`);
         continue;
       }
-      images.push(await serializeImage(source.database, source.store, record));
+      const sourceAdapter = publishSourceRegistry.sources.find((adapter) => adapter.storage?.database === source.database && adapter.storage.store === source.store);
+      if (!sourceAdapter) throw new Error(`Unregistered publishing source: ${source.database}/${source.store}`);
+      images.push(await serializeImage(sourceAdapter.id, source.database, source.store, record));
     }
   }
 
@@ -272,7 +309,7 @@ export async function exportProductionBundle(): Promise<ProductionExportSummary>
     const templateImageRefs = collectTemplateImageRefs(draft);
     for (const [imageId, publicPath] of templateImageRefs) {
       try {
-        images.push(await fetchTemplateImage(projectId, imageId, publicPath));
+        images.push(await fetchTemplateImage("dynamic-template-images", projectId, imageId, publicPath));
       } catch (error) {
         missingReferences.push(`${projectId}: ${imageId} (could not fetch ${publicPath}: ${error instanceof Error ? error.message : String(error)})`);
       }
@@ -288,7 +325,7 @@ export async function exportProductionBundle(): Promise<ProductionExportSummary>
   const uiPracticeImageRefs = collectTemplateImageRefs(uiPractice);
   for (const [imageId, publicPath] of uiPracticeImageRefs) {
     try {
-      images.push(await fetchTemplateImage(UI_PRACTICE_PROJECT_ID, imageId, publicPath));
+      images.push(await fetchTemplateImage("ui-practice-images", UI_PRACTICE_PROJECT_ID, imageId, publicPath));
     } catch (error) {
       missingReferences.push(`${UI_PRACTICE_PROJECT_ID}: ${imageId} (could not fetch ${publicPath}: ${error instanceof Error ? error.message : String(error)})`);
     }
@@ -308,7 +345,22 @@ export async function exportProductionBundle(): Promise<ProductionExportSummary>
         ? record.id
         : "";
     if (!canonicalProjectIds.has(projectId)) continue;
-    images.push(await serializeImage(PROJECT_COVER_DB_NAME, PROJECT_COVER_STORE_NAME, record));
+    images.push(await serializeImage("project-covers-indexeddb", PROJECT_COVER_DB_NAME, PROJECT_COVER_STORE_NAME, record));
+  }
+
+  // The real, currently-used cover pipeline: content/projects/project-covers.json
+  // (disk, written by ProjectCoverEditor.tsx). Every canonical project is
+  // checked; a project with no saved cover simply has no disk record and is
+  // skipped here (not an error — missingAssetsAllowed: true on the
+  // project-covers-disk registry row, since not every project has a cover).
+  for (const projectId of canonicalProjectIds) {
+    const diskCover = await getDiskProjectCover(projectId).catch(() => null);
+    if (!diskCover) continue;
+    try {
+      images.push(await fetchDiskProjectCover(projectId, diskCover.publicUrl, diskCover.format, diskCover.size, diskCover.updatedAt));
+    } catch (error) {
+      missingReferences.push(`${projectId}: cover (could not fetch ${diskCover.publicUrl}: ${error instanceof Error ? error.message : String(error)})`);
+    }
   }
 
   Object.values(projectDocuments.documents).forEach((document) => {
@@ -321,7 +373,7 @@ export async function exportProductionBundle(): Promise<ProductionExportSummary>
   for (const id of bodyAssetIds) {
     const record = bodyRecordsById.get(id);
     if (!record) { missingReferences.push(`project-body: ${id}`); continue; }
-    images.push(await serializeImage(PROJECT_BODY_ASSET_DB_NAME, PROJECT_BODY_ASSET_STORE_NAME, record));
+    images.push(await serializeImage("project-body-indexeddb-assets", PROJECT_BODY_ASSET_DB_NAME, PROJECT_BODY_ASSET_STORE_NAME, record));
   }
 
   const gameCoverIds = new Set(gameExperience.records.flatMap((record) => [
@@ -333,11 +385,12 @@ export async function exportProductionBundle(): Promise<ProductionExportSummary>
   for (const id of gameCoverIds) {
     const record = gameCoverRecordsById.get(id);
     if (!record) { missingReferences.push(`game-cover: ${id}`); continue; }
-    images.push(await serializeImage(GAME_COVER_DB_NAME, GAME_COVER_STORE_NAME, record));
+    images.push(await serializeImage("game-experience-covers", GAME_COVER_DB_NAME, GAME_COVER_STORE_NAME, record));
   }
 
   const bundle = {
     version: 1,
+    publishingRegistryVersion: publishSourceRegistry.version,
     exportedAt: new Date().toISOString(),
     origin: window.location.origin,
     drafts,
@@ -349,6 +402,7 @@ export async function exportProductionBundle(): Promise<ProductionExportSummary>
     diagnostics: {
       missingReferences,
       dynamicProjectWarnings,
+      sourceAdapters: publishSourceRegistry.sources.map((source) => source.id),
       note: "This is a read-only export. Original localStorage and IndexedDB records remain unchanged.",
     },
   };

@@ -18,6 +18,8 @@
     "portfolio:publish": "node scripts/portfolio-workflow.mjs publish",
     "publish:daily": "node scripts/portfolio-workflow.mjs publish",
     "portfolio:import": "node scripts/import-production-bundle.mjs",
+    "portfolio:preflight": "node scripts/publishing-preflight.mjs",
+    "test:publishing": "node scripts/publishing-preflight.test.mjs",
     "portfolio:verify": "node scripts/portfolio-workflow.mjs verify"
   },
   "dependencies": {

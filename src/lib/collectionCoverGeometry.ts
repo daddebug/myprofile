@@ -29,6 +29,12 @@ export type CoverPanel = {
   circles: Array<{ cx: number; cy: number; r: number }>;
 };
 
+export const COLLECTION_FIXED_PAGE_CONTENT = {
+  left: 80,
+  right: 1360,
+  width: 1280,
+} as const;
+
 export const COVER_GEOMETRY = {
   width: 1440,
   height: 900,
@@ -37,8 +43,8 @@ export const COVER_GEOMETRY = {
   softWhite: "#F4F5FA",
   panelGradientFrom: "#2A43C7",
   panelGradientTo: "#181D46",
-  safeLeft: 80,
-  safeRight: 1360,
+  safeLeft: COLLECTION_FIXED_PAGE_CONTENT.left,
+  safeRight: COLLECTION_FIXED_PAGE_CONTENT.right,
   safeTop: 60,
   safeBottom: 870,
   // Overall bounding box of the graphic (panels ∪ circles), measured.
@@ -92,26 +98,21 @@ export const TOC_SLOTS: Array<{ x: number }> = Array.from({ length: TOC_SLOT_COU
   x: Math.round(COVER_GEOMETRY.toc.startX + index * COVER_GEOMETRY.toc.spacing),
 }));
 
-const TOC_FULL_SPAN_END_X = COVER_GEOMETRY.toc.startX + (TOC_SLOT_COUNT - 1) * COVER_GEOMETRY.toc.spacing;
-
-// Distributes however many TOC entries the editor's selection actually
-// produced evenly across the SAME full usable span the fixed 7-slot grid
-// covers (COVER_GEOMETRY.toc.startX .. TOC_FULL_SPAN_END_X) — never just the
-// first N of the 7 fixed left-anchored positions, which clusters a small
-// selection (e.g. 3 projects, no UI Works/Games/Contact) in the left third
-// of the page and reads as an unfinished layout rather than an intentional
-// one. At exactly TOC_SLOT_COUNT entries this reduces to the pixel-measured
-// reference grid exactly; for fewer entries the spacing between nodes
-// widens so the line and nodes still span the full page width.
+// Distributes the editor's actual selection across the shared fixed-page
+// content rail. Slots are left-anchored, so the final slot stops early enough
+// for its complete label to remain inside the right safe edge.
 export function tocSlotPositions(entryCount: number): Array<{ x: number }> {
   const count = Math.min(Math.max(entryCount, 0), TOC_SLOT_COUNT);
   if (count === 0) return [];
+  const slotWidth = tocLabelSlotWidth(count);
+  const startX = COLLECTION_FIXED_PAGE_CONTENT.left;
+  const endX = COLLECTION_FIXED_PAGE_CONTENT.right - slotWidth;
   if (count === 1) {
-    return [{ x: Math.round(COVER_GEOMETRY.toc.startX + (TOC_FULL_SPAN_END_X - COVER_GEOMETRY.toc.startX) / 2) }];
+    return [{ x: Math.round(startX + (endX - startX) / 2) }];
   }
-  const spacing = (TOC_FULL_SPAN_END_X - COVER_GEOMETRY.toc.startX) / (count - 1);
+  const spacing = (endX - startX) / (count - 1);
   return Array.from({ length: count }, (_, index) => ({
-    x: Math.round(COVER_GEOMETRY.toc.startX + index * spacing),
+    x: Math.round(startX + index * spacing),
   }));
 }
 
@@ -121,9 +122,8 @@ export function tocSlotPositions(entryCount: number): Array<{ x: number }> {
 // lone, very wide slot still reads as a compact label rather than a
 // full-width banner.
 export function tocLabelSlotWidth(entryCount: number): number {
-  const positions = tocSlotPositions(Math.max(entryCount, 2));
-  const spacing = positions.length > 1 ? positions[1].x - positions[0].x : COVER_GEOMETRY.toc.spacing;
-  return Math.min(320, Math.round(spacing * 0.88));
+  const count = Math.min(Math.max(entryCount, 1), TOC_SLOT_COUNT);
+  return Math.min(280, Math.max(148, Math.floor(COLLECTION_FIXED_PAGE_CONTENT.width / count) - 18));
 }
 
 export type CoverTocEntry = { id: string; title: string };

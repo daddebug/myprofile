@@ -671,24 +671,43 @@ a {
 /* Portfolio Collection export only (html[data-collection-export-capture],
    set by ProjectPage.tsx's readiness effect only when isCollectionExportCapture()
    is true — never present on the normal site or for the owner). The
-   collection pipeline now captures each project via Chromium's own
-   page.pdf() print pipeline (vector text/shapes, not a screenshot), which
-   auto-paginates when content is taller than the requested page height —
-   break-inside: avoid on every top-level module tells it to prefer breaking
-   between modules rather than through one, matching the requirement that a
-   heading and its body never get split unless a single module alone
-   exceeds a whole segment. The glow lives here (not drawn on top of the
+   collection pipeline captures each project via Chromium's page.pdf() print
+   pipeline (vector text/shapes, not a screenshot). Top-level modules remain
+   in continuous flow so Chromium cannot introduce blank segment pages that
+   later become empty tails in the merged variable-height project page. The
+   glow lives here (not drawn on top of the
    screenshot in the pdf-lib compositor anymore) as a soft two-blob radial
    gradient behind the project content, at very low opacity so it never
    visibly tints text/images sitting on top of it. */
-html[data-collection-export-capture] [data-template-instance-id],
-html[data-collection-export-capture] [data-document-section] {
-  break-inside: avoid;
-  page-break-inside: avoid;
-}
-
 html[data-collection-export-capture] [data-project-route-shell] {
   position: relative;
+}
+
+/* Real repro (project-1ua2677, 2026-08-07): with NO break-inside rule at
+   all in collection-export mode, captureProjectPage's page.pdf() call
+   (scripts/portfolioCollectionExportPlugin.ts) generated 4 physical PDF
+   segments for 3 planned slices — the html[data-project-print="true"]
+   figure/table/img rule further down this file was ruled out first: that
+   attribute is only ever set by the owner-only manual print button
+   (src/components/ProjectPrintAction.tsx, gated on a `?printProject=1`
+   query param collection capture never sends), so it cannot be live here,
+   and explicitly forcing break-inside:auto on figure/table/img under
+   data-collection-export-capture (tried and reverted) did not fix the real
+   case either. The actual cause: a segment boundary landed inside a
+   top-level module (e.g. an image), which browsers cannot fragment, so the
+   whole module got pushed onto the next fixed-height band, leaving the
+   current band's remainder blank and needing one extra physical page to fit
+   the overflow. break-inside: avoid on each top-level module tells Chromium
+   to prefer a break BETWEEN modules over one through the middle of one,
+   which is exactly what captureProjectPage's own inline comment already
+   documents as the intended mechanism — this restores it. Segments are
+   re-merged into one continuous page either way, so this has no reader-
+   facing effect; scoped strictly to data-collection-export-capture, never
+   the normal site. */
+html[data-collection-export-capture] [data-project-route-shell] [data-template-instance-id],
+html[data-collection-export-capture] [data-project-route-shell] [data-document-section] {
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 html[data-collection-export-capture] [data-project-route-shell]::before {

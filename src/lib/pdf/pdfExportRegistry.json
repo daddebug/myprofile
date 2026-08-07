@@ -1,0 +1,247 @@
+{
+  "version": 1,
+  "notes": "Authoritative registry of every content family the Portfolio Collection PDF pipeline can emit. Mirrors src/lib/publishing/publishSourceRegistry.json's role for the publishing pipeline. Read by scripts/pdf-export-preflight-lib.mjs and scripts/pdf-export-postflight-lib.mjs. See docs/PDF_EXPORT_ARCHITECTURE.md for the human-readable version of every field below.",
+  "renderers": {
+    "captureProjectPage": {
+      "implementedIn": "scripts/portfolioCollectionExportPlugin.ts",
+      "sizing": "variable-height",
+      "captureWidthPx": 1440,
+      "usedBy": ["dynamic-project", "ui-personal-practice"]
+    },
+    "renderSectionPdf": {
+      "implementedIn": "scripts/portfolioCollectionExportPlugin.ts",
+      "sizing": "fixed",
+      "widthPx": 1440,
+      "heightPx": 900,
+      "usedBy": ["ui-works", "game-experience", "contact"]
+    },
+    "captureCoverPage": {
+      "implementedIn": "scripts/portfolioCollectionExportPlugin.ts",
+      "sizing": "fixed",
+      "widthPx": 1440,
+      "heightPx": 900,
+      "usedBy": ["cover", "toc"]
+    }
+  },
+  "sharedGeometry": {
+    "source": "src/lib/collectionCoverGeometry.ts",
+    "pageWidthPx": 1440,
+    "pageHeightPx": 900,
+    "horizontalSafeArea": { "leftPx": 80, "rightPx": 1360, "widthPx": 1280 },
+    "coverSafeArea": { "topPx": 60, "bottomPx": 870 },
+    "tocSlotCount": 7,
+    "tocGeometry": {
+      "lineY": 716,
+      "startX": 87,
+      "spacing": 213.33,
+      "slotWidth": 190,
+      "note": "startX(87) + 6*spacing(213.33) + slotWidth(190) = 1557.98px, ~198px past safeRight(1360). Slot 7 (index 6) label extent is only bounded by tocSlotPositions()'s proportional-spread recompute when entryCount < 7; a full 7-entry selection has not been verified against a real generated PDF for right-edge overflow. Postflight TOC safe-area check must measure this directly rather than trust the constant."
+    }
+  },
+  "knownEngineQuirks": [
+    {
+      "id": "print-media-always-evaluated",
+      "description": "Playwright's page.pdf() always evaluates @media print rules in the loaded stylesheet, regardless of any prior page.emulateMedia({ media: 'screen' }) call. emulateMedia only affects on-screen page.evaluate()-based measurement, never what page.pdf() itself resolves stylesheet media queries against.",
+      "implication": "Any @media print rule anywhere in src/styles.css is live for every page.pdf() call in this pipeline (captureProjectPage, renderSectionPdf, captureCoverPage), independent of which attribute or query param a rule appears to be scoped by.",
+      "mitigation": "preferCSSPageSize: false is set on every page.pdf() call in scripts/portfolioCollectionExportPlugin.ts to defeat unscoped @page rules. Any new @media print rule must be audited against every renderer above, not just the feature that motivated it."
+    },
+    {
+      "id": "unscoped-page-rule",
+      "description": "src/styles.css defines @page { size: A4 portrait; margin: 8mm; } inside the same @media print block as scoped print rules. @page cannot be attribute-scoped by definition, so it applies to every page.pdf() call unconditionally.",
+      "implication": "This rule is currently inert only because preferCSSPageSize is explicitly set to false on every call site. If a future call site omits that option, page geometry silently reverts to A4 portrait with 8mm margins instead of the pipeline's real 1440x900 / segment-height geometry.",
+      "status": "known, not yet fixed as of 2026-08-07 — tracked in TASKS.md, deferred pending re-investigation of the figure/table/img blank-segment symptom through this registry rather than as an isolated patch"
+    }
+  ],
+  "sources": [
+    {
+      "id": "cover",
+      "family": "cover",
+      "sourceOfTruth": "Selected project/section list assembled client-side in src/lib/portfolioCollectionExport.ts, geometry from src/lib/collectionCoverGeometry.ts",
+      "renderer": "captureCoverPage",
+      "sizing": "fixed",
+      "width": 1440,
+      "height": 900,
+      "horizontalSafeArea": { "left": 80, "right": 1360 },
+      "padding": { "top": 60, "bottom": 30 },
+      "imageHandling": "none — cover graphic is vector SVG, no raster photography embedded",
+      "emptyContentBehavior": "cover always renders; brandLine/footerLabel are static strings, not user content",
+      "segmentation": "single physical page, no pagination",
+      "verificationRules": ["panel/circle geometry matches collectionCoverGeometry.ts constants", "no navRect exceeds the safe area"]
+    },
+    {
+      "id": "toc",
+      "family": "table-of-contents",
+      "sourceOfTruth": "Same selection as cover — TOC is rendered onto the cover page, not a separate capture pass",
+      "renderer": "captureCoverPage",
+      "sizing": "fixed",
+      "width": 1440,
+      "height": 900,
+      "horizontalSafeArea": { "left": 80, "right": 1360 },
+      "padding": { "top": 0, "bottom": 0 },
+      "imageHandling": "none",
+      "emptyContentBehavior": "TOC omits slots for sections with zero entries (see game-experience/ui-works length checks in portfolioCollectionExport.ts)",
+      "segmentation": "part of the single cover page",
+      "verificationRules": [
+        "every rendered TOC label's right-most glyph extent must stay inside horizontalSafeArea.right",
+        "every rendered TOC label's left-most glyph extent must stay inside horizontalSafeArea.left",
+        "slot spacing must match tocSlotPositions() output for the actual entry count, not the fixed 7-slot constant"
+      ]
+    },
+    {
+      "id": "dynamic-project",
+      "family": "project-page",
+      "sourceOfTruth": "Owner's real draft for the project (localStorage/IndexedDB in DEV, or the project's published draft) resolved through the same staged job payload used by DynamicProjectPage.tsx",
+      "renderer": "captureProjectPage",
+      "sizing": "variable-height",
+      "width": 1440,
+      "height": "variable, computed per project from captureHeight",
+      "horizontalSafeArea": { "left": 0, "right": 1440, "note": "safe area is enforced per-template via each template's own horizontalInset, not a page-level constant like the cover/section pages" },
+      "padding": { "top": "template-defined", "bottom": "intendedBottomPadding (see diagnostics)" },
+      "imageHandling": "each template-instance image resolved by imageId/localImageId to a data URL before capture; missing images are hard media-slot failures, not silently skipped",
+      "emptyContentBehavior": "an empty template wrapper (layoutAudit.emptyTemplateWrappers) is a hard-fail, not rendered blank",
+      "segmentation": "Chromium auto-paginates the tall single-page HTML into segments of segmentHeightPx (captureHeight / segmentCount, capped by maxSegmentHeightPx=3000); segments are merged into one continuous PDF page via pdf-lib embedPage/drawPage",
+      "verificationRules": [
+        "height must be >100px and <30000px",
+        "mediaSlotAudit.failed must be 0",
+        "every templateFitAudit entry's overflowAfterFit must be 0",
+        "layoutAudit.emptyTemplateWrappers must be empty",
+        "trailingBlankHeight must not exceed intendedBottomPadding + 32",
+        "captureWidth must equal 1440 and overflowRight must be 0",
+        "segmentSourcePages.length must equal segmentCount"
+      ]
+    },
+    {
+      "id": "ui-personal-practice",
+      "family": "project-page",
+      "sourceOfTruth": "src/data/uiPracticeMetadata.json + bundled images under src/assets/ui-practice-optimized (source-controlled, not a browser draft)",
+      "renderer": "captureProjectPage",
+      "sizing": "variable-height",
+      "width": 1440,
+      "height": "variable, same mechanism as dynamic-project",
+      "horizontalSafeArea": { "left": 0, "right": 1440 },
+      "padding": { "top": "template-defined", "bottom": "intendedBottomPadding" },
+      "imageHandling": "images are pre-published, source-controlled paths — no localStorage/IndexedDB/blob resolution step, unlike ordinary dynamic projects",
+      "emptyContentBehavior": "same hard-fail rules as dynamic-project",
+      "segmentation": "identical mechanism to dynamic-project",
+      "verificationRules": [
+        "same seven rules as dynamic-project",
+        "this is the content family the previously-reported UI Personal Practice blank-segment symptom affected — segmentSourcePages.length !== segmentCount is the specific guard that would have caught it"
+      ]
+    },
+    {
+      "id": "ui-works",
+      "family": "fixed-section",
+      "sourceOfTruth": "UiPracticeCatalogItem[] passed into buildUiWorksSectionsHtml (src/lib/portfolioCollectionExport.ts), one section page per UI_WORKS_PER_PAGE items",
+      "renderer": "renderSectionPdf",
+      "sizing": "fixed",
+      "width": 1440,
+      "height": 900,
+      "horizontalSafeArea": { "left": 80, "right": 1360 },
+      "padding": { "top": 60, "bottom": 54 },
+      "imageHandling": "every grid image is downscaled to a JPEG data URL (UI_WORKS_CARD_MAX_WIDTH x UI_WORKS_CARD_MAX_HEIGHT) client-side before staging — never embeds the original source asset",
+      "emptyContentBehavior": "buildUiWorksSectionsHtml returns [] and the section is omitted entirely when items.length is 0 — never renders an empty page",
+      "segmentation": "one physical page per HTML snapshot; multi-page pagination is done by the client pre-splitting items into pages, not by page.pdf() auto-pagination",
+      "verificationRules": ["page count matches ceil(itemCount / UI_WORKS_PER_PAGE)", "no card image exceeds its downscale target dimensions"]
+    },
+    {
+      "id": "game-experience",
+      "family": "fixed-section",
+      "sourceOfTruth": "GameExperienceRecord[] from getGameExperienceStore(), filtered to selection.selectedGameIds",
+      "renderer": "renderSectionPdf",
+      "sizing": "fixed",
+      "width": 1440,
+      "height": 900,
+      "horizontalSafeArea": { "left": 80, "right": 1360 },
+      "padding": { "top": 60, "bottom": 54 },
+      "imageHandling": "each game cover resolved via resolveGameCoverSrc (IndexedDB blob by coverAssetId, falling back to record.presentation.coverPublicPath), then downscaled to a 160x160 JPEG data URL — 2.5x the 64x64 CSS display size",
+      "emptyContentBehavior": "buildGameExperienceSectionsHtml returns [] and the section is omitted when records.length is 0; a game with no resolvable cover renders an empty placeholder div, not a missing-image failure",
+      "segmentation": "one physical page per HTML snapshot, client pre-split into pages of GAMES_PER_PAGE=5 rows each",
+      "verificationRules": ["page count matches ceil(selectedGameCount / 5)", "cover images are <=160x160"]
+    },
+    {
+      "id": "contact",
+      "family": "fixed-section",
+      "sourceOfTruth": "portfolioProfile.contact (email, location) — static profile data, not a draft",
+      "renderer": "renderSectionPdf",
+      "sizing": "fixed",
+      "width": 1440,
+      "height": 900,
+      "horizontalSafeArea": { "left": 80, "right": 1360 },
+      "padding": { "top": 0, "bottom": 0 },
+      "imageHandling": "none — text-only page",
+      "emptyContentBehavior": "always renders; contact section has no empty state",
+      "segmentation": "single physical page, always exactly one page",
+      "verificationRules": ["contactLine is non-empty"]
+    },
+    {
+      "id": "dynamic-template-images",
+      "family": "image-asset",
+      "sourceOfTruth": "Owner draft image (localStorage/IndexedDB blob) resolved by imageId/localImageId, staged as a data URL into the job payload before capture",
+      "publishingRegistryAdapterId": "dynamic-template-images",
+      "renderer": "consumed by captureProjectPage, not independently rendered",
+      "imageHandling": "resolved and embedded per template instance; see each template's row below for per-template image slot behavior",
+      "emptyContentBehavior": "an unresolved imageId is a media-slot failure (mediaSlotAudit), not a silently blank slot",
+      "verificationRules": ["every referenced imageId in the staged draft has a corresponding entry in assets-manifest.json"]
+    },
+    {
+      "id": "ui-practice-images",
+      "family": "image-asset",
+      "sourceOfTruth": "src/assets/ui-practice-optimized, referenced by src/data/uiPracticeMetadata.json — source-controlled, not a browser draft",
+      "publishingRegistryAdapterId": "ui-practice-images",
+      "renderer": "consumed by captureProjectPage (ui-personal-practice project) and renderSectionPdf (ui-works section)",
+      "imageHandling": "already-published static paths; no blob/localStorage resolution",
+      "emptyContentBehavior": "a missing referenced file is a build-time/dev-server 404, not a pipeline-level fallback",
+      "verificationRules": ["referenced path exists on disk before capture"]
+    },
+    {
+      "id": "project-covers",
+      "family": "image-asset",
+      "sourceOfTruth": "Project cover IndexedDB store (owner draft) or published cover path",
+      "renderer": "not directly embedded in the Collection PDF today — used by the website/cover editor and the publishing pipeline, not by captureProjectPage/renderSectionPdf",
+      "imageHandling": "n/a to the PDF pipeline",
+      "emptyContentBehavior": "n/a to the PDF pipeline",
+      "verificationRules": ["confirm during any future PDF feature work whether project covers become part of a project page before assuming this row is dormant"],
+      "status": "not currently consumed by the Collection PDF — listed for completeness per the requested content-family coverage, not because it is live in this pipeline"
+    },
+    {
+      "id": "figma-embeds",
+      "family": "template-external-preview",
+      "sourceOfTruth": "Figma prototype/showcase URLs stored in the template instance content",
+      "renderer": "captureProjectPage (as part of whichever project contains the template instance)",
+      "imageHandling": "the live cross-origin iframe never appears in the PDF — src/styles.css @media print rules ([data-figma-prototype-interactive] { display:none }, [data-figma-prototype-print] { display:block }) swap to a static poster + link at capture time. This print-rule pair is a DELIBERATE, correctly-scoped exception to the general 'audit every @media print rule' caution above.",
+      "emptyContentBehavior": "a Figma block with no resolvable poster still renders its static fallback markup; it is not currently a hard-fail condition",
+      "verificationRules": ["[data-figma-prototype-print] element is present and non-empty in the captured DOM before page.pdf() runs"]
+    },
+    {
+      "id": "playable-game-embeds",
+      "family": "template-external-preview",
+      "sourceOfTruth": "Playable Game build entry (see publishing registry's playable-game-builds/playable-game-covers adapters)",
+      "renderer": "captureProjectPage",
+      "imageHandling": "not yet independently verified in this session which fallback (poster, blank, or attempted iframe capture) PlayableGameTemplate produces under page.pdf(); flagged as an open verification gap, not a confirmed behavior",
+      "emptyContentBehavior": "unverified — do not assume parity with the Figma print-swap pattern until PlayableGameTemplate's print/capture branch is actually read and confirmed",
+      "verificationRules": ["confirm PlayableGameTemplate's PDF-capture behavior before relying on this row for any future fix"],
+      "status": "open verification gap, tracked in TASKS.md alongside the broader Playable Game production-hosting gap"
+    }
+  ],
+  "templates": [
+    { "id": "project-header", "file": "src/templates/ProjectHeaderTemplate.tsx", "pdfBehavior": "standard — renders as captured, no confirmed special print/PDF branch" },
+    { "id": "statement-longform", "file": "src/templates/StatementLongformTemplate.tsx", "pdfBehavior": "standard" },
+    { "id": "phase", "file": "src/templates/PhaseTemplate.tsx", "pdfBehavior": "standard" },
+    { "id": "phase-milestones", "file": "src/templates/PhaseMilestonesTemplate.tsx", "pdfBehavior": "has a dedicated export fit rule in captureProjectPage's templateFitAudit (see TASKS #106 history) — treat as having confirmed special handling, not yet fully re-documented here" },
+    { "id": "process-flow", "file": "src/templates/ProcessFlowTemplate.tsx", "pdfBehavior": "wide-content template with a scoped fit-scale applied only in collection-export capture mode to avoid horizontal clipping" },
+    { "id": "before-after", "file": "src/templates/BeforeAfterTemplate.tsx", "pdfBehavior": "standard" },
+    { "id": "image-row", "file": "src/templates/ImageRowTemplate.tsx", "pdfBehavior": "standard — image slots resolved via the dynamic-template-images source row above" },
+    { "id": "image-gallery", "file": "src/templates/ImageGalleryTemplate.tsx", "pdfBehavior": "standard" },
+    { "id": "direction-compare", "file": "src/templates/DirectionCompareTemplate.tsx", "pdfBehavior": "standard — image slots resolved via the dynamic-template-images source row above" },
+    { "id": "table", "file": "src/templates/TableTemplate.tsx", "pdfBehavior": "standard" },
+    { "id": "decision-table", "file": "src/templates/DecisionTableTemplate.tsx", "pdfBehavior": "standard" },
+    { "id": "summary-circles", "file": "src/templates/SummaryCirclesTemplate.tsx", "pdfBehavior": "standard" },
+    { "id": "circle-summary", "file": "src/templates/CircleSummaryTemplate.tsx", "pdfBehavior": "standard" },
+    { "id": "supporting-note", "file": "src/templates/SupportingNoteTemplate.tsx", "pdfBehavior": "standard" },
+    { "id": "xmind", "file": "src/templates/XmindTemplate.tsx", "pdfBehavior": "standard" },
+    { "id": "xmind-breakdown", "file": "src/templates/XMindBreakdownTemplate.tsx", "pdfBehavior": "single/double display-mode vector diagram; single-mode layout was fixed and verified 2026-08-07 (see CHANGELOG)" },
+    { "id": "figma-prototype", "file": "src/templates/FigmaPrototypeTemplate.tsx", "pdfBehavior": "print-media poster+link swap — see figma-embeds source row above" },
+    { "id": "figma-showcase", "file": "src/templates/FigmaShowcaseTemplate.tsx", "pdfBehavior": "not yet independently confirmed whether it shares FigmaPrototypeTemplate's print-swap markup or has its own — treat as unverified until read" },
+    { "id": "playable-game", "file": "src/templates/PlayableGameTemplate.tsx", "pdfBehavior": "see playable-game-embeds source row above — open verification gap" }
+  ]
+}
