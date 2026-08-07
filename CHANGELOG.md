@@ -16,3 +16,11 @@ Only work that was actually completed and verified (passed the required check, o
 ### Added
 
 - Reusable project instruction files: `skills/safe-project-editing/SKILL.md`, `skills/portfolio-collection/SKILL.md`, `skills/project-deletion/SKILL.md`, `skills/publish-portfolio/SKILL.md`, referenced from `CLAUDE.md`'s "Task skills" section.
+
+### Verified — publish pipeline mechanics only
+
+- Full production export/import/build/deploy pipeline run end to end: fresh `EXPORT FOR PUBLISH` bundle (6 real drafts, 7 canonical projects, 0 missing references) → dry-run then confirmed `pnpm portfolio:import` → `pnpm typecheck` and `pnpm build` both passed → git diff reviewed, `content/`, `output/`, `public/portfolio-assets/`, `.claude/`, `.vs/` added to `.gitignore` and excluded (all local-only, largest is 1.1GB) → committed (`fabb8b0`) and pushed to `origin/main` → Vercel production deployment confirmed `● Ready`.
+
+### Fixed
+
+- Production rendering for template-based dynamic projects (`src/pages/DynamicProjectPage.tsx`, commit `cd3b6f9`): `loadDraft()` now falls back to the current project's own published draft (`getPublishedProjectDraft()`) whenever DEV/localStorage/staging don't apply, instead of always returning an empty draft outside DEV. DEV/owner localStorage and Portfolio Collection staging behavior unchanged. Verified live in production on `project-1ua2677` ("任务到体验：重新分配界面节奏") and `game-jam-8lzejf` — both now render their full body content (system breakdowns, comparisons, Figma embeds, playable game embed, etc.), not just the hero. No console errors.

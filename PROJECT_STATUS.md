@@ -9,7 +9,7 @@ Dilida Duman's personal Game UX / Interaction Design portfolio. React 19 + TypeS
 ## Content model
 
 - **Source-controlled**: `src/data/projects.ts` (static project registry — currently only `ui-personal-practice`), `src/data/publishedPortfolio.json`, `src/content/projects/translations.ts`.
-- **Template-based dynamic projects**: created via the "New Project" flow, built from `TemplateInstance[]` drafts and/or `ProjectDocument` content, held in browser localStorage/IndexedDB until published. This is now the only way new project content is authored.
+- **Template-based dynamic projects**: created via the "New Project" flow, built from `TemplateInstance[]` drafts and/or `ProjectDocument` content, held in browser localStorage/IndexedDB until published. This is now the only way new project content is authored. `DynamicProjectPage.tsx`'s `loadDraft()` resolves the current project's `templateInstances` from, in order: Portfolio Collection staging (capture mode) → owner's own `localStorage` (DEV) → the project's own published draft in `publishedPortfolio.json` via `getPublishedProjectDraft()` (production fallback). Verified live in production on `project-1ua2677` and `game-jam-8lzejf`.
 - **Browser-only owner drafts**: localStorage (versioned `dilida-portfolio:*:v1` keys) and several IndexedDB databases (project covers, project body assets, game covers). Never touched directly by git; move to source control only via `EXPORT FOR PUBLISH` → `pnpm portfolio:import` (dry-run by default, backs up existing published files).
 
 ## Bespoke legacy system: retired
@@ -33,4 +33,4 @@ The old one-off bespoke draft pages (own hardcoded storage key + own dedicated I
 
 - The default sandboxed browser tool is an isolated/disposable profile — it cannot see the owner's real dynamic-project drafts or IndexedDB data. Claude in Chrome, when connected, can reach the owner's real profile and is the only way to inspect or modify real browser-stored project data.
 - Never clear localStorage/IndexedDB wholesale, never reset storage keys, never overwrite drafts — see `CLAUDE.md` and `skills/safe-project-editing/SKILL.md`.
-- Nothing in this project has been committed, pushed, or published from an AI session unless explicitly requested and confirmed.
+- Only commit, push, or publish from an AI session when explicitly requested and confirmed. First real publish happened 2026-08-07 (commit `fabb8b0`) — see `CHANGELOG.md`.
