@@ -20,6 +20,7 @@ import {
   type DynamicProjectImageMapping,
 } from "../lib/portfolioContentClient";
 import { getStagedDynamicDraft, isCollectionExportCapture, isCollectionStagingMode } from "../lib/collectionExportStaging";
+import { getPublishedProjectDraft } from "../lib/publishedPortfolio";
 
 const dynamicProjectPickerExcludedTemplateIds = ["project-header"];
 
@@ -57,8 +58,26 @@ function emptyDraft(): DynamicProjectDraft {
   return { version: 1, templateInstances: [], updatedAt: new Date(0).toISOString() };
 }
 
+function normalizeDraft(parsed: unknown): DynamicProjectDraft | null {
+  if (!isRecord(parsed) || parsed.version !== 1) return null;
+  return {
+    version: 1,
+    templateInstances: mergeTemplateInstances(parsed.templateInstances),
+    updatedAt: typeof parsed.updatedAt === "string" ? parsed.updatedAt : emptyDraft().updatedAt,
+  };
+}
+
 function loadDraft(projectId: string): DynamicProjectDraft {
-  if (typeof window === "undefined" || !import.meta.env.DEV) return emptyDraft();
+  if (typeof window === "undefined" || !import.meta.env.DEV) {
+    // Production (and any non-browser/prerender context) has no access to
+    // the owner's own localStorage, and is never a Collection-export
+    // capture — that always runs against the local dev server, where DEV is
+    // true (see the branch below). Fall back to this exact project's own
+    // published draft: the same static data already bundled for every
+    // visitor via publishedPortfolio.json, produced by the same
+    // portfolio:import pipeline that writes the localStorage draft shape.
+    return normalizeDraft(getPublishedProjectDraft(projectId)) ?? emptyDraft();
+  }
   // Collection export capture: this browser's localStorage is Playwright's
   // separate, empty profile, so the real draft was staged ahead of time (see
   // collectionExportStaging.ts) and fetched into memory before this page's
@@ -72,13 +91,7 @@ function loadDraft(projectId: string): DynamicProjectDraft {
   try {
     const stored = window.localStorage.getItem(draftStorageKey(projectId));
     if (!stored) return emptyDraft();
-    const parsed = JSON.parse(stored) as unknown;
-    if (!isRecord(parsed) || parsed.version !== 1) return emptyDraft();
-    return {
-      version: 1,
-      templateInstances: mergeTemplateInstances(parsed.templateInstances),
-      updatedAt: typeof parsed.updatedAt === "string" ? parsed.updatedAt : emptyDraft().updatedAt,
-    };
+    return normalizeDraft(JSON.parse(stored) as unknown) ?? emptyDraft();
   } catch {
     return emptyDraft();
   }
