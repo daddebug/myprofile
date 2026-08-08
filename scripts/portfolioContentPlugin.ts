@@ -42,6 +42,7 @@ const playableGameFolderFinishEndpoint = "/__portfolio-content/playable-games/fo
 const playableGameAbortEndpoint = "/__portfolio-content/playable-games/abort";
 const playableGameCoverStageEndpoint = "/__portfolio-content/playable-games/cover/stage";
 const playableGameCoverCommitEndpoint = "/__portfolio-content/playable-games/cover/commit";
+const playableGameCoverResolveEndpoint = "/__portfolio-content/playable-games/cover/resolve";
 const allowedOrigin = "http://localhost:5173";
 const allowedHost = "localhost:5173";
 const maximumFileBytes = 8 * 1024 * 1024;
@@ -1816,6 +1817,32 @@ export function portfolioContentPlugin(): Plugin {
           sendJson(res, 200, { projectId, cover: { coverId: record.coverId, publicUrl: record.publicUrl, format: record.format, size: record.size } });
         } catch (error) {
           sendJson(res, error instanceof RequestError ? error.statusCode : 500, { error: error instanceof Error ? error.message : "Unable to commit playable game cover." });
+        }
+      });
+
+      // Mirrors projectCoverResolveEndpoint above exactly: the currently
+      // bound playable-game launch cover for this project (the last entry in
+      // content/projects/<id>/playable-games.json#covers — "last wins" is
+      // the same convention a single-current-cover project already uses),
+      // re-fetched by productionBundleExport.ts to get real bytes into the
+      // export bundle.
+      server.middlewares.use(playableGameCoverResolveEndpoint, async (req, res) => {
+        if (req.method !== "GET") {
+          sendJson(res, 405, { error: "Method not allowed." });
+          return;
+        }
+        try {
+          validateLocalReadRequest(req);
+          const requestUrl = new URL(req.url ?? "/", allowedOrigin);
+          const projectId = validateProjectId(requestUrl.searchParams.get("projectId"));
+          const document = await readPlayableGameDocument(projectRoot, projectId);
+          const record = document.covers.at(-1) ?? null;
+          sendJson(res, 200, {
+            projectId,
+            cover: record ? { coverId: record.coverId, publicUrl: record.publicUrl, format: record.format, size: record.size } : null,
+          });
+        } catch (error) {
+          sendJson(res, error instanceof RequestError ? error.statusCode : 500, { error: error instanceof Error ? error.message : "Unable to read playable game cover." });
         }
       });
 

@@ -23,6 +23,7 @@ const playableGameFolderFinishEndpoint = "/__portfolio-content/playable-games/fo
 const playableGameAbortEndpoint = "/__portfolio-content/playable-games/abort";
 const playableGameCoverStageEndpoint = "/__portfolio-content/playable-games/cover/stage";
 const playableGameCoverCommitEndpoint = "/__portfolio-content/playable-games/cover/commit";
+const playableGameCoverResolveEndpoint = "/__portfolio-content/playable-games/cover/resolve";
 const supportedMimeTypes = new Set(["image/png", "image/jpeg", "image/webp"]);
 // Real-world JPEG uploads (observed from WeChat's local file cache on
 // Windows) can report one of these alternate/absent MIME strings even
@@ -447,6 +448,23 @@ export async function commitPlayableGameCover(projectId: string, commitToken: st
     credentials: "same-origin",
   });
   const payload = await readResponse<{ projectId: string; cover: PlayableGameCoverReference }>(response);
+  return payload.cover;
+}
+
+// Mirrors getDiskProjectCover()'s pattern exactly: this project's currently
+// bound playable-game launch cover (content/projects/<id>/playable-games.json
+// #covers, disk-resident — never IndexedDB), re-fetched here purely so
+// productionBundleExport.ts can get the real bytes into the export bundle
+// tagged sourceAdapterId: "playable-game-covers".
+export async function getDiskPlayableGameCover(projectId: string) {
+  const response = await fetch(
+    `${playableGameCoverResolveEndpoint}?projectId=${encodeURIComponent(projectId)}`,
+    { credentials: "same-origin", cache: "no-store" },
+  );
+  const payload = await readResponse<{
+    projectId: string;
+    cover: PlayableGameCoverReference | null;
+  }>(response);
   return payload.cover;
 }
 

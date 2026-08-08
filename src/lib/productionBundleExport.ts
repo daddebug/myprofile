@@ -6,7 +6,7 @@ import { getProjectDocumentsExportStore } from "./projectDocuments";
 import { getProjectCollectionExportStore } from "./projectMetadata";
 import uiPracticeMetadata from "../data/uiPracticeMetadata.json";
 import { getPublishSourceAdapter, publishSourceRegistry } from "./publishing/publishSourceRegistry";
-import { getDiskProjectCover } from "./portfolioContentClient";
+import { getDiskProjectCover, getDiskPlayableGameCover } from "./portfolioContentClient";
 
 type ExportedImage = {
   sourceAdapterId: string;
@@ -99,6 +99,34 @@ async function fetchDiskProjectCover(projectId: string, publicUrl: string, forma
     mimeType: blob.type || `image/${format === "jpeg" ? "jpeg" : format}`,
     size: blob.size || size,
     updatedAt,
+    dataBase64: bytesToBase64(await blob.arrayBuffer()),
+  };
+}
+
+// playable-game-covers: PlayableGameTemplate's own launch-cover (distinct
+// from the project card cover above) — saved to
+// content/projects/<projectId>/playable-games.json#covers via the same
+// dev-server stage/commit pattern as project covers, never IndexedDB.
+// getDiskPlayableGameCover() mirrors getDiskProjectCover() exactly. id is
+// the coverId (not projectId) — import-production-bundle.mjs matches this
+// against content.game.cover.coverId wherever it appears in a project's
+// template instances, the same way dynamic-template-images matches by
+// imageId, since a project's own catalog id is already taken by its card
+// cover's entry in the same bundle.
+async function fetchDiskPlayableGameCover(projectId: string, coverId: string, publicUrl: string, format: string, size: number): Promise<ExportedImage> {
+  const response = await fetch(publicUrl, { credentials: "same-origin", cache: "no-store" });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const blob = await response.blob();
+  const fileName = publicUrl.split("/").pop() || `${coverId}.${format}`;
+  return {
+    sourceAdapterId: "playable-game-covers",
+    database: "disk",
+    store: "playable-game-covers",
+    id: coverId,
+    projectId,
+    fileName,
+    mimeType: blob.type || `image/${format === "jpeg" ? "jpeg" : format}`,
+    size: blob.size || size,
     dataBase64: bytesToBase64(await blob.arrayBuffer()),
   };
 }
@@ -360,6 +388,20 @@ export async function exportProductionBundle(): Promise<ProductionExportSummary>
       images.push(await fetchDiskProjectCover(projectId, diskCover.publicUrl, diskCover.format, diskCover.size, diskCover.updatedAt));
     } catch (error) {
       missingReferences.push(`${projectId}: cover (could not fetch ${diskCover.publicUrl}: ${error instanceof Error ? error.message : String(error)})`);
+    }
+  }
+
+  // Same disk-resident pattern as the project cover loop above, for
+  // PlayableGameTemplate's own launch cover. A project with no playable-game
+  // cover simply has none (missingAssetsAllowed: true on the
+  // playable-game-covers registry row).
+  for (const projectId of canonicalProjectIds) {
+    const gameCover = await getDiskPlayableGameCover(projectId).catch(() => null);
+    if (!gameCover) continue;
+    try {
+      images.push(await fetchDiskPlayableGameCover(projectId, gameCover.coverId, gameCover.publicUrl, gameCover.format, gameCover.size));
+    } catch (error) {
+      missingReferences.push(`${projectId}: playable-game cover (could not fetch ${gameCover.publicUrl}: ${error instanceof Error ? error.message : String(error)})`);
     }
   }
 

@@ -5,7 +5,14 @@ import { TemplateContent, TemplateSurface } from "../components/template-tools/T
 import type { TemplateLayoutControlDefinition, TemplateMeta, TemplateProps } from "../lib/templateLibrary";
 
 type LocalizedText = { zh: string; en: string };
-type GameReference = { gameId: string; entryPublicPath: string; originalFileName: string; displayName?: string; fileCount: number; totalBytes: number; createdAt?: string };
+// entryPublicPath (a local, portfolio-hosted WebGL build) and playUrl (an
+// external canonical hosted build, e.g. Unity Play) are mutually exclusive
+// hosting strategies for the same conceptual "game" reference — a project
+// has one or the other, never both. See TASKS.md/CHANGELOG.md 2026-08-08:
+// "Playable Game has one canonical hosted build." originalFileName/
+// fileCount/totalBytes/createdAt describe a local build's own upload and
+// are meaningless (and omitted) once a project is migrated to playUrl.
+type GameReference = { gameId: string; entryPublicPath?: string; playUrl?: string; originalFileName?: string; displayName?: string; fileCount?: number; totalBytes?: number; createdAt?: string };
 type CoverReference = { coverId: string; publicUrl: string; format: string; size: number };
 type ControlItem = { id: string; key?: LocalizedText; action?: LocalizedText };
 
@@ -32,7 +39,12 @@ export const templateMeta: TemplateMeta = {
 const statuses = ["prototype", "in-development", "complete", "archived"] as const;
 const ratios = { "16:9": "16 / 9", "4:3": "4 / 3", auto: "16 / 9" } as const;
 const text = (value: unknown, locale: "zh" | "en") => value && typeof value === "object" && !Array.isArray(value) ? String((value as Record<string, unknown>)[locale] ?? "") : "";
-const isGame = (value: unknown): value is GameReference => Boolean(value && typeof value === "object" && !Array.isArray(value) && typeof (value as GameReference).gameId === "string" && typeof (value as GameReference).entryPublicPath === "string");
+const isGame = (value: unknown): value is GameReference => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as GameReference;
+  if (typeof candidate.gameId !== "string") return false;
+  return typeof candidate.entryPublicPath === "string" || typeof candidate.playUrl === "string";
+};
 const isCover = (value: unknown): value is CoverReference => Boolean(value && typeof value === "object" && !Array.isArray(value) && typeof (value as CoverReference).coverId === "string" && typeof (value as CoverReference).publicUrl === "string");
 
 export default function PlayableGameTemplate({ content, locale, horizontalInset, inlineEditor }: TemplateProps) {
@@ -41,6 +53,14 @@ export default function PlayableGameTemplate({ content, locale, horizontalInset,
   const [existingGamesOpen, setExistingGamesOpen] = useState(false);
   const [coverLoadFailed, setCoverLoadFailed] = useState(false);
   const game = isGame(content.game) ? content.game : null;
+  // An externally-hosted game (Unity Play) is never put in an iframe here —
+  // confirmed by direct testing (2026-08-08) that Unity Play's game pages do
+  // not reliably render when framed. Rendering a plain external link instead
+  // of an iframe also structurally rules out the recursive
+  // "portfolio-inside-portfolio" failure mode a broken/misrouted local
+  // entryPublicPath could otherwise produce, since no URL of any kind is
+  // ever assigned to an iframe's src for this branch.
+  const isExternal = Boolean(game?.playUrl);
   const cover = isCover(content.cover) ? content.cover : null;
   // The cover is explicitly optional (schema: required: false) and this
   // section always renders real content (the play button/loader) whether
@@ -84,10 +104,23 @@ export default function PlayableGameTemplate({ content, locale, horizontalInset,
         <div className="relative grid w-full place-items-center bg-[#0d1238]" style={{ aspectRatio: ratios[aspectRatio] }} data-media-slot-state={coverMediaSlotState} data-media-slot-id={coverSlotId}>
           {!running && cover ? <img src={cover.publicUrl} alt="" className="absolute inset-0 h-full w-full object-cover opacity-70" onError={() => setCoverLoadFailed(true)} /> : null}
           {!running && cover ? <div className="absolute inset-0 bg-[#090d2b]/45" aria-hidden="true" /> : null}
-          {running && game ? <iframe key={reloadKey} src={game.entryPublicPath} title={text(content.heading, locale) || "Playable game"} className="absolute inset-0 h-full w-full border-0 print:hidden" sandbox="allow-scripts allow-same-origin allow-pointer-lock" allow="fullscreen; gamepad" allowFullScreen /> : <div className="relative flex max-w-3xl flex-col items-center gap-4 px-6 text-center"><Play className="h-10 w-10 text-acidGreen" aria-hidden="true" /><p className="text-sm text-softWhite/62">{game ? (locale === "zh" ? "点击开始加载可玩版本" : "Start to load the playable build") : (locale === "zh" ? "可玩版本待补" : "Playable build to be added")}</p>{game ? <button type="button" className="editor-action border-acidGreen text-acidGreen" onClick={() => setRunning(true)}>{locale === "zh" ? "开始游戏" : "Start game"}</button> : null}{editor ? <div className="grid justify-items-center gap-3"><p className="text-sm font-semibold text-softWhite">{locale === "zh" ? "添加可玩游戏" : "Add playable game"}</p><div className="flex flex-wrap justify-center gap-2"><button type="button" className="editor-action border-acidGreen text-acidGreen" disabled={editor.busy} onClick={editor.onChooseFolder}>{locale === "zh" ? "选择网页游戏文件夹（推荐）" : "Choose web game folder (recommended)"}</button><button type="button" className="editor-action" disabled={editor.busy} onClick={editor.onChooseZip}>{locale === "zh" ? "选择 ZIP 文件" : "Choose ZIP file"}</button><button type="button" className="editor-action" disabled={editor.busy} onClick={() => setExistingGamesOpen((open) => !open)}>{game ? (locale === "zh" ? "选择其他现有游戏" : "Choose another saved game") : (locale === "zh" ? "选择现有游戏" : "Choose saved game")}</button></div><p className="max-w-2xl text-xs leading-5 text-softWhite/48">{locale === "zh" ? "可以直接选择 Unity WebGL 导出的文件夹，无需手动压缩。系统会自动寻找 index.html、Build 和 TemplateData。" : "Select an exported Unity WebGL folder directly. No manual ZIP is needed; the system finds index.html, Build, and TemplateData."}</p>{editor.stage ? <p className="text-sm text-acidGreen">{stageLabels[editor.stage]}</p> : null}</div> : null}</div>}
+          {running && game && !isExternal ? <iframe key={reloadKey} src={game.entryPublicPath} title={text(content.heading, locale) || "Playable game"} className="absolute inset-0 h-full w-full border-0 print:hidden" sandbox="allow-scripts allow-same-origin allow-pointer-lock" allow="fullscreen; gamepad" allowFullScreen /> : <div className="relative flex max-w-3xl flex-col items-center gap-4 px-6 text-center"><Play className="h-10 w-10 text-acidGreen" aria-hidden="true" /><p className="text-sm text-softWhite/62">{game ? (isExternal ? (locale === "zh" ? "在 Unity Play 中打开可玩版本" : "Play the build hosted on Unity Play") : (locale === "zh" ? "点击开始加载可玩版本" : "Start to load the playable build")) : (locale === "zh" ? "可玩版本待补" : "Playable build to be added")}</p>{game && isExternal ? <a className="editor-action border-acidGreen text-acidGreen" href={game.playUrl} target="_blank" rel="noreferrer"><ExternalLink className="h-3.5 w-3.5" />{locale === "zh" ? "打开游戏 / Play Game" : "Play Game"}</a> : game ? <button type="button" className="editor-action border-acidGreen text-acidGreen" onClick={() => setRunning(true)}>{locale === "zh" ? "开始游戏" : "Start game"}</button> : null}{editor ? <div className="grid justify-items-center gap-3">
+              <p className="text-sm font-semibold text-softWhite">{locale === "zh" ? "Unity Play 外部链接" : "Unity Play external URL"}</p>
+              <input
+                type="url"
+                value={game?.playUrl ?? ""}
+                placeholder="https://play.unity.com/en/games/..."
+                className="w-full max-w-xl rounded border border-softWhite/15 bg-deepIndigo px-3 py-2 text-sm text-softWhite"
+                onChange={(event) => {
+                  const value = event.target.value.trim();
+                  const nextGame: GameReference = { gameId: game?.gameId || `game-${crypto.randomUUID()}`, ...game, playUrl: value || undefined };
+                  editor?.onContentChange({ game: nextGame });
+                }}
+              /><p className="text-sm font-semibold text-softWhite">{locale === "zh" ? "添加可玩游戏" : "Add playable game"}</p><div className="flex flex-wrap justify-center gap-2"><button type="button" className="editor-action border-acidGreen text-acidGreen" disabled={editor.busy} onClick={editor.onChooseFolder}>{locale === "zh" ? "选择网页游戏文件夹（推荐）" : "Choose web game folder (recommended)"}</button><button type="button" className="editor-action" disabled={editor.busy} onClick={editor.onChooseZip}>{locale === "zh" ? "选择 ZIP 文件" : "Choose ZIP file"}</button><button type="button" className="editor-action" disabled={editor.busy} onClick={() => setExistingGamesOpen((open) => !open)}>{game ? (locale === "zh" ? "选择其他现有游戏" : "Choose another saved game") : (locale === "zh" ? "选择现有游戏" : "Choose saved game")}</button></div><p className="max-w-2xl text-xs leading-5 text-softWhite/48">{locale === "zh" ? "可以直接选择 Unity WebGL 导出的文件夹，无需手动压缩。系统会自动寻找 index.html、Build 和 TemplateData。" : "Select an exported Unity WebGL folder directly. No manual ZIP is needed; the system finds index.html, Build, and TemplateData."}</p>{editor.stage ? <p className="text-sm text-acidGreen">{stageLabels[editor.stage]}</p> : null}</div> : null}</div>}
           {running && game ? <div className="absolute inset-0 hidden flex-col items-center justify-center gap-3 bg-[#0d1238] px-6 text-center print:flex"><Play className="h-8 w-8 text-acidGreen" aria-hidden="true" /><p className="text-sm text-softWhite">Playable prototype available on the web</p></div> : null}
         </div>
-        {game ? <div className="flex flex-wrap items-center justify-between gap-3 border-t border-softWhite/10 px-4 py-3"><p className="text-xs text-softWhite/48">{game.originalFileName} · {game.fileCount} files · {(game.totalBytes / 1048576).toFixed(1)} MiB</p><div className="flex gap-2">{running ? <button type="button" className="editor-action" onClick={() => setRunning(false)}><Square className="h-3.5 w-3.5" />{locale === "zh" ? "停止" : "Stop"}</button> : null}<button type="button" className="editor-action" onClick={() => { setRunning(true); setReloadKey((value) => value + 1); }}><RefreshCw className="h-3.5 w-3.5" />{locale === "zh" ? "重新加载" : "Reload"}</button><button type="button" className="editor-action" onClick={fullscreen}><Maximize className="h-3.5 w-3.5" />{locale === "zh" ? "全屏" : "Fullscreen"}</button><a className="editor-action" href={game.entryPublicPath} target="_blank" rel="noreferrer"><ExternalLink className="h-3.5 w-3.5" />{locale === "zh" ? "新标签页" : "New tab"}</a></div></div> : null}
+        {game && isExternal ? <div className="flex flex-wrap items-center justify-between gap-3 border-t border-softWhite/10 px-4 py-3"><p className="text-xs text-softWhite/48">{locale === "zh" ? "托管于 Unity Play" : "Hosted on Unity Play"}</p><div className="flex gap-2"><a className="editor-action border-acidGreen text-acidGreen" href={game.playUrl} target="_blank" rel="noreferrer"><ExternalLink className="h-3.5 w-3.5" />{locale === "zh" ? "打开游戏 / Play Game" : "Play Game"}</a></div></div> : null}
+        {game && !isExternal ? <div className="flex flex-wrap items-center justify-between gap-3 border-t border-softWhite/10 px-4 py-3"><p className="text-xs text-softWhite/48">{game.originalFileName} · {game.fileCount} files · {((game.totalBytes ?? 0) / 1048576).toFixed(1)} MiB</p><div className="flex gap-2">{running ? <button type="button" className="editor-action" onClick={() => setRunning(false)}><Square className="h-3.5 w-3.5" />{locale === "zh" ? "停止" : "Stop"}</button> : null}<button type="button" className="editor-action" onClick={() => { setRunning(true); setReloadKey((value) => value + 1); }}><RefreshCw className="h-3.5 w-3.5" />{locale === "zh" ? "重新加载" : "Reload"}</button><button type="button" className="editor-action" onClick={fullscreen}><Maximize className="h-3.5 w-3.5" />{locale === "zh" ? "全屏" : "Fullscreen"}</button><a className="editor-action" href={game.entryPublicPath} target="_blank" rel="noreferrer"><ExternalLink className="h-3.5 w-3.5" />{locale === "zh" ? "新标签页" : "New tab"}</a></div></div> : null}
       </section>
 
       {editor && existingGamesOpen ? <div className="mx-auto mt-4 max-w-[80rem] rounded-[8px] bg-softWhite/[0.035] p-4 ring-1 ring-inset ring-softWhite/10">{editor.availableGames.length ? <div className="grid gap-3">{editor.availableGames.map((saved) => <div key={saved.gameId} className="flex flex-wrap items-center justify-between gap-4 border-b border-softWhite/10 pb-3 last:border-0 last:pb-0"><div className="min-w-0"><p className="font-semibold text-softWhite">{saved.displayName}</p><p className="mt-1 break-all text-xs text-softWhite/48">{saved.originalFileName} · {saved.fileCount} files · {(saved.totalBytes / 1048576).toFixed(1)} MiB · {formatCreatedAt(saved.createdAt)}</p></div><button type="button" className="editor-action border-acidGreen text-acidGreen" disabled={editor.busy || saved.gameId === game?.gameId} onClick={async () => { await editor.onUseSavedBuild(saved.gameId); setExistingGamesOpen(false); }}>{saved.gameId === game?.gameId ? (locale === "zh" ? "已绑定" : "Bound") : (locale === "zh" ? "绑定" : "Bind")}</button></div>)}</div> : <p className="text-sm text-softWhite/60">{locale === "zh" ? "暂无现有游戏构建，可上传 ZIP 创建新版本。" : "No saved game builds. Upload a ZIP to create a new version."}</p>}</div> : null}

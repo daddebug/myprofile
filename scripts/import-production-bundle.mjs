@@ -2,12 +2,14 @@ import { mkdir, readFile, writeFile, copyFile, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { buildPublishingPreflight, getPublishedAssetLocation, readPublishSourceRegistry } from "./publishing-preflight-lib.mjs";
+import { writeBlockedPublishReport, writePublishPlanReport } from "./publishing-report-lib.mjs";
 
 const OFFICIAL_ROOT = path.resolve("D:/myprofilegit/myprofile");
 const OUTPUT_DATA = path.join("src", "data", "publishedPortfolio.json");
 const OUTPUT_UI_PRACTICE_DATA = path.join("src", "data", "uiPracticeMetadata.json");
 const OUTPUT_ASSET_ROOT = path.join("public", "images", "published");
 const CONFIRM_FLAG = "--confirm";
+const PRODUCTION_URL = "https://myprofile-teal.vercel.app/zh/";
 
 function fail(message) {
   console.error(`\nERROR: ${message}\n`);
@@ -56,6 +58,14 @@ function replaceImagePaths(value, imagePathById, missing) {
     const publicPath = imagePathById.get(refId);
     if (publicPath) output.publicPath = publicPath;
     else missing.add(refId);
+  }
+  // PlayableGameTemplate's own launch cover: { coverId, publicUrl } shape,
+  // distinct from the imageId/localImageId shape above — rewrites publicUrl
+  // in place (that field's real name in this shape) rather than publicPath.
+  if (typeof value.coverId === "string" && value.coverId && typeof value.publicUrl === "string") {
+    const publicPath = imagePathById.get(value.coverId);
+    if (publicPath) output.publicUrl = publicPath;
+    else missing.add(value.coverId);
   }
   return output;
 }
@@ -148,6 +158,12 @@ const preflightPath = path.join(cwd, "output", "publishing-preflight-manifest.js
 await mkdir(path.dirname(preflightPath), { recursive: true });
 await writeFile(preflightPath, `${JSON.stringify(preflight, null, 2)}\n`, "utf8");
 if (!preflight.ok) {
+  await writeBlockedPublishReport({
+    root: cwd,
+    manifest: preflight,
+    catalog: bundle.projectCatalog?.projects ?? bundle.publicMetadata?.projects ?? {},
+    productionUrl: PRODUCTION_URL,
+  });
   const failures = preflight.issues
     .filter((issue) => issue.severity === "error")
     .map((issue) => `${issue.sourceAdapterId}: ${issue.message}`);
@@ -195,6 +211,7 @@ const imagePathsByProject = new Map();
 const projectBodyPaths = new Map();
 const templateImagePaths = new Map();
 const gameCoverPaths = new Map();
+const playableGameCoverPaths = new Map();
 const covers = {};
 
 for (const image of bundle.images) {
@@ -206,18 +223,21 @@ for (const image of bundle.images) {
   const isCover = adapter.id === "project-covers-indexeddb" || adapter.id === "project-covers-disk";
   const isProjectBody = adapter.id === "project-body-indexeddb-assets";
   const isGameCover = adapter.id === "game-experience-covers";
+  const isPlayableGameCover = adapter.id === "playable-game-covers";
   const isTemplateImage = adapter.id === "dynamic-template-images" || adapter.id === "ui-practice-images";
   if (isCover && !canonicalProjectIds.has(image.id)) {
     ignoredCoverIds.push(image.id);
     continue;
   }
-  if (isTemplateImage && !(typeof image.projectId === "string" && canonicalProjectIds.has(image.projectId))) {
-    fail(`Template image ${image.id} is not attached to a canonical project (projectId: ${image.projectId ?? "<missing>"}).`);
+  if ((isTemplateImage || isPlayableGameCover) && !(typeof image.projectId === "string" && canonicalProjectIds.has(image.projectId))) {
+    fail(`Image ${image.id} is not attached to a canonical project (projectId: ${image.projectId ?? "<missing>"}).`);
   }
   const owner = isCover
     ? "covers"
     : isGameCover
       ? "game-covers"
+    : isPlayableGameCover
+      ? path.posix.join("playable-game-covers", image.projectId)
     : isProjectBody && typeof image.projectId === "string" && canonicalProjectIds.has(image.projectId)
       ? path.posix.join("project-body", image.projectId)
     : isTemplateImage
@@ -238,6 +258,7 @@ for (const image of bundle.images) {
   assets.push(asset);
   if (isCover) covers[image.id] = publicPath;
   else if (isGameCover) gameCoverPaths.set(image.id, publicPath);
+  else if (isPlayableGameCover) playableGameCoverPaths.set(image.id, publicPath);
   else if (isProjectBody) projectBodyPaths.set(image.id, publicPath);
   else if (isTemplateImage) templateImagePaths.set(image.id, publicPath);
   else {
@@ -255,7 +276,7 @@ for (const [projectId, draft] of Object.entries(bundle.drafts)) {
   // draftImageSources bucket; others reference imageId values staged to disk
   // (templateImagePaths). Merging all three lookups here is additive only —
   // it changes nothing for existing static-project drafts that have neither.
-  const projectImagePaths = new Map([...(imagePathsByProject.get(projectId) ?? new Map()), ...projectBodyPaths, ...templateImagePaths]);
+  const projectImagePaths = new Map([...(imagePathsByProject.get(projectId) ?? new Map()), ...projectBodyPaths, ...templateImagePaths, ...playableGameCoverPaths]);
   drafts[projectId] = replaceImagePaths(draft, projectImagePaths, missing);
 }
 if (missing.size) fail(`Referenced image data is missing from the bundle:\n- ${[...missing].join("\n- ")}`);
@@ -364,11 +385,14 @@ const outputForValidation = excludeProjectIds.size
 const rewrittenPreflight = await buildPublishingPreflight({ root: cwd, bundle, rewrittenOutput: { output: outputForValidation, uiPractice } });
 await writeFile(preflightPath, `${JSON.stringify(rewrittenPreflight, null, 2)}\n`, "utf8");
 if (!rewrittenPreflight.ok) {
+  await writePublishPlanReport({ root: cwd, manifest: rewrittenPreflight, output, uiPractice, assets, productionUrl: PRODUCTION_URL });
   const failures = rewrittenPreflight.issues
     .filter((issue) => issue.severity === "error")
     .map((issue) => `${issue.sourceAdapterId}: ${issue.message}`);
   fail(`Publishing rewrite validation failed. No production files were changed.\nManifest: ${preflightPath}\n- ${failures.join("\n- ")}`);
 }
+
+await writePublishPlanReport({ root: cwd, manifest: rewrittenPreflight, output, uiPractice, assets, productionUrl: PRODUCTION_URL });
 
 console.log("\nPortfolio production import review");
 console.log(`  Drafts: ${Object.keys(drafts).length}`);

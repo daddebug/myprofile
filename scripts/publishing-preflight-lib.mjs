@@ -5,7 +5,7 @@ const REGISTRY_PATH = path.join("src", "lib", "publishing", "publishSourceRegist
 const FORBIDDEN_PUBLISHED_REFERENCE = /^(?:blob:|file:|https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?\/)|^[a-zA-Z]:[\\/]|^\/portfolio-assets\/|^\/__portfolio-content\//;
 const RESOURCE_KEYS = new Set([
   "assetId", "posterAssetId", "imageId", "localImageId", "coverAssetId", "detectedCoverAssetId",
-  "coverId", "gameId", "publicPath", "publicUrl", "posterPublicPath", "entryPublicPath", "figmaUrl", "sourceUrl", "embedUrl",
+  "coverId", "gameId", "publicPath", "publicUrl", "posterPublicPath", "entryPublicPath", "figmaUrl", "sourceUrl", "embedUrl", "playUrl",
 ]);
 
 const MIME_BY_EXTENSION = {
@@ -102,10 +102,21 @@ function collectContentTree(manifest, value, context, registryIds, bundleImageId
 
   for (const [key, item] of Object.entries(record)) {
     const fieldPath = context.fieldPath ? `${context.fieldPath}.${key}` : key;
-    if (typeof item === "string" && item.trim() && RESOURCE_KEYS.has(key)) {
+    // A game reference with a playUrl sibling has migrated to Unity Play
+    // (or another stable external host) as its one canonical hosted build —
+    // see TASKS.md/CHANGELOG.md 2026-08-08, "Playable Game has one
+    // canonical hosted build." Its gameId/entryPublicPath are no longer
+    // real, needs-collecting local assets (there is no longer a local
+    // build for them to point at), so — unlike an unmigrated game — they
+    // must not be required to resolve against playable-game-builds; only
+    // playUrl itself is walked below, the same way figmaUrl/sourceUrl/
+    // embedUrl are.
+    const migratedGameField = (key === "gameId" || key === "entryPublicPath")
+      && typeof record.playUrl === "string" && record.playUrl.trim();
+    if (typeof item === "string" && item.trim() && RESOURCE_KEYS.has(key) && !migratedGameField) {
       let adapterId;
       let referenceId = item;
-      if (key === "figmaUrl" || key === "sourceUrl" || key === "embedUrl") adapterId = "external-embeds";
+      if (key === "figmaUrl" || key === "sourceUrl" || key === "embedUrl" || key === "playUrl") adapterId = "external-embeds";
       else if (key === "localImageId") adapterId = "project-body-indexeddb-assets";
       else if (key === "assetId" || key === "posterAssetId") adapterId = "project-body-indexeddb-assets";
       else if (key === "coverAssetId" || key === "detectedCoverAssetId") adapterId = "game-experience-covers";

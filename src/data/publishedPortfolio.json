@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-07T07:06:58.702Z",
+  "generatedAt": "2026-08-08T09:45:58.450Z",
   "drafts": {
     "interaction-intelligence-system": {
       "version": 1,
@@ -4817,16 +4817,12 @@
             },
             "game": {
               "gameId": "game-70e16fe4-d7fd-4425-ad37-4357636211a2",
-              "entryPublicPath": "/portfolio-assets/playable-games/game-jam-8lzejf/game-70e16fe4-d7fd-4425-ad37-4357636211a2/index.html",
-              "originalFileName": "gamescript",
               "displayName": "gamescript",
-              "fileCount": 17,
-              "totalBytes": 109174000,
-              "createdAt": "2026-08-02T09:47:06.546Z"
+              "playUrl": "https://play.unity.com/en/games/877cb160-3478-4f23-bf1d-384942b132f1/gamescript"
             },
             "cover": {
               "coverId": "cover-931ab6f6-4b00-4c96-809a-53ad7dac51bf",
-              "publicUrl": "/portfolio-assets/playable-games/game-jam-8lzejf/covers/playable-game-cover-msbmb66p-3790aa0e-92f9-4263-a15b-e91ebeba54e9.png",
+              "publicUrl": "/images/published/playable-game-covers/game-jam-8lzejf/cover-931ab6f6-4b00-4c96-809a-53ad7dac51bf.png",
               "format": "png",
               "size": 2867368
             },
@@ -5086,7 +5082,7 @@
                 "id": "image-row-item-6a451b26-3c12-4ccc-a268-6a94982543ab",
                 "image": {
                   "imageId": "image-3e66c1f3-6182-46a2-a7ae-c7f76669f1a1",
-                  "publicPath": "/images/published/template-images-game-jam-8lzejf/image-3e66c1f3-6182-46a2-a7ae-c7f76669f1a1.png"
+                  "publicPath": "/images/published/template-images/game-jam-8lzejf/image-3e66c1f3-6182-46a2-a7ae-c7f76669f1a1.png"
                 },
                 "alt": {
                   "zh": "Flip The Script 主题脑暴与玩法方向",
@@ -5158,7 +5154,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-a93a7c0b-42fd-4512-82a9-9cfff4f46712",
-                  "publicPath": "/images/published/template-images-game-jam-8lzejf/image-a93a7c0b-42fd-4512-82a9-9cfff4f46712.png"
+                  "publicPath": "/images/published/template-images/game-jam-8lzejf/image-a93a7c0b-42fd-4512-82a9-9cfff4f46712.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -5175,7 +5171,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-71a0f0a3-f594-4e26-98c6-8a79b5182882",
-                  "publicPath": "/images/published/template-images-game-jam-8lzejf/image-71a0f0a3-f594-4e26-98c6-8a79b5182882.png"
+                  "publicPath": "/images/published/template-images/game-jam-8lzejf/image-71a0f0a3-f594-4e26-98c6-8a79b5182882.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -5192,7 +5188,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-cc135262-0268-408f-a095-44ac5cb9924e",
-                  "publicPath": "/images/published/template-images-game-jam-8lzejf/image-cc135262-0268-408f-a095-44ac5cb9924e.png"
+                  "publicPath": "/images/published/template-images/game-jam-8lzejf/image-cc135262-0268-408f-a095-44ac5cb9924e.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -5200,7 +5196,7 @@
                 "id": "image-row-item-dc5e6740-5faa-48e3-b661-2a206cc22137",
                 "image": {
                   "imageId": "image-f248cae0-b3f5-46eb-bee1-72569b8097a4",
-                  "publicPath": "/images/published/template-images-game-jam-8lzejf/image-f248cae0-b3f5-46eb-bee1-72569b8097a4.png"
+                  "publicPath": "/images/published/template-images/game-jam-8lzejf/image-f248cae0-b3f5-46eb-bee1-72569b8097a4.png"
                 },
                 "imageDisplayMode": "cover",
                 "hoverPreviewMode": "none",
@@ -5253,7 +5249,7 @@
           }
         }
       ],
-      "updatedAt": "2026-08-05T05:41:04.710Z"
+      "updatedAt": "2026-08-08T09:34:32.191Z"
     },
     "3d-vdr4qg": {
       "version": 1,
@@ -5310,16 +5306,12 @@
             },
             "game": {
               "gameId": "game-544bb4d7-3c67-4ff5-947f-283650afe8d5",
-              "entryPublicPath": "/portfolio-assets/playable-games/3d-vdr4qg/game-544bb4d7-3c67-4ff5-947f-283650afe8d5/index.html",
-              "originalFileName": "afterwarm",
               "displayName": "afterwarm",
-              "fileCount": 20,
-              "totalBytes": 346221980,
-              "createdAt": "2026-08-02T08:32:09.089Z"
+              "playUrl": "https://play.unity.com/en/games/d21db0be-36a7-4193-a21f-64e34a979196/tem"
             },
             "cover": {
               "coverId": "cover-50be874a-0c4d-4c2b-a6fd-5c5c17f0810c",
-              "publicUrl": "/portfolio-assets/playable-games/3d-vdr4qg/covers/playable-game-cover-msbfdf5x-c08315e0-bc16-4813-88d6-575aa4cfd604.png",
+              "publicUrl": "/images/published/playable-game-covers/3d-vdr4qg/cover-50be874a-0c4d-4c2b-a6fd-5c5c17f0810c.png",
               "format": "png",
               "size": 1989236
             },
@@ -5520,7 +5512,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-d41a18d5-0541-49b8-ae46-fd13f4227a20",
-                  "publicPath": "/images/published/template-images-3d-vdr4qg/image-d41a18d5-0541-49b8-ae46-fd13f4227a20.png"
+                  "publicPath": "/images/published/template-images/3d-vdr4qg/image-d41a18d5-0541-49b8-ae46-fd13f4227a20.png"
                 },
                 "imageCropRatio": "16:9"
               },
@@ -5545,7 +5537,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-1b218f11-2920-4ef9-ac7f-1c18cfc4526f",
-                  "publicPath": "/images/published/template-images-3d-vdr4qg/image-1b218f11-2920-4ef9-ac7f-1c18cfc4526f.png"
+                  "publicPath": "/images/published/template-images/3d-vdr4qg/image-1b218f11-2920-4ef9-ac7f-1c18cfc4526f.png"
                 },
                 "imageCropRatio": "16:9"
               },
@@ -5570,7 +5562,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-6c4f41ee-68e1-4f4e-a71c-76c1acc15ec3",
-                  "publicPath": "/images/published/template-images-3d-vdr4qg/image-6c4f41ee-68e1-4f4e-a71c-76c1acc15ec3.png"
+                  "publicPath": "/images/published/template-images/3d-vdr4qg/image-6c4f41ee-68e1-4f4e-a71c-76c1acc15ec3.png"
                 }
               }
             ]
@@ -5639,12 +5631,12 @@
             },
             "leftImage": {
               "imageId": "image-108f3f03-492e-47f3-ac30-bcf261797e17",
-              "publicPath": "/images/published/template-images-3d-vdr4qg/image-108f3f03-492e-47f3-ac30-bcf261797e17.png",
+              "publicPath": "/images/published/template-images/3d-vdr4qg/image-108f3f03-492e-47f3-ac30-bcf261797e17.png",
               "hoverPreviewMode": "none"
             },
             "rightImage": {
               "imageId": "image-1c56bb5b-47b6-4c01-912c-8debc61e7df4",
-              "publicPath": "/images/published/template-images-3d-vdr4qg/image-1c56bb5b-47b6-4c01-912c-8debc61e7df4.png",
+              "publicPath": "/images/published/template-images/3d-vdr4qg/image-1c56bb5b-47b6-4c01-912c-8debc61e7df4.png",
               "hoverPreviewMode": "none"
             },
             "direction": "left-to-right"
@@ -5689,12 +5681,12 @@
             },
             "leftImage": {
               "imageId": "image-b8c2ee01-94f6-41e1-86ca-9bba0f8d1e62",
-              "publicPath": "/images/published/template-images-3d-vdr4qg/image-b8c2ee01-94f6-41e1-86ca-9bba0f8d1e62.png",
+              "publicPath": "/images/published/template-images/3d-vdr4qg/image-b8c2ee01-94f6-41e1-86ca-9bba0f8d1e62.png",
               "hoverPreviewMode": "none"
             },
             "rightImage": {
               "imageId": "image-ea38e8ba-ead1-4929-b4f6-42bbf3a921c2",
-              "publicPath": "/images/published/template-images-3d-vdr4qg/image-ea38e8ba-ead1-4929-b4f6-42bbf3a921c2.png",
+              "publicPath": "/images/published/template-images/3d-vdr4qg/image-ea38e8ba-ead1-4929-b4f6-42bbf3a921c2.png",
               "hoverPreviewMode": "none"
             },
             "direction": "left-to-right"
@@ -5718,7 +5710,7 @@
                 "id": "image-row-item-5e0aa0ed-dbb7-4975-a4c0-d94a05f3b4b2",
                 "image": {
                   "imageId": "image-e62bb9df-ac64-41cd-b673-70d0857bb305",
-                  "publicPath": "/images/published/template-images-3d-vdr4qg/image-e62bb9df-ac64-41cd-b673-70d0857bb305.png"
+                  "publicPath": "/images/published/template-images/3d-vdr4qg/image-e62bb9df-ac64-41cd-b673-70d0857bb305.png"
                 },
                 "imageDisplayMode": "cover",
                 "hoverPreviewMode": "none",
@@ -5745,7 +5737,7 @@
                 "imageDisplayMode": "cover",
                 "image": {
                   "imageId": "image-542a66c2-cfc8-4e6d-893c-5f6d3ad61216",
-                  "publicPath": "/images/published/template-images-3d-vdr4qg/image-542a66c2-cfc8-4e6d-893c-5f6d3ad61216.png"
+                  "publicPath": "/images/published/template-images/3d-vdr4qg/image-542a66c2-cfc8-4e6d-893c-5f6d3ad61216.png"
                 }
               },
               {
@@ -5761,7 +5753,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-4ad4a745-1bfd-4470-8caa-3e59b75ab534",
-                  "publicPath": "/images/published/template-images-3d-vdr4qg/image-4ad4a745-1bfd-4470-8caa-3e59b75ab534.png"
+                  "publicPath": "/images/published/template-images/3d-vdr4qg/image-4ad4a745-1bfd-4470-8caa-3e59b75ab534.png"
                 },
                 "imageDisplayMode": "cover"
               },
@@ -5778,7 +5770,7 @@
                 "hoverPreviewMode": "none",
                 "image": {
                   "imageId": "image-31c2020b-6e83-45b5-b94a-b804aadc4bf5",
-                  "publicPath": "/images/published/template-images-3d-vdr4qg/image-31c2020b-6e83-45b5-b94a-b804aadc4bf5.png"
+                  "publicPath": "/images/published/template-images/3d-vdr4qg/image-31c2020b-6e83-45b5-b94a-b804aadc4bf5.png"
                 },
                 "imageDisplayMode": "cover"
               }
@@ -5813,7 +5805,7 @@
           }
         }
       ],
-      "updatedAt": "2026-08-05T05:02:57.598Z"
+      "updatedAt": "2026-08-08T09:41:59.835Z"
     }
   },
   "projectCatalog": {
@@ -6939,7 +6931,9 @@
     "interaction-intelligence-system": "/images/published/covers/interaction-intelligence-system.png",
     "ai-assisted-ui-environment-design": "/images/published/covers/ai-assisted-ui-environment-design.png",
     "ui-16ienxj": "/images/published/covers/ui-16ienxj.png",
-    "project-1ua2677": "/images/published/covers/project-1ua2677.png"
+    "project-1ua2677": "/images/published/covers/project-1ua2677.png",
+    "game-jam-8lzejf": "/images/published/covers/game-jam-8lzejf.png",
+    "3d-vdr4qg": "/images/published/covers/3d-vdr4qg.png"
   },
   "assets": [
     {
@@ -7482,6 +7476,118 @@
       "publicPath": "/images/published/template-images/project-1ua2677/image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4.png"
     },
     {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-3e66c1f3-6182-46a2-a7ae-c7f76669f1a1",
+      "publicPath": "/images/published/template-images/game-jam-8lzejf/image-3e66c1f3-6182-46a2-a7ae-c7f76669f1a1.png"
+    },
+    {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-a93a7c0b-42fd-4512-82a9-9cfff4f46712",
+      "publicPath": "/images/published/template-images/game-jam-8lzejf/image-a93a7c0b-42fd-4512-82a9-9cfff4f46712.png"
+    },
+    {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-71a0f0a3-f594-4e26-98c6-8a79b5182882",
+      "publicPath": "/images/published/template-images/game-jam-8lzejf/image-71a0f0a3-f594-4e26-98c6-8a79b5182882.png"
+    },
+    {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-cc135262-0268-408f-a095-44ac5cb9924e",
+      "publicPath": "/images/published/template-images/game-jam-8lzejf/image-cc135262-0268-408f-a095-44ac5cb9924e.png"
+    },
+    {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-f248cae0-b3f5-46eb-bee1-72569b8097a4",
+      "publicPath": "/images/published/template-images/game-jam-8lzejf/image-f248cae0-b3f5-46eb-bee1-72569b8097a4.png"
+    },
+    {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-d41a18d5-0541-49b8-ae46-fd13f4227a20",
+      "publicPath": "/images/published/template-images/3d-vdr4qg/image-d41a18d5-0541-49b8-ae46-fd13f4227a20.png"
+    },
+    {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-1b218f11-2920-4ef9-ac7f-1c18cfc4526f",
+      "publicPath": "/images/published/template-images/3d-vdr4qg/image-1b218f11-2920-4ef9-ac7f-1c18cfc4526f.png"
+    },
+    {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-6c4f41ee-68e1-4f4e-a71c-76c1acc15ec3",
+      "publicPath": "/images/published/template-images/3d-vdr4qg/image-6c4f41ee-68e1-4f4e-a71c-76c1acc15ec3.png"
+    },
+    {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-108f3f03-492e-47f3-ac30-bcf261797e17",
+      "publicPath": "/images/published/template-images/3d-vdr4qg/image-108f3f03-492e-47f3-ac30-bcf261797e17.png"
+    },
+    {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-1c56bb5b-47b6-4c01-912c-8debc61e7df4",
+      "publicPath": "/images/published/template-images/3d-vdr4qg/image-1c56bb5b-47b6-4c01-912c-8debc61e7df4.png"
+    },
+    {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-b8c2ee01-94f6-41e1-86ca-9bba0f8d1e62",
+      "publicPath": "/images/published/template-images/3d-vdr4qg/image-b8c2ee01-94f6-41e1-86ca-9bba0f8d1e62.png"
+    },
+    {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-ea38e8ba-ead1-4929-b4f6-42bbf3a921c2",
+      "publicPath": "/images/published/template-images/3d-vdr4qg/image-ea38e8ba-ead1-4929-b4f6-42bbf3a921c2.png"
+    },
+    {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-e62bb9df-ac64-41cd-b673-70d0857bb305",
+      "publicPath": "/images/published/template-images/3d-vdr4qg/image-e62bb9df-ac64-41cd-b673-70d0857bb305.png"
+    },
+    {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-542a66c2-cfc8-4e6d-893c-5f6d3ad61216",
+      "publicPath": "/images/published/template-images/3d-vdr4qg/image-542a66c2-cfc8-4e6d-893c-5f6d3ad61216.png"
+    },
+    {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-4ad4a745-1bfd-4470-8caa-3e59b75ab534",
+      "publicPath": "/images/published/template-images/3d-vdr4qg/image-4ad4a745-1bfd-4470-8caa-3e59b75ab534.png"
+    },
+    {
+      "sourceAdapterId": "dynamic-template-images",
+      "sourceDatabase": "dilida-portfolio-template-images",
+      "sourceStore": "images",
+      "sourceId": "image-31c2020b-6e83-45b5-b94a-b804aadc4bf5",
+      "publicPath": "/images/published/template-images/3d-vdr4qg/image-31c2020b-6e83-45b5-b94a-b804aadc4bf5.png"
+    },
+    {
       "sourceAdapterId": "ui-practice-images",
       "sourceDatabase": "dilida-portfolio-ui-practice-images",
       "sourceStore": "images",
@@ -7529,6 +7635,34 @@
       "sourceStore": "project-covers",
       "sourceId": "project-1ua2677",
       "publicPath": "/images/published/covers/project-1ua2677.png"
+    },
+    {
+      "sourceAdapterId": "project-covers-disk",
+      "sourceDatabase": "disk",
+      "sourceStore": "project-covers",
+      "sourceId": "game-jam-8lzejf",
+      "publicPath": "/images/published/covers/game-jam-8lzejf.png"
+    },
+    {
+      "sourceAdapterId": "project-covers-disk",
+      "sourceDatabase": "disk",
+      "sourceStore": "project-covers",
+      "sourceId": "3d-vdr4qg",
+      "publicPath": "/images/published/covers/3d-vdr4qg.png"
+    },
+    {
+      "sourceAdapterId": "playable-game-covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "playable-game-covers",
+      "sourceId": "cover-931ab6f6-4b00-4c96-809a-53ad7dac51bf",
+      "publicPath": "/images/published/playable-game-covers/game-jam-8lzejf/cover-931ab6f6-4b00-4c96-809a-53ad7dac51bf.png"
+    },
+    {
+      "sourceAdapterId": "playable-game-covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "playable-game-covers",
+      "sourceId": "cover-50be874a-0c4d-4c2b-a6fd-5c5c17f0810c",
+      "publicPath": "/images/published/playable-game-covers/3d-vdr4qg/cover-50be874a-0c4d-4c2b-a6fd-5c5c17f0810c.png"
     },
     {
       "sourceAdapterId": "project-body-indexeddb-assets",
