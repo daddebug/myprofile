@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-08T09:45:58.450Z",
+  "generatedAt": "2026-08-10T11:26:51.742Z",
   "drafts": {
     "interaction-intelligence-system": {
       "version": 1,
@@ -4355,8 +4355,8 @@
               "en": ""
             },
             "fallbackImage": {
-              "localImageId": "image-d3537b36-6223-484f-98a2-01a5131d70cb",
-              "publicPath": "/images/published/project-body/project-1ua2677/image-d3537b36-6223-484f-98a2-01a5131d70cb.png"
+              "localImageId": "image-3d6e3b39-302a-4142-a2c0-7bde0d905b92",
+              "publicPath": "/images/published/project-body/project-1ua2677/image-3d6e3b39-302a-4142-a2c0-7bde0d905b92.png"
             }
           }
         },
@@ -4772,7 +4772,7 @@
           }
         }
       ],
-      "updatedAt": "2026-08-07T01:50:45.000Z"
+      "updatedAt": "2026-08-10T10:12:07.997Z"
     },
     "game-jam-8lzejf": {
       "version": 1,
@@ -5273,7 +5273,7 @@
               "en": ""
             },
             "body": {
-              "zh": "Afterwarm 是一个围绕温度感知构建的 3D 解谜原型。它没有把冷热只当作氛围表现，而是尝试让温度成为玩家观察环境、判断路径和发现隐藏交互的依据。游戏可以通过 Q 键开启的温度视角，本不明显的路径、隐藏门和关键物体关系也会变得可读。这个项目是为了验证一种基础交互：当玩家拥有两套观察同一空间的方式后，是否会主动比较两种视角中的信息，并利用差异决定下一步行动。",
+              "zh": "Afterwarm 是一个围绕温度感知构建的 3D 解谜原型。它没有把冷热只当作氛围表现，而是尝试让温度成为玩家观察环境、判断路径和发现隐藏交互的依据。游戏可以通过 Q 键开启温度视角，本不明显的路径、隐藏门和关键物体关系也会变得可读。这个项目主要验证一种基础交互：当玩家拥有两套观察同一空间的方式后，是否会主动比较其中的信息差，并利用这种差异决定下一步行动。",
               "en": ""
             }
           }
@@ -5285,7 +5285,7 @@
           "anchorId": "__end__",
           "content": {
             "body": {
-              "zh": "原型最终完成了角色移动、温度视角、场景温度反馈、可推动与拉动的物体、隐藏门交互、关卡结束流程以及网页可玩版本。",
+              "zh": "原型最终完成了角色移动、温度视角、场景温度反馈、可推动与拉动的物体、隐藏门交互、角色材质与温度变化、关卡结束流程以及网页可玩版本。",
               "en": ""
             }
           }
@@ -5353,28 +5353,28 @@
           "content": {
             "heading": {
               "zh": "系统设计亮点",
-              "en": "Judgments Brought Back to the Project"
+              "en": ""
             },
             "items": [
               {
                 "id": "circle-summary-1",
                 "text": {
-                  "zh": "普通视角进行空间判断",
-                  "en": "Lightweight experience comes from system and interaction restructuring"
+                  "zh": "普通视角负责空间判断",
+                  "en": ""
                 }
               },
               {
                 "id": "circle-summary-2",
                 "text": {
-                  "zh": "温度视角进行交叉解密",
-                  "en": "Design experience loops for different levels of familiarity"
+                  "zh": "温度视角补充隐藏信息",
+                  "en": ""
                 }
               },
               {
                 "id": "circle-summary-3",
                 "text": {
-                  "zh": "主角本身存在材质变化",
-                  "en": "Keep presentation light and reveal demanding play progressively"
+                  "zh": "角色材质参与温度解谜",
+                  "en": ""
                 }
               }
             ]
@@ -5411,7 +5411,7 @@
                   "en": ""
                 },
                 "title": {
-                  "zh": "温度视角的技术实现",
+                  "zh": "实现温度视角",
                   "en": ""
                 },
                 "description": {
@@ -5425,11 +5425,11 @@
                   "en": ""
                 },
                 "title": {
-                  "zh": "blender搭建空间灰模",
+                  "zh": "搭建空间灰模",
                   "en": ""
                 },
                 "description": {
-                  "zh": "用基础场景和阻挡关系测试角色尺度、移动距离、视野范围与温度观察节奏。",
+                  "zh": "在 Blender 中用基础场景和阻挡关系测试角色尺度、移动距离、视野范围与温度观察节奏。",
                   "en": ""
                 }
               },
@@ -5443,7 +5443,7 @@
                   "en": ""
                 },
                 "description": {
-                  "zh": "免费骨骼绑定进行推动拉动，区分可交互物体和场景。",
+                  "zh": "通过骨骼绑定和交互判定实现推动、拉动等基础操作，并区分可交互物体与普通场景。",
                   "en": ""
                 }
               },
@@ -5467,15 +5467,39 @@
                   "en": ""
                 },
                 "title": {
-                  "zh": "加入完整解谜",
+                  "zh": "形成完整解谜",
                   "en": ""
                 },
                 "description": {
-                  "zh": "通过冰化和角色本身的加热来设计一些有意思的解谜",
+                  "zh": "进一步把角色加热、材质变化与冰体融化连接起来，让温度真正参与行动与结果。",
                   "en": ""
                 }
               }
             ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-f5de3d0a-a911-4e06-9487-884845641ee3",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "02",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "AI 协作",
+              "en": ""
+            },
+            "statement": {
+              "zh": "把 AI 放进探索和实现流程",
+              "en": ""
+            },
+            "body": {
+              "zh": "这次AI 的使用并不是让模型直接生成一款游戏，而是把它放在概念发散、视觉参考、技术排错和叙事整理几个具体环节中。项目早期，我先确定“温度”的核心方向，再利用对话式 AI 扩展火焰、冰体、材质变化和隐藏信息之间可能形成的机制关系；进入实现阶段后，AI 更多承担脚本逻辑拆解和报错定位，我再根据 Unity 中真实的对象关系、Collider、材质状态和交互结果逐步修正。视觉阶段也使用了部分 AI 模型和场景参考，但最终空间、关卡关系和玩法取舍仍由我自己完成。",
+              "en": ""
+            }
           }
         },
         {
@@ -5498,7 +5522,7 @@
                   "en": ""
                 },
                 "caption": {
-                  "zh": "美术技术实现：从一开始的气体表现改为物体切换材质表达温度视角",
+                  "zh": "美术技术实现：从早期气体表现逐步调整为通过物体材质切换表达温度视角。",
                   "en": ""
                 },
                 "placeholder": {
@@ -5523,7 +5547,7 @@
                   "en": ""
                 },
                 "caption": {
-                  "zh": "空间灰模：在blender里设计完整关卡关系，搭建基础的内容",
+                  "zh": "空间灰模：在 Blender 中设计完整关卡关系，并逐步搭建基础场景内容。",
                   "en": ""
                 },
                 "placeholder": {
@@ -5548,7 +5572,7 @@
                   "en": ""
                 },
                 "caption": {
-                  "zh": "引擎内：发光体和材质的处理，以及角色的动作判定等",
+                  "zh": "引擎内测试：处理发光体、材质状态以及角色动作与交互判定。",
                   "en": ""
                 },
                 "placeholder": {
@@ -5578,7 +5602,7 @@
           "anchorId": "__end__",
           "content": {
             "sectionNumber": {
-              "zh": "02",
+              "zh": "03",
               "en": ""
             },
             "leftTitle": {
@@ -5586,11 +5610,11 @@
               "en": ""
             },
             "statement": {
-              "zh": "框架到具体的游戏设计管理思维的提升",
+              "zh": "对 3D 原型管线和游戏设计管理方式的完整练习",
               "en": ""
             },
             "body": {
-              "zh": "这次制作游戏主要是对个人独立尝试3DUnity管线的考验，经历了三次玩法迭代，目前展示的是第二阶段的技术实现结果，历时大约2-3周，没有介入vibecoding，只是通过对话式AI询问解决方法来制作游戏，所以手工感较强，也在一步步的实现中意识到玩法循环的难度。",
+              "zh": "这次制作主要是对个人独立完成 3D Unity 原型管线的一次考验。项目经历了三次玩法迭代，目前展示的是第二阶段形成的主要技术与玩法结果，核心制作历时约 2–3 周。过程中没有使用 Vibe Coding 直接生成完整项目。手工实现的过程让我更直接地看到 3D 游戏中角色、材质、碰撞、场景与交互脚本之间的依赖关系，也让我意识到真正困难的部分并不是把某个功能做出来，而是判断多个系统组合后是否能形成稳定的玩法循环。",
               "en": ""
             }
           }
@@ -5614,19 +5638,19 @@
               "en": ""
             },
             "leftTitle": {
-              "zh": "确认去处",
+              "zh": "先建立去处",
               "en": ""
             },
             "rightTitle": {
-              "zh": "q视角进行解释",
+              "zh": "再解释隐藏信息",
               "en": ""
             },
             "leftDescription": {
-              "zh": "通过一开始隔墙的小孩呼救来提示玩家后墙有东西，从而想要靠近墙的那边",
+              "zh": "通过隔墙传来的小孩呼救，让玩家先意识到墙后可能存在目标，并主动靠近空间边界。",
               "en": ""
             },
             "rightDescription": {
-              "zh": "玩家企图到后墙后通过q看到有门，就可以合理化解释之前呼救的来源",
+              "zh": "靠近后切换 Q 视角看到隐藏门，玩家可以把温度信息与此前的声音线索连接起来，理解呼救来源。",
               "en": ""
             },
             "leftImage": {
@@ -5652,31 +5676,31 @@
           "anchorId": "__end__",
           "content": {
             "heading": {
-              "zh": "玩家个人材质的解谜",
+              "zh": "让角色本身成为温度解谜的一部分",
               "en": ""
             },
             "leftLabel": {
-              "zh": "方向 A",
+              "zh": "材质变化",
               "en": ""
             },
             "rightLabel": {
-              "zh": "方向 B",
+              "zh": "环境作用",
               "en": ""
             },
             "leftTitle": {
-              "zh": "材质切换的引入",
+              "zh": "角色吸收热量",
               "en": ""
             },
             "rightTitle": {
-              "zh": "环境与动态温度变化的玩家材质",
+              "zh": "热量继续影响环境",
               "en": ""
             },
             "leftDescription": {
-              "zh": "旁边有个篝火玩家刚解锁tin材质走进就会烧的通红",
+              "zh": "角色解锁金属材质后靠近篝火会逐渐升温并变红，让温度变化直接体现在角色自身状态上。",
               "en": ""
             },
             "rightDescription": {
-              "zh": "加热烧红的玩家远离篝火后就会逐渐降低温度，走进冰墙后冰墙融化，q视角看到钥匙就明白了意义",
+              "zh": "离开火源后角色逐渐降温；在仍有足够热量时靠近冰体可以使其融化，再通过 Q 视角发现其中隐藏的钥匙。",
               "en": ""
             },
             "leftImage": {
@@ -5702,7 +5726,7 @@
           "anchorId": "__end__",
           "content": {
             "heading": {
-              "zh": "游戏设计过程的一些技术实现手段",
+              "zh": "游戏设计过程中的技术实现",
               "en": ""
             },
             "items": [
@@ -5719,7 +5743,7 @@
                   "en": ""
                 },
                 "caption": {
-                  "zh": "AI模型制作",
+                  "zh": "AI 辅助模型制作与资产探索",
                   "en": ""
                 }
               },
@@ -5730,7 +5754,7 @@
                   "en": ""
                 },
                 "caption": {
-                  "zh": "网页端免费骨骼绑定的动画绑定",
+                  "zh": "网页端免费骨骼绑定与动画处理",
                   "en": ""
                 },
                 "hoverPreviewMode": "none",
@@ -5747,7 +5771,7 @@
                   "en": ""
                 },
                 "caption": {
-                  "zh": "蒙皮的修改",
+                  "zh": "角色蒙皮调整",
                   "en": ""
                 },
                 "hoverPreviewMode": "none",
@@ -5764,7 +5788,7 @@
                   "en": ""
                 },
                 "caption": {
-                  "zh": "光源绑定",
+                  "zh": "光源与角色状态绑定",
                   "en": ""
                 },
                 "hoverPreviewMode": "none",
@@ -5787,7 +5811,7 @@
           "anchorId": "__end__",
           "content": {
             "sectionNumber": {
-              "zh": "03",
+              "zh": "04",
               "en": ""
             },
             "leftTitle": {
@@ -5795,24 +5819,759 @@
               "en": ""
             },
             "statement": {
-              "zh": "信息的展示要克制",
+              "zh": "信息的展示要克制，技术实现也必须回到玩法循环",
               "en": ""
             },
             "body": {
-              "zh": "Afterwarm 证明了双重视角能够快速建立环境信息差，温度着色本身很容易完成，但如果玩家开启 Q 键后只是看到另一种画面，它仍然只是滤镜。这个原型也暴露了 3D 制作中的现实限制。角色、材质、碰撞、场景和交互脚本会同时消耗开发时间，而核心循环仍需要持续验证。因此，后续探索更适合先使用成本更低的形式测试温度传播、材质差异和路线规划，再决定哪些体验值得重新投入到 3D 表现中。",
+              "zh": "Afterwarm 证明了双重视角能够快速建立环境信息差，温度着色本身也很容易被玩家理解，但如果开启 Q 键后只是看到另一种画面，它仍然只是滤镜。这个原型也暴露了 3D 制作中的现实限制：角色、材质、碰撞、场景和交互脚本会同时消耗开发时间，而核心循环仍需要持续验证。AI 可以显著降低技术检索和尝试成本，却不会自动解决玩法是否成立的问题。因此，后续探索更适合先使用成本更低的形式测试温度传播、材质差异和路线规划，再决定哪些体验值得重新投入到 3D 表现中。",
               "en": ""
             }
           }
         }
       ],
-      "updatedAt": "2026-08-08T09:41:59.835Z"
+      "updatedAt": "2026-08-10T01:30:39.701Z"
+    },
+    "ai-agent-6vaadf": {
+      "version": 1,
+      "templateInstances": [
+        {
+          "instanceId": "statement-longform-9ba81b60-9caa-4e9c-9527-13f2e05e75cb",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "01",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "核心 命题",
+              "en": ""
+            },
+            "statement": {
+              "zh": "AI 能不能减少求职中的重复劳动，却不替用户做最终决定？",
+              "en": ""
+            },
+            "body": {
+              "zh": "我最初在 DILIDA DESK 中设计 Job Search，是为了集中保存公司、岗位和求职信息。但真正开始使用后，我发现维护工具本身也变成了一项额外工作：浏览招聘网站、阅读 JD、重复填写姓名和教育经历、上传简历、完成投递以后，还要重新回到 Desk 手动创建记录，并反向确认当时投了什么岗位、使用了哪份简历。于是我开始重新设计这套流程，希望把浏览器中的真实投递行为直接连接到个人求职数据库，让系统承担重复识别、填写和记录，而把岗位判断、重要问题确认和最终提交留给用户。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "supporting-note-419d1ce3-b535-41de-909a-bbe2c8d82ee6",
+          "templateId": "supporting-note",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "body": {
+              "zh": "现有流程最大的成本并不只来自填写表单，而是信息不断在招聘网站、简历文件、作品集和个人记录之间断开。单个公司的资料可以保存，但真正投递时仍然需要重新寻找、复制和确认；完成申请后，JD 和当时使用的材料也容易失去对应关系。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "direction-compare-58ec5653-43ef-4bf9-8eb0-e790c1d3aeab",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "投递流程重新组织",
+              "en": ""
+            },
+            "leftLabel": {
+              "zh": "原有流程",
+              "en": ""
+            },
+            "rightLabel": {
+              "zh": "目标流程",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "用户维护工具",
+              "en": ""
+            },
+            "rightTitle": {
+              "zh": "投递行为自动形成记录",
+              "en": ""
+            },
+            "leftDescription": {
+              "zh": "浏览 JD、手动寻找资料、逐项填写、完成申请，再回到 Desk 创建公司和岗位记录。真实投递和个人数据库之间存在重复录入。",
+              "en": ""
+            },
+            "rightDescription": {
+              "zh": "浏览器插件读取当前 JD 和表单，从 Desk 调用已有资料辅助填写；用户确认并提交后，岗位信息和投递材料自动形成一条 Application 记录。",
+              "en": ""
+            },
+            "leftImage": null,
+            "rightImage": null,
+            "direction": "left-to-right"
+          }
+        },
+        {
+          "instanceId": "process-flow-d45f525d-6ca2-48ab-9fc0-f16c7fb32306",
+          "templateId": "process-flow",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "一次投递如何自然形成完整记录",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "job-flow-01",
+                "number": {
+                  "zh": "01",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "打开招聘页面",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "用户按照原本的求职习惯浏览招聘网站，不需要先在 Desk 中建立公司或岗位。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "job-flow-02",
+                "number": {
+                  "zh": "02",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "识别 JD",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "插件读取用户当前可见页面中的公司、岗位名称、JD、URL、地点等信息，并形成当前岗位上下文。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "job-flow-03",
+                "number": {
+                  "zh": "03",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "匹配表单字段",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "系统根据字段语义、标签、占位文字和周边提示，将网页输入项映射到 Desk 中已有的个人资料。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "job-flow-04",
+                "number": {
+                  "zh": "04",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "辅助填写",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "基础信息可以一键填入；无法确定、未识别或涉及重要选择的字段保持待确认，不进行猜测。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "job-flow-05",
+                "number": {
+                  "zh": "05",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "用户确认提交",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "用户检查实际填写内容，并亲自完成最终投递。系统不自动点击最终提交，也不绕过验证码和网站安全控制。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "job-flow-06",
+                "number": {
+                  "zh": "06",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "生成投递档案",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "申请完成后保存 JD 快照、投递时间、使用的简历和作品集以及关键填写信息，直接进入 Job Search 的后续跟踪。",
+                  "en": ""
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-4d9bcd59-0ccf-4a9c-b315-47ca0adc1675",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "02",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "系统 分工",
+              "en": ""
+            },
+            "statement": {
+              "zh": "浏览器负责观察与操作，Desk 负责长期记忆",
+              "en": ""
+            },
+            "body": {
+              "zh": "我不希望浏览器插件再维护一套独立的求职资料，因此系统采用一个明确的数据边界：DILIDA DESK 是个人资料、字段映射、简历版本、作品集和投递记录的唯一数据源；浏览器插件只负责读取当前招聘页面、请求需要的资料、执行辅助填写，并把新的岗位和投递行为传回 Desk。这样更换电脑或重新安装插件时，不需要重新配置全部信息，也能避免浏览器和桌面端出现两套相互冲突的数据。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "decision-table-f4de7693-b478-4bf3-a60f-84d0fca150be",
+          "templateId": "decision-table",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "插件、Desk 与用户的职责边界",
+              "en": ""
+            },
+            "columns": [
+              {
+                "id": "task",
+                "title": {
+                  "zh": "任务",
+                  "en": ""
+                }
+              },
+              {
+                "id": "extension",
+                "title": {
+                  "zh": "浏览器插件",
+                  "en": ""
+                }
+              },
+              {
+                "id": "desk",
+                "title": {
+                  "zh": "DILIDA DESK",
+                  "en": ""
+                }
+              },
+              {
+                "id": "user",
+                "title": {
+                  "zh": "用户",
+                  "en": ""
+                }
+              }
+            ],
+            "rows": [
+              {
+                "id": "jd",
+                "cells": {
+                  "task": {
+                    "zh": "岗位信息",
+                    "en": ""
+                  },
+                  "extension": {
+                    "zh": "读取当前页面中用户可见的岗位和 JD。",
+                    "en": ""
+                  },
+                  "desk": {
+                    "zh": "保存 JD 快照和岗位记录。",
+                    "en": ""
+                  },
+                  "user": {
+                    "zh": "判断岗位是否值得投递。",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "autofill",
+                "cells": {
+                  "task": {
+                    "zh": "表单填写",
+                    "en": ""
+                  },
+                  "extension": {
+                    "zh": "识别字段并填入可确认的基础资料。",
+                    "en": ""
+                  },
+                  "desk": {
+                    "zh": "提供个人资料和字段映射。",
+                    "en": ""
+                  },
+                  "user": {
+                    "zh": "处理不确定字段并检查结果。",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "submit",
+                "cells": {
+                  "task": {
+                    "zh": "最终提交",
+                    "en": ""
+                  },
+                  "extension": {
+                    "zh": "不自动提交。",
+                    "en": ""
+                  },
+                  "desk": {
+                    "zh": "不控制招聘网站提交动作。",
+                    "en": ""
+                  },
+                  "user": {
+                    "zh": "确认内容并亲自提交申请。",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "application",
+                "cells": {
+                  "task": {
+                    "zh": "投递记录",
+                    "en": ""
+                  },
+                  "extension": {
+                    "zh": "识别可能的成功状态并发送当前上下文。",
+                    "en": ""
+                  },
+                  "desk": {
+                    "zh": "生成 Application 并持续管理进度。",
+                    "en": ""
+                  },
+                  "user": {
+                    "zh": "补充面试、拒绝、Offer 等后续状态。",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "learning",
+                "cells": {
+                  "task": {
+                    "zh": "系统学习",
+                    "en": ""
+                  },
+                  "extension": {
+                    "zh": "暴露未识别或歧义字段。",
+                    "en": ""
+                  },
+                  "desk": {
+                    "zh": "保存新的全局或站点字段别名。",
+                    "en": ""
+                  },
+                  "user": {
+                    "zh": "只需完成一次正确映射。",
+                    "en": ""
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-d1c34365-09e2-4f60-80d9-6fbc3eb59bd9",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "03",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "语义 识别",
+              "en": ""
+            },
+            "statement": {
+              "zh": "网页叫它什么，不应该决定系统能不能认识它",
+              "en": ""
+            },
+            "body": {
+              "zh": "不同招聘网站对同一信息的命名并不统一。例如“姓名”也可能被写成“名字”“应聘人姓名”“Full Name”或“Candidate Name”。因此我没有把网页上的可见文案直接当成字段 ID，而是设计了一层稳定的语义字段。系统内部只保存 fullName、phone、email、preferredCity、portfolioUrl 等标准字段，每个字段可以拥有多个可编辑别名。匹配时同时参考 label、placeholder、name、aria-label、周边提示文字和输入控件类型。当系统遇到无法识别的字段时，用户可以将它映射到已有字段、新建字段或忽略；这个结果会被保存下来，让系统随着真实使用逐渐适应更多网站。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "circle-summary-14d5824b-ca92-4655-b52f-b94156c16ee5",
+          "templateId": "circle-summary",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "字段识别的三个原则",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "semantic",
+                "text": {
+                  "zh": "稳定语义字段作为唯一数据源",
+                  "en": ""
+                }
+              },
+              {
+                "id": "aliases",
+                "text": {
+                  "zh": "全局别名与站点别名持续学习",
+                  "en": ""
+                }
+              },
+              {
+                "id": "uncertainty",
+                "text": {
+                  "zh": "不确定的信息必须交还用户确认",
+                  "en": ""
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "image-row-006ee24e-d79d-4ad2-92ed-67971123374a",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "字段识别与自动填写界面",
+              "en": ""
+            },
+            "columns": 3,
+            "rowAlignment": "center",
+            "items": [
+              {
+                "id": "image-row-item-893f90b0-e641-493f-9f16-34e374b2be17",
+                "alt": {
+                  "zh": "招聘网页字段识别结果",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "插件识别当前页面中的岗位信息和可填写字段。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "上传招聘网页中字段识别状态截图",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "16:9",
+                "suggestedImageCount": 1,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "card",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-805b498b-a9f9-4f3c-a17a-8a43dfa9982c",
+                "alt": {
+                  "zh": "未识别字段映射界面",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "用户可以把陌生网页文案映射到已有语义字段。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "上传字段映射或别名管理截图",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "16:9",
+                "suggestedImageCount": 1,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "card",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-f786e06c-4f6c-4f7f-adba-f6aa412fbc5f",
+                "alt": {
+                  "zh": "自动填写后的确认状态",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "系统区分已填写、待确认和未识别字段，减少逐项检查成本。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "上传一键填写后的字段状态截图",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "16:9",
+                "suggestedImageCount": 1,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "card",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-936e8553-64d5-4ea5-bc90-77e705055286",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "04",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "投递 记忆",
+              "en": ""
+            },
+            "statement": {
+              "zh": "真正需要保存的不是一个网址，而是当时发生过什么",
+              "en": ""
+            },
+            "body": {
+              "zh": "招聘页面可能下线、JD 可能修改，单独保存 URL 并不能还原一次真实投递。因此每条 Application 需要保存当时的 JD 快照，并和投递时间、使用的简历版本、作品集版本、内推码以及关键填写信息建立关系。这样 Job Search 不再是一张需要手工维护的公司列表，而更像一份由真实求职行为自然形成的时间记录。之后准备面试时，可以直接回到当时的岗位要求和投递材料，而不需要重新寻找已经失效的招聘页面。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "image-row-6ac02295-19c6-41d6-908c-e1e6fecbeedb",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "从招聘页面到投递档案",
+              "en": ""
+            },
+            "columns": 2,
+            "rowAlignment": "center",
+            "items": [
+              {
+                "id": "image-row-item-98dfeed9-a7f7-4c3f-aead-903d937669c4",
+                "alt": {
+                  "zh": "浏览器插件读取招聘岗位",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "打开招聘页面后，系统自动获得公司、岗位、JD 和当前申请上下文。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "上传浏览器助手读取 JD 的实际截图",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "16:9",
+                "suggestedImageCount": 1,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-5320526a-88a8-4f6c-a564-0782db59aa4a",
+                "alt": {
+                  "zh": "DILIDA DESK 投递记录",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "申请完成后，同一份上下文转化为可继续跟踪的 Application。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "上传 Job Search 中自动生成的投递记录截图",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "16:9",
+                "suggestedImageCount": 1,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "phase-milestones-4569b0b7-148a-4800-858e-361ba1e824c3",
+          "templateId": "phase-milestones",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "验证路径",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "milestone-01",
+                "state": "active",
+                "number": {
+                  "zh": "01",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "真实招聘页识别",
+                  "en": ""
+                },
+                "hoverTitle": {
+                  "zh": "先验证通用 DOM 读取",
+                  "en": ""
+                },
+                "hoverText": {
+                  "zh": "使用真实招聘页面验证公司、岗位、JD 和基础字段是否能够被稳定识别，不先针对单一公司制作专用逻辑。",
+                  "en": ""
+                },
+                "targetId": "real-page-detection"
+              },
+              {
+                "id": "milestone-02",
+                "state": "outline",
+                "number": {
+                  "zh": "02",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "字段映射与填写",
+                  "en": ""
+                },
+                "hoverTitle": {
+                  "zh": "建立可学习的语义字段系统",
+                  "en": ""
+                },
+                "hoverText": {
+                  "zh": "验证常见表单可以从 Desk 调用资料，并让用户修正未识别字段后持续复用。",
+                  "en": ""
+                },
+                "targetId": "semantic-autofill"
+              },
+              {
+                "id": "milestone-03",
+                "state": "outline",
+                "number": {
+                  "zh": "03",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "投递自动归档",
+                  "en": ""
+                },
+                "hoverTitle": {
+                  "zh": "让真实投递形成 Application",
+                  "en": ""
+                },
+                "hoverText": {
+                  "zh": "保存 JD 快照、材料版本和投递时间，并进入后续面试与结果管理。",
+                  "en": ""
+                },
+                "targetId": "application-capture"
+              },
+              {
+                "id": "milestone-04",
+                "state": "outline",
+                "number": {
+                  "zh": "04",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "跨设备安装",
+                  "en": ""
+                },
+                "hoverTitle": {
+                  "zh": "插件保持轻量可替换",
+                  "en": ""
+                },
+                "hoverText": {
+                  "zh": "让用户能够从 Desk 随时重新安装浏览器助手，并继续使用已有字段和投递数据。",
+                  "en": ""
+                },
+                "targetId": "portable-extension"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-7d90dd60-19b4-4fd3-b54d-b5585e20a431",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "05",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "Agent 边界",
+              "en": ""
+            },
+            "statement": {
+              "zh": "高效不等于把所有决定都交给自动化",
+              "en": ""
+            },
+            "body": {
+              "zh": "这个项目并不把“自动投更多岗位”作为目标。招聘网站包含很多需要真实判断的信息，例如工作地点、到岗时间、调剂意愿、身份问题和额外问答。如果 Agent 为了追求全自动而替用户猜测这些内容，效率反而会带来新的风险。因此我更关注自动化边界：让系统处理重复、结构明确、能够验证的信息，让不确定的字段明确暴露出来，并把最终提交保留给用户。Agent 的价值不在于替用户完成所有操作，而在于减少低价值重复劳动，同时保持用户对求职决策和个人信息的控制。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "circle-summary-3df257a2-2a80-4377-9d7e-ea8a9bd4efdf",
+          "templateId": "circle-summary",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "我希望保留的三条产品原则",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "principle-01",
+                "text": {
+                  "zh": "真实投递自然产生数据，不要求用户重复维护数据库",
+                  "en": ""
+                }
+              },
+              {
+                "id": "principle-02",
+                "text": {
+                  "zh": "Agent 自动处理确定性任务，把歧义主动暴露给用户",
+                  "en": ""
+                }
+              },
+              {
+                "id": "principle-03",
+                "text": {
+                  "zh": "插件可以替换，个人资料与长期记忆必须留在自己的系统中",
+                  "en": ""
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "updatedAt": "2026-08-09T04:20:46.026Z"
     }
   },
   "projectCatalog": {
     "ui-personal-practice": {
       "featured": true,
-      "updatedAt": "2026-08-07T01:24:46.377Z",
-      "archiveOrder": 7,
+      "updatedAt": "2026-08-09T04:20:09.447Z",
+      "archiveOrder": 6,
       "slug": "ui-personal-practice",
       "route": "/work/ui-personal-practice",
       "titleZh": "个人练习",
@@ -5860,7 +6619,7 @@
       "categoryZh": "AI 产品设计 / 游戏 UX",
       "categoryEn": "AI Product Design / Game UX",
       "duration": "2026.7–至今",
-      "archiveOrder": 3,
+      "archiveOrder": 2,
       "featured": true,
       "group": "work",
       "visibility": "public",
@@ -5874,7 +6633,7 @@
         "AI Prototyping"
       ],
       "coverImage": "",
-      "updatedAt": "2026-08-07T01:24:46.377Z"
+      "updatedAt": "2026-08-09T04:20:09.447Z"
     },
     "ai-assisted-ui-environment-design": {
       "isDynamic": true,
@@ -5899,7 +6658,7 @@
       "categoryZh": "AI 辅助设计 / 游戏视觉",
       "categoryEn": "AI-Assisted Design / Game Visuals",
       "duration": "2022–2025",
-      "archiveOrder": 5,
+      "archiveOrder": 4,
       "featured": true,
       "group": "work",
       "visibility": "public",
@@ -5918,7 +6677,7 @@
         "Figma"
       ],
       "coverImage": "",
-      "updatedAt": "2026-08-07T01:24:46.377Z"
+      "updatedAt": "2026-08-09T04:20:09.447Z"
     },
     "ui-16ienxj": {
       "isDynamic": true,
@@ -5933,7 +6692,7 @@
       "categoryZh": "商业项目 / 跨平台游戏体验",
       "categoryEn": "",
       "duration": "2024.11–2025.02",
-      "archiveOrder": 2,
+      "archiveOrder": 1,
       "featured": true,
       "group": "work",
       "visibility": "public",
@@ -5943,7 +6702,7 @@
       "collaborators": [],
       "tools": [],
       "coverImage": "",
-      "updatedAt": "2026-08-07T01:24:46.377Z"
+      "updatedAt": "2026-08-09T04:20:09.447Z"
     },
     "project-1ua2677": {
       "isDynamic": true,
@@ -5958,7 +6717,7 @@
       "categoryZh": "商业项目 / 早期研发 / 系统 UI",
       "categoryEn": "",
       "duration": "2021.07 — 2024.02",
-      "archiveOrder": 1,
+      "archiveOrder": 0,
       "featured": true,
       "group": "work",
       "visibility": "public",
@@ -5968,7 +6727,7 @@
       "collaborators": [],
       "tools": [],
       "coverImage": "",
-      "updatedAt": "2026-08-07T01:47:52.424Z"
+      "updatedAt": "2026-08-09T04:20:09.447Z"
     },
     "game-jam-8lzejf": {
       "isDynamic": true,
@@ -5990,7 +6749,7 @@
       "categoryZh": "游戏策划与交互设计",
       "categoryEn": "",
       "duration": "72 小时 Game Jam · 2026",
-      "archiveOrder": 4,
+      "archiveOrder": 3,
       "featured": true,
       "group": "work",
       "visibility": "public",
@@ -6009,15 +6768,15 @@
         "Codex / AI-assisted development"
       ],
       "coverImage": "",
-      "updatedAt": "2026-08-07T01:24:46.377Z"
+      "updatedAt": "2026-08-09T04:20:09.447Z"
     },
     "3d-vdr4qg": {
       "isDynamic": true,
       "slug": "3d-vdr4qg",
       "route": "/work/3d-vdr4qg",
-      "titleZh": "3D 温度感知解谜demo",
+      "titleZh": "AI辅助3D 温度解谜游戏",
       "titleEn": "",
-      "summaryZh": "游戏围绕温度视角、材质状态与空间判断建立",
+      "summaryZh": "围绕温度视角、材质状态与空间判断建立的 3D 解谜原型，并通过 AI 辅助概念发散、技术排错与快速验证。",
       "summaryEn": "",
       "tagsZh": [
         "独立游戏",
@@ -6025,26 +6784,65 @@
         "温度机制",
         "空间解谜",
         "交互设计",
+        "AI 协作",
+        "快速原型",
         "Unity"
       ],
       "tagsEn": [],
-      "categoryZh": "独立游戏设计",
+      "categoryZh": "独立游戏设计 / AI 辅助原型",
       "categoryEn": "",
       "duration": "2026",
-      "archiveOrder": 6,
+      "archiveOrder": 5,
       "featured": true,
       "group": "work",
       "visibility": "public",
       "publicationState": "draft",
       "year": "2026",
-      "role": "玩法与交互设计、关卡灰模、温度反馈设计、Unity 原型实现",
+      "role": "玩法与交互设计、关卡灰模、温度反馈设计、AI 协作流程、Unity 原型实现",
       "collaborators": [],
       "tools": [
         "Unity",
         "Blender"
       ],
       "coverImage": "",
-      "updatedAt": "2026-08-07T01:24:46.377Z"
+      "updatedAt": "2026-08-10T01:25:21.896Z"
+    },
+    "ai-agent-6vaadf": {
+      "isDynamic": true,
+      "slug": "ai-agent-6vaadf",
+      "route": "/work/ai-agent-6vaadf",
+      "titleZh": "求职 + AI Agent：如何高效完成投递",
+      "titleEn": "",
+      "summaryZh": "把重复填写、JD 保存和投递记录交给系统，让求职者把注意力留给岗位判断和最终决策。",
+      "summaryEn": "",
+      "tagsZh": [
+        "AI Agent",
+        "求职工具",
+        "浏览器插件",
+        "工作流设计",
+        "自动填表",
+        "语义识别",
+        "个人效率工具"
+      ],
+      "tagsEn": [],
+      "categoryZh": "AI Agent / 产品交互",
+      "categoryEn": "",
+      "duration": "2026.7-2026.8",
+      "archiveOrder": 7,
+      "featured": false,
+      "group": "work",
+      "visibility": "public",
+      "publicationState": "draft",
+      "year": "2026.7-2026.8",
+      "role": "产品设计、交互设计、AI 工作流设计、原型规划",
+      "collaborators": [],
+      "tools": [
+        "DILIDA DESK",
+        "Browser Extension",
+        "AI"
+      ],
+      "coverImage": "",
+      "updatedAt": "2026-08-09T04:20:46.024Z"
     }
   },
   "projectDocuments": {
@@ -6933,7 +7731,8 @@
     "ui-16ienxj": "/images/published/covers/ui-16ienxj.png",
     "project-1ua2677": "/images/published/covers/project-1ua2677.png",
     "game-jam-8lzejf": "/images/published/covers/game-jam-8lzejf.png",
-    "3d-vdr4qg": "/images/published/covers/3d-vdr4qg.png"
+    "3d-vdr4qg": "/images/published/covers/3d-vdr4qg.png",
+    "ai-agent-6vaadf": "/images/published/covers/ai-agent-6vaadf.png"
   },
   "assets": [
     {
@@ -7651,6 +8450,13 @@
       "publicPath": "/images/published/covers/3d-vdr4qg.png"
     },
     {
+      "sourceAdapterId": "project-covers-disk",
+      "sourceDatabase": "disk",
+      "sourceStore": "project-covers",
+      "sourceId": "ai-agent-6vaadf",
+      "publicPath": "/images/published/covers/ai-agent-6vaadf.png"
+    },
+    {
       "sourceAdapterId": "playable-game-covers",
       "sourceDatabase": "disk",
       "sourceStore": "playable-game-covers",
@@ -7668,97 +8474,97 @@
       "sourceAdapterId": "project-body-indexeddb-assets",
       "sourceDatabase": "dilida-portfolio-project-body-assets",
       "sourceStore": "assets",
-      "sourceId": "image-d3537b36-6223-484f-98a2-01a5131d70cb",
-      "publicPath": "/images/published/project-body/project-1ua2677/image-d3537b36-6223-484f-98a2-01a5131d70cb.png"
+      "sourceId": "image-3d6e3b39-302a-4142-a2c0-7bde0d905b92",
+      "publicPath": "/images/published/project-body/project-1ua2677/image-3d6e3b39-302a-4142-a2c0-7bde0d905b92.png"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-0197c30b-6c6e-4d75-bd29-fa220f3c792f",
       "publicPath": "/images/published/game-covers/game-cover-0197c30b-6c6e-4d75-bd29-fa220f3c792f.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-5bcbc174-fd11-47ae-a8d1-eb55088d227d",
       "publicPath": "/images/published/game-covers/game-cover-5bcbc174-fd11-47ae-a8d1-eb55088d227d.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-dc478a8f-005a-420b-9952-59b76a3a79fe",
       "publicPath": "/images/published/game-covers/game-cover-dc478a8f-005a-420b-9952-59b76a3a79fe.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-babd4bd0-1e00-4e9f-af2d-dcd8f4fa5ecb",
       "publicPath": "/images/published/game-covers/game-cover-babd4bd0-1e00-4e9f-af2d-dcd8f4fa5ecb.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-1025e29d-0f04-479f-a77e-ec55e0d4105c",
       "publicPath": "/images/published/game-covers/game-cover-1025e29d-0f04-479f-a77e-ec55e0d4105c.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-aac6e163-6beb-48ec-9ba8-1179ff30f2f7",
       "publicPath": "/images/published/game-covers/game-cover-aac6e163-6beb-48ec-9ba8-1179ff30f2f7.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-eb19d5fb-6e4c-4c32-88da-2772b5540ea7",
       "publicPath": "/images/published/game-covers/game-cover-eb19d5fb-6e4c-4c32-88da-2772b5540ea7.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-0d20ec78-7196-4eb8-8b28-c44314f9a481",
       "publicPath": "/images/published/game-covers/game-cover-0d20ec78-7196-4eb8-8b28-c44314f9a481.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-7e4c4b17-9fe9-4495-b5d8-7089a01e9b33",
       "publicPath": "/images/published/game-covers/game-cover-7e4c4b17-9fe9-4495-b5d8-7089a01e9b33.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-ee930174-c94f-4cbe-bc1a-847c778487c3",
       "publicPath": "/images/published/game-covers/game-cover-ee930174-c94f-4cbe-bc1a-847c778487c3.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-65a7f75b-23ca-4008-be27-3cbb0ecb52ac",
       "publicPath": "/images/published/game-covers/game-cover-65a7f75b-23ca-4008-be27-3cbb0ecb52ac.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-dcd9b23e-9c9c-4f60-abaa-fffbb2ec177c",
       "publicPath": "/images/published/game-covers/game-cover-dcd9b23e-9c9c-4f60-abaa-fffbb2ec177c.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-eda2609c-848f-4f5b-8e35-f53221fb7ccc",
       "publicPath": "/images/published/game-covers/game-cover-eda2609c-848f-4f5b-8e35-f53221fb7ccc.jpg"
     }
