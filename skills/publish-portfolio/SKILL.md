@@ -6,16 +6,19 @@ Stable workflow for moving owner drafts and every supported asset source into so
 
 1. Read `docs/PUBLISHING_ARCHITECTURE.md`. Use `src/lib/publishing/publishSourceRegistry.json` as the only source-discovery authority. Never add a parallel source list in a script, component, launcher, or skill.
 2. Generate a fresh production export from the current browser (`EXPORT FOR PUBLISH`). Every exported asset must carry a registered `sourceAdapterId`; stale exports with a different registry version are rejected.
-3. Generate and review `output/publishing-preflight-manifest.json` with `pnpm portfolio:preflight -- <export.json>` or the import dry run. Review every source row, not only total image count.
+3. Generate and review `output/publishing-preflight-manifest.json` with `pnpm portfolio:preflight -- <export.json>` or the import dry run. Review every source row, not only total image count. Launcher UI must present `output/publishing-launcher-report.json`, which is derived by the canonical importer from this manifest; it must not calculate a parallel change report.
 4. Stop if a source is failed, unhandled, missing, or still uses a local/development path. Never waive a failure because another URL returned HTTP 200.
 5. Run the dry import (`pnpm portfolio:import -- <export.json>`). Only after it passes may the confirmed import run (`pnpm portfolio:import -- <export.json> --confirm`). The importer uses the same registry before writes and validates all rewritten references again.
 6. Verify `src/data/publishedPortfolio.json`, `src/data/uiPracticeMetadata.json`, and the manifest contain the real records and intended assets, not an empty or partial export.
 7. Run `pnpm typecheck` and `pnpm build`.
 8. Review the exact `git diff` and staged file list before committing anything.
+9. A website sync publishes the current canonical implementation as well as imported data/assets. Current `src/`, required build/config/scripts, and public implementation changes must be included in the reviewed commit; running a fresh build without committing those source changes is a failed sync. After deployment, compare the production page's hashed JS/CSS asset references with the fresh local `dist/index.html` before visual verification.
 
 ## Verifying a source family actually works
 
 A registry row plus a working import/rewrite branch does not prove a source publishes anything — check that `src/lib/productionBundleExport.ts` (the browser exporter) actually has a real collector for that `sourceAdapterId` too. A "registered but never collected" adapter produces empty output with no preflight error, since preflight only validates what's present in a bundle, not what's silently missing from it. (Discovered 2026-08-07: `project-covers-disk` had a working registry row and importer for a while but zero real collector, so project covers never reached production — see `CHANGELOG.md`.)
+
+For any asset class with both an ephemeral local store (IndexedDB blob) and an already-published disk path (`*PublicPath` field), a collector that only reads the local store will falsely block on every asset whose local blob was never (re-)populated since the last publish — even though the file is already published and the live site renders it fine via the public-path fallback. Check whether the referenced id's public path already matches the source's own canonical output path before treating it as genuinely missing; only fall back to a real "missing" error when no already-published copy exists at that exact path. (Discovered 2026-08-10: `game-experience-covers` blocked all 13 assets this way — see `CHANGELOG.md`.)
 
 If one specific project has an unrelated, already-known blocker, use `--exclude-project=<id>[,<id>...]` on `import-production-bundle.mjs` rather than waiting on it or working around the check. It preserves that project's existing published state unchanged and excludes it from rewrite-revalidation; never a silent default, always logged.
 
@@ -44,12 +47,13 @@ Source-specific live verification is mandatory:
 - Never force push or modify branch protection/remote configuration.
 - Commit and push only after explicit publishing approval.
 - After push, wait for deployment and verify the real archive plus a current template project.
+- The deployed hashed JS/CSS asset set must match the fresh canonical build before visual verification. Never accept a deployment that kept an older frontend bundle while only data/assets changed.
 - HTTP 200 alone is not image success; verify decoding and viewport visibility.
 - If source preflight or live verification fails, do not report publishing success.
 
 ## DILIDA DESK
 
-The launcher sync action must execute this repository workflow and display the manifest's source-level results. It must not duplicate collectors, path rewriting, or missing-resource logic.
+The launcher sync action must execute this repository workflow and display the canonical launcher report's source-level changes and blockers. It must not duplicate collectors, comparisons, path rewriting, or missing-resource logic.
 
 ## Scope
 

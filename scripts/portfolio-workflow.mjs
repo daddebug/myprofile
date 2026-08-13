@@ -1,17 +1,46 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
+import { statSync } from "node:fs";
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { finalizePublishReport } from "./publishing-report-lib.mjs";
 
 const OFFICIAL_ROOT = path.resolve("D:/myprofilegit/myprofile");
 const PRODUCTION_URL = "https://myprofile-teal.vercel.app";
 const VERCEL_DASHBOARD = "https://vercel.com/myprofile2/myprofile";
 const LARGE_FILE_LIMIT = 50 * 1024 * 1024;
 const command = process.argv[2] ?? "check";
+const bundleArgument = process.argv.slice(3).find((argument) => argument !== "--");
+const bundlePath = bundleArgument ? path.resolve(bundleArgument) : "";
+const canonicalPublishOutputs = [
+  "src/data/publishedPortfolio.json",
+  "src/data/uiPracticeMetadata.json",
+];
+const canonicalWebsiteRootFiles = new Set([
+  ".gitignore",
+  "CHANGELOG.md",
+  "CLAUDE.md",
+  "DAILY_WORKFLOW.md",
+  "DEPLOYMENT.md",
+  "PROJECT_STATUS.md",
+  "TASKS.md",
+  "index.html",
+  "package.json",
+  "pnpm-lock.yaml",
+  "postcss.config.js",
+  "tailwind.config.ts",
+  "tsconfig.app.json",
+  "tsconfig.json",
+  "tsconfig.node.json",
+  "vercel.json",
+  "vite.config.ts",
+]);
+const canonicalWebsitePrefixes = ["docs/", "scripts/", "skills/", "src/"];
 
 function fail(message) {
   console.error(`\nERROR: ${message}\n`);
+  if (command === "launcher-preflight" || command === "launcher-publish") throw new Error(message);
   process.exit(1);
 }
 
@@ -50,9 +79,49 @@ function assertOfficialDirectory() {
 }
 
 function changedFiles() {
-  const output = capture("git", ["status", "--porcelain=v1", "--untracked-files=all"]);
+  const output = execFileSync("git", ["status", "--porcelain=v1", "--untracked-files=all"], { cwd: OFFICIAL_ROOT, encoding: "utf8" }).trimEnd();
   if (!output) return [];
   return output.split(/\r?\n/).map((line) => line.slice(3).trim()).filter(Boolean);
+}
+
+function stagedFiles() {
+  const output = capture("git", ["diff", "--cached", "--name-only"]);
+  return output ? output.split(/\r?\n/).map((file) => file.trim()).filter(Boolean) : [];
+}
+
+function isCanonicalPublishOutput(file) {
+  const normalized = file.replaceAll("\\", "/");
+  return canonicalPublishOutputs.includes(normalized) || normalized.startsWith("public/images/published/");
+}
+
+function isCanonicalWebsiteFile(file) {
+  const normalized = file.replaceAll("\\", "/");
+  return isCanonicalPublishOutput(normalized)
+    || canonicalWebsiteRootFiles.has(normalized)
+    || canonicalWebsitePrefixes.some((prefix) => normalized.startsWith(prefix));
+}
+
+function assertLauncherHasOnlyCanonicalWebsiteChanges(files) {
+  const unrelated = files.filter((file) => !isCanonicalWebsiteFile(file));
+  if (unrelated.length) {
+    fail(`Sync is blocked because these changes are outside the canonical website implementation and publishing output:\n- ${unrelated.join("\n- ")}\nReview them separately before using DILIDA DESK sync.`);
+  }
+}
+
+function assertLauncherHasNoUnrelatedStagedFiles() {
+  const unrelated = stagedFiles().filter((file) => !isCanonicalWebsiteFile(file));
+  if (unrelated.length) {
+    fail(`Sync is blocked because unrelated files are already staged for commit:\n- ${unrelated.join("\n- ")}\nUnstage or commit those files separately before using DILIDA DESK sync.`);
+  }
+}
+
+function requireBundlePath() {
+  if (!bundlePath) fail("Choose a fresh EXPORT FOR PUBLISH JSON before syncing.");
+  try {
+    if (!statSync(bundlePath).isFile()) fail(`The selected production export does not exist: ${bundlePath}`);
+  } catch {
+    fail(`The selected production export does not exist: ${bundlePath}`);
+  }
 }
 
 async function inspectChangedFiles(files) {
@@ -132,6 +201,32 @@ async function runChecks() {
 }
 
 async function verifyProduction() {
+  const localIndex = await readFile(path.join(OFFICIAL_ROOT, "dist", "index.html"), "utf8");
+  const expectedAssets = [...localIndex.matchAll(/(?:src|href)="(\/assets\/[^"?#]+)"/g)].map((match) => match[1]).sort();
+  if (!expectedAssets.length) fail("The fresh production build does not reference any hashed assets.");
+
+  const deploymentDeadline = Date.now() + 3 * 60 * 1000;
+  let deployedAssets = [];
+  while (Date.now() < deploymentDeadline) {
+    try {
+      const response = await fetch(`${PRODUCTION_URL}/zh?deployment-check=${Date.now()}`, {
+        redirect: "follow",
+        headers: { "cache-control": "no-cache" },
+      });
+      if (response.ok) {
+        const html = await response.text();
+        deployedAssets = [...html.matchAll(/(?:src|href)="(\/assets\/[^"?#]+)"/g)].map((match) => match[1]).sort();
+        if (JSON.stringify(deployedAssets) === JSON.stringify(expectedAssets)) break;
+      }
+    } catch {
+      // Vercel may briefly be unavailable while the new deployment becomes ready.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+  }
+  if (JSON.stringify(deployedAssets) !== JSON.stringify(expectedAssets)) {
+    fail(`Production is not serving the fresh local build.\nExpected assets:\n- ${expectedAssets.join("\n- ")}\nDeployed assets:\n- ${deployedAssets.join("\n- ") || "none"}`);
+  }
+
   const routes = [
     "/zh",
     "/en",
@@ -150,7 +245,7 @@ async function verifyProduction() {
     }
   }
   if (failures.length) fail(`Production verification failed:\n- ${failures.join("\n- ")}`);
-  console.log(`Production routes respond successfully: ${PRODUCTION_URL}`);
+  console.log(`Production serves the fresh build assets and all required routes respond: ${PRODUCTION_URL}`);
   console.log(`Deployment dashboard: ${VERCEL_DASHBOARD}`);
 }
 
@@ -180,7 +275,73 @@ async function publish() {
   console.log("Run pnpm portfolio:verify after Vercel reports Ready.");
 }
 
+async function launcherPreflight() {
+  assertOfficialDirectory();
+  requireBundlePath();
+  const files = changedFiles();
+  assertLauncherHasNoUnrelatedStagedFiles();
+  assertLauncherHasOnlyCanonicalWebsiteChanges(files);
+  await inspectChangedFiles(files);
+  console.log("Running the canonical production import dry run...");
+  run("pnpm", ["portfolio:import", "--", bundlePath]);
+  console.log("Launcher preflight passed. No production files were changed.");
+}
+
+async function launcherPublish() {
+  assertOfficialDirectory();
+  requireBundlePath();
+  const beforeImport = changedFiles();
+  assertLauncherHasNoUnrelatedStagedFiles();
+  assertLauncherHasOnlyCanonicalWebsiteChanges(beforeImport);
+  await inspectChangedFiles(beforeImport);
+
+  console.log("Running the canonical production import dry run...");
+  run("pnpm", ["portfolio:import", "--", bundlePath]);
+  console.log("Applying the confirmed canonical production import...");
+  run("pnpm", ["portfolio:import", "--", bundlePath, "--confirm"]);
+
+  const changedAfterImport = changedFiles();
+  assertLauncherHasOnlyCanonicalWebsiteChanges(changedAfterImport);
+  const files = changedAfterImport.filter(isCanonicalWebsiteFile);
+  assertLauncherHasNoUnrelatedStagedFiles();
+  await runChecks();
+  if (!files.length) {
+    console.log("No canonical publishing output changed. Verifying the current production site.");
+    await verifyProduction();
+    await finalizePublishReport({ root: OFFICIAL_ROOT, outcome: "published" });
+    return;
+  }
+
+  console.log("\nCanonical website implementation and publishing files proposed for commit:");
+  files.forEach((file) => console.log(`  ${file}`));
+  run("git", ["add", "--", ...files]);
+  const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Sydney" }).format(new Date());
+  run("git", ["commit", "-m", `Update portfolio ${date}`]);
+  run("git", ["push", "origin", "main"]);
+  console.log("\nPush completed. Waiting briefly before production verification...");
+  await new Promise((resolve) => setTimeout(resolve, 15000));
+  await verifyProduction();
+  await finalizePublishReport({ root: OFFICIAL_ROOT, outcome: "published" });
+}
+
 if (command === "check") await runChecks();
 else if (command === "publish") await publish();
 else if (command === "verify") await verifyProduction();
+else if (command === "launcher-preflight") {
+  try {
+    await launcherPreflight();
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  }
+} else if (command === "launcher-publish") {
+  try {
+    await launcherPublish();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    await finalizePublishReport({ root: OFFICIAL_ROOT, outcome: "failed", error: message });
+    console.error(message);
+    process.exitCode = 1;
+  }
+}
 else fail(`Unknown workflow command: ${command}`);

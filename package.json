@@ -16,6 +16,8 @@
     "portfolio:start": "vite",
     "portfolio:check": "node scripts/portfolio-workflow.mjs check",
     "portfolio:publish": "node scripts/portfolio-workflow.mjs publish",
+    "portfolio:launcher-preflight": "node scripts/portfolio-workflow.mjs launcher-preflight",
+    "portfolio:launcher-publish": "node scripts/portfolio-workflow.mjs launcher-publish",
     "publish:daily": "node scripts/portfolio-workflow.mjs publish",
     "portfolio:import": "node scripts/import-production-bundle.mjs",
     "portfolio:preflight": "node scripts/publishing-preflight.mjs",

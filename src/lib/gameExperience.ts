@@ -30,12 +30,16 @@ export type GameExperienceRecord = {
     playtimeHours?: number;
     playtimeLabelZh?: string;
     playtimeLabelEn?: string;
-    achievementMode: AchievementMode;
+    achievementMode?: AchievementMode;
     achievementUnlocked?: number;
     achievementTotal?: number;
     achievementPercent?: number;
     completionStatusZh?: string;
     completionStatusEn?: string;
+    paidAmount?: {
+      amount: number;
+      currency: string;
+    };
   };
   presentation: {
     coverAssetId?: string;
@@ -183,9 +187,9 @@ function finiteNonNegative(value: unknown) {
 }
 
 export function normalizeGameExperienceRecord(record: GameExperienceRecord, index: number): GameExperienceRecord {
-  const mode: AchievementMode = ["exact", "percentage", "unavailable", "none"].includes(record.stats?.achievementMode)
+  const mode: AchievementMode | undefined = ["exact", "percentage", "unavailable", "none"].includes(record.stats?.achievementMode ?? "")
     ? record.stats.achievementMode
-    : "unavailable";
+    : undefined;
   const unlocked = finiteNonNegative(record.stats?.achievementUnlocked);
   const total = finiteNonNegative(record.stats?.achievementTotal);
   const suppliedPercent = finiteNonNegative(record.stats?.achievementPercent);
@@ -194,6 +198,14 @@ export function normalizeGameExperienceRecord(record: GameExperienceRecord, inde
     : mode === "percentage" && suppliedPercent !== undefined
       ? Math.min(100, suppliedPercent)
       : undefined;
+  const paidAmount = record.stats?.paidAmount;
+  const normalizedPaidAmount = paidAmount
+    && finiteNonNegative(paidAmount.amount) !== undefined
+    && paidAmount.amount > 0
+    && typeof paidAmount.currency === "string"
+    && /^[A-Za-z]{3}$/.test(paidAmount.currency.trim())
+    ? { amount: paidAmount.amount, currency: paidAmount.currency.trim().toUpperCase() }
+    : undefined;
   const tags: LocalizedGameTag[] = [];
   const seenTags = new Set<string>();
   for (const [tagIndex, tag] of (record.presentation?.tags ?? []).entries()) {
@@ -225,6 +237,7 @@ export function normalizeGameExperienceRecord(record: GameExperienceRecord, inde
       achievementUnlocked: mode === "exact" ? unlocked : undefined,
       achievementTotal: mode === "exact" ? total : undefined,
       achievementPercent: percent,
+      paidAmount: normalizedPaidAmount,
     },
     presentation: { ...record.presentation, tags, homepageTagIds },
     reflection: {
@@ -274,15 +287,67 @@ function readStoredGameExperience() {
   try { return normalizeGameExperienceStore(JSON.parse(raw)); } catch { return null; }
 }
 
+function hasText(value: string | undefined): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function isCanonicalPublishedGameCoverPath(
+  coverAssetId: string,
+  coverPublicPath: string | undefined,
+): coverPublicPath is string {
+  const prefix = "/images/published/game-covers/";
+  if (!hasText(coverPublicPath) || !coverPublicPath.startsWith(prefix)) return false;
+  const fileName = coverPublicPath.slice(prefix.length);
+  return !fileName.includes("/") && fileName.replace(/\.[^./]+$/, "") === coverAssetId;
+}
+
+export function backfillPublishedGameExperienceMetadata(
+  draftStore: GameExperienceStore,
+  publishedStore: GameExperienceStore | null,
+): GameExperienceStore {
+  if (!publishedStore) return draftStore;
+
+  const publishedById = new Map(publishedStore.records.map((record) => [record.id, record]));
+  let changed = false;
+  const records = draftStore.records.map((draftRecord) => {
+    const publishedRecord = publishedById.get(draftRecord.id);
+    const draftCoverAssetId = draftRecord.presentation.coverAssetId;
+    const publishedCoverAssetId = publishedRecord?.presentation.coverAssetId;
+    const publishedCoverPublicPath = publishedRecord?.presentation.coverPublicPath;
+    if (
+      !publishedRecord
+      || !hasText(draftCoverAssetId)
+      || draftCoverAssetId !== publishedCoverAssetId
+      || hasText(draftRecord.presentation.coverPublicPath)
+      || !isCanonicalPublishedGameCoverPath(draftCoverAssetId, publishedCoverPublicPath)
+    ) {
+      return draftRecord;
+    }
+
+    changed = true;
+    return {
+      ...draftRecord,
+      presentation: {
+        ...draftRecord.presentation,
+        coverPublicPath: publishedCoverPublicPath,
+      },
+    };
+  });
+
+  return changed ? { ...draftStore, records } : draftStore;
+}
+
 let snapshotCache: { raw: string | null; store: GameExperienceStore } | null = null;
 
 export function getGameExperienceStore(): GameExperienceStore {
   if (typeof window === "undefined") return createLegacyGameExperienceStore();
   const raw = import.meta.env.DEV ? window.localStorage.getItem(GAME_EXPERIENCE_STORAGE_KEY) : null;
   if (snapshotCache?.raw === raw) return snapshotCache.store;
-  const store = readStoredGameExperience()
-    ?? normalizeGameExperienceStore(getPublishedGameExperience())
-    ?? createLegacyGameExperienceStore();
+  const publishedStore = normalizeGameExperienceStore(getPublishedGameExperience());
+  const draftStore = readStoredGameExperience();
+  const store = draftStore
+    ? backfillPublishedGameExperienceMetadata(draftStore, publishedStore)
+    : publishedStore ?? createLegacyGameExperienceStore();
   snapshotCache = { raw, store };
   return store;
 }
@@ -302,6 +367,9 @@ export function validateGameExperienceStore(store: GameExperienceStore) {
     }
     if (stats.achievementMode === "percentage" && (stats.achievementPercent === undefined || stats.achievementPercent < 0 || stats.achievementPercent > 100)) {
       throw new Error(`${record.identity.canonicalTitle || record.id}: achievement percentage must be between 0 and 100.`);
+    }
+    if (stats.paidAmount && (!Number.isFinite(stats.paidAmount.amount) || stats.paidAmount.amount <= 0 || !/^[A-Z]{3}$/.test(stats.paidAmount.currency))) {
+      throw new Error(`${record.identity.canonicalTitle || record.id}: paid amount requires a positive amount and a three-letter currency code.`);
     }
   }
   const selected = store.records.filter((record) => record.publication.showOnHomepage && !record.publication.archived);
@@ -347,7 +415,7 @@ export function createBlankGameRecord(): GameExperienceRecord {
     schemaVersion: 1,
     id,
     identity: { canonicalTitle: "", titleZh: "", titleEn: "" },
-    stats: { achievementMode: "unavailable" },
+    stats: {},
     presentation: { tags: [], homepageTagIds: [] },
     reflection: { whyPlayedZh: "", whyPlayedEn: "", strengthsZh: "", strengthsEn: "", weaknessesZh: "", weaknessesEn: "", contributionZh: "", contributionEn: "" },
     detail: { zh: "", en: "" },
@@ -361,7 +429,7 @@ export function formatPlaytime(record: GameExperienceRecord, locale: "zh" | "en"
   const localized = locale === "zh" ? record.stats.playtimeLabelZh : record.stats.playtimeLabelEn;
   if (localized) return localized;
   if (record.stats.playtimeHours !== undefined) return `${record.stats.playtimeHours}h`;
-  return locale === "zh" ? "未记录" : "Not recorded";
+  return null;
 }
 
 export function formatAchievement(record: GameExperienceRecord, locale: "zh" | "en") {
@@ -371,7 +439,22 @@ export function formatAchievement(record: GameExperienceRecord, locale: "zh" | "
     return `${stats.achievementUnlocked} / ${stats.achievementTotal}`;
   }
   if (stats.achievementMode === "percentage" && stats.achievementPercent !== undefined) return `${stats.achievementPercent}%`;
-  return locale === "zh" ? "未记录" : "Not recorded";
+  return null;
+}
+
+export function formatPaidAmount(record: GameExperienceRecord, locale: "zh" | "en") {
+  const paid = record.stats.paidAmount;
+  if (!paid || !Number.isFinite(paid.amount) || paid.amount <= 0) return null;
+  try {
+    return new Intl.NumberFormat(locale === "zh" ? "zh-CN" : "en-AU", {
+      style: "currency",
+      currency: paid.currency,
+      currencyDisplay: "narrowSymbol",
+      maximumFractionDigits: Number.isInteger(paid.amount) ? 0 : 2,
+    }).format(paid.amount);
+  } catch {
+    return `${paid.currency} ${paid.amount}`;
+  }
 }
 
 export function gameTitle(record: GameExperienceRecord, locale: "zh" | "en") {

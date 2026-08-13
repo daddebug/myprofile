@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowDown, ArrowUp, ChevronDown, Clock, ImageIcon, Pencil, Plus, Settings2, Trophy, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Clock, ImageIcon, Pencil, Plus, Settings2, Trophy, X } from "lucide-react";
 import { GameCoverImage } from "../components/GameCoverImage";
 import { GameExperienceManager } from "../components/GameExperienceManager";
 import { PageTransition } from "../components/PageTransition";
 import { useGameCover } from "../hooks/useGameCover";
 import { useOwnerMode } from "../hooks/useOwnerMode";
-import { formatAchievement, formatPlaytime, gameTitle, useGameExperienceStore, type GameExperienceRecord } from "../lib/gameExperience";
+import { formatAchievement, formatPaidAmount, formatPlaytime, gameTitle, useGameExperienceStore, type GameExperienceRecord } from "../lib/gameExperience";
 import { useLocale } from "../locales/LocaleContext";
 
 export function GameArchivePage() {
@@ -18,7 +18,6 @@ export function GameArchivePage() {
   const [editRecordId, setEditRecordId] = useState<string | null>(null);
   const [startWithNewGame, setStartWithNewGame] = useState(false);
   const [isEditingGames, setIsEditingGames] = useState(isOwnerMode);
-  const [expandedGameId, setExpandedGameId] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const visibleGames = useMemo(() => store.records
     .filter((game) => game.publication.visibility === "public" && !game.publication.archived)
@@ -45,8 +44,8 @@ export function GameArchivePage() {
 
       <section className="site-container mt-12">
         <label className="block max-w-md"><span className="sr-only">{locale === "zh" ? "搜索游戏" : "Search games"}</span><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={locale === "zh" ? "按标题或标签搜索" : "Search by title or tag"} className="w-full rounded-full border border-softWhite/12 bg-softWhite/[0.04] px-5 py-3 text-sm text-softWhite outline-none placeholder:text-softWhite/35 focus:border-acidGreen/60" /></label>
-        <div className="mt-12 space-y-14 md:space-y-16">
-          {visibleGames.map((game, index) => <GameExperienceRow key={game.id} game={game} locale={locale} index={index} owner={isEditingGames && import.meta.env.DEV} prefersReducedMotion={Boolean(prefersReducedMotion)} expanded={expandedGameId === game.id} onToggle={() => setExpandedGameId((current) => current === game.id ? null : game.id)} onManage={() => { setStartWithNewGame(false); setEditRecordId(game.id); setManaging(true); }} />)}
+        <div className="mt-12 columns-1 [column-gap:1.5rem] lg:columns-2 lg:[column-gap:1.75rem]">
+          {visibleGames.map((game, index) => <GameExperienceRow key={game.id} game={game} locale={locale} index={index} owner={isEditingGames && import.meta.env.DEV} prefersReducedMotion={Boolean(prefersReducedMotion)} onManage={() => { setStartWithNewGame(false); setEditRecordId(game.id); setManaging(true); }} />)}
         </div>
       </section>
       {managing ? <GameExperienceManager locale={locale} store={store} initialEditingId={editRecordId} startWithNewGame={startWithNewGame} onClose={() => { setManaging(false); setEditRecordId(null); setStartWithNewGame(false); }} /> : null}
@@ -54,43 +53,81 @@ export function GameArchivePage() {
   </PageTransition>;
 }
 
-function GameExperienceRow({ game, locale, index, owner, prefersReducedMotion, expanded, onToggle, onManage }: { game: GameExperienceRecord; locale: "zh" | "en"; index: number; owner: boolean; prefersReducedMotion: boolean; expanded: boolean; onToggle: () => void; onManage: () => void }) {
+function GameExperienceRow({ game, locale, index, owner, prefersReducedMotion, onManage }: { game: GameExperienceRecord; locale: "zh" | "en"; index: number; owner: boolean; prefersReducedMotion: boolean; onManage: () => void }) {
   const title = gameTitle(game, locale);
   const cover = useGameCover(game.presentation.coverAssetId, game.presentation.coverPublicPath);
   const tags = game.presentation.tags.map((tag) => locale === "zh" ? tag.zh || tag.en : tag.en || tag.zh).filter(Boolean);
-  const whyPlayed = locale === "zh" ? game.reflection.whyPlayedZh : game.reflection.whyPlayedEn;
   const strengths = locale === "zh" ? game.reflection.strengthsZh : game.reflection.strengthsEn;
+  const weaknesses = locale === "zh" ? game.reflection.weaknessesZh : game.reflection.weaknessesEn;
   const contribution = locale === "zh" ? game.reflection.contributionZh : game.reflection.contributionEn;
   const detail = locale === "zh" ? game.detail.zh : game.detail.en;
-  const hasDetail = detail.trim().length > 0;
-  const detailsId = `game-experience-details-${game.id}`;
+  const playtime = formatPlaytime(game, locale);
+  const achievement = formatAchievement(game, locale);
+  const paidAmount = formatPaidAmount(game, locale);
 
-  return <motion.article className="relative border-t border-softWhite/12 pt-5 md:pt-6" initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.08 }} transition={{ duration: prefersReducedMotion ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}>
+  const hasBody = Boolean(strengths.trim() || weaknesses.trim() || contribution.trim() || detail.trim());
+
+  return <motion.article className="group relative isolate mb-6 inline-block w-full break-inside-avoid overflow-hidden rounded-lg border border-[#e1e9ff]/[0.08] bg-transparent p-5 align-top shadow-[0_26px_72px_rgba(2,5,28,0.18),inset_0_1px_0_rgba(238,243,255,0.075)] transition-[transform,box-shadow] duration-200 ease-out lg:hover:!-translate-y-0.5 lg:hover:shadow-[0_30px_82px_rgba(2,5,28,0.23),inset_0_1px_0_rgba(238,243,255,0.09)] md:p-6" initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.08 }} transition={{ duration: prefersReducedMotion ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}>
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[-2] rounded-[inherit] bg-[#2b354d]/30 backdrop-blur-[22px] backdrop-saturate-[1.04]" />
+    {cover ? <>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 z-[-1] h-[85%] w-full overflow-hidden"
+        data-game-card-ambient="lower"
+        style={{ WebkitMaskImage: "linear-gradient(to bottom, #000 0%, #000 29%, rgba(0,0,0,0.7) 55%, rgba(0,0,0,0.18) 78%, transparent 100%)", maskImage: "linear-gradient(to bottom, #000 0%, #000 29%, rgba(0,0,0,0.7) 55%, rgba(0,0,0,0.18) 78%, transparent 100%)" }}
+      >
+        <img src={cover} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-0 brightness-[1.08] blur-[50px] saturate-[0.92] transition-opacity duration-300 ease-out lg:group-hover:opacity-[0.14]" />
+      </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 z-[-1] h-[42%] w-full overflow-hidden"
+        data-game-card-ambient="top"
+        style={{ WebkitMaskImage: "linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.82) 28%, rgba(0,0,0,0.32) 66%, rgba(0,0,0,0.08) 86%, transparent 100%)", maskImage: "linear-gradient(to bottom, #000 0%, rgba(0,0,0,0.82) 28%, rgba(0,0,0,0.32) 66%, rgba(0,0,0,0.08) 86%, transparent 100%)" }}
+      >
+        <img src={cover} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-0 brightness-[1.2] contrast-[1.04] blur-[16px] saturate-[1.05] transition-opacity duration-300 ease-out lg:group-hover:opacity-[0.29]" />
+      </div>
+    </> : null}
     {owner ? <div className="mb-4 flex flex-wrap items-center gap-2 rounded-[8px] border border-acidGreen/22 bg-archiveBlue/12 p-2.5 font-mono text-[9px] tracking-[0.06em] text-softWhite/55" data-game-owner-toolbar><button type="button" onClick={onManage} className="editor-action text-acidGreen"><Pencil className="h-3.5 w-3.5" />{locale === "zh" ? "编辑" : "Edit"}</button><button type="button" onClick={onManage} className="editor-action">{locale === "zh" ? `首页展示：${game.publication.showOnHomepage ? "是" : "否"}` : `Homepage: ${game.publication.showOnHomepage ? "Yes" : "No"}`}</button><button type="button" onClick={onManage} className="editor-action">{game.publication.visibility.toUpperCase()}</button><button type="button" onClick={onManage} className="editor-icon" aria-label={locale === "zh" ? "上移" : "Move up"}><ArrowUp className="h-3.5 w-3.5" /></button><button type="button" onClick={onManage} className="editor-icon" aria-label={locale === "zh" ? "下移" : "Move down"}><ArrowDown className="h-3.5 w-3.5" /></button><span className="inline-flex items-center gap-1.5 px-2"><ImageIcon className="h-3.5 w-3.5" />{game.presentation.coverAssetId || game.presentation.coverPublicPath ? (locale === "zh" ? "已有封面" : "Cover ready") : (locale === "zh" ? "缺少封面" : "No cover")}</span></div> : null}
-    <div className="grid gap-x-7 gap-y-5 md:grid-cols-[210px_minmax(0,0.8fr)_minmax(280px,1.2fr)] md:gap-x-6 lg:grid-cols-[210px_minmax(0,0.72fr)_minmax(360px,1.18fr)] lg:gap-x-7 xl:grid-cols-[210px_300px_minmax(0,1fr)]">
-      <div>
-        <div className="aspect-video w-[180px] max-w-full overflow-hidden rounded-lg bg-[#20285b] md:w-full"><GameCoverImage src={cover} title={title} className="h-full w-full object-cover object-center" /></div>
+    <header className="relative z-10 grid grid-cols-[112px_minmax(0,1fr)] gap-4 sm:grid-cols-[148px_minmax(0,1fr)]">
+      <div className="min-w-0">
+        <div className="aspect-video w-full overflow-hidden rounded-lg border border-softWhite/[0.09] bg-[#20285b] shadow-[5px_9px_20px_rgba(2,5,27,0.34),inset_1px_1px_0_rgba(255,255,255,0.08)]"><GameCoverImage src={cover} title={title} className="h-full w-full object-cover object-center" /></div>
         <p className="mt-2 font-mono text-[9px] tracking-[0.12em] text-softWhite/35">{String(index + 1).padStart(2, "0")} / {game.identity.releaseYear ?? "GAME EXPERIENCE"}</p>
       </div>
-      <div className="min-w-0">
-        <h2 className="max-w-2xl font-display text-[22px] font-semibold leading-[1.12] text-softWhite md:text-2xl">{title}</h2>
-        <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5 font-mono text-[11px] tracking-[0.06em] text-acidGreen/88"><span className="inline-flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{formatPlaytime(game, locale)}</span><span className="inline-flex items-center gap-1.5 text-softWhite/52"><Trophy className="h-3.5 w-3.5" />{formatAchievement(game, locale)}</span></div>
-        {tags.length ? <div className="mt-2.5 flex flex-wrap gap-1.5">{tags.map((tag) => <span key={tag} className="rounded bg-softWhite/[0.055] px-2 py-1 text-[10px] leading-4 text-softWhite/56">{tag}</span>)}</div> : null}
-        {whyPlayed.trim() ? <SummaryBlock label={locale === "zh" ? "为什么游玩" : "Why I played"} body={whyPlayed} className="mt-4" /> : null}
+      <div className="min-w-0 self-start">
+        <h2 className="font-display text-[26px] font-semibold leading-[1.12] text-softWhite md:text-[30px]">{title}</h2>
+        {playtime || achievement || paidAmount ? <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 font-mono text-sm leading-5 tracking-[0.04em] text-acidGreen/88">{playtime ? <span className="inline-flex items-center gap-1.5"><Clock className="h-4 w-4" />{playtime}</span> : null}{achievement ? <span className="inline-flex items-center gap-1.5 text-softWhite/56"><Trophy className="h-4 w-4" />{achievement}</span> : null}{paidAmount ? <span className="inline-flex items-center gap-1.5 text-softWhite/56">{locale === "zh" ? "付费" : "Spent"} {paidAmount}</span> : null}</div> : null}
+        {tags.length ? <div className="mt-3 flex flex-wrap gap-1.5">{tags.map((tag) => <span key={tag} className="rounded bg-softWhite/[0.055] px-2 py-1 text-[13px] leading-5 text-softWhite/60">{tag}</span>)}</div> : null}
       </div>
-      <div className="min-w-0 md:pl-1">
-        {strengths.trim() ? <SummaryBlock label={locale === "zh" ? "优点" : "Strengths"} body={strengths} extended /> : null}
-        {contribution.trim() ? <SummaryBlock label={locale === "zh" ? "对我的帮助" : "What I learned"} body={contribution} emphasized extended className={strengths.trim() ? "mt-4" : ""} /> : null}
-        {hasDetail ? <button type="button" aria-expanded={expanded} aria-controls={detailsId} onClick={onToggle} className="mt-4 inline-flex items-center gap-1.5 font-mono text-[10px] font-bold tracking-[0.08em] text-acidGreen transition hover:text-softWhite focus:outline-none focus-visible:ring-2 focus-visible:ring-acidGreen/70"><span>{expanded ? (locale === "zh" ? "收起详情" : "Hide details") : (locale === "zh" ? "查看详情" : "View details")}</span><ChevronDown className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} aria-hidden="true" /></button> : null}
-      </div>
-      {expanded && hasDetail ? <div id={detailsId} className="border-t border-softWhite/10 bg-archiveBlue/10 px-4 py-5 md:col-span-3 md:px-6"><p className="whitespace-pre-wrap text-sm leading-7 text-softWhite/74">{detail}</p></div> : null}
-    </div>
+    </header>
+    {hasBody ? <div className="relative z-10 mt-5 border-t border-softWhite/[0.055] pt-4">
+      {contribution.trim() ? <TakeawayBlock label={locale === "zh" ? "对我的帮助" : "What I learned"} body={contribution} /> : null}
+      {strengths.trim() || weaknesses.trim() ? <div className={`grid gap-3 ${contribution.trim() ? "mt-6" : ""} ${strengths.trim() && weaknesses.trim() ? "xl:grid-cols-2" : ""}`}>
+        {strengths.trim() ? <EvidenceBlock label={locale === "zh" ? "优点" : "Strengths"} body={strengths} /> : null}
+        {weaknesses.trim() ? <EvidenceBlock label={locale === "zh" ? "局限" : "Limitations"} body={weaknesses} divided={Boolean(strengths.trim())} /> : null}
+      </div> : null}
+      {detail.trim() ? <DetailBlock label={locale === "zh" ? "详细体验" : "Detailed experience"} body={detail} className={strengths.trim() || weaknesses.trim() || contribution.trim() ? "mt-7" : ""} /> : null}
+    </div> : null}
   </motion.article>;
 }
 
-function SummaryBlock({ label, body, emphasized = false, extended = false, className = "" }: { label: string; body: string; emphasized?: boolean; extended?: boolean; className?: string }) {
-  return <section className={`${className} ${emphasized ? "border-l-2 border-acidGreen/55 pl-3.5" : ""}`}>
-    <h3 className={`font-mono text-[10px] font-bold tracking-[0.1em] ${emphasized ? "text-acidGreen" : "text-softWhite/45"}`}>{label}</h3>
-    <p className={`mt-1 text-sm leading-5 text-softWhite/68 ${extended ? "line-clamp-2 xl:line-clamp-5" : "line-clamp-2"}`}>{body}</p>
+function EvidenceBlock({ label, body, divided = false }: { label: string; body: string; divided?: boolean }) {
+  return <section className={divided ? "xl:border-l xl:border-softWhite/[0.055] xl:pl-5" : "xl:pr-2"}>
+    <h3 className="font-mono text-[11px] font-bold tracking-[0.1em] text-softWhite/45">{label}</h3>
+    <p className="mt-1.5 whitespace-pre-wrap text-[15px] font-normal leading-[1.55] text-[#dbe3f5]/58">{body}</p>
+  </section>;
+}
+
+function TakeawayBlock({ label, body, className = "" }: { label: string; body: string; className?: string }) {
+  return <section className={`${className} rounded-md border border-softWhite/[0.065] bg-softWhite/[0.055] px-5 py-5 shadow-[0_16px_42px_rgba(2,7,27,0.1),inset_0_1px_0_rgba(248,251,255,0.075)] backdrop-blur-[14px]`}>
+    <p className="font-mono text-[10px] font-bold tracking-[0.14em] text-acidGreen/72">DESIGN TAKEAWAY</p>
+    <h3 className="mt-1 font-mono text-xs font-bold tracking-[0.08em] text-acidGreen">{label}</h3>
+    <p className="mt-2 whitespace-pre-wrap text-[19px] font-medium leading-[1.6] text-softWhite/82">{body}</p>
+  </section>;
+}
+
+function DetailBlock({ label, body, className = "" }: { label: string; body: string; className?: string }) {
+  return <section className={`${className} border-t border-softWhite/[0.045] pt-5`}>
+    <h3 className="font-mono text-[11px] font-bold tracking-[0.1em] text-softWhite/30">{label}</h3>
+    <p className="mt-1.5 whitespace-pre-wrap text-[14px] font-normal leading-[1.75] text-[#d3dced]/42">{body}</p>
   </section>;
 }
