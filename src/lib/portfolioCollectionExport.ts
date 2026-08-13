@@ -280,11 +280,12 @@ async function buildGameExperienceSectionsHtml(records: GameExperienceRecord[], 
     const eyebrow = `${locale === "zh" ? "游戏经历" : "GAME EXPERIENCE"} / ${String(pageIndex + 1).padStart(2, "0")}`;
     const rows = pageRecords.map(({ record, cover }) => {
       const tags = record.presentation.tags.map((tag) => locale === "zh" ? (tag.zh || tag.en) : (tag.en || tag.zh)).filter(Boolean).slice(0, 4);
+      const metadata = [formatPlaytime(record, locale), formatAchievement(record, locale)].filter(Boolean).join(" · ");
       return `<div class="cx-game-row">
         ${cover ? `<img class="cx-game-cover" src="${escapeHtml(cover)}" alt="" />` : `<div class="cx-game-cover"></div>`}
         <div style="min-width:0;">
           <p class="cx-game-title">${escapeHtml(gameTitle(record, locale))}</p>
-          <p class="cx-game-meta">${escapeHtml(formatPlaytime(record, locale))} · ${escapeHtml(formatAchievement(record, locale))}</p>
+          ${metadata ? `<p class="cx-game-meta">${escapeHtml(metadata)}</p>` : ""}
           <div class="cx-game-tags">${tags.map((tag) => `<span class="cx-game-tag">${escapeHtml(tag)}</span>`).join("")}</div>
         </div>
       </div>`;
