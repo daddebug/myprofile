@@ -248,7 +248,7 @@ export function HomePage() {
           viewport={{ once: true, amount: 0.45 }}
           transition={{ duration: prefersReducedMotion ? 0.01 : 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
-          Games are built from the small experiences we choose to refine.
+          Meaningful experiences are built from the small interactions we choose to refine.
         </motion.p>
 
         <HomePlayExperience />
