@@ -15,6 +15,7 @@ Applies to normal project changes: bug fixes, feature work, layout/visual fixes,
 - Do not create test projects unless explicitly necessary and authorized.
 - Do not leave synthetic projects, test drafts, test assets, or temporary catalog entries behind — clean up anything created for verification before finishing.
 - Do not modify normal website visuals to solve an export-only problem. Export-only changes must be query-gated (e.g. `?collectionExport=1`) or isolated to the export compositor — never a bare change to shared component output.
+- **Fix upstream root causes, not downstream symptoms.** Before patching the stage where a problem was *observed*, check whether it was actually *caused* by an earlier pipeline stage (asset source → renderer → export snapshot → PDF/HTML generation → post-processing). If the root cause is upstream, fix that stage — don't add a downstream patch that compensates for it, since that starts a chain of patch-for-the-patch special cases. Only keep a downstream workaround when the upstream system genuinely can't be changed, and document why. Full rule in `CLAUDE.md`.
 
 ## Data safety
 

@@ -19,6 +19,7 @@ Editing UI (`CaseStudyEditor`, `ProjectCoverEditor`, `ProductionExportDock`, man
 - **Never reset storage keys** (e.g. bumping an IndexedDB/localStorage version to force a clean slate). Storage schemas must evolve in place.
 - **Never overwrite user-created project content.** Treat everything in `src/data/publishedPortfolio.json`, `src/data/projects.ts`, and browser-stored drafts as authored content, not scaffolding.
 - **Prefer non-destructive migrations.** When a data shape changes, write a migration that reads old shapes and upgrades them in memory/on write, rather than dropping and recreating stores or files.
+- **Legacy or partial drafts must not erase valid published metadata for the same stable asset reference.** Missing fields may be backfilled at runtime only when the record identity and asset identity match exactly; never overwrite explicit draft values or persist a read-time merge automatically.
 - **Preserve existing routes and stable project IDs.** Project `slug`s, IndexedDB record IDs, and localStorage keys are referenced across drafts, exports, and the published JSON — do not rename or renumber them without an explicit migration path.
 - **Before editing, inspect the relevant files and explain the likely cause** of the bug or the reasoning for the change before writing code.
 - **Make the smallest scoped change** that addresses the request. Don't refactor, rename, or restructure beyond what's needed.
@@ -26,6 +27,7 @@ Editing UI (`CaseStudyEditor`, `ProjectCoverEditor`, `ProductionExportDock`, man
 - **Do not publish, deploy, commit, or push unless explicitly requested.** No `git add`/`commit`/`push`, no `pnpm portfolio:publish`/`portfolio:import -- --confirm`/`upload:unity`, no Vercel actions, without the user asking for that specific step.
 - **For code changes, report**: files changed, behavior changed, checks passed (typecheck/build output), and explicit data-safety confirmation (what storage/content was and wasn't touched).
 - **The portfolio should feel authored by a game UX designer, not a generic AI-generated SaaS website.** Favor the project's existing voice, motion, and visual language (see `src/styles.css`, `tailwind.config.ts`, existing components) over generic dashboard/marketing-site patterns.
+- **Fix upstream root causes, not downstream symptoms.** When a problem in the current pipeline stage (e.g. PDF size/encoding) was actually caused by an earlier stage (e.g. what gets fed into the renderer/capture step), fix the earlier stage. Do not build increasingly complex patches at the current stage to compensate for a bug introduced upstream — that produces a fragile second pipeline that needs special-case knowledge of every case the upstream stage produces. Before implementing a fix, ask: where was the incorrect state first introduced, and would fixing it there make all downstream outputs correct automatically? Only keep a downstream workaround when the upstream system genuinely cannot be changed, compatibility requires it, or the workaround is the correct responsibility of that stage — and document exactly why. Applies to portfolio rendering, HTML export, PDF export, publishing, asset processing, Resume export, and DILIDA DESK integrations alike.
 
 ## Task skills
 
@@ -35,6 +37,7 @@ Available skills:
 
 - `skills/safe-project-editing/SKILL.md` — default rules for normal bug fixes, features, and layout/visual work.
 - `skills/portfolio-collection/SKILL.md` — the `/export` Portfolio Collection PDF pipeline.
+- `skills/static-html-export/SKILL.md` — the `/export` single-file Static HTML snapshot pipeline.
 - `skills/project-deletion/SKILL.md` — permanently removing one exact project.
 - `skills/publish-portfolio/SKILL.md` — moving browser drafts to source control and deploying.
 

@@ -8,8 +8,6 @@ Use only:
 D:\myprofilegit\myprofile
 ```
 
-`D:\profile` is a backup. Do not make independent edits in both directories.
-
 The canonical local URL is:
 
 ```text

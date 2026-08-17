@@ -42,3 +42,6 @@ public/portfolio-assets/
 
 # Local script/test output (audits, PDF diagnostics, etc.), never published.
 /output/
+
+# Submission-ready local files managed by DILIDA DESK. Never publish or commit.
+/local-deliverables/

@@ -27,6 +27,8 @@
     "test:import-confirm-gate": "node scripts/import-production-bundle-confirm-gate.test.mjs",
     "test:import-inherit": "node scripts/import-production-bundle-inherit.test.mjs",
     "test:import-catalog-inherit": "node scripts/import-production-bundle-catalog-inherit.test.mjs",
+    "test:import-missing-diagnostic": "node scripts/import-production-bundle-missing-diagnostic.test.mjs",
+    "test:asset-integrity": "node scripts/asset-integrity-gate.test.mjs",
     "portfolio:verify": "node scripts/portfolio-workflow.mjs verify"
   },
   "dependencies": {
