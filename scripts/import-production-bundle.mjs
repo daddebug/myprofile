@@ -1,138 +1,74 @@
-import { mkdir, readFile, writeFile, copyFile, stat } from "node:fs/promises";
+// Live publish CLI (Publishing Architecture V2, Cutover). This is the ONLY
+// place that may write production files (src/data/publishedPortfolio.json,
+// src/data/uiPracticeMetadata.json, public/images/published/**), and it does
+// so by delegating ALL judgment to buildPublishPlan.mjs / executePublishPlan.mjs:
+//   - buildPublishPlan.mjs is the sole merge/conflict/status/BLOCKED authority
+//   - executePublishPlan.mjs is the sole writeset-precondition-check + write authority
+// This file itself does none of that anymore -- it only (1) reads inputs,
+// (2) translates the still-V1-shaped export bundle into V2 entities/intents
+// via the one formal compatibility adapter (bundleCompat.mjs), (3) assembles
+// the final whole-file output from already-decided plan results (a pure
+// structural merge, not judgment -- see assemblePublishedOutput.mjs), and
+// (4) renders/executes. V1's preflight -> inline-merge -> rewritten-preflight
+// -> report-re-diff pipeline is retired from this path (see
+// publishing-preflight-lib.mjs and publishing-report-lib.mjs's own retirement
+// comments) -- their functions are no longer imported here.
+import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import process from "node:process";
-import { buildPublishingPreflight, getPublishedAssetLocation, readPublishSourceRegistry, resolveAlreadyPublishedProjectBodyAsset } from "./publishing-preflight-lib.mjs";
-import { LAUNCHER_REPORT_PATH, writeBlockedPublishReport, writePublishPlanReport } from "./publishing-report-lib.mjs";
+import { bundleV1ToV2AllIntents, bundleV1ToV2BundleAssets } from "./publishing/bundleCompat.mjs";
+import { buildPublishPlan } from "./publishing/buildPublishPlan.mjs";
+import { assemblePublishedOutput } from "./publishing/assemblePublishedOutput.mjs";
+import { hashContent } from "./publishing/contentHash.mjs";
+import { executePublishPlan } from "./publishing/executePublishPlan.mjs";
+import { readPublishSourceRegistry } from "./publishing/registry.mjs";
+import { LAUNCHER_REPORT_PATH, renderPublishPlanReportV2 } from "./publishing-report-lib.mjs";
 
 const OFFICIAL_ROOT = path.resolve("D:/myprofilegit/myprofile");
+// Test-only root override (Publishing Architecture V2, Test Isolation
+// Order): requires BOTH NODE_ENV=test AND an explicit PORTFOLIO_TEST_ROOT.
+// Any other combination -- including PORTFOLIO_TEST_ROOT set without
+// NODE_ENV=test -- is ignored outright and production stays locked to
+// OFFICIAL_ROOT. Deliberately not a general-purpose --root flag: that would
+// let anything redirect where "production" writes go.
+const TEST_ROOT_OVERRIDE = process.env.NODE_ENV === "test" && process.env.PORTFOLIO_TEST_ROOT
+  ? path.resolve(process.env.PORTFOLIO_TEST_ROOT)
+  : null;
+const REQUIRED_ROOT = TEST_ROOT_OVERRIDE || OFFICIAL_ROOT;
 const OUTPUT_DATA = path.join("src", "data", "publishedPortfolio.json");
 const OUTPUT_UI_PRACTICE_DATA = path.join("src", "data", "uiPracticeMetadata.json");
 const OUTPUT_ASSET_ROOT = path.join("public", "images", "published");
 const CONFIRM_FLAG = "--confirm";
 const PRODUCTION_URL = "https://myprofile-teal.vercel.app/zh/";
 
+// Permanently retired legacy project ids -- must never republish even if a
+// stale browser session's export still carries them. Preserved verbatim from
+// V1 (see publishing-preflight-lib.mjs history); folded into excludeProjectIds
+// below rather than kept as separate judgment, since "never touch this id" is
+// exactly what excludeProjectIds already means.
+const RETIRED_PROJECT_IDS = new Set([
+  "game-ux-case-study",
+  "ktv-tablet-interface",
+  "playable-web-game-prototype",
+  "visual-system-ui-art",
+]);
+
 function fail(message) {
   console.error(`\nERROR: ${message}\n`);
   process.exit(1);
 }
 
-function safeSegment(value) {
-  return value
-    .normalize("NFKD")
-    .replace(/[^a-zA-Z0-9._-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 100) || "asset";
+function hashBytes(buffer) {
+  return createHash("sha256").update(buffer).digest("hex");
 }
 
-function extensionFor(image) {
-  const extension = path.extname(image.fileName || "").toLowerCase();
-  if ([".png", ".jpg", ".jpeg", ".webp", ".avif", ".gif"].includes(extension)) return extension;
-  return {
-    "image/png": ".png",
-    "image/jpeg": ".jpg",
-    "image/webp": ".webp",
-    "image/avif": ".avif",
-    "image/gif": ".gif",
-  }[image.mimeType] || ".bin";
-}
-
-function imageKey(database, store, id) {
-  return `${database}\u0000${store}\u0000${id}`;
-}
-
-// Both functions below resolve a reference the same two ways, in order:
-// (A) the exported bundle's own IndexedDB snapshot (imagePathById), then
-// (B) resolveAlreadyPublishedProjectBodyAsset() -- the exact file this asset
-// already published to disk, if the exporting browser session's IndexedDB
-// didn't have it this time. (B) applies to every disk-publishable reference
-// type a project body can contain -- project-body-indexeddb-assets
-// (localImageId, assetId), dynamic-template-images/ui-practice-images
-// (imageId), and playable-game-covers (coverId) -- notably including a whole
-// project's own asset references when that project is being inherited
-// unedited from the currently-published state (see the per-project
-// catalog/draft merge below), so an inherited body's assets resolve the same
-// way a fresh edit's would, regardless of which of these types it uses. This
-// must stay the same rule buildPublishingPreflight() uses (see
-// resolveAlreadyPublishedProjectBodyAsset in publishing-preflight-lib.mjs) so
-// import can never judge a reference differently than preflight already did.
-async function replaceImagePaths(root, value, imagePathById, missing) {
-  if (!value || typeof value !== "object") return value;
-  if (Array.isArray(value)) return Promise.all(value.map((item) => replaceImagePaths(root, item, imagePathById, missing)));
-
-  const output = {};
-  for (const [key, item] of Object.entries(value)) {
-    output[key] = await replaceImagePaths(root, item, imagePathById, missing);
-  }
-
-  const isProjectBodyRef = typeof value.localImageId === "string" && Boolean(value.localImageId);
-  const isTemplateImageRef = !isProjectBodyRef && typeof value.imageId === "string" && Boolean(value.imageId);
-  const refId = isProjectBodyRef
-    ? value.localImageId
-    : isTemplateImageRef
-      ? value.imageId
-      : null;
-  if (refId) {
-    let publicPath = imagePathById.get(refId);
-    if (!publicPath && (isProjectBodyRef || isTemplateImageRef)) {
-      // dynamic-template-images and ui-practice-images publish to the exact
-      // same path family, so either adapter id resolves identically here --
-      // no need to know which of the two this particular reference is.
-      const fallbackAdapterId = isProjectBodyRef ? "project-body-indexeddb-assets" : "dynamic-template-images";
-      const declaredPath = typeof value.publicPath === "string" ? value.publicPath : typeof value.publicUrl === "string" ? value.publicUrl : undefined;
-      const fallback = await resolveAlreadyPublishedProjectBodyAsset(root, fallbackAdapterId, refId, declaredPath);
-      if (fallback) publicPath = fallback.publicPath;
-    }
-    if (publicPath) output.publicPath = publicPath;
-    else missing.add(refId);
-  }
-  // PlayableGameTemplate's own launch cover: { coverId, publicUrl } shape,
-  // distinct from the imageId/localImageId shape above — rewrites publicUrl
-  // in place (that field's real name in this shape) rather than publicPath.
-  // Same (A) bundle-first, (B) disk-fallback rule as above -- this reference
-  // is just as likely to belong to a whole project body being inherited
-  // unedited (see the per-project catalog/body merge below).
-  if (typeof value.coverId === "string" && value.coverId && typeof value.publicUrl === "string") {
-    let publicPath = imagePathById.get(value.coverId);
-    if (!publicPath) {
-      const fallback = await resolveAlreadyPublishedProjectBodyAsset(root, "playable-game-covers", value.coverId, value.publicUrl);
-      if (fallback) publicPath = fallback.publicPath;
-    }
-    if (publicPath) output.publicUrl = publicPath;
-    else missing.add(value.coverId);
-  }
-  return output;
-}
-
-async function replaceDocumentAssetPaths(root, value, imagePathById, missing) {
-  if (!value || typeof value !== "object") return value;
-  if (Array.isArray(value)) return Promise.all(value.map((item) => replaceDocumentAssetPaths(root, item, imagePathById, missing)));
-  const output = {};
-  for (const [key, item] of Object.entries(value)) {
-    output[key] = await replaceDocumentAssetPaths(root, item, imagePathById, missing);
-  }
-  if (typeof value.assetId === "string" && value.assetId) {
-    let publicPath = imagePathById.get(value.assetId);
-    if (!publicPath) {
-      const fallback = await resolveAlreadyPublishedProjectBodyAsset(root, "project-body-indexeddb-assets", value.assetId, value.publicPath);
-      if (fallback) publicPath = fallback.publicPath;
-    }
-    if (publicPath) output.publicPath = publicPath;
-    else missing.add(value.assetId);
-  }
-  return output;
-}
-
-async function backupIfPresent(root, relativePath, backupRoot) {
-  const source = path.join(root, relativePath);
+async function currentFileHashOrNull(root, relativePath) {
   try {
-    const file = await stat(source);
-    if (!file.isFile()) return;
+    return hashBytes(await readFile(path.join(root, relativePath)));
   } catch {
-    return;
+    return null;
   }
-  const destination = path.join(backupRoot, relativePath);
-  await mkdir(path.dirname(destination), { recursive: true });
-  await copyFile(source, destination);
 }
 
 const EXCLUDE_PROJECT_PREFIX = "--exclude-project=";
@@ -143,22 +79,15 @@ const bundleArgument = args.find((argument) => argument !== CONFIRM_FLAG && argu
 if (!bundleArgument) {
   fail("Provide the downloaded export JSON path. Example: pnpm portfolio:import -- C:\\Users\\you\\Downloads\\portfolio-production-export.json");
 }
-// Explicit, per-run, CLI-visible exclusion — never a silent default. Used
-// when a specific project's content is known-blocked by an unrelated,
-// already-tracked issue (e.g. Playable Game production hosting is
-// unresolved — see TASKS.md) and the rest of the bundle should still
-// publish. Excluded projects are removed from the bundle entirely before
-// preflight/rewrite ever sees them, so today's publish neither includes nor
-// silently drops/corrupts their content — their currently-live production
-// state (already-published data) is simply left untouched by this run.
-const excludeProjectIds = new Set(
+const explicitExcludeProjectIds = new Set(
   args.filter((argument) => argument.startsWith(EXCLUDE_PROJECT_PREFIX))
     .flatMap((argument) => argument.slice(EXCLUDE_PROJECT_PREFIX.length).split(",").map((id) => id.trim()).filter(Boolean)),
 );
+const excludeProjectIds = new Set([...explicitExcludeProjectIds, ...RETIRED_PROJECT_IDS]);
 
 const cwd = path.resolve(process.cwd());
-if (cwd.toLowerCase() !== OFFICIAL_ROOT.toLowerCase()) {
-  fail(`Run this command from ${OFFICIAL_ROOT}. Current directory: ${cwd}`);
+if (cwd.toLowerCase() !== REQUIRED_ROOT.toLowerCase()) {
+  fail(`Run this command from ${REQUIRED_ROOT}. Current directory: ${cwd}`);
 }
 
 let bundle;
@@ -172,426 +101,148 @@ if (!bundle || bundle.version !== 1 || typeof bundle.drafts !== "object" || !Arr
   fail("The selected file is not a supported version-1 portfolio production export.");
 }
 
-if (excludeProjectIds.size) {
-  const missingFromBundle = [...excludeProjectIds].filter((id) => !(id in bundle.drafts) && !bundle.images.some((image) => image.projectId === id));
-  if (missingFromBundle.length) fail(`--exclude-project referenced a project not present in this export: ${missingFromBundle.join(", ")}`);
-  console.log(`Excluding from this publish (explicit --exclude-project): ${[...excludeProjectIds].join(", ")}`);
-  for (const id of excludeProjectIds) delete bundle.drafts[id];
-  bundle.images = bundle.images.filter((image) => image.projectId === undefined || !excludeProjectIds.has(image.projectId));
-  if (bundle.projectCatalog?.projectIds) bundle.projectCatalog.projectIds = bundle.projectCatalog.projectIds.filter((id) => !excludeProjectIds.has(id));
-  if (bundle.projectCatalog?.projects) for (const id of excludeProjectIds) delete bundle.projectCatalog.projects[id];
-  if (bundle.projectDocuments?.documents) for (const id of excludeProjectIds) delete bundle.projectDocuments.documents[id];
-  if (Array.isArray(bundle.diagnostics?.missingReferences)) {
-    bundle.diagnostics.missingReferences = bundle.diagnostics.missingReferences.filter((entry) => ![...excludeProjectIds].some((id) => entry.startsWith(`${id}:`)));
-  }
-}
-
+// Basic bundle SHAPE validation only (malformed input, not content judgment)
+// -- registry version/adapter-id checks belong here because an unregistered
+// adapter id or a stale registry version means the bundle cannot be
+// interpreted at all, before buildPublishPlan.mjs ever sees it.
 const registry = await readPublishSourceRegistry(cwd);
 if (bundle.publishingRegistryVersion !== registry.version) {
   fail(`The export was not generated with publishing registry version ${registry.version}. Create a fresh browser export before publishing.`);
 }
-const adapterById = new Map(registry.sources.map((source) => [source.id, source]));
-
-// The currently-published state is the source of truth a project's body
-// inherits from when this run's export doesn't include it. Read once, up
-// front, so both the per-project draft merge below and the (unrelated)
-// --exclude-project restore step share the same read instead of drifting.
-let currentPublished = {};
-let currentPublishedReadError = null;
-try {
-  currentPublished = JSON.parse(await readFile(path.join(cwd, OUTPUT_DATA), "utf8"));
-} catch (error) {
-  currentPublishedReadError = error instanceof Error ? error : new Error(String(error));
-}
-
-// Absence from an export must never be interpreted as "delete this body" --
-// only an explicit, per-run deletedProjectIds entry may remove a previously
-// -published project body. Defaults to empty; nothing infers deletion from
-// a missing key, an empty browser session, or any other implicit signal.
-const deletedProjectIds = new Set(
-  Array.isArray(bundle.deletedProjectIds) ? bundle.deletedProjectIds.filter((id) => typeof id === "string") : [],
-);
-const preflight = await buildPublishingPreflight({ root: cwd, bundle });
-const preflightPath = path.join(cwd, "output", "publishing-preflight-manifest.json");
-await mkdir(path.dirname(preflightPath), { recursive: true });
-await writeFile(preflightPath, `${JSON.stringify(preflight, null, 2)}\n`, "utf8");
-if (!preflight.ok) {
-  await writeBlockedPublishReport({
-    root: cwd,
-    manifest: preflight,
-    catalog: bundle.projectCatalog?.projects ?? bundle.publicMetadata?.projects ?? {},
-    productionUrl: PRODUCTION_URL,
-  });
-  const failures = preflight.issues
-    .filter((issue) => issue.severity === "error")
-    .map((issue) => `${issue.sourceAdapterId}: ${issue.message}`);
-  fail(`Publishing preflight failed. No production files were changed.\nManifest: ${preflightPath}\n- ${failures.join("\n- ")}`);
-}
-
-const reportedMissing = Array.isArray(bundle.diagnostics?.missingReferences)
-  ? bundle.diagnostics.missingReferences
-  : [];
-if (reportedMissing.length) {
-  fail(`The browser export reported missing image references:\n- ${reportedMissing.join("\n- ")}`);
-}
-
-const catalogStore = bundle.projectCatalog?.version === 1
-  ? bundle.projectCatalog
-  : bundle.publicMetadata?.version === 1
-    ? bundle.publicMetadata
-    : { version: 1, projects: {} };
-const retiredProjectIds = new Set([
-  "game-ux-case-study",
-  "ktv-tablet-interface",
-  "playable-web-game-prototype",
-  "visual-system-ui-art",
-]);
-const bundleProjectIds = new Set(
-  (Array.isArray(catalogStore.projectIds) ? catalogStore.projectIds : Object.keys(catalogStore.projects ?? {}))
-    .filter((projectId) => typeof projectId === "string"),
-);
-
-// A previously-published project that's simply absent from this export's
-// own catalog was not loaded/edited this cycle -- that alone must never be
-// interpreted as "delete this project" (the same principle already applied
-// to project bodies above). So the set of projects this run considers
-// canonical is the bundle's own catalog PLUS every currently-published
-// project id, minus retired ids. deletedProjectIds is intentionally NOT
-// subtracted here: every consumer below (storedCatalog, drafts,
-// projectDocuments, covers) independently checks deletedProjectIds at its
-// own point of assignment, precisely so a deleted id still reaches those
-// checks -- and their own bookkeeping (e.g. deletedAppliedProjectIds) --
-// instead of silently vanishing one step earlier were it filtered out here.
-const previousProjectIds = new Set(Object.keys(currentPublished.projectCatalog || {}));
-const canonicalProjectIds = new Set(
-  [...bundleProjectIds, ...previousProjectIds].filter((projectId) => !retiredProjectIds.has(projectId)),
-);
-
-const ignoredProjectIds = [...bundleProjectIds].filter((projectId) => retiredProjectIds.has(projectId));
-const ignoredCoverIds = [];
-const inheritedCatalogProjectIds = [];
-const deletedCatalogProjectIds = [];
-const storedCatalog = {};
-for (const projectId of canonicalProjectIds) {
-  if (deletedProjectIds.has(projectId)) {
-    deletedCatalogProjectIds.push(projectId);
-    continue; // explicit delete intent -- the only path allowed to omit an entire project
-  }
-  const bundleProject = bundleProjectIds.has(projectId) ? catalogStore.projects?.[projectId] : undefined;
-  if (bundleProject !== undefined) {
-    if (!bundleProject || typeof bundleProject !== "object" || Array.isArray(bundleProject)) {
-      storedCatalog[projectId] = bundleProject;
-      continue;
-    }
-    const { homepageGroup: _legacyHomepageGroup, homepageOrder: _legacyHomepageOrder, ...canonicalProject } = bundleProject;
-    storedCatalog[projectId] = canonicalProject;
-  } else if (currentPublished.projectCatalog?.[projectId] !== undefined) {
-    // Absent from this export's catalog entirely -- inherit the whole
-    // currently-published project (metadata here; body/documents/cover are
-    // inherited the same way further below, all keyed off the same
-    // canonicalProjectIds membership) rather than silently dropping it.
-    storedCatalog[projectId] = currentPublished.projectCatalog[projectId];
-    inheritedCatalogProjectIds.push(projectId);
-  }
-}
-
-const assets = [];
-const imagePathsByProject = new Map();
-const projectBodyPaths = new Map();
-const templateImagePaths = new Map();
-const gameCoverPaths = new Map();
-const playableGameCoverPaths = new Map();
-const covers = {};
-
+const registeredAdapterIds = new Set(registry.sources.map((source) => source.id));
 for (const image of bundle.images) {
   if (!image || typeof image.id !== "string" || typeof image.dataBase64 !== "string") {
     fail("The export contains an invalid image record.");
   }
-  const adapter = typeof image.sourceAdapterId === "string" ? adapterById.get(image.sourceAdapterId) : undefined;
-  if (!adapter) fail(`Unknown or missing source adapter for ${image.database}/${image.store}/${image.id}.`);
-  const isCover = adapter.id === "project-covers-indexeddb" || adapter.id === "project-covers-disk";
-  const isProjectBody = adapter.id === "project-body-indexeddb-assets";
-  const isGameCover = adapter.id === "game-experience-covers";
-  const isPlayableGameCover = adapter.id === "playable-game-covers";
-  const isTemplateImage = adapter.id === "dynamic-template-images" || adapter.id === "ui-practice-images";
-  if (isCover && !canonicalProjectIds.has(image.id)) {
-    ignoredCoverIds.push(image.id);
-    continue;
-  }
-  if ((isTemplateImage || isPlayableGameCover) && !(typeof image.projectId === "string" && canonicalProjectIds.has(image.projectId))) {
-    fail(`Image ${image.id} is not attached to a canonical project (projectId: ${image.projectId ?? "<missing>"}).`);
-  }
-  const owner = isCover
-    ? "covers"
-    : isGameCover
-      ? "game-covers"
-    : isPlayableGameCover
-      ? path.posix.join("playable-game-covers", image.projectId)
-    : isProjectBody && typeof image.projectId === "string" && canonicalProjectIds.has(image.projectId)
-      ? path.posix.join("project-body", image.projectId)
-    : isTemplateImage
-      ? path.posix.join("template-images", image.projectId)
-    : undefined;
-  if (!owner) fail(`Unknown image source: ${image.database}/${image.store}/${image.id}`);
-
-  const { relativePath, publicPath } = getPublishedAssetLocation(adapter.id, image.projectId, image.id, `${safeSegment(image.id)}${extensionFor(image)}`);
-  const asset = {
-    sourceAdapterId: adapter.id,
-    sourceDatabase: image.database,
-    sourceStore: image.store,
-    sourceId: image.id,
-    relativePath,
-    publicPath,
-    bytes: Buffer.from(image.dataBase64, "base64"),
-  };
-  assets.push(asset);
-  if (isCover) covers[image.id] = publicPath;
-  else if (isGameCover) gameCoverPaths.set(image.id, publicPath);
-  else if (isPlayableGameCover) playableGameCoverPaths.set(image.id, publicPath);
-  else if (isProjectBody) projectBodyPaths.set(image.id, publicPath);
-  else if (isTemplateImage) templateImagePaths.set(image.id, publicPath);
-  else {
-    if (!imagePathsByProject.has(owner)) imagePathsByProject.set(owner, new Map());
-    imagePathsByProject.get(owner).set(image.id, publicPath);
+  if (typeof image.sourceAdapterId !== "string" || !registeredAdapterIds.has(image.sourceAdapterId)) {
+    fail(`Unknown or missing source adapter for image ${image.id}.`);
   }
 }
 
-// Covers follow the same inherit rule as everything else: a catalog
-// -inherited project's cover wasn't re-collected this cycle (its whole
-// project wasn't loaded), so it's inherited from the currently-published
-// state rather than silently disappearing from the output.
-for (const projectId of inheritedCatalogProjectIds) {
-  if (!(projectId in covers) && currentPublished.covers?.[projectId]) {
-    covers[projectId] = currentPublished.covers[projectId];
-  }
+let currentPublished = {};
+try {
+  currentPublished = JSON.parse(await readFile(path.join(cwd, OUTPUT_DATA), "utf8"));
+} catch (error) {
+  fail(`Cannot read the current ${OUTPUT_DATA}: ${error instanceof Error ? error.message : String(error)}`);
 }
 
-// Per-project merge, never a wholesale `output.drafts = bundle.drafts`
-// replace: a project's published body must survive any publish run that
-// simply didn't touch it this cycle. For every project id known either to
-// this export or to the currently-published state:
-//   A. bundle has a draft for it       -> use the bundle's (fresh edit)
-//   B. bundle doesn't, published does  -> inherit the published body as-is
-//   C. neither has it                  -> stays absent
-//   (explicit deletedProjectIds entry) -> omitted regardless of A/B/C
-// "No local edit draft found" is never treated as "delete this body."
-const missing = new Set();
-const drafts = {};
-const inheritedProjectIds = [];
-const deletedAppliedProjectIds = [];
-const draftProjectIds = new Set([
-  ...Object.keys(bundle.drafts || {}),
-  ...Object.keys(currentPublished.drafts || {}),
-]);
-for (const projectId of draftProjectIds) {
-  if (!canonicalProjectIds.has(projectId)) continue; // outside this run's catalog entirely -- unrelated to body inheritance/deletion
-  if (deletedProjectIds.has(projectId)) {
-    deletedAppliedProjectIds.push(projectId);
-    continue; // the only path allowed to omit a previously-published body
-  }
-  // Some template-instance images (e.g. older image-row items on dynamic
-  // projects) reference localImageId values that live in the project-body
-  // asset store (projectBodyPaths) rather than a per-project
-  // draftImageSources bucket; others reference imageId values staged to disk
-  // (templateImagePaths). Merging all three lookups here is additive only —
-  // it changes nothing for existing static-project drafts that have neither.
-  const projectImagePaths = new Map([...(imagePathsByProject.get(projectId) ?? new Map()), ...projectBodyPaths, ...templateImagePaths, ...playableGameCoverPaths]);
-  if (Object.prototype.hasOwnProperty.call(bundle.drafts || {}, projectId)) {
-    drafts[projectId] = await replaceImagePaths(cwd, bundle.drafts[projectId], projectImagePaths, missing);
-  } else if (Object.prototype.hasOwnProperty.call(currentPublished.drafts || {}, projectId)) {
-    // No local edit draft in this export -- inherit the currently-published
-    // body unchanged, routed through the same path-resolution rules a fresh
-    // edit goes through, so an inherited body's own asset references are
-    // validated identically (see resolveAlreadyPublishedProjectBodyAsset).
-    drafts[projectId] = await replaceImagePaths(cwd, currentPublished.drafts[projectId], projectImagePaths, missing);
-    inheritedProjectIds.push(projectId);
-  }
-}
-if (missing.size) fail(`Referenced image data is missing from the bundle:\n- ${[...missing].join("\n- ")}`);
+const {
+  projectIntents, projectCurrentEntities, projectBodyTarget,
+  gameExperienceIntents, gameExperienceCurrentEntities,
+  touchedProjectIds,
+} = bundleV1ToV2AllIntents(bundle, currentPublished, { excludeProjectIds });
 
-const rawProjectDocuments = bundle.projectDocuments?.version === 1 && bundle.projectDocuments.documents && typeof bundle.projectDocuments.documents === "object"
-  ? bundle.projectDocuments.documents
-  : {};
-const currentProjectDocuments = currentPublished.projectDocuments?.version === 1 && currentPublished.projectDocuments.documents && typeof currentPublished.projectDocuments.documents === "object"
-  ? currentPublished.projectDocuments.documents
-  : {};
-const documentProjectIds = new Set([...Object.keys(rawProjectDocuments), ...Object.keys(currentProjectDocuments)]);
-const projectDocumentEntries = await Promise.all([...documentProjectIds].map(async (projectId) => {
-  if (!canonicalProjectIds.has(projectId) || deletedProjectIds.has(projectId)) return null;
-  if (Object.prototype.hasOwnProperty.call(rawProjectDocuments, projectId)) {
-    const document = rawProjectDocuments[projectId];
-    if (!document || typeof document !== "object" || document.schemaVersion !== 1) return null;
-    return [projectId, await replaceDocumentAssetPaths(cwd, document, projectBodyPaths, missing)];
-  }
-  if (Object.prototype.hasOwnProperty.call(currentProjectDocuments, projectId)) {
-    // Same inherit rule as project bodies above: no fresh document in this
-    // export is not "delete this document," so the currently-published one
-    // is carried forward, re-validated through the same path resolution.
-    const document = currentProjectDocuments[projectId];
-    if (!document || typeof document !== "object" || document.schemaVersion !== 1) return null;
-    if (!inheritedProjectIds.includes(projectId)) inheritedProjectIds.push(projectId);
-    return [projectId, await replaceDocumentAssetPaths(cwd, document, projectBodyPaths, missing)];
-  }
-  return null;
-}));
-const projectDocuments = {
-  version: 1,
-  documents: Object.fromEntries(projectDocumentEntries.filter(Boolean)),
-};
-if (missing.size) fail(`Referenced project-body image data is missing from the bundle:\n- ${[...missing].join("\n- ")}`);
+const missingFromBundle = [...explicitExcludeProjectIds].filter((id) => !touchedProjectIds.has(id));
+if (missingFromBundle.length) fail(`--exclude-project referenced a project not present in this export: ${missingFromBundle.join(", ")}`);
+if (explicitExcludeProjectIds.size) console.log(`Excluding from this publish (explicit --exclude-project): ${[...explicitExcludeProjectIds].join(", ")}`);
 
-const uiPractice = bundle.uiPractice?.version === 1 && Array.isArray(bundle.uiPractice.items)
-  ? await replaceImagePaths(cwd, bundle.uiPractice, templateImagePaths, missing)
-  : undefined;
-if (missing.size) fail(`Referenced UI Practice image data is missing from the bundle:\n- ${[...missing].join("\n- ")}`);
+const bundleAssets = bundleV1ToV2BundleAssets(bundle);
 
-const rawGameExperience = bundle.gameExperience?.schemaVersion === 1 && Array.isArray(bundle.gameExperience.records)
-  ? bundle.gameExperience
-  : null;
-const ignoredGameRecordIds = [];
-const seenGameRecordIds = new Set();
-const gameExperience = rawGameExperience
-  ? {
-      ...rawGameExperience,
-      records: rawGameExperience.records.flatMap((record) => {
-        if (!record || typeof record !== "object" || typeof record.id !== "string" || !record.id || record.schemaVersion !== 1 || seenGameRecordIds.has(record.id)) {
-          ignoredGameRecordIds.push(typeof record?.id === "string" ? record.id : "<invalid>");
-          return [];
-        }
-        seenGameRecordIds.add(record.id);
-        const presentation = record.presentation && typeof record.presentation === "object" ? record.presentation : {};
-        const detail = record.detail && typeof record.detail === "object" ? record.detail : {};
-        const coverAssetId = typeof presentation.coverAssetId === "string" ? presentation.coverAssetId : "";
-        const coverPublicPath = coverAssetId ? gameCoverPaths.get(coverAssetId) : undefined;
-        if (coverAssetId && !coverPublicPath && !presentation.coverPublicPath) missing.add(coverAssetId);
-        return [{
-          ...record,
-          detail: {
-            zh: typeof detail.zh === "string" ? detail.zh : "",
-            en: typeof detail.en === "string" ? detail.en : "",
-          },
-          presentation: { ...presentation, ...(coverPublicPath ? { coverPublicPath } : {}) },
-        }];
-      }),
-    }
-  : undefined;
-if (missing.size) fail(`Referenced game-cover data is missing from the bundle:\n- ${[...missing].join("\n- ")}`);
+// ---- The ONLY merge/conflict/status/BLOCKED authority in this CLI. ----
+const projectPlan = await buildPublishPlan({ root: cwd, entityType: "project", currentEntities: projectCurrentEntities, intents: projectIntents, bundleAssets });
+const gameExperiencePlan = gameExperienceIntents.size
+  ? await buildPublishPlan({ root: cwd, entityType: "gameExperienceRecord", currentEntities: gameExperienceCurrentEntities, intents: gameExperienceIntents, bundleAssets })
+  : { items: [], writeset: [], counts: {}, blocked: false, assetIntegrity: { total: 0, valid: 0, invalid: 0, inherited: 0 } };
 
-// Restore each excluded project's CURRENT published state exactly as-is —
-// this run's bundle never contained their content past this point (see the
-// exclusion filter above), so without this they would simply vanish from
-// publishedPortfolio.json instead of staying untouched.
-if (excludeProjectIds.size) {
-  if (currentPublishedReadError) fail(`--exclude-project requires the current ${OUTPUT_DATA} to be readable, to preserve excluded projects' existing state: ${currentPublishedReadError.message}`);
-  for (const id of excludeProjectIds) {
-    if (currentPublished?.projectCatalog?.[id]) storedCatalog[id] = currentPublished.projectCatalog[id];
-    if (currentPublished?.drafts?.[id]) drafts[id] = currentPublished.drafts[id];
-    if (currentPublished?.projectDocuments?.documents?.[id]) projectDocuments.documents[id] = currentPublished.projectDocuments.documents[id];
-    if (currentPublished?.covers?.[id]) covers[id] = currentPublished.covers[id];
-  }
-  console.log(`Preserved existing published state for excluded project(s): ${[...excludeProjectIds].join(", ")}`);
-}
-
-const output = {
-  version: 1,
-  generatedAt: bundle.exportedAt || new Date().toISOString(),
-  drafts,
-  projectCatalog: storedCatalog,
-  projectDocuments,
-  ...(gameExperience ? { gameExperience } : {}),
-  covers,
-  assets: assets.map(({ sourceAdapterId, sourceDatabase, sourceStore, sourceId, publicPath }) => ({
-    sourceAdapterId,
-    sourceDatabase,
-    sourceStore,
-    sourceId,
-    publicPath,
-  })),
+const catalogForTitles = {
+  ...currentPublished.projectCatalog,
+  ...Object.fromEntries(projectPlan.items.filter((item) => item.value?.meta).map((item) => [item.entityId, item.value.meta])),
 };
 
-// Validate only what THIS run actually produced — an excluded project's
-// merged-back existing state (see above) is untouched legacy data, not
-// something this run rewrote, so it must not be re-validated here (it may
-// legitimately still contain the very local references this check exists
-// to catch — that is exactly the already-known, separately-tracked issue
-// this run is deliberately not touching).
-const outputForValidation = excludeProjectIds.size
-  ? {
-      ...output,
-      projectCatalog: Object.fromEntries(Object.entries(output.projectCatalog).filter(([id]) => !excludeProjectIds.has(id))),
-      drafts: Object.fromEntries(Object.entries(output.drafts).filter(([id]) => !excludeProjectIds.has(id))),
-      projectDocuments: { ...output.projectDocuments, documents: Object.fromEntries(Object.entries(output.projectDocuments.documents).filter(([id]) => !excludeProjectIds.has(id))) },
-      covers: Object.fromEntries(Object.entries(output.covers).filter(([id]) => !excludeProjectIds.has(id))),
-    }
-  : output;
-const rewrittenPreflight = await buildPublishingPreflight({ root: cwd, bundle, rewrittenOutput: { output: outputForValidation, uiPractice } });
-await writeFile(preflightPath, `${JSON.stringify(rewrittenPreflight, null, 2)}\n`, "utf8");
-if (!rewrittenPreflight.ok) {
-  await writePublishPlanReport({ root: cwd, manifest: rewrittenPreflight, output, uiPractice, assets, productionUrl: PRODUCTION_URL, deletedProjectIds, inheritedProjectIds: new Set(inheritedProjectIds), inheritedCatalogProjectIds: new Set(inheritedCatalogProjectIds) });
-  const failures = rewrittenPreflight.issues
-    .filter((issue) => issue.severity === "error")
-    .map((issue) => `${issue.sourceAdapterId}: ${issue.message}`);
-  fail(`Publishing rewrite validation failed. No production files were changed.\nManifest: ${preflightPath}\n- ${failures.join("\n- ")}`);
-}
+// ---- Report: a PURE VIEW over the two plans above, nothing re-derived. ----
+const report = await renderPublishPlanReportV2({ root: cwd, plans: [projectPlan, gameExperiencePlan], catalogForTitles, productionUrl: PRODUCTION_URL });
 
-const planReport = await writePublishPlanReport({ root: cwd, manifest: rewrittenPreflight, output, uiPractice, assets, productionUrl: PRODUCTION_URL, deletedProjectIds, inheritedProjectIds: new Set(inheritedProjectIds), inheritedCatalogProjectIds: new Set(inheritedCatalogProjectIds) });
-
-console.log("\nPortfolio production import review");
-console.log(`  Drafts: ${Object.keys(drafts).length}`);
-console.log(`  Images: ${assets.length}`);
-console.log(`  Homepage covers: ${Object.keys(covers).length}`);
-console.log(`  Canonical projects: ${Object.keys(storedCatalog).length}`);
-console.log(`  Data-driven project documents: ${Object.keys(projectDocuments.documents).length}`);
-console.log(`  UI Practice items: ${uiPractice?.items.length ?? 0}`);
-console.log(`  Game Experience records: ${gameExperience?.records?.length ?? 0}`);
-if (ignoredProjectIds.length) console.log(`  Ignored legacy project IDs: ${ignoredProjectIds.join(", ")}`);
-if (ignoredCoverIds.length) console.log(`  Ignored non-canonical cover IDs: ${ignoredCoverIds.join(", ")}`);
-if (ignoredGameRecordIds.length) console.log(`  Ignored invalid/duplicate game records: ${ignoredGameRecordIds.join(", ")}`);
-if (inheritedCatalogProjectIds.length) console.log(`  Inherited whole projects (absent from this export's catalog): ${inheritedCatalogProjectIds.join(", ")}`);
-if (inheritedProjectIds.length) console.log(`  Inherited unchanged project bodies (no local edit in this export): ${inheritedProjectIds.join(", ")}`);
-if (deletedCatalogProjectIds.length) console.log(`  Removed whole projects (explicit delete intent): ${deletedCatalogProjectIds.join(", ")}`);
-if (deletedAppliedProjectIds.length) console.log(`  Removed project bodies (explicit delete intent): ${deletedAppliedProjectIds.join(", ")}`);
+console.log("\nPortfolio production import review (Publishing Architecture V2)");
+console.log(`  Project entities touched: ${projectPlan.items.length}`);
+console.log(`  Game Experience records touched: ${gameExperiencePlan.items.length}`);
+console.log(`  Counts: ${JSON.stringify(report.counts)}`);
+console.log(`  Asset references resolved: ${report.assetIntegrity.total} (valid ${report.assetIntegrity.valid}, inherited ${report.assetIntegrity.inherited}, invalid ${report.assetIntegrity.invalid})`);
+console.log(`  Writeset entries (asset bytes that will actually change): ${report.writesetSize}`);
 console.log(`  Output data: ${OUTPUT_DATA}`);
 console.log(`  Asset root: ${OUTPUT_ASSET_ROOT}`);
-console.log("  Original browser data: unchanged");
-console.log("  Existing published files: never deleted");
+console.log(`  Report: ${LAUNCHER_REPORT_PATH}`);
+
+// A BLOCKED plan fails the run whether or not --confirm was passed -- a dry
+// run must surface the exact same verdict a confirm would refuse on, not
+// silently report "DRY RUN ONLY" over a plan that could never actually
+// publish. plan.blocked is consulted directly here (also re-checked inside
+// executePublishPlan itself on a confirmed run, which refuses unconditionally
+// on a blocked plan) so "what the report says" and "what this CLI allows" can
+// never drift apart -- not a second, independently-maintained BLOCKED
+// judgment.
+if (projectPlan.blocked || gameExperiencePlan.blocked) {
+  const blockedReasons = report.items.filter((item) => item.status === "BLOCKED").map((item) => `${item.category}${item.projectId ? ` (${item.projectId})` : ""}: ${item.reason}`);
+  fail(`Publish plan is BLOCKED. No production files were changed, no backup was created, no assets were copied.\nReport: ${LAUNCHER_REPORT_PATH}\n- ${blockedReasons.join("\n- ")}`);
+}
 
 if (!confirm) {
   console.log("\nDRY RUN ONLY. Review the summary, then repeat with --confirm to write version-controlled files.");
   process.exit(0);
 }
 
-// A confirmed run may only proceed to mutation once the SAME publish report
-// just shown above (planReport) reports nothing blocked. This is not a
-// second, independently-maintained BLOCKED judgment — it consumes
-// writePublishPlanReport()'s own result directly, so "what the report says"
-// and "what confirm actually allows" can never drift apart. Everything below
-// this point is a real write (backup, asset copy, publishedPortfolio.json,
-// uiPracticeMetadata.json); nothing above it has touched disk except the
-// always-generated preflight manifest and this same plan report.
-if (planReport.outcome === "blocked" || planReport.counts.blocked > 0) {
-  const blockedReasons = planReport.items
-    .filter((item) => item.status === "BLOCKED")
-    .map((item) => `${item.category}${item.projectId ? ` (${item.projectId})` : ""}: ${item.reason || item.description}`);
-  fail(`Publish report is BLOCKED. No production files were changed, no backup was created, no assets were copied.\nReport: ${LAUNCHER_REPORT_PATH}\n- ${blockedReasons.join("\n- ")}`);
+// ---- Final assembly: pure structural merge of already-decided values into
+// the whole-file output shape (see assemblePublishedOutput.mjs). No judgment
+// happens here -- every status was already decided by buildPublishPlan.mjs.
+// generatedAt is compared using the CURRENT file's own timestamp first --
+// otherwise a fresh timestamp on every run would make even a fully no-op
+// publish (nothing touched, nothing changed) look like a real content change,
+// defeating the Writeset Rule for the one field that would otherwise change
+// unconditionally on every run. A fresh timestamp is only stamped once a REAL
+// content change has already been detected below. The DECISION of whether a
+// real change occurred is made with hashContent() (key-order-independent
+// structural comparison, see contentHash.mjs) rather than a raw byte-hash of
+// the re-serialized JSON -- object key insertion order is not semantically
+// meaningful here, and a naive byte comparison would spuriously flag "changed"
+// for a file whose content is identical but was hand-authored (or by any
+// other writer) with different key ordering. The actual writeset entry's
+// expectedPreviousHash/nextHash still use real byte hashes, since
+// executePublishPlan's Window-2 check re-hashes the literal file on disk.
+const outputWithStableTimestamp = assemblePublishedOutput({
+  currentPublished,
+  projectPlan,
+  gameExperiencePlan,
+  projectBodyTarget,
+  generatedAt: currentPublished.generatedAt || "",
+});
+
+const combinedWriteset = [...projectPlan.writeset, ...gameExperiencePlan.writeset];
+
+// Whole-file writes (publishedPortfolio.json / uiPracticeMetadata.json)
+// follow the identical Writeset Rule as every asset above: only enter the
+// writeset if the newly-assembled content actually differs from what is
+// currently on disk.
+const currentDataHash = await currentFileHashOrNull(cwd, OUTPUT_DATA);
+const contentChanged = hashContent(outputWithStableTimestamp) !== hashContent({ ...currentPublished, generatedAt: currentPublished.generatedAt || "" });
+if (contentChanged) {
+  const output = { ...outputWithStableTimestamp, generatedAt: bundle.exportedAt || new Date().toISOString() };
+  const nextDataContent = `${JSON.stringify(output, null, 2)}\n`;
+  combinedWriteset.push({ path: OUTPUT_DATA, expectedPreviousHash: currentDataHash, nextHash: hashBytes(Buffer.from(nextDataContent, "utf8")), content: nextDataContent });
+}
+
+if (bundle.uiPractice?.version === 1 && Array.isArray(bundle.uiPractice.items)) {
+  let currentUiPractice = null;
+  try {
+    currentUiPractice = JSON.parse(await readFile(path.join(cwd, OUTPUT_UI_PRACTICE_DATA), "utf8"));
+  } catch {
+    // No current file yet -- any bundle.uiPractice content is a real, first-time change.
+  }
+  if (hashContent(bundle.uiPractice) !== hashContent(currentUiPractice)) {
+    const nextUiPracticeContent = `${JSON.stringify(bundle.uiPractice, null, 2)}\n`;
+    const currentUiPracticeHash = await currentFileHashOrNull(cwd, OUTPUT_UI_PRACTICE_DATA);
+    combinedWriteset.push({ path: OUTPUT_UI_PRACTICE_DATA, expectedPreviousHash: currentUiPracticeHash, nextHash: hashBytes(Buffer.from(nextUiPracticeContent, "utf8")), content: nextUiPracticeContent });
+  }
 }
 
 const backupTimestamp = new Date().toISOString().replace(/[:.]/g, "-");
 const backupRoot = path.join(cwd, ".local-backups", `production-import-${backupTimestamp}`);
-await backupIfPresent(cwd, OUTPUT_DATA, backupRoot);
-if (uiPractice) await backupIfPresent(cwd, OUTPUT_UI_PRACTICE_DATA, backupRoot);
-for (const asset of assets) await backupIfPresent(cwd, asset.relativePath, backupRoot);
 
-for (const asset of assets) {
-  const destination = path.join(cwd, asset.relativePath);
-  await mkdir(path.dirname(destination), { recursive: true });
-  await writeFile(destination, asset.bytes);
-}
-await mkdir(path.dirname(path.join(cwd, OUTPUT_DATA)), { recursive: true });
-await writeFile(path.join(cwd, OUTPUT_DATA), `${JSON.stringify(output, null, 2)}\n`, "utf8");
-if (uiPractice) {
-  await writeFile(path.join(cwd, OUTPUT_UI_PRACTICE_DATA), `${JSON.stringify(uiPractice, null, 2)}\n`, "utf8");
+// ---- The ONLY writeset-precondition-check + write authority. ----
+const result = await executePublishPlan({ root: cwd, plan: { blocked: false, writeset: combinedWriteset }, backupRoot });
+
+if (result.status === "REFUSED") {
+  fail(`${result.reason}\n${result.staleEntries.map((entry) => `- ${entry.path}: expected ${entry.expected}, found ${entry.actual}`).join("\n")}`);
 }
 
-console.log(`\nImported safely. Backup snapshot: ${backupRoot}`);
+console.log(`\nImported safely via Publishing Architecture V2. Backup snapshot: ${backupRoot}`);
+console.log(`Files written (${result.writtenPaths.length}): ${result.writtenPaths.slice(0, 10).join(", ")}${result.writtenPaths.length > 10 ? ", ..." : ""}`);
 console.log("Run pnpm portfolio:check before publishing.");

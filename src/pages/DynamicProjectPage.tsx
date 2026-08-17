@@ -21,6 +21,8 @@ import {
 } from "../lib/portfolioContentClient";
 import { getStagedDynamicDraft, isCollectionExportCapture, isCollectionStagingMode } from "../lib/collectionExportStaging";
 import { getPublishedProjectDraft } from "../lib/publishedPortfolio";
+import { markProjectDirty } from "../lib/publishIntent";
+import { backfillMatchingTemplateImagePublicPaths } from "../lib/templateImageReferences";
 
 const dynamicProjectPickerExcludedTemplateIds = ["project-header"];
 
@@ -68,6 +70,7 @@ function normalizeDraft(parsed: unknown): DynamicProjectDraft | null {
 }
 
 function loadDraft(projectId: string): DynamicProjectDraft {
+  const publishedDraft = normalizeDraft(getPublishedProjectDraft(projectId));
   if (typeof window === "undefined" || !import.meta.env.DEV) {
     // Production (and any non-browser/prerender context) has no access to
     // the owner's own localStorage, and is never a Collection-export
@@ -76,7 +79,7 @@ function loadDraft(projectId: string): DynamicProjectDraft {
     // published draft: the same static data already bundled for every
     // visitor via publishedPortfolio.json, produced by the same
     // portfolio:import pipeline that writes the localStorage draft shape.
-    return normalizeDraft(getPublishedProjectDraft(projectId)) ?? emptyDraft();
+    return publishedDraft ?? emptyDraft();
   }
   // Collection export capture: this browser's localStorage is Playwright's
   // separate, empty profile, so the real draft was staged ahead of time (see
@@ -91,7 +94,16 @@ function loadDraft(projectId: string): DynamicProjectDraft {
   try {
     const stored = window.localStorage.getItem(draftStorageKey(projectId));
     if (!stored) return emptyDraft();
-    return normalizeDraft(JSON.parse(stored) as unknown) ?? emptyDraft();
+    const localDraft = normalizeDraft(JSON.parse(stored) as unknown) ?? emptyDraft();
+    return publishedDraft
+      ? {
+          ...localDraft,
+          templateInstances: backfillMatchingTemplateImagePublicPaths(
+            localDraft.templateInstances,
+            publishedDraft.templateInstances,
+          ),
+        }
+      : localDraft;
   } catch {
     return emptyDraft();
   }
@@ -284,6 +296,7 @@ export function DynamicProjectPage({ projectId, metadata }: { projectId: string;
       if (typeof window === "undefined") return;
       try {
         window.localStorage.setItem(draftStorageKey(projectId), JSON.stringify(draft));
+        markProjectDirty(projectId);
       } catch {
         // Best-effort autosave, matching every other draft page in this app.
       }

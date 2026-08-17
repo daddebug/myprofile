@@ -2,6 +2,7 @@ import { useState, type ChangeEvent, type ReactNode } from "react";
 import { AlertTriangle, ArrowLeft, ArrowRight, FilePlus2, Save, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createDynamicProject, getProjectPublicMetaStoreSnapshot, restoreProjectPublicMetaStore, setProjectPublicMetaOverride, type ProjectCatalogItem, type ProjectVisibility, type ResolvedProjectMetadata } from "../lib/projectMetadata";
+import { markProjectDirty } from "../lib/publishIntent";
 import { ProjectCoverEditor } from "./ProjectCoverEditor";
 import { useLocale } from "../locales/LocaleContext";
 
@@ -175,6 +176,7 @@ export function ProjectInfoEditor({ project, catalog, onClose, onSaved }: { proj
       visibility: metadata.visibility,
       publicationState: metadata.status === "public" ? "published" : metadata.status,
     });
+    markProjectDirty(project.id);
     setError("");
     setSaved(true);
     onSaved?.(metadata.slug);

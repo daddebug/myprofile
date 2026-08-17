@@ -1,30 +1,23 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { VALID_PNG_BYTES, runImportProductionBundle, withFixtureRepo } from "./publishing/__tests__/fixtureRepo.mjs";
 
-// import-production-bundle.mjs hardcodes its official root (a deliberate
-// safety gate -- see OFFICIAL_ROOT in that file), so unlike
-// publishing-preflight-lib.mjs's pure functions this can only be exercised
-// as a real dry run against this actual repository, using a self-contained
-// fixture project/asset id that cannot collide with real content.
-const repositoryRoot = process.cwd();
-const scriptPath = path.join(repositoryRoot, "scripts", "import-production-bundle.mjs");
-const registry = JSON.parse(await readFile(path.join(repositoryRoot, "src", "lib", "publishing", "publishSourceRegistry.json"), "utf8"));
+// Exercises the project-body disk-fallback rule end to end: (A) the bundle's
+// own IndexedDB snapshot is missing a referenced blob but the exact file it
+// already published to disk still exists -- dry run must succeed via that
+// fallback; (B) the same missing blob with no disk fallback either -- dry run
+// must still fail closed. Runs the real, live V2-cutover
+// import-production-bundle.mjs CLI (buildPublishPlan/executePublishPlan as
+// sole authority) against an isolated fixture root (see
+// publishing/__tests__/fixtureRepo.mjs) -- never against this real repository.
 
-const fixtureProjectId = "test-fixture-import-regression";
-const fixtureAssetId = "test-fixture-import-regression-asset";
+const fixtureProjectId = "fixture-project-body";
+const fixtureAssetId = "fixture-project-body-asset";
 const fixturePublicPath = `/images/published/project-body/${fixtureProjectId}/${fixtureAssetId}.png`;
-const fixtureDirectory = path.join(repositoryRoot, "public", "images", "published", "project-body", fixtureProjectId);
-const fixtureFile = path.join(fixtureDirectory, `${fixtureAssetId}.png`);
-const bundlePath = path.join(repositoryRoot, "output", "import-production-bundle-regression-test.json");
-const preflightManifestPath = path.join(repositoryRoot, "output", "publishing-preflight-manifest.json");
-// A minimal, real, valid 1x1 PNG -- the disk-fallback path now requires
-// genuinely decodable image bytes (see assetIntegrity.mjs), so a placeholder
-// text string no longer stands in for a published image file.
-const VALID_PNG_BYTES = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNgAAIAAAUAAen63NgAAAAASUVORK5CYII=", "base64");
 
-function buildBundle() {
+async function buildBundle(root) {
+  const registry = JSON.parse(await readFile(path.join(root, "src", "lib", "publishing", "publishSourceRegistry.json"), "utf8"));
   return {
     version: 1,
     publishingRegistryVersion: registry.version,
@@ -65,43 +58,60 @@ function buildBundle() {
   };
 }
 
-async function runDryRun() {
-  await writeFile(bundlePath, JSON.stringify(buildBundle()), "utf8");
-  return spawnSync(process.execPath, [scriptPath, bundlePath], { cwd: repositoryRoot, encoding: "utf8" });
+async function writeBundle(root, bundle) {
+  const bundlePath = path.join(root, "output", "import-bundle.json");
+  await mkdir(path.dirname(bundlePath), { recursive: true });
+  await writeFile(bundlePath, JSON.stringify(bundle), "utf8");
+  return bundlePath;
 }
 
-try {
-  // A. bundle blob missing, exact published file exists -> dry run succeeds,
-  // path resolves correctly, no missing-asset error.
+// A. bundle blob missing, exact published file exists, AND this exact
+// reference was already part of the project's currently-published baseline
+// (referenceIntent "inherited") -- dry run must succeed via disk fallback.
+// Publishing Architecture V2's Asset Resolution Model deliberately narrows
+// disk fallback to inherited references only (Root Cause 11 fix: a brand-new
+// or CHANGED reference with no bundle bytes must never silently substitute a
+// stale/orphan file) -- so, unlike V1, this scenario requires currentPublished
+// to already know about this exact project+asset reference, not just an
+// orphan file sitting at the expected path.
+await withFixtureRepo(async (root) => {
+  const fixtureDirectory = path.join(root, "public", "images", "published", "project-body", fixtureProjectId);
   await mkdir(fixtureDirectory, { recursive: true });
-  await writeFile(fixtureFile, VALID_PNG_BYTES);
+  await writeFile(path.join(fixtureDirectory, `${fixtureAssetId}.png`), VALID_PNG_BYTES);
 
-  const resolved = await runDryRun();
+  const bundle = await buildBundle(root);
+  await writeFile(path.join(root, "src", "data", "publishedPortfolio.json"), JSON.stringify({
+    version: 1,
+    drafts: { [fixtureProjectId]: bundle.drafts[fixtureProjectId] },
+    projectCatalog: { [fixtureProjectId]: bundle.projectCatalog.projects[fixtureProjectId] },
+    projectDocuments: { version: 1, documents: {} },
+    covers: {},
+    assets: [],
+  }), "utf8");
+  const bundlePath = await writeBundle(root, bundle);
+  const resolved = runImportProductionBundle(root, [bundlePath]);
   assert.equal(resolved.status, 0, `expected dry run to succeed:\nstdout:\n${resolved.stdout}\nstderr:\n${resolved.stderr}`);
   assert(resolved.stdout.includes("DRY RUN ONLY"), `expected dry-run summary in stdout:\n${resolved.stdout}`);
   assert(!/missing/i.test(resolved.stderr), `expected no missing-asset error:\n${resolved.stderr}`);
 
-  const manifest = JSON.parse(await readFile(preflightManifestPath, "utf8"));
-  const resolvedAsset = manifest.assets.find((asset) => asset.sourceAdapterId === "project-body-indexeddb-assets" && asset.assetId === fixtureAssetId);
-  assert(resolvedAsset, "expected the fixture asset to appear in the preflight manifest");
-  assert.equal(resolvedAsset.status, "available");
-  assert.equal(resolvedAsset.publishedFileFallback, true);
-  assert.equal(resolvedAsset.intendedProductionPath, `public/images/published/project-body/${fixtureProjectId}/${fixtureAssetId}.png`);
-  assert(!manifest.issues.some((issue) => issue.code === "MISSING_REFERENCED_ASSET" && issue.sourceAdapterId === "project-body-indexeddb-assets"));
+  const report = JSON.parse(await readFile(path.join(root, "output", "publishing-launcher-report.json"), "utf8"));
+  const projectItem = report.items.find((item) => item.projectId === fixtureProjectId);
+  assert(projectItem, "expected a report item for the fixture project");
+  assert.notEqual(projectItem.status, "BLOCKED", `expected the inherited disk-fallback reference to resolve cleanly, got: ${JSON.stringify(projectItem)}`);
+  assert.equal(report.outcome, "ready");
+});
+console.log("A: bundle blob missing, published file exists, reference inherited -> dry run succeeds via disk fallback, passed");
 
-  await rm(fixtureFile, { force: true });
-
-  // B. bundle blob missing AND published file also missing -> dry run still
-  // fails closed, exactly as before this fix.
-  const genuinelyMissing = await runDryRun();
+// B. bundle blob missing AND published file also missing -> dry run still
+// fails closed, exactly as before this fix.
+await withFixtureRepo(async (root) => {
+  const bundlePath = await writeBundle(root, await buildBundle(root));
+  const genuinelyMissing = runImportProductionBundle(root, [bundlePath]);
   assert.notEqual(genuinelyMissing.status, 0, `expected dry run to fail when the file is genuinely missing:\nstdout:\n${genuinelyMissing.stdout}\nstderr:\n${genuinelyMissing.stderr}`);
   const genuinelyMissingOutput = `${genuinelyMissing.stderr}${genuinelyMissing.stdout}`;
   assert(/missing|not collected/i.test(genuinelyMissingOutput), `expected a missing/not-collected asset error:\n${genuinelyMissingOutput}`);
   assert(genuinelyMissingOutput.includes(fixtureAssetId), `expected the error to name the fixture asset:\n${genuinelyMissingOutput}`);
+});
+console.log("B: bundle blob missing, published file also missing -> dry run fails closed, passed");
 
-  console.log("import-production-bundle project-body fallback regression tests passed");
-} finally {
-  await rm(fixtureFile, { force: true });
-  await rm(fixtureDirectory, { recursive: true, force: true });
-  await rm(bundlePath, { force: true });
-}
+console.log("import-production-bundle project-body fallback regression tests passed");

@@ -55,6 +55,19 @@ export async function getAllGameCoverRecords() {
   return withStore<GameCoverRecord[]>("readonly", (store) => store.getAll());
 }
 
+// Was missing from this module even though every other asset-db module
+// (projectBodyAssetDb.ts's deleteProjectBodyAsset, projectCoverDb.ts's
+// removeProjectCover) already has the equivalent -- added so V2 browser
+// integration tests have a real, non-hacky way to clean up the specific
+// test records they create, instead of leaving permanent IndexedDB residue
+// (see Publishing Architecture V2's Test Safety report). Only ever deletes
+// the exact id passed in, never a bulk/whole-store operation.
+export async function deleteGameCoverRecord(id: string) {
+  if (!id) return;
+  await withStore<undefined>("readwrite", (store) => store.delete(id));
+  window.dispatchEvent(new CustomEvent(GAME_COVER_CHANGE_EVENT, { detail: { id } }));
+}
+
 export function validateGameCoverFile(file: Blob & { name?: string }) {
   if (!allowedTypes.has(file.type)) throw new Error("Please use a PNG, JPEG, WebP, or AVIF image.");
   if (file.size > GAME_COVER_MAX_BYTES) throw new Error("Game covers must be 12 MB or smaller.");

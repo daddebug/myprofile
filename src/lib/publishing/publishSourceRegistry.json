@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "excludedLocalRoots": ["local-deliverables/"],
   "sources": [
     { "id": "project-catalog", "sourceType": "content", "sourceOfTruth": "browser localStorage project metadata export", "discovery": "project-catalog", "assetCollection": "none", "missingAssetsAllowed": true, "outputPath": "src/data/publishedPortfolio.json#projectCatalog", "rewrite": "none", "verification": "canonical-projects-present" },
     { "id": "dynamic-project-drafts", "sourceType": "content", "sourceOfTruth": "dilida-portfolio:dynamic-project:<projectId>:draft:v1", "discovery": "dynamic-drafts-from-catalog", "assetCollection": "recursive-template-resource-fields", "missingAssetsAllowed": false, "outputPath": "src/data/publishedPortfolio.json#drafts", "rewrite": "rewrite-template-resource-paths", "verification": "template-instances-and-references" },

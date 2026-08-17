@@ -6,6 +6,8 @@
 
 The generated preflight is `output/publishing-preflight-manifest.json`. It is local audit output and is not committed. No production data or asset is written unless the preflight and post-rewrite checks both pass.
 
+`local-deliverables/` is a DILIDA DESK submission folder: **LOCAL ONLY - NEVER PUBLISHED**. It is Git-ignored, declared in the registry's `excludedLocalRoots`, never scanned as a publishing source, and any content reference pointing into it is a blocking preflight error. It must never become a `publicPath`, Vercel asset, or production-bundle input.
+
 ## Sources
 
 | Adapter | Source of truth | Export collector | Import destination | Rewrite | Live verification |
@@ -42,6 +44,8 @@ The generated manifest contains:
 - the responsible adapter, source path, intended production path, byte size, MIME type, and status;
 - source-level record/asset counts and issues.
 
+The canonical importer also writes `output/publishing-launcher-report.json`. This is a presentation-oriented derivative of the same manifest and the importer's already-computed rewritten output. It groups records by project/source into `NEW`, `UPDATED`, `UNCHANGED`, and `BLOCKED`; after a verified launcher publish, changed items become `PUBLISHED` (or `FAILED` if a later publish stage fails). It does not discover sources independently and is never a substitute for the manifest.
+
 ## Blocking Rules
 
 Publishing stops before writes when:
@@ -71,6 +75,6 @@ If a specific project has an unrelated, already-known blocker (e.g. Playable Gam
 
 ## DILIDA DESK
 
-The launcher must invoke this repository workflow and consume the generated manifest. It may display source-level counts and status, but must not reimplement discovery, rewriting, or missing-resource checks in Rust or UI code.
+The launcher must invoke this repository workflow and consume the generated manifest plus its `publishing-launcher-report.json` presentation derivative. It may display source-level counts and status, but must not reimplement discovery, change comparison, rewriting, or missing-resource checks in Rust or UI code.
 
 The production destination for large Playable Game bundles remains unresolved. The registry and manifest expose those files instead of omitting them; publishing must remain blocked until that import/hosting handler is deliberately completed.

@@ -12,7 +12,9 @@ import { AspectRatioSelect, aspectRatioToClassName, type AspectRatioValue } from
 import { ImageAssetUploader, isAcceptedImageFile, useResolvedAssetSource } from "./editor/ImageAssetUploader";
 import { BlockLayoutPicker } from "./editor/BlockLayoutPicker";
 import { setProjectPublicMetaOverride, type ResolvedProjectMetadata } from "../lib/projectMetadata";
+import { markProjectDirty } from "../lib/publishIntent";
 import { isCollectionExportCapture } from "../lib/collectionExportStaging";
+import { getPortfolioExportMode } from "../lib/portfolioExportMode";
 import { recordEmptySlotCollapsed, recordEmptySlotFound } from "../lib/collectionMediaDiagnostics";
 import {
   createStableId,
@@ -123,6 +125,7 @@ export function ProjectDocumentPage({ metadata, initialDocument }: { metadata: R
         : await saveProjectBodyDocument(metadata.id, documentWithDiskPaths);
       const persistedDocument = installed.document as ProjectDocument;
       saveProjectDocument(persistedDocument);
+      markProjectDirty(metadata.id);
       setProjectPublicMetaOverride(metadata.id, {
         titleZh: metaDraft.titleZh, titleEn: metaDraft.titleEn,
         summaryZh: metaDraft.summaryZh, summaryEn: metaDraft.summaryEn,
@@ -1120,18 +1123,7 @@ function FigmaPrototypeBlock({ block, locale }: { block: ProjectDocumentBlock; l
     ? textFor(figma.interactionHint, locale)
     : (locale === "zh" ? "可交互原型 — 点击体验" : "Interactive prototype — click to explore");
 
-  // The live iframe embed (data-figma-prototype-interactive) points at
-  // Figma's real servers and is deliberately never waited on before the
-  // collection export takes its screenshot (see ProjectPage.tsx's readiness
-  // watcher: "Special embedded media ... is never waited on at all"), so it
-  // can render blank in a one-shot headless capture even though a real
-  // prototype is configured. The @media print swap to the static poster
-  // (data-figma-prototype-print) below already exists for literal browser
-  // printing, but captureProjectPage renders with page.emulateMedia({media:
-  // "screen"}) — print CSS never activates there. Checking capture mode in
-  // JS and swapping directly fixes this regardless of which media Chromium
-  // emulates.
-  const captureMode = isCollectionExportCapture();
+  const artifactMode = getPortfolioExportMode() !== "live";
   const hasPosterReference = Boolean(figma.posterAssetId || figma.posterPublicPath);
   const posterSlotState = !hasPosterReference ? null : posterSource ? (posterLoadFailed ? "failed" : "filled") : "failed";
   const posterSlotId = `figma-prototype-block:${block.id}`;
@@ -1142,7 +1134,7 @@ function FigmaPrototypeBlock({ block, locale }: { block: ProjectDocumentBlock; l
       {description ? <p className="mt-2 max-w-3xl text-base leading-7 text-softWhite/64">{description}</p> : null}
     </div> : null}
 
-    {captureMode ? (
+    {artifactMode ? (
       <div className={`relative overflow-hidden rounded-[10px] border border-softWhite/12 bg-archiveBlue/20 ${aspectClass}`} data-media-slot-state={posterSlotState ?? undefined} data-media-slot-id={posterSlotId}>
         {posterSource ? (
           <img src={posterSource} alt={title || "Figma prototype preview"} className="absolute inset-0 h-full w-full object-cover" onError={() => setPosterLoadFailed(true)} />
@@ -1186,19 +1178,6 @@ function FigmaPrototypeBlock({ block, locale }: { block: ProjectDocumentBlock; l
       </a>
     </div>
 
-    {captureMode ? null : (
-      <div data-figma-prototype-print className="hidden">
-        {posterSource ? (
-          <img src={posterSource} alt={title || "Figma prototype preview"} className="w-full rounded-[10px] object-cover" />
-        ) : (
-          <div className="grid aspect-video w-full place-items-center rounded-[10px] border border-softWhite/16 text-sm text-softWhite/40">
-            {title || (locale === "zh" ? "可交互原型" : "Interactive prototype")}
-          </div>
-        )}
-        <p className="mt-3 text-sm font-semibold text-acidGreen"><a href={figma.sourceUrl}>{locale === "zh" ? "在 Figma 中打开可交互原型" : "Open interactive prototype in Figma"}</a></p>
-        <p className="mt-1 break-all text-xs text-softWhite/50">{figma.sourceUrl}</p>
-      </div>
-    )}
   </figure>;
 }
 

@@ -77,6 +77,7 @@ function counts(items) {
     updated: items.filter((item) => item.status === "UPDATED").length,
     unchanged: items.filter((item) => item.status === "UNCHANGED").length,
     removed: items.filter((item) => item.status === "REMOVED").length,
+    unpublished: items.filter((item) => item.status === "UNPUBLISHED").length,
     blocked: items.filter((item) => item.status === "BLOCKED").length,
     published: items.filter((item) => item.status === "PUBLISHED").length,
     failed: items.filter((item) => item.status === "FAILED").length,
@@ -90,6 +91,15 @@ async function writeReport(root, report) {
   return report;
 }
 
+// RETIRED from the live publish path (Publishing Architecture V2, Cutover).
+// Kept only for parity/rollback reference -- no longer reachable from
+// import-production-bundle.mjs. It independently re-read `currentPublished`
+// and V1's rewrittenPreflight manifest to compute its own NEW/UPDATED/
+// UNCHANGED/BLOCKED judgment (Root Cause 5's "judgment pass 3") -- the exact
+// duplicated-judgment pattern V2's PublishPlan replaces. See
+// renderPublishPlanReportV2 below for its live V2 replacement, which is a
+// pure view over an already-computed PublishPlan and performs none of this
+// function's own diffing/status logic.
 export async function writeBlockedPublishReport({ root, manifest, catalog = {}, productionUrl }) {
   const items = blockedItems(manifest, catalog);
   return writeReport(root, {
@@ -110,6 +120,12 @@ function combineStatus(contentExists, contentChanged, assetStates) {
   return "UNCHANGED";
 }
 
+// RETIRED from the live publish path (Publishing Architecture V2, Cutover).
+// Kept only for parity/rollback reference (still used by
+// scripts/publishing-preflight.mjs's old code path prior to its own
+// reduction -- see that file) -- no longer reachable from
+// import-production-bundle.mjs. See renderPublishPlanReportV2 below for its
+// live replacement.
 export async function writePublishPlanReport({ root, manifest, output, uiPractice, assets, productionUrl, deletedProjectIds = new Set(), inheritedProjectIds = new Set(), inheritedCatalogProjectIds = new Set() }) {
   const currentOutput = await readJson(path.join(root, "src/data/publishedPortfolio.json"), {});
   const currentUiPractice = await readJson(path.join(root, "src/data/uiPracticeMetadata.json"), null);
@@ -312,6 +328,69 @@ export async function writePublishPlanReport({ root, manifest, output, uiPractic
     productionUrl,
     counts: counts(items),
     items,
+  });
+}
+
+function planItemTitle(catalogForTitles, entityId, entityType) {
+  if (entityType === "project") return projectTitle(catalogForTitles, entityId);
+  if (entityType === "gameExperienceRecord") return "Game Experience";
+  return entityId || "Portfolio";
+}
+
+function planItemDescription(item) {
+  if (item.reason) return item.reason;
+  if (item.assetResolutions?.length) {
+    const inherited = item.assetResolutions.filter((r) => r.source === "published-fallback").length;
+    const fresh = item.assetResolutions.length - inherited;
+    return `${item.assetResolutions.length} referenced asset(s) (${fresh} from this edit, ${inherited} inherited unchanged).`;
+  }
+  return item.status === "UNCHANGED" ? "No change from the currently-published state." : "Content and referenced assets.";
+}
+
+// The live V2 report renderer (Publishing Architecture V2, Cutover, Section
+// B). A PURE VIEW over already-built PublishPlan(s) -- consumes ONLY
+// plan.items / plan.counts / plan.blocked / plan.assetIntegrity / plan.writeset
+// (per plan, passed in already computed) plus plain display lookups
+// (catalogForTitles, for a human-readable project name). It never re-reads
+// currentPublished, never re-derives NEW/UPDATED/UNCHANGED, never re-judges
+// missing/BLOCKED -- every one of those was already decided once, by
+// buildPublishPlan.mjs, before this function is ever called. Report status
+// can never disagree with plan status because it is not computed twice.
+export async function renderPublishPlanReportV2({ root, plans, catalogForTitles = {}, productionUrl }) {
+  const items = [];
+  for (const plan of plans) {
+    for (const planItem of plan.items) {
+      items.push({
+        id: `${planItem.entityId}:${planItem.entityType}`,
+        projectId: planItem.entityType === "project" ? planItem.entityId : "",
+        title: planItemTitle(catalogForTitles, planItem.entityId, planItem.entityType),
+        category: planItem.entityType === "project" ? "Project" : planItem.entityType === "gameExperienceRecord" ? "Game Experience" : planItem.entityType,
+        status: planItem.status,
+        description: planItemDescription(planItem),
+        ...(planItem.reason ? { reason: planItem.reason } : {}),
+      });
+    }
+  }
+  const blocked = plans.some((plan) => plan.blocked);
+  const totalWriteset = plans.reduce((sum, plan) => sum + plan.writeset.length, 0);
+  const assetIntegrity = plans.reduce((sum, plan) => ({
+    total: sum.total + plan.assetIntegrity.total,
+    valid: sum.valid + plan.assetIntegrity.valid,
+    invalid: sum.invalid + plan.assetIntegrity.invalid,
+    inherited: sum.inherited + plan.assetIntegrity.inherited,
+  }), { total: 0, valid: 0, invalid: 0, inherited: 0 });
+
+  return writeReport(root, {
+    version: 2,
+    generatedAt: new Date().toISOString(),
+    phase: "preflight",
+    outcome: blocked ? "blocked" : "ready",
+    diffStatus: "complete",
+    productionUrl,
+    counts: counts(items),
+    items,
+    writesetSize: totalWriteset,
+    assetIntegrity,
   });
 }
 

@@ -1,28 +1,22 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { runImportProductionBundle, withFixtureRepo } from "./publishing/__tests__/fixtureRepo.mjs";
 
 // Exercises the real per-project draft merge algorithm end to end (dry-run
 // only -- no --confirm is needed to observe it, since the plan report
 // already reflects the merged `output.drafts` before any write happens).
-// import-production-bundle.mjs hardcodes its OFFICIAL_ROOT, so this can only
-// run against this actual repository; the currently-published data file is
-// temporarily given a few self-contained fixture projects and restored
-// byte-for-byte in `finally`, verified, exactly like
-// import-production-bundle-confirm-gate.test.mjs.
-const repositoryRoot = process.cwd();
-const scriptPath = path.join(repositoryRoot, "scripts", "import-production-bundle.mjs");
-const publishedDataPath = path.join(repositoryRoot, "src", "data", "publishedPortfolio.json");
-const bundlePath = path.join(repositoryRoot, "output", "import-inherit-regression-test.json");
-const registry = JSON.parse(await readFile(path.join(repositoryRoot, "src", "lib", "publishing", "publishSourceRegistry.json"), "utf8"));
+// Runs the real, still-frozen V1 import-production-bundle.mjs CLI against an
+// isolated fixture root (see publishing/__tests__/fixtureRepo.mjs), seeded
+// with a few self-contained fixture projects -- never against this real
+// repository or its real publishedPortfolio.json.
 
 const ids = {
-  updated: "test-fixture-inherit-updated",   // A: published has body, bundle has a modified body -> UPDATED
-  inherited: "test-fixture-inherit-kept",    // B/E: published has body, bundle has none, no delete intent -> UNCHANGED, inherited
-  brandNew: "test-fixture-inherit-new",      // C: published has no body, bundle has one -> NEW
-  neverExisted: "test-fixture-inherit-none", // D: neither side has a body -> no report item at all
-  removed: "test-fixture-inherit-removed",   // F: published has body, bundle has none, explicit delete intent -> REMOVED
+  updated: "fixture-inherit-updated",  // A: published has body, bundle has a modified body -> UPDATED
+  inherited: "fixture-inherit-kept",   // B/E: published has body, bundle has none, no delete intent -> UNCHANGED, inherited
+  brandNew: "fixture-inherit-new",     // C: published has no body, bundle has one -> NEW
+  neverExisted: "fixture-inherit-none", // D: neither side has a body -> no report item at all
+  removed: "fixture-inherit-removed",  // F: published has body, bundle has none, explicit delete intent -> REMOVED
 };
 
 function fixtureCatalogEntry(id) {
@@ -31,36 +25,28 @@ function fixtureCatalogEntry(id) {
 function fixtureDraft(text) {
   return { version: 1, templateInstances: [{ instanceId: "a", templateId: "statement-longform", regionId: "content", content: { body: { zh: text, en: "" } } }] };
 }
-function run(args) {
-  return spawnSync(process.execPath, [scriptPath, ...args], { cwd: repositoryRoot, encoding: "utf8" });
-}
 
-const originalPublishedBytes = await readFile(publishedDataPath);
-const originalPublished = JSON.parse(originalPublishedBytes.toString("utf8"));
-for (const id of Object.values(ids)) {
-  assert(!(id in (originalPublished.projectCatalog || {})), `fixture id collision on ${id} -- aborting before touching real data`);
-}
+const publishedPortfolio = {
+  version: 1,
+  projectCatalog: {
+    [ids.updated]: fixtureCatalogEntry(ids.updated),
+    [ids.inherited]: fixtureCatalogEntry(ids.inherited),
+    [ids.removed]: fixtureCatalogEntry(ids.removed),
+    // ids.brandNew and ids.neverExisted intentionally NOT added here --
+    // they have no previously-published catalog entry or body.
+  },
+  drafts: {
+    [ids.updated]: fixtureDraft("original-updated-fixture-body"),
+    [ids.inherited]: fixtureDraft("original-inherited-fixture-body"),
+    [ids.removed]: fixtureDraft("original-removed-fixture-body"),
+  },
+  projectDocuments: { version: 1, documents: {} },
+  covers: {},
+  assets: [],
+};
 
-try {
-  const withFixtures = {
-    ...originalPublished,
-    projectCatalog: {
-      ...originalPublished.projectCatalog,
-      [ids.updated]: fixtureCatalogEntry(ids.updated),
-      [ids.inherited]: fixtureCatalogEntry(ids.inherited),
-      [ids.removed]: fixtureCatalogEntry(ids.removed),
-      // ids.brandNew and ids.neverExisted intentionally NOT added here --
-      // they have no previously-published catalog entry or body.
-    },
-    drafts: {
-      ...originalPublished.drafts,
-      [ids.updated]: fixtureDraft("original-updated-fixture-body"),
-      [ids.inherited]: fixtureDraft("original-inherited-fixture-body"),
-      [ids.removed]: fixtureDraft("original-removed-fixture-body"),
-    },
-  };
-  await writeFile(publishedDataPath, JSON.stringify(withFixtures));
-  const stateBeforeRun = await readFile(publishedDataPath);
+await withFixtureRepo(async (root) => {
+  const registry = JSON.parse(await readFile(path.join(root, "src", "lib", "publishing", "publishSourceRegistry.json"), "utf8"));
 
   const bundle = {
     version: 1,
@@ -96,62 +82,53 @@ try {
     // cause a previously-published body to be omitted from the output.
     deletedProjectIds: [ids.removed],
   };
+  const bundlePath = path.join(root, "output", "import-bundle.json");
+  await mkdir(path.dirname(bundlePath), { recursive: true });
   await writeFile(bundlePath, JSON.stringify(bundle), "utf8");
 
-  const dryRun = run([bundlePath]);
+  const stateBeforeRun = await readFile(path.join(root, "src", "data", "publishedPortfolio.json"));
+
+  const dryRun = runImportProductionBundle(root, [bundlePath]);
   assert.equal(dryRun.status, 0, `expected dry run to succeed:\nstdout:\n${dryRun.stdout}\nstderr:\n${dryRun.stderr}`);
   assert(dryRun.stdout.includes("DRY RUN ONLY"), dryRun.stdout);
-  // Real, currently-published projects are legitimately inherited in the
-  // same run too (this run's bundle only declares the fixtures, so every
-  // other real project is "absent from this export's catalog" and correctly
-  // inherited) -- so these lines list more than just the fixtures; check
-  // membership, not an exact list.
-  const inheritedBodiesLine = dryRun.stdout.split("\n").find((line) => line.includes("Inherited unchanged project bodies"));
-  assert(inheritedBodiesLine && inheritedBodiesLine.includes(ids.inherited), dryRun.stdout);
-  const removedBodiesLine = dryRun.stdout.split("\n").find((line) => line.includes("Removed project bodies"));
-  assert(removedBodiesLine && removedBodiesLine.includes(ids.removed), dryRun.stdout);
-  assert((await readFile(publishedDataPath)).equals(stateBeforeRun), "dry run must never modify publishedPortfolio.json");
+  assert((await readFile(path.join(root, "src", "data", "publishedPortfolio.json"))).equals(stateBeforeRun), "dry run must never modify publishedPortfolio.json");
 
-  const report = JSON.parse(await readFile(path.join(repositoryRoot, "output", "publishing-launcher-report.json"), "utf8"));
-  const bodyItem = (id) => report.items.find((item) => item.id === `${id}:body`);
+  const report = JSON.parse(await readFile(path.join(root, "output", "publishing-launcher-report.json"), "utf8"));
+  const projectItem = (id) => report.items.find((item) => item.id === `${id}:project`);
 
-  // A. published has body, bundle has a modified body -> UPDATED.
-  const itemA = bodyItem(ids.updated);
-  assert(itemA, "expected a Project body item for the updated fixture");
+  // A. published has a body, bundle has a modified body -> UPDATED.
+  const itemA = projectItem(ids.updated);
+  assert(itemA, "expected a project item for the updated fixture");
   assert.equal(itemA.status, "UPDATED");
 
-  // B / E. published has body, bundle has none, no delete intent ->
-  // UNCHANGED, explicitly described as inherited (not silently dropped, not
-  // BLOCKED).
-  const itemB = bodyItem(ids.inherited);
-  assert(itemB, "expected a Project body item for the inherited fixture");
-  assert.equal(itemB.status, "UNCHANGED");
-  assert(/inherited/i.test(itemB.description), itemB.description);
+  // B / E. published has a body, bundle's export doesn't include this project
+  // at all (an empty browser session for it) and there is no delete intent --
+  // Publishing Architecture V2's Edit Intent Model produces NO intent at all
+  // for an entity nothing asked it to touch (buildPublishPlan.mjs never even
+  // sees it), so there is no report item for it either -- the currently
+  // -published body is left byte-for-byte as-is by construction, not
+  // re-touched/re-reported as "inherited."
+  const itemB = projectItem(ids.inherited);
+  assert.equal(itemB, undefined, "expected no report item for an untouched, inherited project");
 
   // C. published has no body, bundle introduces one -> NEW.
-  const itemC = bodyItem(ids.brandNew);
-  assert(itemC, "expected a Project body item for the brand-new fixture");
+  const itemC = projectItem(ids.brandNew);
+  assert(itemC, "expected a project item for the brand-new fixture");
   assert.equal(itemC.status, "NEW");
 
   // D. neither side has a body -> no report item at all for it.
-  const itemD = bodyItem(ids.neverExisted);
-  assert.equal(itemD, undefined, "expected no Project body item when neither side ever had one");
+  const itemD = projectItem(ids.neverExisted);
+  assert.equal(itemD, undefined, "expected no project item when neither side ever had one");
 
-  // F. published has body, bundle has none, explicit delete intent -> REMOVED
-  // (never BLOCKED, never silently UNCHANGED).
-  const itemF = bodyItem(ids.removed);
-  assert(itemF, "expected a Project body item for the removed fixture");
+  // F. published has a body, bundle has none, explicit delete intent ->
+  // REMOVED (never BLOCKED, never silently UNCHANGED).
+  const itemF = projectItem(ids.removed);
+  assert(itemF, "expected a project item for the removed fixture");
   assert.equal(itemF.status, "REMOVED");
-  assert.equal(itemF.reason, "Removed via explicit project deletion intent.");
+  assert.equal(itemF.reason, "Removed via explicit delete intent.");
 
   // Nothing here should ever be BLOCKED -- that is the whole point of this fix.
-  assert.equal(report.items.filter((item) => item.category === "Project body" && [ids.updated, ids.inherited, ids.brandNew, ids.removed].includes(item.projectId) && item.status === "BLOCKED").length, 0);
+  assert.equal(report.items.filter((item) => Object.values(ids).includes(item.projectId) && item.status === "BLOCKED").length, 0);
 
   console.log("import-production-bundle inherit/delete-intent regression tests passed");
-} finally {
-  await writeFile(publishedDataPath, originalPublishedBytes);
-  const restored = await readFile(publishedDataPath);
-  if (!restored.equals(originalPublishedBytes)) {
-    throw new Error("CRITICAL: failed to restore publishedPortfolio.json to its original bytes after the inherit regression test.");
-  }
-}
+}, { publishedPortfolio });

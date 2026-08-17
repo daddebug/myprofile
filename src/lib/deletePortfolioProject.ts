@@ -1,7 +1,9 @@
+import { clearDirtyIntent, getDirtyIntent, captureDirtyIntent } from "./dirtyIntentStore";
 import { deleteProjectDocument, getProjectDocument } from "./projectDocuments";
 import { deleteProjectBodyAssetsForProject } from "./projectBodyAssetDb";
 import { getProjectCover, removeProjectCover } from "./projectCoverDb";
 import { removeProjectPublicMetaOverride } from "./projectMetadata";
+import { currentPublishedProjectSnapshot } from "./publishIntent";
 
 // Each bespoke draft page uses a dedicated IndexedDB, entirely owned by that
 // one project (never shared), so clearing the whole store is safe. Dynamic
@@ -55,15 +57,11 @@ export type DeletePortfolioProjectResult = {
   removedRegistryOverride: boolean;
 };
 
-// Single entry point for permanently deleting one project's browser-owned
-// data, keyed by its real project id / slug. Only ever touches storage that
-// is confirmed to belong to this exact id — never a whole store or a whole
-// database. Static, source-controlled catalog entries (defined in
-// projects.ts) cannot be removed by this function: their compiled catalog
-// row stays, but every piece of browser-only data (draft, ProjectDocument,
-// images, owner-edited metadata) is still fully cleared, and any owner
-// override reverts to the compiled default.
-export async function deletePortfolioProject(projectId: string): Promise<DeletePortfolioProjectResult> {
+// The actual, permanent, local-data purge -- everything deletePortfolioProject
+// used to do immediately on click. Now ONLY ever called by
+// finalizeProjectDeletion() below, once production has proven this project's
+// deletion publish actually succeeded. Never call this directly from UI.
+async function purgeProjectLocalData(projectId: string): Promise<DeletePortfolioProjectResult> {
   const result: DeletePortfolioProjectResult = {
     removedDraftKey: false,
     removedProjectDocument: false,
@@ -72,7 +70,6 @@ export async function deletePortfolioProject(projectId: string): Promise<DeleteP
     clearedImageRecordCount: 0,
     removedRegistryOverride: false,
   };
-  if (typeof window === "undefined" || !import.meta.env.DEV) return result;
 
   // Bespoke pages each have their own hardcoded key; every project created
   // through "New project" (DynamicProjectPage) instead uses this one
@@ -100,5 +97,50 @@ export async function deletePortfolioProject(projectId: string): Promise<DeleteP
   result.removedRegistryOverride = true;
   removeProjectPublicMetaOverride(projectId);
 
+  return result;
+}
+
+// Phase 1 of two-phase deletion (Publishing Architecture V2, Deletion
+// Transaction Model): opens (or reuses) a DELETE dirty intent for this
+// project. Deliberately does NOT touch any local data — the project's
+// draft, assets, cover, and catalog override are all left completely intact
+// and immediately recoverable via undoProjectPendingDeletion(). The caller
+// (WorkPage.tsx) is responsible for filtering this project out of the
+// visible catalog once this returns — that filtering, not data loss, is
+// what makes deletion "look done" to the user.
+export function markProjectPendingDeletion(projectId: string): void {
+  if (typeof window === "undefined" || !import.meta.env.DEV) return;
+  captureDirtyIntent(projectId, "project", "DELETE", currentPublishedProjectSnapshot(projectId));
+}
+
+// Reverses markProjectPendingDeletion(). Since no local data was ever
+// touched, undo is exactly "stop treating this as pending deletion" — zero
+// data was ever at risk. Only clears an entry that is actually still a
+// DELETE intent, so it can never clobber an unrelated UPSERT/UNPUBLISH
+// intent that happens to share this project's id.
+export function undoProjectPendingDeletion(projectId: string): void {
+  if (getDirtyIntent(projectId)?.kind !== "DELETE") return;
+  clearDirtyIntent(projectId);
+}
+
+export function isProjectPendingDeletion(projectId: string): boolean {
+  return getDirtyIntent(projectId)?.kind === "DELETE";
+}
+
+// Phase 2, lazy — intended to be called once per project with an open
+// DELETE intent, e.g. on app/page load. Only actually purges local data
+// once production has PROVEN this project's deletion publish succeeded:
+// absent from currentPublished AND the local intent is still DELETE. A
+// Window-1 conflict on this entity (see buildPublishPlan.mjs) leaves the
+// intent open and the project still published — this function must never
+// guess at success, only confirm it against currentPublished, the same
+// source of truth every other inherit/absence check in this system uses.
+export async function finalizeProjectDeletion(projectId: string): Promise<DeletePortfolioProjectResult | null> {
+  if (typeof window === "undefined" || !import.meta.env.DEV) return null;
+  if (getDirtyIntent(projectId)?.kind !== "DELETE") return null;
+  const stillPublished = currentPublishedProjectSnapshot(projectId) !== undefined;
+  if (stillPublished) return null;
+  const result = await purgeProjectLocalData(projectId);
+  clearDirtyIntent(projectId);
   return result;
 }

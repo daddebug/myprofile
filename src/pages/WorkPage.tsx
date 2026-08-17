@@ -1,5 +1,5 @@
-import { useState, type DragEvent } from "react";
-import { AlertTriangle, ArrowDown, ArrowRight, ArrowUp, Copy, Edit3, Eye, EyeOff, FilePlus2, GripVertical, Pencil, Save, Star, Trash2, X } from "lucide-react";
+import { useEffect, useState, type DragEvent } from "react";
+import { AlertTriangle, ArrowDown, ArrowRight, ArrowUp, Copy, Edit3, Eye, EyeOff, FilePlus2, GripVertical, Pencil, RotateCcw, Save, Star, Trash2, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PageTransition } from "../components/PageTransition";
 import { ProjectCoverEditor } from "../components/ProjectCoverEditor";
@@ -7,7 +7,8 @@ import { NewProjectWizard, ProjectInfoEditor } from "../components/ProjectManage
 import { useProjectCatalog } from "../hooks/useProjectCatalog";
 import { createDynamicProject, setProjectArchiveOrder, setProjectFeatured, setProjectPublicMetaOverride, type ProjectCatalogItem, type ResolvedProjectMetadata } from "../lib/projectMetadata";
 import { createStableId, getProjectDocument, saveProjectDocument } from "../lib/projectDocuments";
-import { deletePortfolioProject } from "../lib/deletePortfolioProject";
+import { finalizeProjectDeletion, markProjectPendingDeletion, undoProjectPendingDeletion } from "../lib/deletePortfolioProject";
+import { useDirtyIntents } from "../lib/dirtyIntentStore";
 import { useLocale } from "../locales/LocaleContext";
 import { useOwnerMode } from "../hooks/useOwnerMode";
 
@@ -27,9 +28,12 @@ const archiveCopy = {
     cancel: "取消",
     comingSoon: "筹备中",
     deleteProject: "删除项目",
-    deleteTitle: "永久删除项目？",
-    deleteBody: (title: string) => `将永久删除「${title}」及其页面内容、草稿和项目专属资源。此操作无法撤销。`,
-    deleteConfirm: "永久删除",
+    deleteTitle: "删除项目？",
+    deleteBody: (title: string) => `「${title}」将从档案中隐藏，并在下次发布时从生产环境移除。本地草稿、资源仍会保留，可在发布完成前随时撤销。`,
+    deleteConfirm: "删除",
+    pendingDeletionTitle: "待删除项目",
+    pendingDeletionHelp: "已标记删除，尚未发布。发布成功前可以撤销；本地数据尚未被清除。",
+    undoDelete: "撤销删除",
   },
   en: {
     eyebrow: "/ Archive",
@@ -46,9 +50,12 @@ const archiveCopy = {
     cancel: "Cancel",
     comingSoon: "Coming soon",
     deleteProject: "Delete project",
-    deleteTitle: "Permanently delete this project?",
-    deleteBody: (title: string) => `"${title}" and its page content, drafts, and project-owned assets will be permanently deleted. This cannot be undone.`,
-    deleteConfirm: "Delete permanently",
+    deleteTitle: "Delete this project?",
+    deleteBody: (title: string) => `"${title}" will be hidden from the archive and removed from production on the next publish. Local drafts and assets are kept, and this can be undone any time before that publish completes.`,
+    deleteConfirm: "Delete",
+    pendingDeletionTitle: "Pending deletion",
+    pendingDeletionHelp: "Marked for deletion but not yet published. You can undo any time before that publish completes — local data has not been cleared.",
+    undoDelete: "Undo delete",
   },
 };
 
@@ -64,14 +71,55 @@ export function WorkPage() {
   const [managementPanel, setManagementPanel] = useState<"new" | null>(null);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const copy = archiveCopy[locale];
-  const fullArchive = [...projectCatalog].sort((left, right) => left.archiveOrder - right.archiveOrder);
+
+  // Two-phase deletion (Publishing Architecture V2, Deletion Transaction
+  // Model): a project with an open DELETE dirty intent is filtered out of
+  // every list below -- "deleted" in the UI, but its local data (draft,
+  // assets, cover, catalog override) is untouched until finalizeProjectDeletion()
+  // confirms the delete actually published. useDirtyIntents is live-reactive,
+  // so undoing a pending deletion (or a finalize completing) updates these
+  // lists immediately without a page reload.
+  const pendingDeletionIds = new Set(
+    useDirtyIntents("project").filter((entry) => entry.kind === "DELETE").map((entry) => entry.entityId),
+  );
+  const pendingDeletionProjects = projectCatalog.filter((project) => pendingDeletionIds.has(project.id));
+
+  useEffect(() => {
+    for (const id of pendingDeletionIds) {
+      finalizeProjectDeletion(id).catch(() => undefined);
+    }
+    // Only re-run when the SET of pending-deletion ids actually changes membership,
+    // not on every unrelated catalog re-render -- otherwise this would refire on
+    // every keystroke elsewhere in the app.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [[...pendingDeletionIds].sort().join(",")]);
+
+  const fullArchive = [...projectCatalog]
+    .filter((project) => !pendingDeletionIds.has(project.id))
+    .sort((left, right) => left.archiveOrder - right.archiveOrder);
   const managedProjects = fullArchive.filter((project) => project.group === "work");
   const orderedProjects = managedProjects.filter(
     (project) => project.group === "work" && project.visibility === "public",
   );
   const projectsById = new Map(managedProjects.map((project) => [project.id, project]));
+
+  // Undo needs to restore a project's visibility WITHIN an already-open
+  // "编辑排序" session too, not just after re-entering it: deleting removes
+  // the id from `draftOrder` immediately (see confirmDelete), so undoing the
+  // DELETE intent alone leaves it absent from the local editing session's
+  // order array even though managedProjects/pendingDeletionIds already have
+  // it back. Re-append any managedProjects id that's missing from the
+  // in-progress draftOrder whenever the pending-deletion set changes.
+  useEffect(() => {
+    if (!isEditingOrder) return;
+    setDraftOrder((current) => {
+      const currentSet = new Set(current);
+      const missing = managedProjects.filter((project) => !currentSet.has(project.id)).map((project) => project.id);
+      return missing.length ? [...current, ...missing] : current;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditingOrder, [...pendingDeletionIds].sort().join(",")]);
   const draftProjects = draftOrder
     .map((projectId) => projectsById.get(projectId))
     .filter((project): project is ResolvedProjectMetadata => Boolean(project));
@@ -135,19 +183,17 @@ export function WorkPage() {
     setDraggedProjectId(null);
   };
 
-  const confirmDelete = async () => {
+  const confirmDelete = () => {
     if (!deleteTargetId) return;
-    setIsDeleting(true);
-    try {
-      await deletePortfolioProject(deleteTargetId);
-      setDraftOrder((current) => current.filter((id) => id !== deleteTargetId));
-      setDraftFeatured((current) => { const { [deleteTargetId]: _removed, ...rest } = current; return rest; });
-      setDraftVisibility((current) => { const { [deleteTargetId]: _removed, ...rest } = current; return rest; });
-      if (editingProjectId === deleteTargetId) setEditingProjectId(null);
-      setDeleteTargetId(null);
-    } finally {
-      setIsDeleting(false);
-    }
+    // Phase 1 only: opens a DELETE dirty intent and lets the filters above
+    // hide the project. No local data is touched here -- see
+    // deletePortfolioProject.ts's Deletion Transaction Model.
+    markProjectPendingDeletion(deleteTargetId);
+    setDraftOrder((current) => current.filter((id) => id !== deleteTargetId));
+    setDraftFeatured((current) => { const { [deleteTargetId]: _removed, ...rest } = current; return rest; });
+    setDraftVisibility((current) => { const { [deleteTargetId]: _removed, ...rest } = current; return rest; });
+    if (editingProjectId === deleteTargetId) setEditingProjectId(null);
+    setDeleteTargetId(null);
   };
 
   return (
@@ -166,10 +212,33 @@ export function WorkPage() {
           <DeleteProjectConfirm
             title={deleteTarget.title}
             copy={copy}
-            isDeleting={isDeleting}
             onCancel={() => setDeleteTargetId(null)}
             onConfirm={confirmDelete}
           />
+        ) : null}
+
+        {import.meta.env.DEV && pendingDeletionProjects.length > 0 ? (
+          <section className="border-b border-peach/25 bg-peach/[0.06] py-6" data-work-pending-deletions>
+            <div className="site-container">
+              <h2 className="font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-peach">{copy.pendingDeletionTitle}</h2>
+              <p className="mt-1.5 max-w-2xl text-xs leading-5 text-softWhite/56">{copy.pendingDeletionHelp}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {pendingDeletionProjects.map((project) => (
+                  <div key={project.id} className="flex items-center gap-2 rounded-full border border-peach/30 bg-deepIndigo/60 py-1.5 pl-4 pr-2 text-xs text-softWhite/72">
+                    <span className="truncate">{project.title}</span>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 rounded-full border border-acidGreen/50 px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.08em] text-acidGreen transition hover:bg-acidGreen/12"
+                      onClick={() => undoProjectPendingDeletion(project.id)}
+                    >
+                      <RotateCcw className="h-3 w-3" aria-hidden="true" />
+                      {copy.undoDelete}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
         ) : null}
 
         <section className="border-b border-softWhite/10 py-16 md:py-20">
@@ -352,10 +421,9 @@ function duplicateManagedProject(project: ResolvedProjectMetadata, catalog: Reso
   createDynamicProject(record);
 }
 
-function DeleteProjectConfirm({ title, copy, isDeleting, onCancel, onConfirm }: {
+function DeleteProjectConfirm({ title, copy, onCancel, onConfirm }: {
   title: string;
   copy: typeof archiveCopy["zh"];
-  isDeleting: boolean;
   onCancel: () => void;
   onConfirm: () => void;
 }) {
@@ -370,20 +438,18 @@ function DeleteProjectConfirm({ title, copy, isDeleting, onCancel, onConfirm }: 
         <div className="mt-6 flex justify-end gap-2">
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-full border border-softWhite/16 px-4 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-softWhite/64 transition hover:border-softWhite/40 hover:text-softWhite disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-full border border-softWhite/16 px-4 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-softWhite/64 transition hover:border-softWhite/40 hover:text-softWhite"
             onClick={onCancel}
-            disabled={isDeleting}
           >
             {copy.cancel}
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-full border border-peach bg-peach/12 px-4 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-peach transition hover:bg-peach hover:text-deepIndigo disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-full border border-peach bg-peach/12 px-4 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-peach transition hover:bg-peach hover:text-deepIndigo"
             onClick={onConfirm}
-            disabled={isDeleting}
           >
             <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-            {isDeleting ? "..." : copy.deleteConfirm}
+            {copy.deleteConfirm}
           </button>
         </div>
       </div>

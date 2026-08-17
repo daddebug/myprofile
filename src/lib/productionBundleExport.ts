@@ -7,6 +7,7 @@ import { getProjectCollectionExportStore } from "./projectMetadata";
 import uiPracticeMetadata from "../data/uiPracticeMetadata.json";
 import { getPublishSourceAdapter, publishSourceRegistry } from "./publishing/publishSourceRegistry";
 import { getDiskProjectCover, getDiskPlayableGameCover } from "./portfolioContentClient";
+import { getPublishedProjectDraft } from "./publishedPortfolio";
 
 type ExportedImage = {
   sourceAdapterId: string;
@@ -131,6 +132,31 @@ async function fetchDiskPlayableGameCover(projectId: string, coverId: string, pu
   };
 }
 
+// game-experience-covers: normally sourced from the game-cover IndexedDB
+// blob a fresh upload/edit creates (see gameCoverDb.ts). Once a cover has
+// already been published, useGameCover() (src/hooks/useGameCover.ts) falls
+// back to presentation.coverPublicPath instead of re-reading IndexedDB, so
+// the live site renders correctly even from a browser whose IndexedDB blob
+// for that cover was never (re-)populated since the last publish - the
+// export must not block on a blob that was never meant to persist past its
+// own publish cycle when the already-published file is right there.
+async function fetchAlreadyPublishedGameCover(coverAssetId: string, coverPublicPath: string): Promise<ExportedImage> {
+  const response = await fetch(coverPublicPath, { credentials: "same-origin", cache: "no-store" });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const blob = await response.blob();
+  const fileName = coverPublicPath.split("/").pop() || `${coverAssetId}.bin`;
+  return {
+    sourceAdapterId: "game-experience-covers",
+    database: "disk",
+    store: "published-game-covers",
+    id: coverAssetId,
+    fileName,
+    mimeType: blob.type || "application/octet-stream",
+    size: blob.size,
+    dataBase64: bytesToBase64(await blob.arrayBuffer()),
+  };
+}
+
 function parseStoredJson(key: string): unknown {
   const raw = window.localStorage.getItem(key);
   if (!raw) return undefined;
@@ -228,6 +254,30 @@ function downloadJson(value: unknown) {
   URL.revokeObjectURL(url);
 }
 
+async function deliverLauncherExport(value: unknown, requestToken: string) {
+  const response = await fetch(
+    `/__portfolio-content/publishing-export/complete?token=${encodeURIComponent(requestToken)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: `${JSON.stringify(value, null, 2)}\n`,
+    },
+  );
+  const result = await response.json().catch(() => null) as { error?: string } | null;
+  if (!response.ok) throw new Error(result?.error || `Launcher export delivery failed (HTTP ${response.status}).`);
+}
+
+export async function reportLauncherExportFailure(requestToken: string, error: unknown) {
+  await fetch(
+    `/__portfolio-content/publishing-export/fail?token=${encodeURIComponent(requestToken)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+    },
+  ).catch(() => undefined);
+}
+
 export type ProductionExportSummary = {
   draftCount: number;
   imageCount: number;
@@ -248,7 +298,16 @@ function readDynamicProjectDraft(projectId: string, warnings: string[]): unknown
   const key = dynamicProjectDraftStorageKey(projectId);
   const raw = window.localStorage.getItem(key);
   if (!raw) {
-    warnings.push(`${projectId}: no draft found at "${key}".`);
+    // Absence here is never "delete this project's body" — it only means
+    // this browser session has no pending edit. The publish pipeline
+    // inherits the currently-published body for this project when the
+    // export doesn't carry one (see import-production-bundle.mjs), so this
+    // warning must not read as "publish data is incomplete."
+    warnings.push(
+      getPublishedProjectDraft(projectId) !== undefined
+        ? `${projectId}: no local edit draft found; current published body will be inherited.`
+        : `${projectId}: no local or published project body found.`,
+    );
     return undefined;
   }
 
@@ -278,7 +337,7 @@ function readDynamicProjectDraft(projectId: string, warnings: string[]): unknown
   return parsed;
 }
 
-export async function exportProductionBundle(): Promise<ProductionExportSummary> {
+export async function exportProductionBundle(options?: { launcherRequestToken?: string }): Promise<ProductionExportSummary> {
   const drafts: Record<string, unknown> = {};
   const images: ExportedImage[] = [];
   const missingReferences: string[] = [];
@@ -422,12 +481,44 @@ export async function exportProductionBundle(): Promise<ProductionExportSummary>
     record.presentation.coverAssetId,
     record.presentation.detectedCoverAssetId,
   ].filter((id): id is string => Boolean(id))));
+  // A cover id can be referenced by coverAssetId and/or detectedCoverAssetId;
+  // either way it shares the same record's coverPublicPath, which is what
+  // the already-published fallback below needs.
+  const publishedPathByCoverId = new Map<string, string>();
+  for (const record of gameExperience.records) {
+    const path = record.presentation.coverPublicPath;
+    if (!path) continue;
+    if (record.presentation.coverAssetId) publishedPathByCoverId.set(record.presentation.coverAssetId, path);
+    if (record.presentation.detectedCoverAssetId) publishedPathByCoverId.set(record.presentation.detectedCoverAssetId, path);
+  }
   const gameCoverRecords = await readStore(GAME_COVER_DB_NAME, GAME_COVER_STORE_NAME);
   const gameCoverRecordsById = new Map(gameCoverRecords.map((record) => [typeof record.id === "string" ? record.id : "", record]));
+  const publishedGameCoverPrefix = "/images/published/game-covers/";
   for (const id of gameCoverIds) {
     const record = gameCoverRecordsById.get(id);
-    if (!record) { missingReferences.push(`game-cover: ${id}`); continue; }
-    images.push(await serializeImage("game-experience-covers", GAME_COVER_DB_NAME, GAME_COVER_STORE_NAME, record));
+    if (record) {
+      images.push(await serializeImage("game-experience-covers", GAME_COVER_DB_NAME, GAME_COVER_STORE_NAME, record));
+      continue;
+    }
+    // Not in the local blob store - only reuse an already-published file
+    // when its path is the exact canonical published path for THIS asset
+    // id (never a stale or unrelated coverPublicPath), so a genuinely
+    // missing cover still fails loudly instead of silently substituting
+    // the wrong image.
+    const publicPath = publishedPathByCoverId.get(id);
+    const isCanonicalPublishedPath = typeof publicPath === "string"
+      && publicPath.startsWith(publishedGameCoverPrefix)
+      && publicPath.slice(publishedGameCoverPrefix.length).replace(/\.[^./]+$/, "") === id;
+    if (isCanonicalPublishedPath) {
+      try {
+        images.push(await fetchAlreadyPublishedGameCover(id, publicPath!));
+        continue;
+      } catch (error) {
+        missingReferences.push(`game-cover: ${id} (already-published fetch failed: ${error instanceof Error ? error.message : String(error)})`);
+        continue;
+      }
+    }
+    missingReferences.push(`game-cover: ${id}`);
   }
 
   const bundle = {
@@ -449,6 +540,10 @@ export async function exportProductionBundle(): Promise<ProductionExportSummary>
     },
   };
 
-  downloadJson(bundle);
+  if (options?.launcherRequestToken) {
+    await deliverLauncherExport(bundle, options.launcherRequestToken);
+  } else {
+    downloadJson(bundle);
+  }
   return { draftCount: Object.keys(drafts).length, imageCount: images.length, missingReferences, dynamicProjectWarnings };
 }
