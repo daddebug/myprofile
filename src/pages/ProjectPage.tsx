@@ -120,7 +120,7 @@ function ProjectRouteShellFrame() {
     // rather than continuing to block — well inside the server's 20s
     // "ready" step timeout, so a bad image can never eat the whole budget.
     const IMAGE_GRACE_MS = 9_000;
-    const SPECIAL_MEDIA_SELECTOR = "[data-playable-game], [data-figma-prototype-interactive], [data-figma-prototype-print]";
+    const SPECIAL_MEDIA_SELECTOR = "[data-playable-game]";
 
     const normalImages = () => Array.from(root.querySelectorAll("img")).filter((image) => !image.closest(SPECIAL_MEDIA_SELECTOR));
 
@@ -142,7 +142,7 @@ function ProjectRouteShellFrame() {
         iframeCount: root.querySelectorAll("iframe").length,
         videoCount: root.querySelectorAll("video").length,
         playableGameCount: root.querySelectorAll("[data-playable-game]").length,
-        figmaPrototypeCount: root.querySelectorAll("[data-figma-prototype-interactive]").length,
+        figmaPrototypeCount: root.querySelectorAll("[data-figma-prototype-block], [data-figma-prototype-frame]").length,
         ...extra,
       };
       root.setAttribute("data-project-export-diagnostics", JSON.stringify(diagnostics));
@@ -232,6 +232,29 @@ function ProjectRouteShellFrame() {
   );
 }
 
+// The canonical "real content has committed" signal, distinct from
+// data-disk-read-complete (which only means the project JSON fetch
+// finished, not that the content it feeds - possibly behind a
+// lazy()/Suspense boundary rendering fallback={null} in the meantime - has
+// actually mounted). Rendered as a sibling of the real content in every
+// ProjectPageContent branch below, including inside each Suspense boundary:
+// a non-suspending sibling still only commits once its Suspense boundary as
+// a whole resolves, so this effect firing is proof the real content around
+// it, not just the shell, is now in the DOM. Static HTML export
+// (portfolioStaticHtmlExport.ts) waits on this exact attribute before
+// cloning - never on disk-read-complete, elapsed time, or stable height
+// alone. See the permanent rule in skills/static-html-export/SKILL.md.
+function ProjectContentReadySignal() {
+  useEffect(() => {
+    const shell = document.querySelector("[data-project-route-shell]");
+    shell?.setAttribute("data-project-content-ready", "true");
+    return () => {
+      shell?.setAttribute("data-project-content-ready", "false");
+    };
+  }, []);
+  return null;
+}
+
 function ProjectPageContent({ projectId }: { projectId: string }) {
   const { locale, messages, pathFor } = useLocale();
   const { isEditing } = useCaseStudyEditor();
@@ -244,7 +267,13 @@ function ProjectPageContent({ projectId }: { projectId: string }) {
     let active = true;
     setDiskDocument(null);
     setDiskReadComplete(!import.meta.env.DEV);
-    document.querySelector("[data-project-route-shell]")?.setAttribute("data-disk-read-complete", String(!import.meta.env.DEV));
+    const shell = document.querySelector("[data-project-route-shell]");
+    shell?.setAttribute("data-disk-read-complete", String(!import.meta.env.DEV));
+    // A fresh project must never keep showing the PREVIOUS project's
+    // "content ready" state while its own content is still loading -
+    // ProjectContentReadySignal will flip this back to "true" once real
+    // content for THIS projectId actually commits.
+    shell?.setAttribute("data-project-content-ready", "false");
     if (!import.meta.env.DEV) return () => { active = false; };
     getDiskProjectBodyDocument<ProjectDocument>(projectId)
       .then((record) => { if (active) setDiskDocument(record?.document ?? null); })
@@ -279,9 +308,10 @@ function ProjectPageContent({ projectId }: { projectId: string }) {
     // public (non-editing) English visitors, matching the exact behaviour
     // the bespoke pages already had for incomplete translations.
     if (locale === "en" && !isEditing && translationStatus === "unavailable") {
-      return <EnglishProjectPlaceholder slug={projectId} />;
+      return <><ProjectContentReadySignal /><EnglishProjectPlaceholder slug={projectId} /></>;
     }
     return <Suspense fallback={null}>
+      <ProjectContentReadySignal />
       {locale === "en" && !isEditing && translationStatus === "partial" ? (
         <p className="site-container pt-8 text-sm text-softWhite/50">{messages.project.chineseAvailable}</p>
       ) : null}
@@ -293,7 +323,7 @@ function ProjectPageContent({ projectId }: { projectId: string }) {
   // yet is a blank project waiting to be built with the current 9-template
   // system — it never falls through to the legacy bespoke/static renderers.
   if (publicMetadata?.isDynamic) {
-    return <Suspense fallback={null}><DynamicProjectPage projectId={projectId} metadata={publicMetadata} /></Suspense>;
+    return <Suspense fallback={null}><ProjectContentReadySignal /><DynamicProjectPage projectId={projectId} metadata={publicMetadata} /></Suspense>;
   }
 
   if (
@@ -302,10 +332,10 @@ function ProjectPageContent({ projectId }: { projectId: string }) {
     && !projectsWithCompleteCustomEnglishContent.has(projectId)
     && getProjectTranslation(projectId, "en")?.status !== "complete"
   ) {
-    return <EnglishProjectPlaceholder slug={projectId} />;
+    return <><ProjectContentReadySignal /><EnglishProjectPlaceholder slug={projectId} /></>;
   }
 
-  if (CustomProjectContent) return <Suspense fallback={null}><CustomProjectContent /></Suspense>;
+  if (CustomProjectContent) return <Suspense fallback={null}><ProjectContentReadySignal /><CustomProjectContent /></Suspense>;
 
   const project = getProjectBySlug(projectId);
 
@@ -323,6 +353,7 @@ function ProjectPageContent({ projectId }: { projectId: string }) {
 
   return (
     <PageTransition>
+      <ProjectContentReadySignal />
       <article className="bg-deepIndigo text-softWhite">
         <section className="relative overflow-hidden bg-deepIndigo">
           <div className="absolute inset-0 bg-grain bg-[length:18px_18px] opacity-35" />

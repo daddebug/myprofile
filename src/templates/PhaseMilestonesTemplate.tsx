@@ -15,8 +15,6 @@ import type {
   TemplateMeta,
   TemplateProps,
 } from "../lib/templateLibrary";
-import { isCollectionExportCapture } from "../lib/collectionExportStaging";
-import { recordTemplateFit } from "../lib/collectionMediaDiagnostics";
 
 export const layoutControls = {
   emphasisMode: "custom",
@@ -231,41 +229,15 @@ export default function PhaseMilestonesTemplate({
   const reducedMotionRef = useRef(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
-  const trackRef = useRef<HTMLDivElement | null>(null);
 
-  // Collection export only: with more than 6 milestones the track relies on
-  // the live site's horizontal-scroll affordance (isScrollable above) — a
-  // one-shot PDF capture can't scroll, so nodes past the visible edge would
-  // otherwise be clipped (confirmed: a real export failed with "phase-
-  // milestones ... overflow=170px"). Scale only the track itself (not the
-  // heading or the whole template instance) down to fit its available
-  // width, exactly the same fitScale math as process-flow's own dedicated
-  // fix, and disable the scroll affordance so nothing sits off-screen.
-  useEffect(() => {
-    if (!isCollectionExportCapture()) return;
-    const viewport = scrollRef.current;
-    const track = trackRef.current;
-    if (!viewport || !track) return;
-    viewport.scrollLeft = 0;
-    track.style.zoom = "1";
-    const availableWidth = viewport.clientWidth;
-    const naturalTrackWidth = track.scrollWidth;
-    const fitScale = availableWidth > 0 && naturalTrackWidth > availableWidth
-      ? Math.min(1, availableWidth / naturalTrackWidth)
-      : 1;
-    if (fitScale < 1) track.style.zoom = String(fitScale);
-    const trackRect = track.getBoundingClientRect();
-    const viewportRect = viewport.getBoundingClientRect();
-    const overflowAfterFit = Math.max(0, Math.round(trackRect.right - viewportRect.right));
-    recordTemplateFit({
-      templateInstanceId: `phase-milestones-track:${localizedValue(content.heading as LocalizedText | undefined, locale) || "untitled"}`,
-      templateId: "phase-milestones",
-      naturalWidth: naturalTrackWidth,
-      availableWidth,
-      fitScale,
-      overflowAfterFit,
-    });
-  }, [content.heading, locale, isScrollable, items.length]);
+  // The horizontal-scroll track (isScrollable above, >6 milestones) is
+  // handled by the canonical exact-web exporter's own generic horizontal-
+  // row scaling (markHorizontalExportRows/horizontalExportLayoutScript in
+  // src/components/ProjectExactWebExportAction.tsx and
+  // scripts/exactWebExportPlugin.ts) for BOTH the single-project button and
+  // Portfolio Collection — this template no longer runs its own Collection-
+  // only zoom/centering pass. See docs/PDF_EXPORT_ARCHITECTURE.md's
+  // canonical-renderer rule.
 
   const gapRem =
     nodeGapRem[
@@ -486,8 +458,7 @@ export default function PhaseMilestonesTemplate({
                   locale === "zh" ? "阶段节点轨道" : "Phase milestone track"
                 }
                 tabIndex={0}
-                className="timeline-scroll overflow-x-auto overscroll-x-contain outline-none focus-visible:ring-1 focus-visible:ring-acidGreen/50 data-[collection-export]:flex data-[collection-export]:justify-center data-[collection-export]:overflow-visible"
-                data-collection-export={isCollectionExportCapture() ? "true" : undefined}
+                className="timeline-scroll overflow-x-auto overscroll-x-contain outline-none focus-visible:ring-1 focus-visible:ring-acidGreen/50"
                 onScroll={updateScrollHints}
                 onKeyDown={handleKeyDown}
                 onPointerMove={handlePointerMove}
@@ -507,9 +478,8 @@ export default function PhaseMilestonesTemplate({
                 }}
               >
                 <div
-                  ref={trackRef}
                   className="relative grid w-max grid-flow-col auto-cols-[190px] px-3 pb-2 pt-1"
-                  style={{ columnGap: `${gapRem}rem`, marginInline: isCollectionExportCapture() ? "auto" : undefined }}
+                  style={{ columnGap: `${gapRem}rem` }}
                 >
                   <span
                     aria-hidden="true"

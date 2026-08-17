@@ -49,6 +49,7 @@ function AlbumGameCard({ game, locale, index, prefersReducedMotion }: { game: Ga
   const cover = useGameCover(game.presentation.coverAssetId, game.presentation.coverPublicPath);
   const selectedIds = game.presentation.homepageTagIds ?? [];
   const tags = selectedIds.map((id) => game.presentation.tags.find((tag) => tag.id === id)).filter(Boolean).map((tag) => locale === "zh" ? tag!.zh || tag!.en : tag!.en || tag!.zh).filter(Boolean).slice(0, 4);
+  const playtime = formatPlaytime(game, locale);
   return <motion.article
     className={`relative -ml-3 h-[218px] w-[164px] shrink-0 overflow-hidden rounded-lg border border-softWhite/10 bg-[#182252] shadow-[0_18px_42px_rgba(3,7,30,0.32)] first:ml-0 md:absolute md:h-[244px] md:w-[184px] ${albumPositions[index] ?? albumPositions[albumPositions.length - 1]}`}
     style={{ marginTop: index % 2 === 0 ? 22 : 0, rotate: albumRotations[index] ?? 0 }}
@@ -59,7 +60,7 @@ function AlbumGameCard({ game, locale, index, prefersReducedMotion }: { game: Ga
     <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,13,48,0.08)_18%,rgba(9,13,48,0.88)_78%,rgba(9,13,48,0.98))]" aria-hidden="true" />
     <div className="relative flex h-full flex-col justify-end p-4">
       <h3 className="font-display text-lg font-semibold leading-tight text-softWhite md:text-xl">{title}</h3>
-      <p className="mt-1.5 font-mono text-[10px] text-acidGreen/90">{formatPlaytime(game, locale)}</p>
+      {playtime ? <p className="mt-1.5 font-mono text-[10px] text-acidGreen/90">{playtime}</p> : null}
       {tags.length ? <div className="mt-2 flex flex-wrap gap-1">{tags.map((tag) => <span key={tag} className="rounded bg-deepIndigo/68 px-1.5 py-0.5 text-[9px] leading-4 text-softWhite/66">{tag}</span>)}</div> : null}
     </div>
   </motion.article>;

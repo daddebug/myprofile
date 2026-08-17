@@ -656,18 +656,6 @@ a {
   }
 }
 
-/* Figma prototype blocks must never print their live cross-origin iframe,
-   regardless of how printing was triggered — swap to the poster + link. */
-@media print {
-  [data-figma-prototype-interactive] {
-    display: none !important;
-  }
-
-  [data-figma-prototype-print] {
-    display: block !important;
-  }
-}
-
 /* Portfolio Collection export only (html[data-collection-export-capture],
    set by ProjectPage.tsx's readiness effect only when isCollectionExportCapture()
    is true — never present on the normal site or for the owner). The

@@ -18,7 +18,7 @@ type ResolvedHomeProjectCard = FeaturedProjectCardItem & { projectId: string };
 // moves the scroll position — the two are the same number by construction,
 // which is what makes the clone buffer exactly wide enough for one click's
 // worth of travel before a reset is needed.
-const VISIBLE_COUNT = 3;
+export const VISIBLE_COUNT = 3;
 
 type CarouselSlide = {
   project: ResolvedHomeProjectCard;
@@ -78,7 +78,11 @@ export function HomePage() {
       .sort((left, right) => left.archiveOrder - right.archiveOrder)
       .map(resolveHomeProjectCard);
   }, [projectCatalog]);
-  const hasMultipleGroups = homeProjects.length > 3;
+  // Real pagination state, not a hardcoded "3 projects" check: with
+  // VISIBLE_COUNT cards shown per page, there is another page to navigate to
+  // only once the catalog needs more than one page to hold every card.
+  const totalPages = Math.ceil(homeProjects.length / VISIBLE_COUNT) || 1;
+  const hasMultipleGroups = totalPages > 1;
   // Clone the last/first VISIBLE_COUNT real cards onto the opposite ends of
   // the rail so scrolling one click past either real boundary lands on a
   // card that looks identical to where a silent, unanimated reset will put
@@ -172,15 +176,15 @@ export function HomePage() {
             </h2>
           </div>
 
-          <div className="xl:grid xl:grid-cols-[6.5rem_minmax(0,1fr)_6.5rem] xl:items-center xl:gap-2">
-            <div className="hidden justify-self-stretch xl:block">
-              <ProjectGroupButton
-                direction="previous"
-                label={previousGroupLabel}
-                disabled={!hasMultipleGroups}
-                onClick={() => showProjectGroup("previous")}
-              />
-            </div>
+          <div
+            className={hasMultipleGroups ? "xl:grid xl:grid-cols-[6.5rem_minmax(0,1fr)_6.5rem] xl:items-center xl:gap-2" : ""}
+            data-carousel-nav-grid
+          >
+            {hasMultipleGroups ? (
+              <div className="hidden justify-self-stretch xl:block" data-carousel-nav="previous">
+                <ProjectGroupButton direction="previous" label={previousGroupLabel} onClick={() => showProjectGroup("previous")} />
+              </div>
+            ) : null}
 
             <div className="min-w-0">
               <div
@@ -228,21 +232,18 @@ export function HomePage() {
               ) : null}
             </div>
 
-            <div className="hidden justify-self-stretch xl:block">
-              <ProjectGroupButton
-                direction="next"
-                label={nextGroupLabel}
-                disabled={!hasMultipleGroups}
-                onClick={() => showProjectGroup("next")}
-              />
-            </div>
+            {hasMultipleGroups ? (
+              <div className="hidden justify-self-stretch xl:block" data-carousel-nav="next">
+                <ProjectGroupButton direction="next" label={nextGroupLabel} onClick={() => showProjectGroup("next")} />
+              </div>
+            ) : null}
           </div>
         </div>
       </section>
 
-      <section className="flex min-h-[82vh] flex-col items-center justify-center bg-deepIndigo px-4 pb-32 pt-20 text-softWhite md:min-h-[88vh] md:px-6 md:pb-40 md:pt-24">
+      <section id="home-play-experience" className="flex min-h-[82vh] flex-col items-center justify-center bg-deepIndigo px-4 pb-32 pt-20 text-softWhite md:min-h-[88vh] md:px-6 md:pb-40 md:pt-24">
         <motion.p
-          className="max-w-5xl text-center font-display text-[clamp(2.25rem,5vw,5.9rem)] leading-[1.02] text-softWhite/86"
+          className="max-w-5xl text-center font-display text-[clamp(2.25rem,5vw,5.9rem)] leading-[1.02] text-softWhite/86 md:max-w-[1280px] md:text-[clamp(3rem,3.6vw,4.75rem)] md:leading-[1.1]"
           initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.45 }}
@@ -282,12 +283,10 @@ export function HomePage() {
 function ProjectGroupButton({
   direction,
   label,
-  disabled,
   onClick,
 }: {
   direction: "previous" | "next";
   label: string;
-  disabled: boolean;
   onClick: () => void;
 }) {
   const isPrevious = direction === "previous";
@@ -296,20 +295,15 @@ function ProjectGroupButton({
   return (
     <button
       type="button"
-      className={`group grid h-24 w-full place-items-center border-0 bg-transparent text-softWhite/62 shadow-none transition-colors duration-200 focus:outline-none focus-visible:text-softWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-softWhite/70 sm:h-32 lg:h-40 ${
-        disabled ? "cursor-not-allowed opacity-20" : "hover:text-softWhite"
-      }`}
+      className="group grid h-24 w-full place-items-center border-0 bg-transparent text-softWhite/62 shadow-none transition-colors duration-200 hover:text-softWhite focus:outline-none focus-visible:text-softWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-softWhite/70 sm:h-32 lg:h-40"
       onClick={onClick}
-      disabled={disabled}
       aria-label={label}
     >
       <Icon
         className={`h-20 w-11 stroke-[2.6] transition-transform duration-200 motion-reduce:transform-none motion-reduce:transition-none sm:h-24 sm:w-14 lg:h-32 lg:w-20 ${
-          disabled
-            ? ""
-            : isPrevious
-              ? "group-hover:-translate-x-1 group-hover:scale-105 group-focus-visible:-translate-x-1 group-focus-visible:scale-105"
-              : "group-hover:translate-x-1 group-hover:scale-105 group-focus-visible:translate-x-1 group-focus-visible:scale-105"
+          isPrevious
+            ? "group-hover:-translate-x-1 group-hover:scale-105 group-focus-visible:-translate-x-1 group-focus-visible:scale-105"
+            : "group-hover:translate-x-1 group-hover:scale-105 group-focus-visible:translate-x-1 group-focus-visible:scale-105"
         }`}
         aria-hidden="true"
       />

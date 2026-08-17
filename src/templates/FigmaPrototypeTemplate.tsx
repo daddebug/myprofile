@@ -10,7 +10,7 @@ import type {
   TemplateMeta,
   TemplateProps,
 } from "../lib/templateLibrary";
-import { isCollectionExportCapture, isWebsiteSliceExportCapture } from "../lib/collectionExportStaging";
+import { getPortfolioExportMode } from "../lib/portfolioExportMode";
 import { recordEmptySlotCollapsed, recordEmptySlotFound } from "../lib/collectionMediaDiagnostics";
 
 // How long to wait for the iframe's own `load` event before treating the
@@ -120,36 +120,33 @@ export default function FigmaPrototypeTemplate({ content, locale, horizontalInse
   // live embed happens to be showing instead. A slot with no publicPath at
   // all is genuinely empty; one with a publicPath that fails to load is a
   // real asset failure, tracked below via onError.
+  const [loadState, setLoadState] = useState<"idle" | "loading" | "loaded" | "failed">("idle");
   const [fallbackLoadFailed, setFallbackLoadFailed] = useState(false);
+  const hasEmbed = Boolean(embedUrl);
   const hasFallbackReference = Boolean(fallbackImage?.publicPath);
-  const figmaMediaSlotState = embedUrl ? "filled" : !hasFallbackReference ? "empty" : fallbackLoadFailed ? "failed" : "filled";
+  const exportMode = getPortfolioExportMode();
+  const artifactMode = exportMode !== "live";
+  const iframeFailed = hasEmbed && loadState === "failed";
+  const showIframe = !artifactMode && hasEmbed && !iframeFailed;
+  const showFallback = hasFallbackReference && (artifactMode || !hasEmbed || iframeFailed);
+  const figmaMediaSlotState = showIframe || (showFallback && !fallbackLoadFailed)
+    ? "filled"
+    : hasEmbed || hasFallbackReference
+      ? "failed"
+      : "empty";
   const figmaSlotId = `figma-prototype:${heading || "untitled"}`;
-  const captureMode = isCollectionExportCapture();
-  const suppressFigmaPlaceholder = figmaMediaSlotState === "empty" && captureMode;
+  const suppressFigmaPlaceholder = figmaMediaSlotState === "empty" && exportMode === "pdf";
   if (suppressFigmaPlaceholder) {
     recordEmptySlotFound(figmaSlotId);
     recordEmptySlotCollapsed(figmaSlotId);
   }
-  // Emergency website-slice export mode: page.pdf() cannot render a live
-  // cross-origin Figma iframe meaningfully (it prints blank or hangs), and
-  // this mode has no print-media CSS swap to fall back on. Never show the
-  // iframe here — use the static fallback image if one is configured,
-  // otherwise omit the whole media frame (zero height), matching a
-  // genuinely empty slot. Normal website/owner-mode rendering (this flag
-  // off) is completely unaffected.
-  const websiteSliceMode = isWebsiteSliceExportCapture();
-  const showIframe = Boolean(embedUrl) && !websiteSliceMode;
-  const websiteSliceFallbackSrc = websiteSliceMode && !embedUrl ? fallbackImage?.publicPath : undefined;
-  const suppressForWebsiteSlice = websiteSliceMode && embedUrl && !fallbackImage?.publicPath;
 
   // Tracks the iframe's own load outcome so the permission/starting-point
   // hint only shows for a genuine failure (never loaded within the
   // timeout) — never unconditionally, and never once `onLoad` has already
   // fired for the current embedUrl.
-  const [loadState, setLoadState] = useState<"idle" | "loading" | "loaded" | "failed">("idle");
-
   useEffect(() => {
-    if (!embedUrl) {
+    if (artifactMode || !embedUrl) {
       setLoadState("idle");
       return;
     }
@@ -158,7 +155,11 @@ export default function FigmaPrototypeTemplate({ content, locale, horizontalInse
       setLoadState((current) => (current === "loading" ? "failed" : current));
     }, LOAD_TIMEOUT_MS);
     return () => window.clearTimeout(timeoutId);
-  }, [embedUrl]);
+  }, [artifactMode, embedUrl]);
+
+  useEffect(() => {
+    setFallbackLoadFailed(false);
+  }, [fallbackImage?.publicPath]);
 
   return (
     <TemplateSurface>
@@ -181,12 +182,13 @@ export default function FigmaPrototypeTemplate({ content, locale, horizontalInse
             </h2>
           ) : null}
 
-          {suppressFigmaPlaceholder || suppressForWebsiteSlice ? null : (
+          {suppressFigmaPlaceholder ? null : (
           <div
             className="case-study-media-frame"
             style={{ marginTop: inlineEditor || heading ? headingGap : 0 }}
             data-media-slot-state={figmaMediaSlotState}
             data-media-slot-id={figmaSlotId}
+            data-figma-prototype-frame={hasFallbackReference ? "fallback" : "no-fallback"}
           >
             {showIframe ? (
               <iframe
@@ -194,25 +196,18 @@ export default function FigmaPrototypeTemplate({ content, locale, horizontalInse
                 src={embedUrl}
                 title={heading || "Figma prototype"}
                 className="absolute inset-0 h-full w-full border-0"
-                loading="lazy"
+                loading={artifactMode ? "eager" : "lazy"}
                 allowFullScreen
                 onLoad={() => setLoadState("loaded")}
+                onError={() => setLoadState("failed")}
               />
-            ) : websiteSliceMode ? (
-              websiteSliceFallbackSrc ? (
-                <img
-                  src={websiteSliceFallbackSrc}
-                  alt={heading || "Figma prototype fallback"}
-                  className="case-study-media-image"
-                  loading="lazy"
-                />
-              ) : null
-            ) : fallbackImage?.publicPath ? (
+            ) : showFallback && fallbackImage?.publicPath ? (
               <img
                 src={fallbackImage.publicPath}
                 alt={heading || "Figma prototype fallback"}
                 className="case-study-media-image"
-                loading="lazy"
+                loading={artifactMode ? "eager" : "lazy"}
+                data-figma-prototype-fallback
                 onError={() => setFallbackLoadFailed(true)}
               />
             ) : (
@@ -250,7 +245,7 @@ export default function FigmaPrototypeTemplate({ content, locale, horizontalInse
           </p>
         ) : null}
 
-        {loadState === "failed" && !websiteSliceMode ? (
+        {(iframeFailed || (artifactMode && hasEmbed)) && (!hasFallbackReference || fallbackLoadFailed) ? (
           <p className="mx-auto mt-3 max-w-md text-center text-xs leading-5 text-softWhite/40">
             {locale === "zh"
               ? "Figma 原型未能加载，请检查分享权限（Anyone with the link can view）和原型起点（Prototype Flow starting point）。"

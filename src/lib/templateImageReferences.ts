@@ -39,6 +39,67 @@ export type MinimalTemplateInstance = {
   content: Record<string, unknown>;
 };
 
+const TEMPLATE_IMAGE_IDENTITY_FIELDS = ["imageId", "localImageId"] as const;
+
+function collectPublishedPathsByIdentity(value: unknown, paths: Map<string, string>) {
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectPublishedPathsByIdentity(item, paths));
+    return;
+  }
+  if (!isPlainObject(value)) return;
+  const publicPath = typeof value.publicPath === "string" && value.publicPath.trim()
+    ? value.publicPath
+    : null;
+  if (publicPath) {
+    for (const field of TEMPLATE_IMAGE_IDENTITY_FIELDS) {
+      const identity = value[field];
+      if (typeof identity === "string" && identity) paths.set(`${field}:${identity}`, publicPath);
+    }
+  }
+  for (const nested of Object.values(value)) collectPublishedPathsByIdentity(nested, paths);
+}
+
+function backfillPublicPaths(value: unknown, paths: Map<string, string>): unknown {
+  if (Array.isArray(value)) return value.map((item) => backfillPublicPaths(item, paths));
+  if (!isPlainObject(value)) return value;
+  const next = Object.fromEntries(
+    Object.entries(value).map(([key, nested]) => [key, backfillPublicPaths(nested, paths)]),
+  );
+  if (typeof value.publicPath === "string" && value.publicPath.trim()) return next;
+  const matchingPaths = TEMPLATE_IMAGE_IDENTITY_FIELDS.flatMap((field) => {
+    const identity = value[field];
+    if (typeof identity !== "string" || !identity) return [];
+    const publicPath = paths.get(`${field}:${identity}`);
+    return publicPath ? [publicPath] : [];
+  });
+  if (matchingPaths.length > 0 && matchingPaths.every((path) => path === matchingPaths[0])) {
+    next.publicPath = matchingPaths[0];
+  }
+  return next;
+}
+
+// A legacy browser draft may retain a stable image identity while lacking
+// the canonical publicPath already present in the published copy of that
+// same template instance. Backfill only that missing path, only inside the
+// same instance/template, and only when the image identity matches exactly.
+// This is a read-time normalization: it never mutates either input.
+export function backfillMatchingTemplateImagePublicPaths<T extends MinimalTemplateInstance>(
+  draftInstances: T[],
+  publishedInstances: MinimalTemplateInstance[],
+): T[] {
+  const publishedByInstance = new Map(
+    publishedInstances.map((instance) => [`${instance.templateId}:${instance.instanceId}`, instance] as const),
+  );
+  return draftInstances.map((instance) => {
+    const published = publishedByInstance.get(`${instance.templateId}:${instance.instanceId}`);
+    if (!published) return instance;
+    const paths = new Map<string, string>();
+    collectPublishedPathsByIdentity(published.content, paths);
+    if (paths.size === 0) return instance;
+    return { ...instance, content: backfillPublicPaths(instance.content, paths) as Record<string, unknown> };
+  });
+}
+
 // Every field name any audited template (or the legacy DraftImage slot
 // shape) uses to reference an image. A raw-data object counts as an
 // "image reference" the moment it carries ANY of these, even if every
