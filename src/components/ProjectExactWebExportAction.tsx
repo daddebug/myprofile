@@ -5,7 +5,10 @@ import { useLocale } from "../locales/LocaleContext";
 
 type ExportState = "idle" | "preparing" | "exporting" | "done" | "error";
 export type ExactProjectHeader = "logo-project" | "logo-only" | "none";
-export type ExactSnapshotOptions = { header?: ExactProjectHeader; projectName?: string };
+export type ExactSnapshotOptions = {
+  header?: ExactProjectHeader;
+  projectName?: string;
+};
 export type ExactSnapshotDiagnostics = {
   projectId: string;
   route: string;
@@ -344,10 +347,19 @@ export async function buildExactSnapshotResult(options: ExactSnapshotOptions = {
     cloneRoot.prepend(header);
   }
 
+  // Captured here, at the moment the real page's own snapshot is built —
+  // this is "the current browser CSS viewport width" the export must
+  // reproduce (per the layout-fidelity investigation: Exact Web PDF used
+  // to hard-force 1440px, which silently diverged from whatever width the
+  // page was actually being viewed at, since the site is intentionally
+  // responsive). Never a physical-pixel/DPR concept — just the CSS
+  // viewport width every responsive rule in the live page is already
+  // resolving against right now.
+  const captureWidth = window.innerWidth;
   const exactCss = `
-    html, body { margin: 0; min-width: 1440px; width: 1440px; overflow: visible; background: #181743; }
+    html, body { margin: 0; min-width: ${captureWidth}px; width: ${captureWidth}px; overflow: visible; background: #181743; }
     body { min-height: 0; }
-    #root, [data-exact-web-export] { width: 1440px; min-width: 1440px; min-height: 0; overflow: visible; }
+    #root, [data-exact-web-export] { width: ${captureWidth}px; min-width: ${captureWidth}px; min-height: 0; overflow: visible; }
     [data-exact-web-export] > main,
     [data-exact-web-export] > div > main {
       opacity: 1 !important;
@@ -383,7 +395,7 @@ export async function buildExactSnapshotResult(options: ExactSnapshotOptions = {
     .exact-export-project-name { font: 650 16px/1.3 system-ui, sans-serif; color: rgba(244,245,250,.82); }
   `;
   const lang = document.documentElement.lang || "zh";
-  const html = `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=1440,initial-scale=1">${absoluteStylesheetMarkup()}<style>${exactCss}</style></head><body class="${document.body.className}"><div id="root">${cloneRoot.outerHTML}</div>${horizontalExportLayoutScript()}</body></html>`;
+  const html = `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=${captureWidth},initial-scale=1">${absoluteStylesheetMarkup()}<style>${exactCss}</style></head><body class="${document.body.className}"><div id="root">${cloneRoot.outerHTML}</div>${horizontalExportLayoutScript()}</body></html>`;
   const diagnostics: ExactSnapshotDiagnostics = {
     projectId,
     route: window.location.pathname,
@@ -403,12 +415,23 @@ export async function buildExactSnapshotResult(options: ExactSnapshotOptions = {
     fontReady: document.fonts.status === "loaded",
     exportReadySignal: true,
   };
-  return { html, diagnostics };
+  return { html, diagnostics, captureWidth };
 }
 
-export async function buildExactSnapshot(options: ExactSnapshotOptions = {}) {
-  return (await buildExactSnapshotResult(options)).html;
+declare global {
+  interface Window {
+    __exactWebExport?: { buildSnapshot: typeof buildExactSnapshotResult };
+  }
 }
+
+// Lets the Portfolio Collection export's own headless capture page (which
+// navigates directly to a project route, never inside an iframe) call the
+// exact same DOM-snapshot builder the single-project "Export Exact Web PDF"
+// button uses — no postMessage/bridge round-trip needed, since both run in
+// the same page context. This is what makes Collection's project pages the
+// canonical exact-web output instead of a second, independently-drifting
+// rendering pipeline (see scripts/portfolioCollectionExportPlugin.ts).
+if (import.meta.env.DEV) window.__exactWebExport = { buildSnapshot: buildExactSnapshotResult };
 
 export function ProjectExactWebExportBridge() {
   useEffect(() => {
@@ -418,8 +441,8 @@ export function ProjectExactWebExportBridge() {
       const request = event.data as { type?: string; requestId?: string; projectId?: string; iframeIndex?: number; options?: ExactSnapshotOptions };
       if (request.type !== "dilida:exact-snapshot-request" || !request.requestId || !event.ports[0]) return;
       const port = event.ports[0];
-      void buildExactSnapshotResult(request.options, { projectId: request.projectId, iframeIndex: request.iframeIndex }).then(({ html, diagnostics }) => {
-        port.postMessage({ ok: true, requestId: request.requestId, projectId: diagnostics.projectId, html, diagnostics });
+      void buildExactSnapshotResult(request.options, { projectId: request.projectId, iframeIndex: request.iframeIndex }).then(({ html, diagnostics, captureWidth }) => {
+        port.postMessage({ ok: true, requestId: request.requestId, projectId: diagnostics.projectId, html, diagnostics, captureWidth });
       }).catch((error) => {
         port.postMessage({ ok: false, requestId: request.requestId, error: error instanceof Error ? error.message : "Snapshot failed." });
       });
@@ -461,7 +484,7 @@ export function ProjectExactWebExportAction({ onBeforeExport }: { onBeforeExport
     onBeforeExport?.();
     await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     try {
-      const html = await buildExactSnapshot();
+      const { html, captureWidth } = await buildExactSnapshotResult();
       const projectId = document.querySelector<HTMLElement>("[data-project-route-shell]")?.dataset.projectId;
       if (!projectId) throw new Error("The stable project ID was not found.");
       setState("exporting");
@@ -469,7 +492,7 @@ export function ProjectExactWebExportAction({ onBeforeExport }: { onBeforeExport
       const response = await fetch("/__local-export/exact-project-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId, slug, locale, width: 1440, html }),
+        body: JSON.stringify({ projectId, slug, locale, width: captureWidth, html }),
       });
       if (!response.ok) {
         const failure = await response.json().catch(() => ({ error: "Exact Web PDF export failed." })) as { error?: string };

@@ -25,6 +25,18 @@ async function readDiagnostics(diagnosticsDir) {
   return results;
 }
 
+function collectProjectDiagnostics(diagnostics) {
+  return diagnostics.flatMap((entry) => {
+    if (entry.parseError) return [];
+    if (Array.isArray(entry.projects)) {
+      return entry.projects
+        .filter((project) => project && project.sectionId !== "cover" && typeof project.measuredContentBottom === "number")
+        .map((project) => ({ file: entry.file, ...project }));
+    }
+    return typeof entry.measuredContentBottom === "number" ? [entry] : [];
+  });
+}
+
 // Enumerates every embedded raster image XObject across every page, without
 // re-decoding pixels — Length/Filter/Width/Height come straight off each
 // stream's own dictionary, and identical (length, first/last 64 bytes)
@@ -90,6 +102,10 @@ export async function buildPdfExportPostflight({ root, pdfPath, diagnosticsDir }
   const rasterImages = collectRasterImages(pdfDoc);
   const duplicateImages = findDuplicateImages(rasterImages);
   const diagnostics = await readDiagnostics(diagnosticsDir);
+  const expectedDiagnosticsFile = `${path.basename(pdfPath, path.extname(pdfPath))}-diagnostics.json`;
+  const matchingDiagnostics = diagnostics.filter((entry) => entry.file === expectedDiagnosticsFile);
+  const activeDiagnostics = matchingDiagnostics.length ? matchingDiagnostics : diagnostics;
+  const projectDiagnostics = collectProjectDiagnostics(activeDiagnostics);
 
   const report = {
     version: 1,
@@ -105,6 +121,8 @@ export async function buildPdfExportPostflight({ root, pdfPath, diagnosticsDir }
     largestEmbeddedImages: [...rasterImages].sort((a, b) => b.byteLength - a.byteLength).slice(0, 10).map(({ ref, width, height, byteLength }) => ({ ref, width, height, byteLength })),
     duplicateEmbeddedAssets: duplicateImages,
     projectBlankTail: [],
+    collectionPageChrome: [],
+    figmaArtifactMode: [],
     tocSafeArea: null,
     fixedPageDimensions: [],
     issues: [],
@@ -117,14 +135,13 @@ export async function buildPdfExportPostflight({ root, pdfPath, diagnosticsDir }
   // re-asserts the same threshold at the finished, merged PDF level so a
   // regression introduced by segment-merge/embed is still caught even if
   // every individual capture passed.
-  for (const entry of diagnostics) {
-    if (entry.parseError) {
-      report.issues.push({ severity: "error", code: "DIAGNOSTICS_UNREADABLE", sourcePath: entry.file, message: entry.parseError });
-      continue;
-    }
+  for (const entry of activeDiagnostics) {
+    if (entry.parseError) report.issues.push({ severity: "error", code: "DIAGNOSTICS_UNREADABLE", sourcePath: entry.file, message: entry.parseError });
+  }
+  for (const entry of projectDiagnostics) {
     if (typeof entry.trailingBlankHeight !== "number" || typeof entry.intendedBottomPadding !== "number") continue;
-    const threshold = entry.intendedBottomPadding + 32;
-    const withinThreshold = entry.trailingBlankHeight <= threshold;
+    const threshold = entry.intendedBottomPadding;
+    const withinThreshold = entry.trailingBlankHeight === threshold;
     report.projectBlankTail.push({
       file: entry.file,
       projectId: entry.projectId ?? null,
@@ -134,7 +151,7 @@ export async function buildPdfExportPostflight({ root, pdfPath, diagnosticsDir }
       withinThreshold,
     });
     if (!withinThreshold) {
-      report.issues.push({ severity: "error", code: "UNEXPLAINED_BLANK_TAIL", sourcePath: entry.file, message: `trailingBlankHeight (${entry.trailingBlankHeight}px) exceeds intendedBottomPadding + 32 (${threshold}px).` });
+      report.issues.push({ severity: "error", code: "UNEXPLAINED_BLANK_TAIL", sourcePath: entry.file, message: `trailingBlankHeight (${entry.trailingBlankHeight}px) does not equal the final page margin (${threshold}px).` });
     }
     if (entry.segmentSourcePages !== undefined && entry.segmentCount !== undefined) {
       const segmentPagesLength = Array.isArray(entry.segmentSourcePages) ? entry.segmentSourcePages.length : entry.segmentSourcePages;
@@ -144,6 +161,30 @@ export async function buildPdfExportPostflight({ root, pdfPath, diagnosticsDir }
     }
     if (typeof entry.overflowRight === "number" && entry.overflowRight > 0) {
       report.issues.push({ severity: "error", code: "HORIZONTAL_OVERFLOW", sourcePath: entry.file, message: `overflowRight is ${entry.overflowRight}px.` });
+    }
+
+    const chrome = {
+      file: entry.file,
+      projectId: entry.sectionId ?? entry.projectId ?? null,
+      width: entry.exportRootWidth ?? null,
+      projectNumber: entry.projectNumber ?? null,
+      projectCount: entry.projectCount ?? null,
+      contentSeparation: entry.projectContentSeparation ?? null,
+      chromeHeight: entry.collectionPageChromeHeight ?? null,
+      backLinkRect: entry.collectionBackLinkRect ?? null,
+      exactWebPdfPages: entry.exactWebPdfPages ?? null,
+    };
+    report.collectionPageChrome.push(chrome);
+    if (chrome.width !== 1440 || chrome.contentSeparation !== 32 || chrome.chromeHeight !== 96 || chrome.exactWebPdfPages !== 1 || !chrome.backLinkRect) {
+      report.issues.push({ severity: "error", code: "COLLECTION_PAGE_CHROME_INVALID", sourcePath: entry.file, message: `Project ${chrome.projectId ?? "unknown"} does not use the canonical 1440px / 32px separation / 96px chrome / one-page structure with a Back to Index link rectangle.` });
+    }
+
+    const figma = entry.figmaAudit;
+    if (figma && typeof figma === "object") {
+      report.figmaArtifactMode.push({ file: entry.file, projectId: chrome.projectId, ...figma });
+      if (figma.iframeCount !== 0 || figma.visibleFallbackCount !== figma.frameCount) {
+        report.issues.push({ severity: "error", code: "FIGMA_ARTIFACT_FALLBACK_INVALID", sourcePath: entry.file, message: `Project ${chrome.projectId ?? "unknown"} exported ${figma.iframeCount} Figma iframe(s) and ${figma.visibleFallbackCount}/${figma.frameCount} visible fallback image(s).` });
+      }
     }
   }
 

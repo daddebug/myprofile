@@ -5,7 +5,7 @@ import { useLegacyProjectAsset } from "../hooks/useLegacyProjectAsset";
 import { useProjectBodyAsset } from "../hooks/useProjectBodyAsset";
 import { useProjectCover } from "../hooks/useProjectCover";
 import { formatAchievement, formatPlaytime, gameTitle, type GameExperienceRecord } from "../lib/gameExperience";
-import type { PortfolioPdfConfig, PdfProjectItemConfig, PdfSectionId } from "../lib/portfolioPdf";
+import type { PortfolioPdfConfig, PdfProjectItemConfig } from "../lib/portfolioPdf";
 import type { PdfProjectBlock, PdfProjectContent, PdfProjectMedia, PdfProjectSection } from "../lib/projectPdfContent";
 import { projectPdfThemes, type ProjectPdfCompositionConfig, type ProjectPdfPage, type ProjectPdfThemeId } from "../lib/projectPdfCompositions";
 import type { ResolvedProjectMetadata } from "../lib/projectMetadata";
@@ -369,9 +369,12 @@ function PdfGameRecord({ locale, game, detailLevel, config }: { locale: Locale; 
   const learned = locale === "zh" ? game.reflection.contributionZh : game.reflection.contributionEn;
   const detail = locale === "zh" ? game.detail.zh : game.detail.en;
   const tags = game.presentation.tags.map((tag) => locale === "zh" ? tag.zh || tag.en : tag.en || tag.zh).filter(Boolean);
+  const playtime = formatPlaytime(game, locale);
+  const achievement = config.gameOptions.showAchievements ? formatAchievement(game, locale) : null;
+  const metadata = [playtime ? `${copy.playtime}: ${playtime}` : "", achievement ? `${copy.achievement}: ${achievement}` : ""].filter(Boolean).join(" · ");
   return <article className="pdf-game-record">
     <PdfImage src={cover} alt={gameTitle(game, locale)} className="pdf-game-cover" />
-    <div><div className="pdf-game-title-row"><h2>{gameTitle(game, locale)}</h2><span>{copy.playtime}: {formatPlaytime(game, locale)}{config.gameOptions.showAchievements ? ` · ${copy.achievement}: ${formatAchievement(game, locale)}` : ""}</span></div>
+    <div><div className="pdf-game-title-row"><h2>{gameTitle(game, locale)}</h2>{metadata ? <span>{metadata}</span> : null}</div>
       {config.gameOptions.showTags && tags.length ? <div className="pdf-game-tags">{tags.slice(0, 4).map((tag) => <span key={tag}>{tag}</span>)}</div> : null}
       {detailLevel !== "metadata" ? <div className="pdf-game-summary">{why ? <p><strong>{copy.why}</strong>{excerpt(why, 180)}</p> : null}{strengths ? <p><strong>{copy.strengths}</strong>{excerpt(strengths, 220)}</p> : null}{learned ? <p><strong>{copy.learned}</strong>{excerpt(learned, 220)}</p> : null}</div> : null}
       {detailLevel === "detail" && detail.trim() ? <p className="pdf-game-detail">{detail}</p> : null}
@@ -437,11 +440,4 @@ function usePdfImageSource(src?: string) {
   }, [src]);
 
   return state;
-}
-
-export function pdfSectionLabel(id: PdfSectionId, locale: Locale) {
-  const values: Record<PdfSectionId, { zh: string; en: string }> = {
-    cover: { zh: "封面", en: "Cover" }, profile: { zh: "个人资料与经历", en: "Profile & Experience" }, projects: { zh: "项目案例", en: "Projects" }, "ui-works": { zh: "UI 作品", en: "UI Works" }, games: { zh: "游戏经历", en: "Game Experience" }, contact: { zh: "联系方式", en: "Contact" },
-  };
-  return values[id][locale];
 }

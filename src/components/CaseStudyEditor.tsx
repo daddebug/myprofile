@@ -79,6 +79,7 @@ export function CaseStudyEditorDock({
   return (
     <div
       ref={dockRef}
+      data-owner-editor-dock
       className="fixed right-3 top-[calc(var(--site-header-height)+13px)] z-[80] flex max-w-[calc(100vw-1.5rem)] flex-col items-end gap-2 md:right-6"
     >
       <div className="flex max-w-full flex-wrap justify-end gap-2">

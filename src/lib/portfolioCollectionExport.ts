@@ -24,6 +24,8 @@ import { portfolioProfile } from "../data/portfolioProfile";
 import { getUiPracticeCatalog, type UiPracticeCatalogItem } from "./uiPracticeCatalog";
 import { formatAchievement, formatPlaytime, gameTitle, getGameExperienceStore, type GameExperienceRecord } from "./gameExperience";
 import { getGameCoverRecord } from "./gameCoverDb";
+import { getDiskProjectCover } from "./portfolioContentClient";
+import { getPublishedProjectCover } from "./publishedPortfolio";
 import { MAX_COLLECTION_PROJECTS, type CoverTocEntry } from "./collectionCoverGeometry";
 
 const stageEndpoint = "/__local-export/collection/stage";
@@ -56,8 +58,16 @@ export type CollectionExportResult = {
   links: number;
   outlines: number;
   bytes: number;
+  // Distinct, non-overlapping categories — never combined into one count:
+  // selected = what the editor's selection actually listed (deduped);
+  // included = selected ids that were actually captured into this PDF;
+  // unselected = eligible public projects the editor never selected at all;
+  // blocked = selected ids that did NOT make it in (deleted/unpublished since
+  // selection, or dropped by the MAX_COLLECTION_PROJECTS cap).
   selectedProjectIds: string[];
-  excludedProjectIds: string[];
+  includedProjectIds: string[];
+  unselectedProjectIds: string[];
+  blockedProjectIds: string[];
 };
 
 // Explicit selection contract from the collection editor (/:locale/export,
@@ -131,28 +141,15 @@ function buildCoverFooterLabel() {
   return "D.D / PORTFOLIO COLLECTION";
 }
 
-// Emergency website-slice export's own cover: a plain HTML/CSS page (same
-// renderSectionPdf path as Contact/UI Works, not the SVG dot-timeline
-// renderer above) — explicitly no TOC, no project-navigation dots/lines,
-// per that mode's own spec. Entries are listed as plain numbered text only.
-const simpleCoverPageCss = `${coverPageCss}
-  .cx-page { justify-content: center; }
-  .cx-brand { position: absolute; right: ${SAFE_MARGIN_PX}px; bottom: ${Math.round(SAFE_MARGIN_PX * 0.6)}px; font: 700 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; color: rgba(244,245,250,0.34); }
-  .cx-simple-subtitle { font: 500 14px/1.6 system-ui, sans-serif; color: rgba(244,245,250,0.6); margin: 0 0 40px; }
-  .cx-simple-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-  .cx-simple-list li { font: 600 15px/1.4 system-ui, sans-serif; color: rgba(244,245,250,0.85); }
-  .cx-simple-list li span { color: #34f025; font: 700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; margin-right: 10px; }
-`;
-
-function buildSimpleCoverHtml(entries: CoverTocEntry[], locale: Locale) {
-  const items = entries.map((entry, index) => `<li><span>${String(index + 1).padStart(2, "0")}</span>${escapeHtml(entry.title)}</li>`).join("");
-  const body = `<p class="cx-eyebrow">${escapeHtml(locale === "zh" ? "作品集合集" : "PORTFOLIO COLLECTION")}</p>
-    <h1 class="cx-title">${escapeHtml(portfolioProfile.name)}</h1>
-    <p class="cx-simple-subtitle">${escapeHtml(portfolioProfile.positioning[locale])}</p>
-    <ul class="cx-simple-list">${items}</ul>
-    ${brandFooterHtml}`;
-  return `<!doctype html><html lang="${locale}"><head><meta charset="utf-8">${absoluteStylesheetMarkup()}<style>${simpleCoverPageCss}</style></head>
-    <body><div data-collection-export-section><div class="cx-page" style="position:relative;">${body}</div></div></body></html>`;
+// Small index metadata line under a project's title — category plus its
+// duration/timeframe when available, the same two fields shown on the
+// project's own page header. Absent entirely if neither is set, rather
+// than rendering an empty line.
+function buildIndexMetaLabel(project: ResolvedProjectMetadata): string | undefined {
+  const category = project.category?.trim();
+  const duration = project.duration?.trim();
+  if (category && duration) return `${category} · ${duration}`;
+  return category || duration || undefined;
 }
 
 // --- Image downscale before embedding into a section's HTML ---
@@ -342,30 +339,10 @@ async function stageSection(payload: Record<string, unknown>, signal?: AbortSign
   return { token: body.token };
 }
 
-const DEFAULT_SECTION_ORDER: PortfolioCollectionSectionId[] = ["cover", "projects", "ui-works", "game-experience", "contact"];
-
-
 export async function runPortfolioCollectionExport(
   projects: ResolvedProjectMetadata[],
   locale: Locale,
   selection: PortfolioCollectionSelection,
-  // Explicit, caller-supplied override — real React state from the /export
-  // editor's own "Emergency export" checkbox (PortfolioPdfBuilderPage.tsx),
-  // not parsed from window.location. When true, the server keeps whatever
-  // PDF segments Chromium actually generated for a project instead of
-  // hard-failing on a segment-count mismatch (see captureProjectPage in
-  // scripts/portfolioCollectionExportPlugin.ts). Every other export-
-  // blocking check (missing draft, missing images, clipped content, failed
-  // rendering, empty body) is unaffected. Defaults to false.
-  emergencyPdfExport = false,
-  // Separate, independent emergency mode: renders each project's REAL
-  // website layout and slices it into landscape-A4-ratio physical PDF
-  // pages via manual clip+shift, never Chromium's print auto-pagination
-  // (see captureProjectPageWebsiteSlice in
-  // scripts/portfolioCollectionExportPlugin.ts). Uses a plain-text cover
-  // (no TOC/dots) and suppresses live Figma iframes. Independent of
-  // emergencyPdfExport — the two are not meant to be combined.
-  websiteSlice = false,
   onProgress?: (progress: CollectionExportProgress) => void,
   signal?: AbortSignal,
 ): Promise<CollectionExportResult> {
@@ -379,12 +356,21 @@ export async function runPortfolioCollectionExport(
   // export. The MAX_COLLECTION_PROJECTS cap is enforced again here as a
   // hard backstop even though the editor is also expected to enforce it.
   const eligibleById = new Map(eligible.map((project) => [project.id, project]));
-  const visible = selection.projectIds
+  const selectedProjectIds = [...new Set(selection.projectIds)];
+  const visible = selectedProjectIds
     .map((id) => eligibleById.get(id))
     .filter((project): project is ResolvedProjectMetadata => Boolean(project))
     .slice(0, MAX_COLLECTION_PROJECTS);
-  const visibleIds = new Set(visible.map((project) => project.id));
-  const excludedProjectIds = eligible.filter((project) => !visibleIds.has(project.id)).map((project) => project.id);
+  const selectedSet = new Set(selectedProjectIds);
+  // "unselected" (the editor never listed it) is decided here. "blocked"
+  // (the editor listed it, but it didn't actually end up in the generated
+  // PDF — deleted/unpublished since selection, dropped by the
+  // MAX_COLLECTION_PROJECTS cap, or the whole Projects section was disabled
+  // in the section list independent of which individual projects are
+  // checked) is decided below from what was actually staged, not from this
+  // pre-staging projection — `visible` alone can't tell you whether the
+  // "projects" section ever ran at all.
+  const unselectedProjectIds = eligible.filter((project) => !selectedSet.has(project.id)).map((project) => project.id);
   if (!visible.length) throw new Error(locale === "zh" ? "没有选中任何项目。" : "No projects selected.");
 
   // Same pattern for UI Works / Game Experience: the editor's explicit
@@ -400,7 +386,12 @@ export async function runPortfolioCollectionExport(
     ? selection.selectedGameIds.map((id) => gameById.get(id)).filter((record): record is GameExperienceRecord => Boolean(record))
     : [];
   const includeContact = selection.includeContact;
-  const sectionOrder = selection.sectionOrder.length ? selection.sectionOrder : DEFAULT_SECTION_ORDER;
+  // The editor's own section list is authoritative, including when it's
+  // empty — an explicit "nothing enabled" must produce nothing, never a
+  // hardcoded default order. A prior fallback here silently substituted a
+  // default order whenever every section was disabled, which is exactly
+  // the state where the user's choice matters most.
+  const sectionOrder = selection.sectionOrder;
 
   // The cover/index and Contact are each always exactly one capture unit;
   // UI Works and Game Experience may each paginate into more than one
@@ -429,8 +420,25 @@ export async function runPortfolioCollectionExport(
   const jobId = crypto.randomUUID();
   let jobCreated = false;
   try {
-    const stagingPayloads = (await Promise.all(visible.map((project) => buildDynamicProjectStagingPayload(project.id, jobId))))
-      .filter((payload): payload is StagedProjectPayload => payload !== null);
+    const [stagingPayloadResults, projectCoverEntries] = await Promise.all([
+      Promise.all(visible.map((project) => buildDynamicProjectStagingPayload(project.id, jobId))),
+      // Real cover URL per project, same resolution order the site itself
+      // uses for an owner's current cover (see useProjectCover.ts): the
+      // disk-backed dev draft first, then the published/fallback path.
+      // Absolute (server-side Playwright fetches this independently of any
+      // browser page context, so a relative path wouldn't resolve there).
+      Promise.all(visible.map(async (project): Promise<CoverTocEntry> => {
+        const diskCover = await getDiskProjectCover(project.id).catch(() => null);
+        const coverPath = diskCover?.publicUrl || getPublishedProjectCover(project.id) || project.coverImage;
+        return {
+          id: project.id,
+          title: project.title,
+          coverUrl: coverPath ? `${window.location.origin}${coverPath}` : undefined,
+          metaLabel: buildIndexMetaLabel(project),
+        };
+      })),
+    ]);
+    const stagingPayloads = stagingPayloadResults.filter((payload): payload is StagedProjectPayload => payload !== null);
     if (stagingPayloads.length) {
       await createCollectionJob(jobId, stagingPayloads);
       jobCreated = true;
@@ -443,7 +451,7 @@ export async function runPortfolioCollectionExport(
     // rest of this loop stages in — TOC and generated pages always reflect
     // the exact same selection, never two independently-decided lists.
     const coverEntries: CoverTocEntry[] = sectionOrder.flatMap((section): CoverTocEntry[] => {
-      if (section === "projects") return visible.map((project) => ({ id: project.id, title: project.title }));
+      if (section === "projects") return projectCoverEntries;
       if (section === "ui-works") return uiWorks.length ? [{ id: "ui-works", title: locale === "zh" ? "UI 作品" : "UI Works" }] : [];
       if (section === "game-experience") return games.length ? [{ id: "games", title: locale === "zh" ? "游戏经历" : "Game Experience" }] : [];
       if (section === "contact") return includeContact ? [{ id: "contact", title: locale === "zh" ? "联系方式" : "Contact" }] : [];
@@ -453,12 +461,10 @@ export async function runPortfolioCollectionExport(
     for (const section of sectionOrder) {
       checkCancelled();
       if (section === "cover") {
-        const { token } = websiteSlice
-          ? await stageSection({ sectionId: "cover", label: "Cover", kind: "section", html: buildSimpleCoverHtml(coverEntries, locale) }, signal)
-          : await stageSection({
-            sectionId: "cover", label: "Cover", kind: "cover",
-            entries: coverEntries, brandLine: buildCoverBrandLine(locale), footerLabel: buildCoverFooterLabel(),
-          }, signal);
+        const { token } = await stageSection({
+          sectionId: "cover", label: "Cover", kind: "cover",
+          entries: coverEntries, brandLine: buildCoverBrandLine(locale), footerLabel: buildCoverFooterLabel(), captureWidthPx: window.innerWidth,
+        }, signal);
         staged.push({ sectionId: "cover", label: "Cover", token });
         completed += 1;
         report("staging");
@@ -466,10 +472,28 @@ export async function runPortfolioCollectionExport(
         for (const project of visible) {
           checkCancelled();
           report("staging", project.title);
-          const path = `${localizePath(project.route ?? `/work/${project.slug}`, locale)}?collectionExport=1${websiteSlice ? "&websiteSliceExport=1" : ""}${jobCreated ? `&collectionJob=${jobId}` : ""}`;
+          const path = `${localizePath(project.route ?? `/work/${project.slug}`, locale)}?collectionExport=1&exportMode=pdf${jobCreated ? `&collectionJob=${jobId}` : ""}`;
           const url = `${window.location.origin}${path}`;
-          console.info("[collection export] staging project", project.id, "emergencyPdfExport =", emergencyPdfExport, "websiteSlice =", websiteSlice);
-          const { token } = await stageSection({ sectionId: project.id, label: project.title, kind: "project", url, projectId: project.id, emergencyPdfExport, websiteSlice }, signal);
+          // The server opens its own capture page at this exact width
+          // (scripts/portfolioCollectionExportPlugin.ts) — this browser's
+          // own current CSS viewport width, so the captured project page
+          // reproduces the same responsive layout state this browser is
+          // actually showing right now, not a hardcoded width.
+          const { token } = await stageSection({
+            sectionId: project.id,
+            label: project.title,
+            kind: "project",
+            url,
+            projectId: project.id,
+            slug: project.slug,
+            locale,
+            captureWidthPx: window.innerWidth,
+            endingLabel: "PROJECT END",
+            closingSentence: project.summary,
+            backToIndexLabel: locale === "zh" ? "返回目录 / Back to Index" : "Back to Index / 返回目录",
+            projectNumber: visible.indexOf(project) + 1,
+            projectCount: visible.length,
+          }, signal);
           staged.push({ sectionId: project.id, label: project.title, token });
           completed += 1;
           report("staging", project.title);
@@ -506,6 +530,17 @@ export async function runPortfolioCollectionExport(
       }
     }
 
+    // Ground truth for what actually made it into this PDF: staged
+    // section ids, not the pre-staging `visible` projection. If the
+    // "projects" section itself was disabled in the section list (even
+    // with individual projects still checked), the loop above never runs
+    // its "projects" branch and none of `visible` are ever staged — this
+    // still reports every selected id as blocked rather than "included".
+    const stagedSectionIds = new Set(staged.map((entry) => entry.sectionId));
+    const includedProjectIds = visible.map((project) => project.id).filter((id) => stagedSectionIds.has(id));
+    const includedSet = new Set(includedProjectIds);
+    const blockedProjectIds = selectedProjectIds.filter((id) => !includedSet.has(id));
+
     checkCancelled();
     report("finalizing");
     const filename = `portfolio-collection-${locale}-${new Date().toISOString().replace(/[:.]/g, "-")}.pdf`;
@@ -529,7 +564,7 @@ export async function runPortfolioCollectionExport(
     // what "open file" / "open folder" act on, so the bytes aren't read here.
     await response.arrayBuffer();
 
-    return { outputPath, pages, links, outlines, bytes, selectedProjectIds: visible.map((project) => project.id), excludedProjectIds };
+    return { outputPath, pages, links, outlines, bytes, selectedProjectIds, includedProjectIds, unselectedProjectIds, blockedProjectIds };
   } catch (error) {
     await reportCollectionExportError({
       message: error instanceof Error ? error.message : String(error),

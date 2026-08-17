@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Download, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
-import { exportProductionBundle } from "../lib/productionBundleExport";
+import { exportProductionBundle, reportLauncherExportFailure } from "../lib/productionBundleExport";
 import { useLocale } from "../locales/LocaleContext";
 
 type ExportState = "idle" | "exporting" | "done" | "error";
@@ -74,10 +74,44 @@ function CollectionExportButton() {
 }
 
 export function ProductionExportDock() {
+  const launcherExportStarted = useRef(false);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV || launcherExportStarted.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const requestToken = params.get("portfolioLauncherExport") ?? "";
+    if (!/^[0-9a-f-]{36}$/i.test(requestToken)) return;
+    launcherExportStarted.current = true;
+
+    const removeRequestFromUrl = () => {
+      const nextUrl = new URL(window.location.href);
+      nextUrl.searchParams.delete("portfolioLauncherExport");
+      window.history.replaceState(window.history.state, "", `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
+    };
+
+    void (async () => {
+      try {
+        const request = await fetch(
+          `/__portfolio-content/publishing-export/request?token=${encodeURIComponent(requestToken)}`,
+          { cache: "no-store" },
+        );
+        const state = await request.json().catch(() => null) as { state?: string; error?: string } | null;
+        if (!request.ok) throw new Error(state?.error || "The launcher publishing request is unavailable.");
+        if (state?.state === "pending") {
+          await exportProductionBundle({ launcherRequestToken: requestToken });
+        }
+      } catch (error) {
+        await reportLauncherExportFailure(requestToken, error);
+      } finally {
+        removeRequestFromUrl();
+      }
+    })();
+  }, []);
+
   if (!import.meta.env.DEV) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-[75] flex max-w-[calc(100vw-2rem)] flex-col items-start gap-2 print:hidden">
+    <div data-production-export-dock className="fixed bottom-4 left-4 z-[75] flex max-w-[calc(100vw-2rem)] flex-col items-start gap-2 print:hidden">
       <CollectionExportButton />
       <PublishExportButton />
     </div>

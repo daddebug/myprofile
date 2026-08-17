@@ -1,12 +1,34 @@
 {
   "version": 1,
   "notes": "Authoritative registry of every content family the Portfolio Collection PDF pipeline can emit. Mirrors src/lib/publishing/publishSourceRegistry.json's role for the publishing pipeline. Read by scripts/pdf-export-preflight-lib.mjs and scripts/pdf-export-postflight-lib.mjs. See docs/PDF_EXPORT_ARCHITECTURE.md for the human-readable version of every field below.",
+  "canonicalRendererInvariant": "Project rendering has one canonical source: exact-web export. Collection PDF assembles canonical project output and must not maintain an independent project rendering pipeline. See docs/PDF_EXPORT_ARCHITECTURE.md.",
   "renderers": {
     "captureProjectPage": {
       "implementedIn": "scripts/portfolioCollectionExportPlugin.ts",
+      "role": "Shared Collection orchestrator: navigates to the canonical project DOM, audits content/media, delegates project-content printing to renderExactWebPdf, then composes one independent Collection page-chrome layer below that content. It never selects alternate PDFs or project-specific DOM.",
+      "usedBy": ["dynamic-project", "ui-personal-practice"]
+    },
+    "renderExactWebPdf": {
+      "implementedIn": "scripts/exactWebExportPlugin.ts",
+      "domSnapshotBuiltBy": "buildExactSnapshotResult, src/components/ProjectExactWebExportAction.tsx (exposed dev-only on window.__exactWebExport for captureProjectPage to call)",
       "sizing": "variable-height",
       "captureWidthPx": 1440,
-      "usedBy": ["dynamic-project", "ui-personal-practice"]
+      "modes": {
+        "continuous": "single page sized to exact measured content height, used when height <= 7100px",
+        "section-pages": "splits into real top-level-section physical pages, used above the continuous-mode threshold"
+      },
+      "usedBy": ["dynamic-project", "ui-personal-practice", "single-project 'Export Exact Web PDF' button"],
+      "note": "The single renderer for project CONTENT in both single-project export and Collection. PROJECT END, summary, selected-order indicator and Back to Index are not inserted into this DOM; Collection adds them afterward as one shared page-level chrome layer."
+    },
+    "collectionPageChrome": {
+      "implementedIn": "scripts/portfolioCollectionExportPlugin.ts",
+      "sizing": "fixed-height layer appended to each variable-height project page",
+      "widthPx": 1440,
+      "heightPx": 96,
+      "contentSeparationPx": 32,
+      "finalMarginPx": 24,
+      "usedBy": ["dynamic-project", "ui-personal-practice"],
+      "note": "Independent PDF page furniture only. It spans page-level safe margins, carries PROJECT END / canonical summary / selected-order indicator / Back to Index, and never participates in project DOM measurement."
     },
     "renderSectionPdf": {
       "implementedIn": "scripts/portfolioCollectionExportPlugin.ts",
@@ -29,14 +51,7 @@
     "pageHeightPx": 900,
     "horizontalSafeArea": { "leftPx": 80, "rightPx": 1360, "widthPx": 1280 },
     "coverSafeArea": { "topPx": 60, "bottomPx": 870 },
-    "tocSlotCount": 7,
-    "tocGeometry": {
-      "lineY": 716,
-      "startX": 87,
-      "spacing": 213.33,
-      "slotWidth": 190,
-      "note": "startX(87) + 6*spacing(213.33) + slotWidth(190) = 1557.98px, ~198px past safeRight(1360). Slot 7 (index 6) label extent is only bounded by tocSlotPositions()'s proportional-spread recompute when entryCount < 7; a full 7-entry selection has not been verified against a real generated PDF for right-edge overflow. Postflight TOC safe-area check must measure this directly rather than trust the constant."
-    }
+    "note": "Cover (page 1, identity only) and index (page 2, editorial contents list) were split into two separate pages on 2026-08-09 — there is no longer a dot/label TOC grid on the cover. The index page's own column grid (heading, per-column number/title/metadata/thumbnail, equal-width columns, vertical separators) is computed by indexColumnPositions() against INDEX_PAGE in src/lib/collectionCoverGeometry.ts — see that file rather than a duplicated constant table here, since duplicating the numbers here would drift."
   },
   "knownEngineQuirks": [
     {
@@ -60,31 +75,33 @@
       "renderer": "captureCoverPage",
       "sizing": "fixed",
       "width": 1440,
-      "height": 900,
+      "height": 700,
+      "note": "height changed 900->700 (2026-08-09) to end shortly after the identity graphic/title/footer instead of leaving a large empty area — a fixed constant since cover content never depends on the selection.",
       "horizontalSafeArea": { "left": 80, "right": 1360 },
       "padding": { "top": 60, "bottom": 30 },
-      "imageHandling": "none — cover graphic is vector SVG, no raster photography embedded",
+      "imageHandling": "none — cover graphic is vector SVG, no raster photography embedded, no project thumbnails (moved to the index page, 2026-08-09)",
       "emptyContentBehavior": "cover always renders; brandLine/footerLabel are static strings, not user content",
-      "segmentation": "single physical page, no pagination",
-      "verificationRules": ["panel/circle geometry matches collectionCoverGeometry.ts constants", "no navRect exceeds the safe area"]
+      "segmentation": "single physical page (page 1 of the cover+index section), no pagination",
+      "verificationRules": ["panel/circle geometry matches collectionCoverGeometry.ts constants", "cover page itself has zero link annotations — all click targets live on the index page"]
     },
     {
       "id": "toc",
       "family": "table-of-contents",
-      "sourceOfTruth": "Same selection as cover — TOC is rendered onto the cover page, not a separate capture pass",
+      "sourceOfTruth": "Same selection as cover — entries assembled in src/lib/portfolioCollectionExport.ts (title/coverUrl/metaLabel), column geometry from INDEX_PAGE in src/lib/collectionCoverGeometry.ts",
       "renderer": "captureCoverPage",
-      "sizing": "fixed",
+      "sizing": "content-driven",
       "width": 1440,
-      "height": 900,
+      "height": "computeIndexPageHeight(count) — top margin + actual row content + a modest bottom margin, e.g. 376px for the real 3-project case; never a fixed canvas",
+      "note": "No heading (removed 2026-08-09 — the page is just the project entries). Thumbnail aspect 4.3:1->3.2:1 (2026-08-09), within the 3:1-3.5:1 range, so the cover image is actually legible rather than a shallow strip.",
       "horizontalSafeArea": { "left": 80, "right": 1360 },
       "padding": { "top": 0, "bottom": 0 },
-      "imageHandling": "none",
-      "emptyContentBehavior": "TOC omits slots for sections with zero entries (see game-experience/ui-works length checks in portfolioCollectionExport.ts)",
-      "segmentation": "part of the single cover page",
+      "imageHandling": "each project's own resolved cover image, cropped (never squashed, preserveAspectRatio=xMidYMid slice) to a ~3.2:1 thumbnail per column — same source image as elsewhere, no separate re-encoding pass",
+      "emptyContentBehavior": "an entry with no coverUrl (non-project section entries) falls back to a plain panel-toned rect instead of a placeholder/X — its column, title, and click target still work",
+      "segmentation": "a separate physical page (page 2 of the cover+index section, immediately after the cover) — no longer part of the cover page (changed 2026-08-09)",
       "verificationRules": [
-        "every rendered TOC label's right-most glyph extent must stay inside horizontalSafeArea.right",
-        "every rendered TOC label's left-most glyph extent must stay inside horizontalSafeArea.left",
-        "slot spacing must match tocSlotPositions() output for the actual entry count, not the fixed 7-slot constant"
+        "column count equals selected entry count; columns are equal-width and fill horizontalSafeArea exactly",
+        "every column's clickable navRect (number through thumbnail bottom) resolves to the correct target page",
+        "vertical separators sit only between columns in the same row"
       ]
     },
     {
@@ -94,20 +111,21 @@
       "renderer": "captureProjectPage",
       "sizing": "variable-height",
       "width": 1440,
-      "height": "variable, computed per project from captureHeight",
+      "height": "variable: bottom-most visible rendered project-content bound + 32px separation + 96px Collection page chrome + 24px final margin",
       "horizontalSafeArea": { "left": 0, "right": 1440, "note": "safe area is enforced per-template via each template's own horizontalInset, not a page-level constant like the cover/section pages" },
       "padding": { "top": "template-defined", "bottom": "intendedBottomPadding (see diagnostics)" },
       "imageHandling": "each template-instance image resolved by imageId/localImageId to a data URL before capture; missing images are hard media-slot failures, not silently skipped",
       "emptyContentBehavior": "an empty template wrapper (layoutAudit.emptyTemplateWrappers) is a hard-fail, not rendered blank",
-      "segmentation": "Chromium auto-paginates the tall single-page HTML into segments of segmentHeightPx (captureHeight / segmentCount, capped by maxSegmentHeightPx=3000); segments are merged into one continuous PDF page via pdf-lib embedPage/drawPage",
+      "segmentation": "one continuous physical PDF page per project; exact-web prints only canonical project content through its measured bottom plus 32px separation, then Collection appends the shared 96px page chrome and 24px final margin; historical generated project PDFs are never selected as capture inputs",
       "verificationRules": [
-        "height must be >100px and <30000px",
+        "measuredContentBottom must be >100px and finalPageHeight must equal measuredContentBottom + 32px + 96px + 24px",
         "mediaSlotAudit.failed must be 0",
         "every templateFitAudit entry's overflowAfterFit must be 0",
         "layoutAudit.emptyTemplateWrappers must be empty",
-        "trailingBlankHeight must not exceed intendedBottomPadding + 32",
-        "captureWidth must equal 1440 and overflowRight must be 0",
-        "segmentSourcePages.length must equal segmentCount"
+        "trailingBlankHeight must equal the final page margin (24px); projectContentSeparation must equal 32px; collectionPageChromeHeight must equal 96px",
+        "captureWidth must equal the canonical Collection capture width and overflowRight must be 0",
+        "exactWebMode must be continuous and exactWebPdfPages must equal 1",
+        "PROJECT END must exist only in the shared Collection page-chrome layer, projectNumber/projectCount must follow selected order, and collectionBackLinkRect must target the Collection index page"
       ]
     },
     {
@@ -117,15 +135,15 @@
       "renderer": "captureProjectPage",
       "sizing": "variable-height",
       "width": 1440,
-      "height": "variable, same mechanism as dynamic-project",
+      "height": "variable, same content bound + 32px separation + 96px page chrome + 24px final margin as dynamic-project",
       "horizontalSafeArea": { "left": 0, "right": 1440 },
       "padding": { "top": "template-defined", "bottom": "intendedBottomPadding" },
       "imageHandling": "images are pre-published, source-controlled paths — no localStorage/IndexedDB/blob resolution step, unlike ordinary dynamic projects",
       "emptyContentBehavior": "same hard-fail rules as dynamic-project",
-      "segmentation": "identical mechanism to dynamic-project",
+      "segmentation": "identical one-continuous-page mechanism to dynamic-project",
       "verificationRules": [
         "same seven rules as dynamic-project",
-        "this is the content family the previously-reported UI Personal Practice blank-segment symptom affected — segmentSourcePages.length !== segmentCount is the specific guard that would have caught it"
+        "the shared page chrome must remain vector/selectable and independent of the long project-content snapshot"
       ]
     },
     {
@@ -208,9 +226,9 @@
       "family": "template-external-preview",
       "sourceOfTruth": "Figma prototype/showcase URLs stored in the template instance content",
       "renderer": "captureProjectPage (as part of whichever project contains the template instance)",
-      "imageHandling": "the live cross-origin iframe never appears in the PDF — src/styles.css @media print rules ([data-figma-prototype-interactive] { display:none }, [data-figma-prototype-print] { display:block }) swap to a static poster + link at capture time. This print-rule pair is a DELIBERATE, correctly-scoped exception to the general 'audit every @media print rule' caution above.",
-      "emptyContentBehavior": "a Figma block with no resolvable poster still renders its static fallback markup; it is not currently a hard-fail condition",
-      "verificationRules": ["[data-figma-prototype-print] element is present and non-empty in the captured DOM before page.pdf() runs"]
+      "imageHandling": "The explicit exportMode is the only switch: live tries the iframe and falls back only on genuine failure; pdf/offline never instantiate an iframe and immediately render the canonical fallback image in the same media frame. Capture requires that fallback to decode with non-zero natural and visible dimensions.",
+      "emptyContentBehavior": "a configured fallback that cannot decode is a hard capture failure; an instance with no configured fallback keeps the template's existing failure behavior",
+      "verificationRules": ["every configured [data-figma-prototype-frame=\"fallback\"] contains a decoded, visibly sized img[data-figma-prototype-fallback] before page.pdf() runs", "the final merged Collection PDF must visibly show the fallback image, not merely contain a successful asset response"]
     },
     {
       "id": "playable-game-embeds",
@@ -226,21 +244,15 @@
   "templates": [
     { "id": "project-header", "file": "src/templates/ProjectHeaderTemplate.tsx", "pdfBehavior": "standard — renders as captured, no confirmed special print/PDF branch" },
     { "id": "statement-longform", "file": "src/templates/StatementLongformTemplate.tsx", "pdfBehavior": "standard" },
-    { "id": "phase", "file": "src/templates/PhaseTemplate.tsx", "pdfBehavior": "standard" },
     { "id": "phase-milestones", "file": "src/templates/PhaseMilestonesTemplate.tsx", "pdfBehavior": "has a dedicated export fit rule in captureProjectPage's templateFitAudit (see TASKS #106 history) — treat as having confirmed special handling, not yet fully re-documented here" },
     { "id": "process-flow", "file": "src/templates/ProcessFlowTemplate.tsx", "pdfBehavior": "wide-content template with a scoped fit-scale applied only in collection-export capture mode to avoid horizontal clipping" },
-    { "id": "before-after", "file": "src/templates/BeforeAfterTemplate.tsx", "pdfBehavior": "standard" },
     { "id": "image-row", "file": "src/templates/ImageRowTemplate.tsx", "pdfBehavior": "standard — image slots resolved via the dynamic-template-images source row above" },
-    { "id": "image-gallery", "file": "src/templates/ImageGalleryTemplate.tsx", "pdfBehavior": "standard" },
     { "id": "direction-compare", "file": "src/templates/DirectionCompareTemplate.tsx", "pdfBehavior": "standard — image slots resolved via the dynamic-template-images source row above" },
-    { "id": "table", "file": "src/templates/TableTemplate.tsx", "pdfBehavior": "standard" },
     { "id": "decision-table", "file": "src/templates/DecisionTableTemplate.tsx", "pdfBehavior": "standard" },
-    { "id": "summary-circles", "file": "src/templates/SummaryCirclesTemplate.tsx", "pdfBehavior": "standard" },
     { "id": "circle-summary", "file": "src/templates/CircleSummaryTemplate.tsx", "pdfBehavior": "standard" },
     { "id": "supporting-note", "file": "src/templates/SupportingNoteTemplate.tsx", "pdfBehavior": "standard" },
-    { "id": "xmind", "file": "src/templates/XmindTemplate.tsx", "pdfBehavior": "standard" },
     { "id": "xmind-breakdown", "file": "src/templates/XMindBreakdownTemplate.tsx", "pdfBehavior": "single/double display-mode vector diagram; single-mode layout was fixed and verified 2026-08-07 (see CHANGELOG)" },
-    { "id": "figma-prototype", "file": "src/templates/FigmaPrototypeTemplate.tsx", "pdfBehavior": "print-media poster+link swap — see figma-embeds source row above" },
+    { "id": "figma-prototype", "file": "src/templates/FigmaPrototypeTemplate.tsx", "pdfBehavior": "collection-capture fallback-image branch with mandatory decode/visible-size guard; see figma-embeds source row above" },
     { "id": "figma-showcase", "file": "src/templates/FigmaShowcaseTemplate.tsx", "pdfBehavior": "not yet independently confirmed whether it shares FigmaPrototypeTemplate's print-swap markup or has its own — treat as unverified until read" },
     { "id": "playable-game", "file": "src/templates/PlayableGameTemplate.tsx", "pdfBehavior": "see playable-game-embeds source row above — open verification gap" }
   ]

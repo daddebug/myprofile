@@ -10,11 +10,12 @@ Generated preflight/postflight output is local audit output (`output/pdf/collect
 
 ## Renderers
 
-The pipeline has exactly three render paths. Every content family in the registry declares which one it uses.
+The pipeline has three content render paths plus one shared page-furniture compositor. Every content family in the registry declares which one it uses.
 
 | Renderer | Sizing | Width | Height | Used by |
 | --- | --- | --- | --- | --- |
-| `captureProjectPage` | variable-height | 1440px | computed per project, auto-paginated by Chromium into segments (`segmentHeightPx = ceil(captureHeight / segmentCount)`, `segmentCount = max(1, ceil(captureHeight / 3000))`) then merged into one continuous PDF page via `pdf-lib`'s `embedPage`/`drawPage` | dynamic project pages, UI Personal Practice |
+| `captureProjectPage` | variable-height | canonical Collection capture width | content bound + 32px separation + 96px page chrome + 24px final margin; one continuous physical page | dynamic project pages, UI Personal Practice |
+| `collectionPageChrome` | fixed-height PDF layer | canonical Collection capture width | 96px, appended below project content | every Collection project page |
 | `renderSectionPdf` | fixed | 1440px | 900px | UI Works, Game Experience, Contact |
 | `captureCoverPage` | fixed | 1440px | 900px | Cover, Table of Contents (rendered together, one page) |
 
@@ -43,7 +44,7 @@ See `src/lib/pdf/pdfExportRegistry.json` for the full machine-readable table (so
 | `figma-embeds` | template external preview | consumed by `captureProjectPage` | n/a |
 | `playable-game-embeds` | template external preview | consumed by `captureProjectPage` | n/a — open verification gap |
 
-Every template file under `src/templates/*.tsx` (excluding dev-only `__TemplatePreview*.tsx` files, which are gitignored/excluded from production) is listed in the registry's `templates` array with a `pdfBehavior` note. Most are marked `standard` (renders as captured, no confirmed special print/PDF branch found in this codebase). Confirmed non-standard cases: `figma-prototype` (deliberate print-media poster+link swap via `[data-figma-prototype-interactive]`/`[data-figma-prototype-print]`), `process-flow` (scoped fit-scale to avoid horizontal clipping in capture mode), `phase-milestones` (dedicated export fit rule). `playable-game` and `figma-showcase` are marked as open verification gaps — their PDF-capture behavior has not been read/confirmed in this codebase and must not be assumed to match `figma-prototype`'s pattern until it is.
+Every template file under `src/templates/*.tsx` (excluding dev-only `__TemplatePreview*.tsx` files, which are gitignored/excluded from production) is listed in the registry's `templates` array with a `pdfBehavior` note. Most are marked `standard`. Confirmed non-standard cases: `figma-prototype` (explicit `exportMode`: live uses the iframe/failure fallback; pdf/offline instantiate no iframe and immediately render the canonical fallback), `process-flow` (scoped fit-scale), and `phase-milestones` (dedicated export fit rule). `playable-game` and `figma-showcase` remain open verification gaps.
 
 ## Preflight
 
@@ -74,18 +75,20 @@ Implemented in `scripts/pdf-export-postflight-lib.mjs`, exporting `buildPdfExpor
 - selectable text presence (best-effort: a page with zero extractable text objects is flagged, not hard-failed, since some pages are legitimately vector/graphic-only);
 - raster image count and the largest embedded images (via `pdf-lib`'s object inspection — same technique used for `vectorPdfBytes` sizing in the existing per-project diagnostics);
 - duplicate embedded assets where detectable (same-length identical-byte raster streams);
-- trailing blank height for every variable-height project page, read directly from each project's own `trailingBlankHeight`/`intendedBottomPadding` diagnostics rather than recomputed;
+- trailing blank height for every variable-height project page, read directly from each project's own diagnostics;
+- Collection page chrome geometry (`projectContentSeparation`, `collectionPageChromeHeight`, selected-order numbering, and Back-to-Index link rectangle);
+- Figma artifact-mode proof (`iframeCount === 0` and every configured frame has a decoded visible fallback);
 - horizontal overflow / clipped content, read from `overflowLeft`/`overflowRight`/`templateFitAudit`;
 - blank pages (a page whose only content is the background fill);
 - TOC safe margins (see rule below);
 - fixed-page dimensions (cover/section pages must be exactly 1440x900pt-equivalent);
 - project order (must match the preflight's declared order);
 - missing images (cross-checked against the preflight manifest, not re-derived);
-- segment seams (any project where `segmentSourcePages.length !== segmentCount`).
+- continuous-page integrity (`exactWebMode === "continuous"` and one physical source page per project).
 
 ### Project blank-tail rule
 
-For every variable-height project page: `trailingBlankHeight = finalPageHeight - measuredContentBottom`. This is already computed per-project by `captureProjectPage` and written to `-diagnostics.json`; postflight aggregates it rather than remeasuring. **Fail** when `trailingBlankHeight > intendedBottomPadding + 32` (the same threshold `captureProjectPage` already hard-fails capture on — postflight re-asserts it at the finished-PDF level so a regression anywhere in the merge/embed step is still caught even if the per-project capture step passed).
+For every variable-height project page, the final geometry is `measured project content bottom + 32px separation + 96px Collection page chrome + 24px final margin`. The diagnostics expose each term independently. Postflight fails unless the final blank tail is exactly the 24px final margin, the chrome is 96px, the separation is 32px, the page is one continuous exact-web source page, and a Back-to-Index annotation rectangle exists.
 
 ### TOC safe-area rule
 
@@ -125,3 +128,11 @@ Whenever a new PDF bug reveals a missing content type, template behavior, sizing
 6. Record the fix in `CHANGELOG.md` only after it is verified against a real generated PDF opened in a real viewer (see Real verification above) — not from a postflight pass alone.
 
 Do not repeatedly solve PDF failures as isolated one-off exceptions outside this registry.
+
+## Collection page chrome and Figma artifact mode
+
+The exact-web snapshot contains project content only. After that content is printed, `captureProjectPage` appends one separately rendered vector PDF layer containing the full-width divider, `PROJECT END`, canonical localized summary, selected-order indicator, and `Back to Index`. This layer uses page-level safe margins and never inherits a project's nested max-width. The final merge writes a PDF `GoTo` annotation over its bottom-right return link; directory links and return links use the same merged page map.
+
+Figma has one explicit mode switch: `live | pdf | offline`. Live mode renders a valid iframe and changes to the existing fallback only on genuine iframe failure. PDF and offline modes never create an iframe, never start its timeout, and immediately render the canonical fallback in the same media frame. Collection diagnostics block export when a PDF-mode iframe exists or a configured fallback is not decoded and visibly sized. Final visual inspection is still required.
+
+Every project follows the same route: selected project -> current canonical DOM -> shared exact-web content capture -> shared visible-content bound -> shared page chrome -> shared link generation. No project ID, historical PDF, alternate DOM, crop, scale, or cached-height branch is part of the active path.

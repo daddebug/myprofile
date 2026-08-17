@@ -1,11 +1,12 @@
 import { useMemo, useRef, useState } from "react";
-import { ArrowDown, ArrowLeft, ArrowUp, Check, FileText, FolderOpen, RotateCcw, Save, X } from "lucide-react";
+import { createPortal } from "react-dom";
+import { ArrowDown, ArrowLeft, ArrowUp, Check, Clipboard, Eye, FileCode2, FileText, FolderOpen, RotateCcw, Save, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import { pdfSectionLabel } from "../components/PortfolioPdfDocument";
 import { useProjectCatalog } from "../hooks/useProjectCatalog";
 import { formatPlaytime, gameTitle, useGameExperienceStore } from "../lib/gameExperience";
 import {
   createPortfolioPdfConfig,
+  pdfSectionLabel,
   loadPortfolioPdfConfig,
   moveOrderedItem,
   savePortfolioPdfConfig,
@@ -16,14 +17,28 @@ import {
 import { getUiPracticeCatalog } from "../lib/uiPracticeCatalog";
 import { useLocale } from "../locales/LocaleContext";
 import {
-  openCollectionFile,
-  openCollectionFolder,
   runPortfolioCollectionExport,
   type CollectionExportPhase,
   type PortfolioCollectionSectionId,
   type PortfolioCollectionSelection,
 } from "../lib/portfolioCollectionExport";
 import { MAX_COLLECTION_PROJECTS } from "../lib/collectionCoverGeometry";
+import {
+  runPortfolioCompleteOfflineHtmlExport,
+  runPortfolioStaticHtmlExport,
+  type StaticHtmlExportPhase,
+  type StaticHtmlExportProgress,
+} from "../lib/portfolioStaticHtmlExport";
+import {
+  DeliverablesBridgeError,
+  deliverableFolderPath,
+  loadDeliverableDirections,
+  registerDeliverableHtml,
+  registerDeliverablePath,
+  runDeliverableAction,
+  type DeliverableArtifact,
+  type DeliverableDirection,
+} from "../lib/deliverablesBridge";
 import "../pdf.css";
 
 // Maps the old A4/print builder's section vocabulary onto the new
@@ -43,6 +58,23 @@ const SECTION_ID_TO_COLLECTION_SECTION: Partial<Record<PdfSectionId, PortfolioCo
 // enabled flags and order arrows the owner already uses, just read instead
 // of duplicated into a second selection UI. Never mutates config or touches
 // PORTFOLIO_PDF_CONFIG_STORAGE_KEY; this is a pure read.
+// Single source of truth for "is Cover selected", shared by both export
+// pipelines (buildCollectionSelection below, and StaticHtmlGenerateAction) -
+// reads the exact same Outline/章节 panel state the owner already toggles,
+// so neither pipeline can silently diverge from what's checked there.
+function isCoverSelected(config: PortfolioPdfConfig): boolean {
+  return config.sections.some((section) => section.id === "cover" && section.enabled);
+}
+
+// Mirrors buildCollectionSelection's own includeGameExperience condition
+// exactly (section enabled AND at least one game individually enabled) so
+// the PLAY nav entry can never disagree with what the PDF/Collection
+// pipeline considers "Game Experience selected".
+function isGameExperienceSelected(config: PortfolioPdfConfig): boolean {
+  const sectionEnabled = config.sections.some((section) => section.id === "games" && section.enabled);
+  return sectionEnabled && config.games.some((game) => game.enabled);
+}
+
 function buildCollectionSelection(config: PortfolioPdfConfig): PortfolioCollectionSelection {
   const orderedProjectIds = [...config.projects].sort((a, b) => a.order - b.order).filter((item) => item.enabled).map((item) => item.id);
   const orderedUiWorkIds = [...config.uiWorks].sort((a, b) => a.order - b.order).filter((item) => item.enabled).map((item) => item.id);
@@ -97,7 +129,7 @@ export function PortfolioPdfBuilderPage() {
   return <main className="min-h-screen bg-[#0b1035] text-softWhite" data-pdf-builder>
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-softWhite/10 bg-[#0b1035]/96 px-4 backdrop-blur md:px-6">
       <div className="flex items-center gap-3"><Link to={pathFor("/work")} className="grid h-9 w-9 place-items-center rounded border border-softWhite/15 text-softWhite/70" aria-label={locale === "zh" ? "返回作品列表" : "Back to work"}><ArrowLeft className="h-4 w-4" /></Link><div><p className="font-mono text-[9px] tracking-[0.16em] text-acidGreen">PORTFOLIO COLLECTION</p><h1 className="text-sm font-semibold">{locale === "zh" ? "作品集合集导出" : "Portfolio collection export"}</h1></div></div>
-      <div className="flex items-center gap-2"><button type="button" className="pdf-builder-button" onClick={save}><Save className="h-4 w-4" />{saved ? (locale === "zh" ? "已保存" : "Saved") : (locale === "zh" ? "保存配置" : "Save config")}</button><CollectionGenerateAction locale={locale} projects={projects} config={config} /></div>
+      <div className="flex items-center gap-2"><button type="button" className="pdf-builder-button" onClick={save}><Save className="h-4 w-4" />{saved ? (locale === "zh" ? "已保存" : "Saved") : (locale === "zh" ? "保存配置" : "Save config")}</button><StaticHtmlGenerateAction locale={locale} projects={projects} config={config} /><CollectionGenerateAction locale={locale} projects={projects} config={config} /></div>
     </header>
 
     <div className="mx-auto min-h-[calc(100vh-4rem)] max-w-[720px]">
@@ -117,6 +149,114 @@ export function PortfolioPdfBuilderPage() {
   </main>;
 }
 
+function StaticHtmlGenerateAction({ locale, projects, config }: { locale: "zh" | "en"; projects: ReturnType<typeof useProjectCatalog>; config: PortfolioPdfConfig }) {
+  const [phase, setPhase] = useState<StaticHtmlExportPhase>("idle");
+  const [message, setMessage] = useState("");
+  const [directionDialog, setDirectionDialog] = useState<DirectionDialogState | null>(null);
+  const [deliverable, setDeliverable] = useState<GeneratedDeliverable | null>(null);
+  const controllerRef = useRef<AbortController | null>(null);
+  const busy = phase === "capturing" || phase === "packaging";
+
+  const chooseDirection = async () => {
+    setDirectionDialog({ loading: true, directions: [] });
+    try {
+      const directions = await loadDeliverableDirections();
+      setDirectionDialog({ loading: false, directions });
+    } catch (error) {
+      setDirectionDialog({ loading: false, directions: [], error: error instanceof Error ? error.message : "DILIDA DESK is unavailable." });
+    }
+  };
+
+  const archiveHtml = async (generated: GeneratedDeliverable, replace: boolean) => {
+    if (!generated.html) return;
+    try {
+      const artifact = await registerDeliverableHtml({
+        directionId: generated.direction?.id,
+        artifactType: generated.artifactType as "portfolio-html" | "complete-offline-html",
+        fileName: generated.fileName,
+        html: generated.html,
+        replace,
+      });
+      setDeliverable({ ...generated, artifact, html: undefined, archiveError: undefined, slotOccupied: false });
+    } catch (error) {
+      setDeliverable({
+        ...generated,
+        archiveError: error instanceof Error ? error.message : "Archive failed.",
+        slotOccupied: error instanceof DeliverablesBridgeError && error.slotOccupied,
+      });
+    }
+  };
+
+  const runExport = async (scope: "collection" | "complete-offline", direction?: DeliverableDirection) => {
+    const projectIds = [...config.projects].sort((a, b) => a.order - b.order).filter((item) => item.enabled).map((item) => item.id);
+    if (scope === "collection" && !projectIds.length) {
+      setPhase("error");
+      setMessage(locale === "zh" ? "请至少启用一个项目。" : "Enable at least one project first.");
+      return;
+    }
+    const includeCover = isCoverSelected(config);
+    const includeGameExperience = isGameExperienceSelected(config);
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    setPhase("capturing");
+    setDeliverable(null);
+    setMessage(locale === "zh" ? "正在读取当前首页…" : "Reading the current homepage...");
+    try {
+      const onProgress = (progress: StaticHtmlExportProgress) => {
+        setPhase(progress.phase);
+        if (progress.phase === "capturing") {
+          setMessage(`${locale === "zh" ? "正在冻结" : "Capturing"} ${progress.currentLabel ?? ""} (${progress.completed}/${progress.total})`);
+        } else if (progress.phase === "packaging") {
+          setMessage(locale === "zh" ? "正在内联图片与样式…" : "Embedding images and styles...");
+        }
+      };
+      const result = scope === "complete-offline"
+        ? await runPortfolioCompleteOfflineHtmlExport(projects, locale, onProgress, controller.signal, "return")
+        : await runPortfolioStaticHtmlExport(projects, locale, projectIds, includeCover, includeGameExperience, onProgress, controller.signal, "standard", "return");
+      if (!result.html) throw new Error("The generated HTML was not returned for local archiving.");
+      setPhase("done");
+      setMessage("");
+      const generated: GeneratedDeliverable = {
+        fileName: result.filename,
+        artifactType: scope === "complete-offline" ? "complete-offline-html" : "portfolio-html",
+        direction,
+        html: result.html,
+        bytes: result.bytes,
+      };
+      setDeliverable(generated);
+      await archiveHtml(generated, false);
+    } catch (error) {
+      setPhase("error");
+      setMessage(error instanceof Error ? error.message : "Static HTML export failed.");
+    } finally {
+      controllerRef.current = null;
+    }
+  };
+
+  return (
+    <div className="relative">
+      <div className="flex items-center gap-2">
+        <button type="button" className="pdf-builder-button" onClick={() => void chooseDirection()} disabled={busy}>
+          <FileCode2 className="h-4 w-4" />
+          {busy ? (locale === "zh" ? "生成中…" : "GENERATING...") : (locale === "zh" ? "生成单文件 HTML" : "Generate Single HTML")}
+        </button>
+        <button type="button" className="pdf-builder-button" onClick={() => void runExport("complete-offline")} disabled={busy}>
+          <FileCode2 className="h-4 w-4" />
+          {locale === "zh" ? "导出完整离线作品集" : "Export Complete Offline Portfolio"}
+        </button>
+        {busy ? <button type="button" className="pdf-builder-button" onClick={() => controllerRef.current?.abort()}><X className="h-4 w-4" />{locale === "zh" ? "取消" : "Cancel"}</button> : null}
+      </div>
+      {message && phase !== "done" ? (
+        <div className={`absolute right-0 top-full z-50 mt-2 w-80 rounded-lg border bg-[#0b1035] px-3 py-2 text-xs leading-5 shadow-archive ${phase === "error" ? "border-peach/45 text-peach" : "border-softWhite/12 text-softWhite/70"}`} aria-live="polite">
+          <p className="break-all">{message}</p>
+        </div>
+      ) : null}
+      {directionDialog ? <DirectionDialog locale={locale} state={directionDialog} onCancel={() => setDirectionDialog(null)} onSelect={(direction) => { setDirectionDialog(null); void runExport("collection", direction); }} /> : null}
+      {deliverable ? <DeliverableResultPanel locale={locale} result={deliverable} onClose={() => setDeliverable(null)} onArchive={(replace) => archiveHtml(deliverable, replace)} /> : null}
+    </div>
+  );
+}
+
 // The "Generate" step for the new Playwright/pdf-lib collection pipeline —
 // reads this same page's existing selection state (via
 // buildCollectionSelection) and hands it to runPortfolioCollectionExport().
@@ -127,24 +267,40 @@ export function PortfolioPdfBuilderPage() {
 function CollectionGenerateAction({ locale, projects, config }: { locale: "zh" | "en"; projects: ReturnType<typeof useProjectCatalog>; config: PortfolioPdfConfig }) {
   const [phase, setPhase] = useState<CollectionExportPhase>("idle");
   const [message, setMessage] = useState("");
-  const [outputPath, setOutputPath] = useState("");
-  // Temporary, explicit, UI-driven override — replaces the earlier
-  // ?emergencyPdfExport=1 query-param approach, which did not reliably
-  // reach the actual Generate request (client-side route/tab-switching in
-  // this page can rewrite the URL and silently drop unrelated query
-  // params). This is real React state read directly at request time, not
-  // parsed from window.location, so it cannot be lost that way.
-  const [emergencyPdfExport, setEmergencyPdfExport] = useState(false);
-  // A second, independent emergency mode — never combined with the one
-  // above. Renders each project's real website layout and slices it into
-  // landscape-A4-ratio physical pages without ever letting Chromium's print
-  // pagination decide a page break (captureProjectPageWebsiteSlice). See
-  // the state comment above for why this is real React state, not a URL
-  // query param.
-  const [websiteSlice, setWebsiteSlice] = useState(false);
+  const [directionDialog, setDirectionDialog] = useState<DirectionDialogState | null>(null);
+  const [deliverable, setDeliverable] = useState<GeneratedDeliverable | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
 
-  const runExport = async () => {
+  const chooseDirection = async () => {
+    setDirectionDialog({ loading: true, directions: [] });
+    try {
+      const directions = await loadDeliverableDirections();
+      setDirectionDialog({ loading: false, directions });
+    } catch (error) {
+      setDirectionDialog({ loading: false, directions: [], error: error instanceof Error ? error.message : "DILIDA DESK is unavailable." });
+    }
+  };
+
+  const archivePdf = async (generated: GeneratedDeliverable, replace: boolean) => {
+    if (!generated.sourcePath || !generated.direction) return;
+    try {
+      const artifact = await registerDeliverablePath({
+        directionId: generated.direction.id,
+        artifactType: "portfolio-pdf",
+        sourcePath: generated.sourcePath,
+        replace,
+      });
+      setDeliverable({ ...generated, artifact, archiveError: undefined, slotOccupied: false });
+    } catch (error) {
+      setDeliverable({
+        ...generated,
+        archiveError: error instanceof Error ? error.message : "Archive failed.",
+        slotOccupied: error instanceof DeliverablesBridgeError && error.slotOccupied,
+      });
+    }
+  };
+
+  const runExport = async (direction: DeliverableDirection) => {
     const selection = buildCollectionSelection(config);
     if (!selection.projectIds.length) {
       setPhase("error");
@@ -154,15 +310,10 @@ function CollectionGenerateAction({ locale, projects, config }: { locale: "zh" |
     const controller = new AbortController();
     controllerRef.current = controller;
     setPhase("staging");
-    console.info("[collection export] emergencyPdfExport (client, about to send) =", emergencyPdfExport, "websiteSlice =", websiteSlice);
-    setMessage(
-      (emergencyPdfExport ? (locale === "zh" ? "紧急导出：开启\n" : "Emergency export: ON\n") : "")
-      + (websiteSlice ? (locale === "zh" ? "网站切片导出：开启\n" : "Website-slice export: ON\n") : "")
-      + (locale === "zh" ? "正在抓取项目页面…" : "Capturing project pages..."),
-    );
-    setOutputPath("");
+    setDeliverable(null);
+    setMessage(locale === "zh" ? "正在抓取项目页面…" : "Capturing project pages...");
     try {
-      const result = await runPortfolioCollectionExport(projects, locale, selection, emergencyPdfExport, websiteSlice, (progress) => {
+      const result = await runPortfolioCollectionExport(projects, locale, selection, (progress) => {
         setPhase(progress.phase);
         if (progress.phase === "staging") {
           setMessage(
@@ -175,13 +326,23 @@ function CollectionGenerateAction({ locale, projects, config }: { locale: "zh" |
         }
       }, controller.signal);
       setPhase("done");
-      setOutputPath(result.outputPath);
-      const excludedNote = result.excludedProjectIds.length
-        ? (locale === "zh" ? `（另有 ${result.excludedProjectIds.length} 个未选中或超出上限的项目未包含）` : ` (${result.excludedProjectIds.length} unselected/over-limit project(s) excluded)`)
-        : "";
-      setMessage(
-        (locale === "zh" ? `已生成 ${result.pages} 页：${result.outputPath}` : `Generated ${result.pages} page(s): ${result.outputPath}`) + excludedNote,
-      );
+      // Selected/included/unselected/blocked are distinct, non-overlapping
+      // counts — never combine "never selected" with "selected but dropped"
+      // into one number again (see portfolioCollectionExport.ts).
+      const counts = locale === "zh"
+        ? `（已选 ${result.selectedProjectIds.length}，已包含 ${result.includedProjectIds.length}，未选中 ${result.unselectedProjectIds.length}，被拦截/失败 ${result.blockedProjectIds.length}）`
+        : ` (Selected ${result.selectedProjectIds.length}, Included ${result.includedProjectIds.length}, Unselected ${result.unselectedProjectIds.length}, Blocked/failed ${result.blockedProjectIds.length})`;
+      setMessage("");
+      const generated: GeneratedDeliverable = {
+        fileName: result.outputPath.split(/[\\/]/).pop() || "portfolio-collection.pdf",
+        artifactType: "portfolio-pdf",
+        direction,
+        sourcePath: result.outputPath,
+        bytes: result.bytes,
+        detail: `${result.pages} ${locale === "zh" ? "页" : "pages"}${counts}`,
+      };
+      setDeliverable(generated);
+      await archivePdf(generated, false);
     } catch (error) {
       setPhase("error");
       setMessage(error instanceof Error ? error.message : "Collection export failed.");
@@ -196,7 +357,7 @@ function CollectionGenerateAction({ locale, projects, config }: { locale: "zh" |
   return (
     <div className="relative">
       <div className="flex items-center gap-2">
-        <button type="button" className="pdf-builder-button pdf-builder-button-primary" onClick={() => void runExport()} disabled={busy}>
+        <button type="button" className="pdf-builder-button pdf-builder-button-primary" onClick={() => void chooseDirection()} disabled={busy}>
           <FileText className="h-4 w-4" />
           {busy ? (locale === "zh" ? "生成中…" : "GENERATING...") : (locale === "zh" ? "生成合集 PDF" : "Generate Collection PDF")}
         </button>
@@ -207,34 +368,7 @@ function CollectionGenerateAction({ locale, projects, config }: { locale: "zh" |
           </button>
         ) : null}
       </div>
-      {/* Temporary emergency override control — see the state comment above.
-          Not gated behind DEV/owner mode beyond whatever already gates this
-          whole editor; intentionally visible and explicit rather than a
-          hidden query param, per its own purpose. */}
-      <label className={`mt-2 flex w-fit items-center gap-2 rounded border px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wide ${emergencyPdfExport ? "border-peach/60 bg-peach/10 text-peach" : "border-softWhite/15 text-softWhite/55"}`}>
-        <input type="checkbox" checked={emergencyPdfExport} onChange={(event) => setEmergencyPdfExport(event.target.checked)} disabled={busy || websiteSlice} />
-        {locale === "zh" ? "紧急导出：允许额外的 Chromium 分段" : "Emergency export: allow extra Chromium segments"}
-      </label>
-      {emergencyPdfExport ? (
-        <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-peach">
-          {locale === "zh" ? "紧急导出：开启" : "Emergency export: ON"}
-        </p>
-      ) : null}
-      {/* Second, independent emergency mode — see the state comment above.
-          Mutually exclusive with the segment-count override above (both
-          solve the same underlying symptom differently); disabling one
-          while the other is on keeps that explicit rather than silently
-          letting both apply at once. */}
-      <label className={`mt-2 flex w-fit items-center gap-2 rounded border px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wide ${websiteSlice ? "border-acidGreen/60 bg-acidGreen/10 text-acidGreen" : "border-softWhite/15 text-softWhite/55"}`}>
-        <input type="checkbox" checked={websiteSlice} onChange={(event) => setWebsiteSlice(event.target.checked)} disabled={busy || emergencyPdfExport} />
-        {locale === "zh" ? "紧急导出：网站切片模式（A4 横向）" : "Emergency export: website-slice mode (A4 landscape)"}
-      </label>
-      {websiteSlice ? (
-        <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-acidGreen">
-          {locale === "zh" ? "网站切片导出：开启" : "Website-slice export: ON"}
-        </p>
-      ) : null}
-      {message ? (
+      {message && phase !== "done" ? (
         <div
           className={`absolute right-0 top-full z-50 mt-2 w-80 rounded-lg border bg-[#0b1035] px-3 py-2 text-xs leading-5 shadow-archive ${
             phase === "error" ? "border-peach/45 text-peach" : "border-softWhite/12 text-softWhite/70"
@@ -242,21 +376,132 @@ function CollectionGenerateAction({ locale, projects, config }: { locale: "zh" |
           aria-live="polite"
         >
           <p className="break-all">{message}</p>
-          {phase === "done" && outputPath ? (
-            <div className="mt-2 flex gap-2">
-              <button type="button" className="inline-flex items-center gap-1 rounded border border-softWhite/20 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-softWhite/80 hover:border-acidGreen hover:text-acidGreen" onClick={() => void openCollectionFile(outputPath)}>
-                <FileText className="h-3 w-3" aria-hidden="true" />
-                {locale === "zh" ? "打开文件" : "Open file"}
-              </button>
-              <button type="button" className="inline-flex items-center gap-1 rounded border border-softWhite/20 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-softWhite/80 hover:border-acidGreen hover:text-acidGreen" onClick={() => void openCollectionFolder(outputPath)}>
-                <FolderOpen className="h-3 w-3" aria-hidden="true" />
-                {locale === "zh" ? "打开文件夹" : "Open folder"}
-              </button>
-            </div>
-          ) : null}
         </div>
       ) : null}
+      {directionDialog ? <DirectionDialog locale={locale} state={directionDialog} onCancel={() => setDirectionDialog(null)} onSelect={(direction) => { setDirectionDialog(null); void runExport(direction); }} /> : null}
+      {deliverable ? <DeliverableResultPanel locale={locale} result={deliverable} onClose={() => setDeliverable(null)} onArchive={(replace) => archivePdf(deliverable, replace)} /> : null}
     </div>
+  );
+}
+
+type DirectionDialogState = {
+  loading: boolean;
+  directions: DeliverableDirection[];
+  error?: string;
+};
+
+type GeneratedDeliverable = {
+  fileName: string;
+  artifactType: "portfolio-pdf" | "portfolio-html" | "complete-offline-html";
+  direction?: DeliverableDirection;
+  sourcePath?: string;
+  html?: string;
+  bytes: number;
+  detail?: string;
+  artifact?: DeliverableArtifact;
+  archiveError?: string;
+  slotOccupied?: boolean;
+};
+
+function DirectionDialog({ locale, state, onCancel, onSelect }: {
+  locale: "zh" | "en";
+  state: DirectionDialogState;
+  onCancel: () => void;
+  onSelect: (direction: DeliverableDirection) => void;
+}) {
+  const [selectedId, setSelectedId] = useState(() => state.directions.find((item) => item.active)?.id ?? state.directions[0]?.id ?? "");
+  const effectiveId = selectedId || state.directions.find((item) => item.active)?.id || state.directions[0]?.id || "";
+  const selected = state.directions.find((item) => item.id === effectiveId);
+  return createPortal(
+    <div className="fixed inset-0 z-[200] grid place-items-center bg-[#070a25]/65 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={locale === "zh" ? "选择求职方向" : "Choose career direction"}>
+      <div className="w-full max-w-md rounded-lg border border-softWhite/15 bg-[#0b1035] p-5 shadow-archive">
+        <h2 className="text-base font-semibold">{locale === "zh" ? "用于哪个求职方向？" : "Which career direction is this for?"}</h2>
+        <p className="mt-1 text-xs leading-5 text-softWhite/50">{locale === "zh" ? "方向来自 DILIDA DESK 的 Resume Library。" : "Directions come from the DILIDA DESK Resume Library."}</p>
+        {state.loading ? <p className="mt-4 text-sm text-softWhite/60">{locale === "zh" ? "正在读取求职方向…" : "Loading directions..."}</p> : null}
+        {state.error ? <p className="mt-4 rounded border border-peach/35 bg-peach/5 p-3 text-xs leading-5 text-peach">{state.error}</p> : null}
+        {!state.loading && !state.error && !state.directions.length ? <p className="mt-4 text-sm text-softWhite/60">{locale === "zh" ? "Resume Library 中暂无求职方向。" : "No Resume Library direction is available."}</p> : null}
+        {state.directions.length ? (
+          <select className="mt-4 w-full rounded border border-softWhite/15 bg-[#111742] px-3 py-2 text-sm text-softWhite" value={effectiveId} onChange={(event) => setSelectedId(event.target.value)}>
+            {state.directions.map((direction) => <option key={direction.id} value={direction.id}>{direction.label}{direction.active ? (locale === "zh" ? "（当前）" : " (active)") : ""}</option>)}
+          </select>
+        ) : null}
+        <div className="mt-5 flex justify-end gap-2">
+          <button type="button" className="pdf-builder-button" onClick={onCancel}>{locale === "zh" ? "取消" : "Cancel"}</button>
+          <button type="button" className="pdf-builder-button pdf-builder-button-primary" disabled={!selected} onClick={() => selected && onSelect(selected)}>{locale === "zh" ? "开始导出" : "Start export"}</button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+function DeliverableResultPanel({ locale, result, onClose, onArchive }: {
+  locale: "zh" | "en";
+  result: GeneratedDeliverable;
+  onClose: () => void;
+  onArchive: (replace: boolean) => Promise<void>;
+}) {
+  const [actionMessage, setActionMessage] = useState("");
+  const [archiving, setArchiving] = useState(false);
+  const path = result.artifact?.absolutePath ?? result.sourcePath ?? "";
+  const folder = path ? deliverableFolderPath(path) : "";
+  const typeLabel = result.artifactType === "portfolio-pdf" ? "PDF" : "HTML";
+  const destination = result.artifactType === "complete-offline-html"
+    ? (locale === "zh" ? "完整离线作品集 / HTML" : "Complete Offline Portfolio / HTML")
+    : `${result.direction?.label ?? ""} / ${locale === "zh" ? "作品集" : "Portfolio"} / ${typeLabel}`;
+  const perform = async (action: "preview" | "open" | "reveal") => {
+    if (!result.artifact) return;
+    try {
+      await runDeliverableAction(result.artifact.artifactId, action);
+      setActionMessage(locale === "zh" ? "操作已发送到 DILIDA DESK。" : "Action sent to DILIDA DESK.");
+    } catch (error) {
+      setActionMessage(error instanceof Error ? error.message : "Action failed.");
+    }
+  };
+  const copy = async (value: string) => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      setActionMessage(locale === "zh" ? "路径已复制。" : "Path copied.");
+    } catch {
+      setActionMessage(locale === "zh" ? "复制失败，请检查浏览器权限。" : "Copy failed. Check browser permission.");
+    }
+  };
+  const archive = async () => {
+    const replace = Boolean(result.slotOccupied);
+    if (replace && !window.confirm(locale === "zh" ? "当前槽位已有文件。确认替换当前归档？" : "This slot already has a file. Replace the current archive?")) return;
+    setArchiving(true);
+    await onArchive(replace);
+    setArchiving(false);
+  };
+  const buttonClass = "inline-flex items-center gap-1.5 rounded border border-softWhite/20 px-2.5 py-1.5 text-[11px] font-semibold text-softWhite/80 disabled:cursor-not-allowed disabled:opacity-35 hover:border-acidGreen hover:text-acidGreen";
+  return createPortal(
+    <div className="fixed inset-0 z-[200] grid place-items-center bg-[#070a25]/65 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={locale === "zh" ? "导出结果" : "Export result"}>
+      <div className="w-full max-w-2xl rounded-lg border border-softWhite/15 bg-[#0b1035] p-5 shadow-archive">
+        <div className="flex items-start justify-between gap-4">
+          <div><p className="font-mono text-[10px] tracking-[0.14em] text-acidGreen">EXPORT RESULT</p><h2 className="mt-1 text-lg font-semibold">{result.fileName}</h2></div>
+          <button type="button" className="grid h-8 w-8 place-items-center rounded border border-softWhite/15 text-softWhite/60 hover:text-softWhite" onClick={onClose} aria-label={locale === "zh" ? "关闭" : "Close"}><X className="h-4 w-4" /></button>
+        </div>
+        <dl className="mt-4 grid gap-2 text-xs leading-5 sm:grid-cols-[110px_1fr]">
+          <dt className="text-softWhite/40">{locale === "zh" ? "类型" : "Type"}</dt><dd>{typeLabel}</dd>
+          {result.direction ? <><dt className="text-softWhite/40">{locale === "zh" ? "求职方向" : "Direction"}</dt><dd>{result.direction.label}</dd></> : null}
+          <dt className="text-softWhite/40">{locale === "zh" ? "归档状态" : "Archive status"}</dt><dd className={result.artifact ? "text-acidGreen" : "text-peach"}>{result.artifact ? `${locale === "zh" ? "已归档到" : "Archived to"} ${destination}` : (locale === "zh" ? "尚未归档" : "Not archived")}</dd>
+          <dt className="text-softWhite/40">{locale === "zh" ? "文件大小" : "File size"}</dt><dd>{(result.bytes / 1024 / 1024).toFixed(1)} MB{result.detail ? ` · ${result.detail}` : ""}</dd>
+          {path ? <><dt className="text-softWhite/40">{locale === "zh" ? "本地路径" : "Local path"}</dt><dd className="break-all font-mono text-[11px] text-softWhite/65">{path}</dd></> : null}
+        </dl>
+        {result.archiveError ? <p className="mt-4 rounded border border-peach/35 bg-peach/5 p-3 text-xs leading-5 text-peach">{result.slotOccupied ? (locale === "zh" ? "当前槽位已有归档。确认后可替换当前文件。" : "The slot already has an archived file. Confirm to replace it.") : result.archiveError}</p> : null}
+        <div className="mt-5 flex flex-wrap gap-2">
+          <button type="button" className={buttonClass} disabled={!result.artifact} onClick={() => void perform("preview")}><Eye className="h-3.5 w-3.5" />{locale === "zh" ? "快速预览" : "Quick Preview"}</button>
+          {!result.artifact ? <button type="button" className={buttonClass} disabled={archiving} onClick={() => void archive()}><Save className="h-3.5 w-3.5" />{archiving ? (locale === "zh" ? "归档中…" : "Archiving...") : result.slotOccupied ? (locale === "zh" ? "替换当前归档" : "Replace current archive") : (locale === "zh" ? "归档" : "Archive")}</button> : null}
+          <button type="button" className={buttonClass} disabled={!path} onClick={() => void copy(path)}><Clipboard className="h-3.5 w-3.5" />{locale === "zh" ? "复制文件路径" : "Copy file path"}</button>
+          <button type="button" className={buttonClass} disabled={!folder} onClick={() => void copy(folder)}><Clipboard className="h-3.5 w-3.5" />{locale === "zh" ? "复制文件夹路径" : "Copy folder path"}</button>
+          <button type="button" className={buttonClass} disabled={!result.artifact} onClick={() => void perform("open")}><FileText className="h-3.5 w-3.5" />{locale === "zh" ? "打开文件" : "Open file"}</button>
+          <button type="button" className={buttonClass} disabled={!result.artifact} onClick={() => void perform("reveal")}><FolderOpen className="h-3.5 w-3.5" />{locale === "zh" ? "打开所在文件夹" : "Open folder"}</button>
+        </div>
+        {actionMessage ? <p className="mt-3 text-xs text-softWhite/55" aria-live="polite">{actionMessage}</p> : null}
+      </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -290,7 +535,7 @@ function UiPanel({ locale, config, setConfig, items }: { locale: "zh" | "en"; co
 
 function GamesPanel({ locale, config, setConfig, games }: { locale: "zh" | "en"; config: PortfolioPdfConfig; setConfig: ConfigSetter; games: ReturnType<typeof useGameExperienceStore>["records"] }) {
   const byId = new Map(games.map((item) => [item.id, item])); const ordered = [...config.games].sort((a, b) => a.order - b.order);
-  return <div><PanelHeading>{locale === "zh" ? "游戏经历选择" : "Game selection"}</PanelHeading><div className="mb-4 flex gap-4 text-xs"><label><input className="mr-2" type="checkbox" checked={config.gameOptions.showAchievements} onChange={(event) => setConfig((current) => ({ ...current, gameOptions: { ...current.gameOptions, showAchievements: event.target.checked } }))} />{locale === "zh" ? "成就" : "Achievements"}</label><label><input className="mr-2" type="checkbox" checked={config.gameOptions.showTags} onChange={(event) => setConfig((current) => ({ ...current, gameOptions: { ...current.gameOptions, showTags: event.target.checked } }))} />Tags</label></div><div className="space-y-2">{ordered.map((entry, index) => { const game = byId.get(entry.id); if (!game) return null; return <div className="pdf-config-card" key={entry.id}><div className="flex items-center gap-2"><label className="min-w-0 flex-1"><input className="mr-2" type="checkbox" checked={entry.enabled} onChange={(event) => setConfig((current) => ({ ...current, games: current.games.map((value) => value.id === entry.id ? { ...value, enabled: event.target.checked } : value) }))} /><span className="text-sm">{gameTitle(game, locale)}</span><span className="ml-2 text-[10px] text-softWhite/35">{formatPlaytime(game, locale)}</span></label><MoveButtons index={index} count={ordered.length} onMove={(direction) => setConfig((current) => ({ ...current, games: moveOrderedItem(current.games, index, direction) }))} /></div><select value={entry.detailLevel} onChange={(event) => setConfig((current) => ({ ...current, games: current.games.map((value) => value.id === entry.id ? { ...value, detailLevel: event.target.value as typeof entry.detailLevel } : value) }))} className="mt-2 w-full rounded bg-[#0b1035] px-3 py-2 text-xs"><option value="metadata">{locale === "zh" ? "仅元数据" : "Metadata only"}</option><option value="summary">{locale === "zh" ? "摘要" : "Summary"}</option><option value="detail">{locale === "zh" ? "摘要 + 详情" : "Summary + detail"}</option></select></div>; })}</div></div>;
+  return <div><PanelHeading>{locale === "zh" ? "游戏经历选择" : "Game selection"}</PanelHeading><div className="mb-4 flex gap-4 text-xs"><label><input className="mr-2" type="checkbox" checked={config.gameOptions.showAchievements} onChange={(event) => setConfig((current) => ({ ...current, gameOptions: { ...current.gameOptions, showAchievements: event.target.checked } }))} />{locale === "zh" ? "成就" : "Achievements"}</label><label><input className="mr-2" type="checkbox" checked={config.gameOptions.showTags} onChange={(event) => setConfig((current) => ({ ...current, gameOptions: { ...current.gameOptions, showTags: event.target.checked } }))} />Tags</label></div><div className="space-y-2">{ordered.map((entry, index) => { const game = byId.get(entry.id); if (!game) return null; const playtime = formatPlaytime(game, locale); return <div className="pdf-config-card" key={entry.id}><div className="flex items-center gap-2"><label className="min-w-0 flex-1"><input className="mr-2" type="checkbox" checked={entry.enabled} onChange={(event) => setConfig((current) => ({ ...current, games: current.games.map((value) => value.id === entry.id ? { ...value, enabled: event.target.checked } : value) }))} /><span className="text-sm">{gameTitle(game, locale)}</span>{playtime ? <span className="ml-2 text-[10px] text-softWhite/35">{playtime}</span> : null}</label><MoveButtons index={index} count={ordered.length} onMove={(direction) => setConfig((current) => ({ ...current, games: moveOrderedItem(current.games, index, direction) }))} /></div><select value={entry.detailLevel} onChange={(event) => setConfig((current) => ({ ...current, games: current.games.map((value) => value.id === entry.id ? { ...value, detailLevel: event.target.value as typeof entry.detailLevel } : value) }))} className="mt-2 w-full rounded bg-[#0b1035] px-3 py-2 text-xs"><option value="metadata">{locale === "zh" ? "仅元数据" : "Metadata only"}</option><option value="summary">{locale === "zh" ? "摘要" : "Summary"}</option><option value="detail">{locale === "zh" ? "摘要 + 详情" : "Summary + detail"}</option></select></div>; })}</div></div>;
 }
 
 function SettingsPanel({ locale, config, applyPreset }: { locale: "zh" | "en"; config: PortfolioPdfConfig; applyPreset: (preset: PdfPreset) => void }) {
@@ -304,4 +549,3 @@ function MoveButtons({ index, count, onMove }: { index: number; count: number; o
 function SelectField({ label, value, options, onChange }: { label: string; value: string; options: string[][]; onChange: (value: string) => void }) {
   return <label className="pdf-field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}>{options.map(([key, text]) => <option value={key} key={key}>{text}</option>)}</select></label>;
 }
-

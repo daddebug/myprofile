@@ -18,9 +18,11 @@
 // (via ProjectPage.tsx) can prefer it over the browser's own (empty, in
 // Playwright) storage.
 
-import type { TemplateInstance } from "./projectTemplateInstances";
+import { mergeTemplateInstances, type TemplateInstance } from "./projectTemplateInstances";
 import { getProjectBodyAsset } from "./projectBodyAssetDb";
 import { getLocalProjectDocumentStoreSnapshot, type ProjectDocument } from "./projectDocuments";
+import { getPublishedProjectDraft } from "./publishedPortfolio";
+import { backfillMatchingTemplateImagePublicPaths } from "./templateImageReferences";
 
 const createJobEndpoint = "/__local-export/collection/create-job";
 const jobProjectEndpoint = (jobId: string, projectId: string) =>
@@ -72,9 +74,17 @@ function readLocalDynamicDraft(projectId: string): StagedDynamicDraft | null {
     const parsed = JSON.parse(raw) as unknown;
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || (parsed as Record<string, unknown>).version !== 1) return null;
     const instances = (parsed as Record<string, unknown>).templateInstances;
+    const published = getPublishedProjectDraft(projectId);
+    const publishedInstances = published && typeof published === "object" && !Array.isArray(published)
+      ? mergeTemplateInstances((published as Record<string, unknown>).templateInstances)
+      : [];
+    const normalizedInstances = backfillMatchingTemplateImagePublicPaths(
+      Array.isArray(instances) ? (instances as TemplateInstance[]) : [],
+      publishedInstances,
+    );
     return {
       version: 1,
-      templateInstances: Array.isArray(instances) ? (instances as TemplateInstance[]) : [],
+      templateInstances: normalizedInstances,
       updatedAt: typeof (parsed as Record<string, unknown>).updatedAt === "string" ? (parsed as Record<string, unknown>).updatedAt as string : new Date(0).toISOString(),
     };
   } catch {
@@ -293,19 +303,6 @@ export function isCollectionStagingMode(): boolean {
 export function isCollectionExportCapture(): boolean {
   if (typeof window === "undefined") return false;
   return new URLSearchParams(window.location.search).has("collectionExport");
-}
-
-// Separate, independent marker for the emergency "website-slice" export
-// mode (scripts/portfolioCollectionExportPlugin.ts's
-// captureProjectPageWebsiteSlice) — always set together with
-// collectionExport so the normal readiness/staging machinery above still
-// runs, but checked independently so templates can react to this specific
-// mode without changing behavior for the existing (default) collection
-// pipeline or the normal site. Currently used only to suppress live Figma
-// iframes, which page.pdf() cannot render meaningfully either way.
-export function isWebsiteSliceExportCapture(): boolean {
-  if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).has("websiteSliceExport");
 }
 
 // Fetches this job's staged data for the CURRENT project only (the one

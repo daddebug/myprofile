@@ -6,6 +6,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { chromium, type Browser, type Page } from "playwright-core";
 import type { Plugin, ViteDevServer } from "vite";
+import { resizeOversizedExportImages } from "./exportImageResize";
 
 const execFileAsync = promisify(execFile);
 const endpoint = "/__local-export/exact-project-pdf";
@@ -16,14 +17,22 @@ let exportBrowserPromise: Promise<Browser> | null = null;
 let exportPagePromise: Promise<Page> | null = null;
 let exportQueue: Promise<unknown> = Promise.resolve();
 
+// width is the CSS viewport width the snapshot's own HTML was built
+// against (see ProjectExactWebExportAction.tsx's captureWidth — the real
+// browser's window.innerWidth at export time, not a fixed constant). The
+// capture viewport here must match it exactly, or the responsive layout
+// baked into the snapshot HTML won't be the layout actually printed.
 export type SnapshotPayload = {
   projectId: string;
   slug: string;
   locale: "zh" | "en";
-  width: 1440;
+  width: number;
   html: string;
   mode?: "continuous" | "section-pages";
 };
+
+const minimumCaptureWidth = 320;
+const maximumCaptureWidth = 4096;
 
 export type SnapshotRecord = { html: string; createdAt: number };
 const sharedSnapshots = new Map<string, SnapshotRecord>();
@@ -105,7 +114,9 @@ function validatePayload(value: unknown): SnapshotPayload {
   if (!candidate.projectId || !safeName(candidate.projectId)) throw new Error("Invalid project ID.");
   if (!candidate.slug || !safeName(candidate.slug)) throw new Error("Invalid project slug.");
   if (candidate.locale !== "zh" && candidate.locale !== "en") throw new Error("Invalid locale.");
-  if (candidate.width !== 1440) throw new Error("Exact Web PDF requires a 1440px export width.");
+  if (!Number.isInteger(candidate.width) || candidate.width! < minimumCaptureWidth || candidate.width! > maximumCaptureWidth) {
+    throw new Error(`Exact Web PDF requires an export width between ${minimumCaptureWidth} and ${maximumCaptureWidth}px.`);
+  }
   if (candidate.mode !== undefined && candidate.mode !== "continuous" && candidate.mode !== "section-pages") throw new Error("Invalid Exact Web PDF mode.");
   if (typeof candidate.html !== "string" || !candidate.html.includes("data-exact-web-export")) throw new Error("Invalid exact-web snapshot HTML.");
   return candidate as SnapshotPayload;
@@ -169,8 +180,64 @@ async function waitForSnapshot(page: Page) {
   });
 }
 
-async function addSectionPageRules(page: Page) {
-  return page.evaluate(() => {
+const exactProjectBottomPaddingPx = 32;
+
+async function measureAndConstrainVisibleContent(page: Page) {
+  return page.evaluate((bottomPadding) => {
+    const root = document.querySelector<HTMLElement>("[data-exact-web-export]");
+    if (!root) throw new Error("Missing rendered export root.");
+    const rootRect = root.getBoundingClientRect();
+    const visibleBottoms: number[] = [];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node: Node | null;
+    while ((node = walker.nextNode())) {
+      if (!(node.textContent ?? "").trim()) continue;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      for (const rect of Array.from(range.getClientRects())) {
+        if (rect.width > 0 && rect.height > 0) visibleBottoms.push(rect.bottom - rootRect.top);
+      }
+    }
+    for (const element of Array.from(root.querySelectorAll<HTMLElement>("img, svg, canvas, video, iframe"))) {
+      const style = window.getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      if (style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0) {
+        visibleBottoms.push(rect.bottom - rootRect.top);
+      }
+    }
+    const measuredContentBottom = Math.ceil(Math.max(0, ...visibleBottoms));
+    if (measuredContentBottom < 100) throw new Error(`Rendered export content has an invalid visible bottom (${measuredContentBottom}px).`);
+    const finalPageHeight = measuredContentBottom + bottomPadding;
+    // Constrain only the disposable export snapshot. This removes empty
+    // wrapper/min-height tails from Chromium's print layout without changing
+    // the live project DOM or spacing inside a visible module.
+    document.documentElement.style.height = `${finalPageHeight}px`;
+    document.documentElement.style.minHeight = "0";
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.height = `${finalPageHeight}px`;
+    document.body.style.minHeight = "0";
+    document.body.style.overflow = "hidden";
+    const appRoot = document.getElementById("root");
+    if (appRoot) {
+      appRoot.style.height = `${finalPageHeight}px`;
+      appRoot.style.minHeight = "0";
+      appRoot.style.overflow = "hidden";
+    }
+    root.style.height = `${finalPageHeight}px`;
+    root.style.minHeight = "0";
+    root.style.maxHeight = `${finalPageHeight}px`;
+    root.style.overflow = "hidden";
+    return {
+      measuredContentBottom,
+      finalPageHeight,
+      intendedBottomPadding: bottomPadding,
+      trailingBlankHeight: finalPageHeight - measuredContentBottom,
+    };
+  }, exactProjectBottomPaddingPx);
+}
+
+async function addSectionPageRules(page: Page, width: number) {
+  return page.evaluate((width) => {
     const exportRoot = document.querySelector<HTMLElement>("[data-exact-web-export]");
     const main = exportRoot?.querySelector<HTMLElement>("main");
     const contentRoot = main?.querySelector<HTMLElement>(":scope > article")
@@ -192,7 +259,7 @@ async function addSectionPageRules(page: Page) {
       const name = `exactSection${index}`;
       section.dataset.exactPdfSection = String(index);
       heights.push(height);
-      rules.push(`@page ${name} { size: 1440px ${height}px; margin: 0; }`);
+      rules.push(`@page ${name} { size: ${width}px ${height}px; margin: 0; }`);
       rules.push(`[data-exact-pdf-section="${index}"] { page: ${name}; break-before: page; break-after: page; }`);
     });
     const style = document.createElement("style");
@@ -200,7 +267,7 @@ async function addSectionPageRules(page: Page) {
     style.textContent = rules.join("\n");
     document.head.append(style);
     return { count: sections.length, heights };
-  });
+  }, width);
 }
 
 async function findPopplerTool(name: "pdfinfo" | "pdftoppm" | "pdftotext") {
@@ -240,11 +307,11 @@ async function inspectPdf(pdfPath: string) {
   }
 }
 
-async function renderPdfReference(browser: Browser, pdfPath: string, outputPath: string, tempDir: string, origin: string, snapshots: Map<string, SnapshotRecord>) {
+async function renderPdfReference(browser: Browser, pdfPath: string, outputPath: string, tempDir: string, origin: string, snapshots: Map<string, SnapshotRecord>, width: number) {
   const pdftoppm = await findPopplerTool("pdftoppm");
   if (!pdftoppm) throw new Error("pdftoppm is required to render the PDF verification reference.");
   const prefix = path.join(tempDir, "pdf-page");
-  await execFileAsync(pdftoppm, ["-png", "-scale-to", "1200", pdfPath, prefix], { windowsHide: true, maxBuffer: 20 * 1024 * 1024 });
+  await execFileAsync(pdftoppm, ["-png", "-scale-to-x", String(width), "-scale-to-y", "-1", pdfPath, prefix], { windowsHide: true, maxBuffer: 20 * 1024 * 1024 });
   const files = (await fs.readdir(tempDir))
     .filter((name) => /^pdf-page-\d+\.png$/i.test(name))
     .sort((a, b) => Number(a.match(/(\d+)/)?.[1]) - Number(b.match(/(\d+)/)?.[1]));
@@ -256,9 +323,9 @@ async function renderPdfReference(browser: Browser, pdfPath: string, outputPath:
   const token = crypto.randomUUID();
   snapshots.set(token, {
     createdAt: Date.now(),
-    html: `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#181743}img{display:block;width:1440px;height:auto}</style></head><body>${images.join("")}</body></html>`,
+    html: `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#181743}img{display:block;width:${width}px;height:auto}</style></head><body>${images.join("")}</body></html>`,
   });
-  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const page = await browser.newPage({ viewport: { width, height: 900 } });
   try {
     await page.goto(`${origin}${snapshotEndpoint}/${token}`, { waitUntil: "networkidle" });
     const nonUniformRatios = await page.evaluate(() => Array.from(document.images).map((image) => {
@@ -311,6 +378,12 @@ async function createExactWebPdf(payload: SnapshotPayload, root: string, origin:
     await page.goto(origin, { waitUntil: "domcontentloaded" });
     await page.setContent(payload.html, { waitUntil: "networkidle" });
     await waitForSnapshot(page);
+    // Export-only, in-page right-sizing of oversized images before
+    // Chromium prints — see exportImageResize.ts. Runs after layout has
+    // settled (waitForSnapshot already waited for stable height) so each
+    // image's measured CSS box reflects its real, final rendered size.
+    await page.evaluate(resizeOversizedExportImages);
+    const contentBounds = await measureAndConstrainVisibleContent(page);
     const renderDiagnostics = await page.evaluate(() => {
       const root = document.querySelector<HTMLElement>("[data-exact-web-export]")!;
       const rect = root.getBoundingClientRect();
@@ -322,10 +395,16 @@ async function createExactWebPdf(payload: SnapshotPayload, root: string, origin:
         imageCount: root.querySelectorAll("img").length,
       };
     });
-    const measuredHeight = Math.ceil(renderDiagnostics.documentScrollHeight);
+    const measuredHeight = contentBounds.finalPageHeight;
     let mode: "continuous" | "section-pages" = "continuous";
     let sectionHeights: number[] = [];
-    if (payload.mode !== "section-pages" && measuredHeight <= maximumContinuousHeight) {
+    // `payload.mode` is an explicit override in either direction: forcing
+    // "section-pages" always splits regardless of height (existing
+    // behavior); forcing "continuous" always keeps one page regardless of
+    // height (new — previously height alone could push a request past this
+    // cap even when the caller asked for one page). Omitting `mode` keeps
+    // the auto height-based default unchanged.
+    if (payload.mode === "continuous" || (payload.mode !== "section-pages" && measuredHeight <= maximumContinuousHeight)) {
       const pdfHeight = measuredHeight + 1;
       await page.addStyleTag({ content: `@page { size: ${payload.width}px ${pdfHeight}px; margin: 0; }` });
       await page.pdf({
@@ -339,7 +418,7 @@ async function createExactWebPdf(payload: SnapshotPayload, root: string, origin:
         preferCSSPageSize: true,
       });
     } else {
-      const sections = await addSectionPageRules(page);
+      const sections = await addSectionPageRules(page, payload.width);
       if (!sections.count) throw new Error("The project is too tall for one page and has no safe top-level section boundaries.");
       mode = "section-pages";
       sectionHeights = sections.heights;
@@ -359,7 +438,7 @@ async function createExactWebPdf(payload: SnapshotPayload, root: string, origin:
 
     const pdfBytes = await fs.readFile(pdfPath);
     const pdfAudit = await inspectPdf(pdfPath);
-    const nonUniformRatios = await renderPdfReference(browser, pdfPath, pdfReferencePath, tempDir, origin, snapshots);
+    const nonUniformRatios = await renderPdfReference(browser, pdfPath, pdfReferencePath, tempDir, origin, snapshots, payload.width);
     validateProjectPdf(payload.projectId, pdfBytes.length, pdfAudit, nonUniformRatios);
     const report = {
       version: 1,
@@ -375,6 +454,7 @@ async function createExactWebPdf(payload: SnapshotPayload, root: string, origin:
       pdfBytes: pdfBytes.length,
       nonUniformRatios,
       renderDiagnostics,
+      ...contentBounds,
       generatedAt: new Date().toISOString(),
     };
     await fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");

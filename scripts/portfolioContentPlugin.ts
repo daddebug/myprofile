@@ -43,6 +43,9 @@ const playableGameAbortEndpoint = "/__portfolio-content/playable-games/abort";
 const playableGameCoverStageEndpoint = "/__portfolio-content/playable-games/cover/stage";
 const playableGameCoverCommitEndpoint = "/__portfolio-content/playable-games/cover/commit";
 const playableGameCoverResolveEndpoint = "/__portfolio-content/playable-games/cover/resolve";
+const launcherExportRequestEndpoint = "/__portfolio-content/publishing-export/request";
+const launcherExportCompleteEndpoint = "/__portfolio-content/publishing-export/complete";
+const launcherExportFailEndpoint = "/__portfolio-content/publishing-export/fail";
 const allowedOrigin = "http://localhost:5173";
 const allowedHost = "localhost:5173";
 const maximumFileBytes = 8 * 1024 * 1024;
@@ -52,6 +55,7 @@ const stagedCoverLifetimeMs = 10 * 60 * 1000;
 const maximumGameZipBytes = 200 * 1024 * 1024;
 const maximumGameExpandedBytes = 500 * 1024 * 1024;
 const maximumGameFiles = 5000;
+const maximumLauncherExportBytes = 768 * 1024 * 1024;
 const forbiddenGameExtensions = new Set([".exe", ".bat", ".cmd", ".ps1", ".msi", ".scr", ".com"]);
 
 type ImageFormat = "png" | "jpeg" | "webp";
@@ -1723,6 +1727,46 @@ function validateLocalReadRequest(req: IncomingMessage) {
   }
 }
 
+function validateLauncherExportToken(value: string | null) {
+  if (!value || !/^[0-9a-f-]{36}$/i.test(value)) {
+    throw new RequestError("Invalid launcher export request token.", 400);
+  }
+  return value;
+}
+
+function launcherExportPaths(projectRoot: string, token: string) {
+  const directory = path.join(projectRoot, "output", "launcher-publishing");
+  return {
+    directory,
+    request: path.join(directory, `request-${token}.json`),
+    status: path.join(directory, `status-${token}.json`),
+  };
+}
+
+async function readLauncherExportRequest(projectRoot: string, token: string) {
+  const paths = launcherExportPaths(projectRoot, token);
+  let request: unknown;
+  try {
+    request = JSON.parse(await readFile(paths.request, "utf8")) as unknown;
+  } catch {
+    throw new RequestError("Launcher export request was not found or is invalid.", 404);
+  }
+  if (!request || typeof request !== "object" || Array.isArray(request) || (request as { token?: unknown }).token !== token) {
+    throw new RequestError("Launcher export request does not match this token.", 403);
+  }
+  return paths;
+}
+
+async function writeLauncherExportStatus(statusPath: string, payload: unknown) {
+  const temporaryPath = `${statusPath}.${randomUUID()}.tmp`;
+  try {
+    await writeFile(temporaryPath, `${JSON.stringify(payload, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
+    await rename(temporaryPath, statusPath);
+  } finally {
+    await rm(temporaryPath, { force: true });
+  }
+}
+
 export function portfolioContentPlugin(): Plugin {
   return {
     name: "portfolio-content-persistence-test",
@@ -1763,6 +1807,97 @@ export function portfolioContentPlugin(): Plugin {
           if (staged.createdAt < cutoff) stagedPlayableGameCovers.delete(token);
         }
       };
+
+      server.middlewares.use(launcherExportRequestEndpoint, async (req, res) => {
+        if (req.method !== "GET") { sendJson(res, 405, { error: "Method not allowed." }); return; }
+        try {
+          validateLocalReadRequest(req);
+          const requestUrl = new URL(req.url ?? "/", allowedOrigin);
+          const token = validateLauncherExportToken(requestUrl.searchParams.get("token"));
+          const paths = await readLauncherExportRequest(projectRoot, token);
+          try {
+            const status = JSON.parse(await readFile(paths.status, "utf8")) as unknown;
+            sendJson(res, 200, status);
+          } catch {
+            sendJson(res, 200, { state: "pending" });
+          }
+        } catch (error) {
+          sendJson(res, error instanceof RequestError ? error.statusCode : 500, { error: error instanceof Error ? error.message : "Unable to read launcher export request." });
+        }
+      });
+
+      server.middlewares.use(launcherExportCompleteEndpoint, async (req, res) => {
+        if (req.method !== "POST") { sendJson(res, 405, { error: "Method not allowed." }); return; }
+        let temporaryPath = "";
+        try {
+          validateSameOriginRequest(req);
+          if ((req.headers["content-type"] ?? "").toString().split(";", 1)[0].trim().toLowerCase() !== "application/json") {
+            throw new RequestError("Content-Type must be application/json.", 415);
+          }
+          const requestUrl = new URL(req.url ?? "/", allowedOrigin);
+          const token = validateLauncherExportToken(requestUrl.searchParams.get("token"));
+          const paths = await readLauncherExportRequest(projectRoot, token);
+          await mkdir(paths.directory, { recursive: true });
+
+          try {
+            const currentStatus = JSON.parse(await readFile(paths.status, "utf8")) as { state?: string; exportBundlePath?: string };
+            if (currentStatus.state === "completed" && currentStatus.exportBundlePath) {
+              sendJson(res, 200, currentStatus);
+              return;
+            }
+          } catch {
+            // A missing status file is the expected pending state.
+          }
+
+          const declaredHeader = req.headers["content-length"];
+          const declaredBytes = Number(Array.isArray(declaredHeader) ? declaredHeader[0] : declaredHeader ?? 0);
+          if (declaredBytes > maximumLauncherExportBytes) throw new RequestError("Portfolio publishing export exceeds the size limit.", 413);
+
+          const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+          const exportPath = path.join(paths.directory, `portfolio-production-export-${timestamp}-${token}.json`);
+          temporaryPath = `${exportPath}.tmp`;
+          const output = await open(temporaryPath, "wx");
+          let totalBytes = 0;
+          try {
+            for await (const chunk of req) {
+              const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+              totalBytes += buffer.length;
+              if (totalBytes > maximumLauncherExportBytes) throw new RequestError("Portfolio publishing export exceeds the size limit.", 413);
+              await output.write(buffer);
+            }
+            if (!totalBytes) throw new RequestError("Portfolio publishing export is empty.", 400);
+            if (declaredBytes > 0 && declaredBytes !== totalBytes) throw new RequestError("Portfolio publishing export size does not match Content-Length.", 400);
+            await output.sync();
+          } finally {
+            await output.close();
+          }
+          await rename(temporaryPath, exportPath);
+          temporaryPath = "";
+          const status = { state: "completed", exportBundlePath: exportPath, totalBytes, completedAt: new Date().toISOString() };
+          await writeLauncherExportStatus(paths.status, status);
+          sendJson(res, 201, status);
+        } catch (error) {
+          if (temporaryPath) await rm(temporaryPath, { force: true });
+          sendJson(res, error instanceof RequestError ? error.statusCode : 500, { error: error instanceof Error ? error.message : "Unable to save launcher publishing export." });
+        }
+      });
+
+      server.middlewares.use(launcherExportFailEndpoint, async (req, res) => {
+        if (req.method !== "POST") { sendJson(res, 405, { error: "Method not allowed." }); return; }
+        try {
+          validateSameOriginRequest(req);
+          const requestUrl = new URL(req.url ?? "/", allowedOrigin);
+          const token = validateLauncherExportToken(requestUrl.searchParams.get("token"));
+          const paths = await readLauncherExportRequest(projectRoot, token);
+          const payload = await readJsonBody(req, 16 * 1024);
+          const errorMessage = typeof payload.error === "string" && payload.error.trim() ? payload.error.trim() : "The browser-side portfolio export failed.";
+          const status = { state: "failed", error: errorMessage, completedAt: new Date().toISOString() };
+          await writeLauncherExportStatus(paths.status, status);
+          sendJson(res, 200, status);
+        } catch (error) {
+          sendJson(res, error instanceof RequestError ? error.statusCode : 500, { error: error instanceof Error ? error.message : "Unable to record launcher export failure." });
+        }
+      });
 
       server.middlewares.use(playableGameCoverStageEndpoint, async (req, res) => {
         if (req.method !== "POST") { sendJson(res, 405, { error: "Method not allowed." }); return; }

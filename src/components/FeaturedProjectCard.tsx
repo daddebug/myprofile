@@ -103,6 +103,7 @@ export function FeaturedProjectCard({
       // height, and any card growing taller pulls them down with it.
       className="group relative flex h-full min-w-0 flex-col bg-deepIndigo/84 outline outline-1 outline-softWhite/8 transition-colors duration-300 focus-within:outline-acidGreen/60 md:min-h-[520px] md:hover:outline-electricBlue/36"
       data-featured-work-card
+      data-project-id={projectId}
       onPointerEnter={onActivate}
       onFocus={onActivate}
       onBlur={handleBlur}

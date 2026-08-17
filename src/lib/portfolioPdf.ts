@@ -49,6 +49,18 @@ type ConfigInputs = { locale: Locale; projectIds: string[]; uiIds: string[]; gam
 
 const sectionOrder: PdfSectionId[] = ["cover", "profile", "projects", "ui-works", "games", "contact"];
 
+export function pdfSectionLabel(id: PdfSectionId, locale: Locale) {
+  const values: Record<PdfSectionId, { zh: string; en: string }> = {
+    cover: { zh: "封面", en: "Cover" },
+    profile: { zh: "个人资料与经历", en: "Profile & Experience" },
+    projects: { zh: "项目案例", en: "Projects" },
+    "ui-works": { zh: "UI 作品", en: "UI Works" },
+    games: { zh: "游戏经历", en: "Game Experience" },
+    contact: { zh: "联系方式", en: "Contact" },
+  };
+  return values[id][locale];
+}
+
 export function createPortfolioPdfConfig({ locale, projectIds, uiIds, gameIds }: ConfigInputs, preset: PdfPreset = "standard"): PortfolioPdfConfig {
   const limits = preset === "compact"
     ? { projects: 3, ui: 6, games: 3 }
