@@ -1,8 +1,9 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
+import { isImageSourceAdapter, validateImageBytes } from "./assetIntegrity.mjs";
 
 const REGISTRY_PATH = path.join("src", "lib", "publishing", "publishSourceRegistry.json");
-const FORBIDDEN_PUBLISHED_REFERENCE = /^(?:blob:|file:|https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?\/)|^[a-zA-Z]:[\\/]|^\/portfolio-assets\/|^\/__portfolio-content\//;
+const FORBIDDEN_PUBLISHED_REFERENCE = /^(?:blob:|file:|https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?\/)|^[a-zA-Z]:[\\/]|^\/?local-deliverables\/|^\/portfolio-assets\/|^\/__portfolio-content\//;
 const RESOURCE_KEYS = new Set([
   "assetId", "posterAssetId", "imageId", "localImageId", "coverAssetId", "detectedCoverAssetId",
   "coverId", "gameId", "publicPath", "publicUrl", "posterPublicPath", "entryPublicPath", "figmaUrl", "sourceUrl", "embedUrl", "playUrl",
@@ -152,10 +153,96 @@ function collectContentTree(manifest, value, context, registryIds, bundleImageId
         if (!valid) manifest.issues.push({ severity: "error", code: "INVALID_EXTERNAL_URL", sourceAdapterId: adapterId, sourcePath: fieldPath, message: `External resource is not a production-safe HTTPS URL: ${item}` });
       } else if (["imageId", "localImageId", "assetId", "posterAssetId", "coverAssetId", "detectedCoverAssetId", "gameId", "coverId"].includes(key)) {
         const hasBundleAsset = bundleImageIds.has(`${adapterId}\u0000${referenceId}`);
-        manifest.assets.push({ assetId: referenceId, projectId: context.projectId, sourceAdapterId: adapterId, sourcePath: fieldPath, intendedProductionPath: null, byteSize: 0, mimeType: "application/octet-stream", status: hasBundleAsset ? "collected" : "discovered" });
+        // For project-body-indexeddb-assets only: capture the sibling publicPath
+        // (or posterPublicPath for posterAssetId) declared alongside this reference,
+        // so a later pass can check whether it's already safely published on disk
+        // even when this browser session's IndexedDB didn't have the blob. See
+        // resolveProjectBodyAssetFallbacks().
+        const declaredPublicPath = ["project-body-indexeddb-assets", "dynamic-template-images", "ui-practice-images", "playable-game-covers"].includes(adapterId)
+          ? (key === "posterAssetId" && typeof record.posterPublicPath === "string" ? record.posterPublicPath
+            : typeof record.publicPath === "string" ? record.publicPath
+            : typeof record.publicUrl === "string" ? record.publicUrl
+            : undefined)
+          : undefined;
+        manifest.assets.push({ assetId: referenceId, projectId: context.projectId, sourceAdapterId: adapterId, sourcePath: fieldPath, intendedProductionPath: null, byteSize: 0, mimeType: "application/octet-stream", status: hasBundleAsset ? "collected" : "discovered", declaredPublicPath });
       }
     }
     collectContentTree(manifest, item, { ...context, fieldPath }, registryIds, bundleImageIds);
+  }
+}
+
+// A published asset's declared publicPath must look exactly like
+// /images/published/<category>/<project>/<fileName> -- captured as two
+// groups so the file's own basename can be checked against the referenced
+// asset id below. Only the adapters below have this disk-published shape;
+// every other adapter (game-experience-covers has its own, separate
+// disk-fallback in productionBundleExport.ts; project covers, etc. are
+// untouched) returns null, unresolved.
+const PUBLISHED_ASSET_PATH_BY_ADAPTER = {
+  "project-body-indexeddb-assets": /^\/images\/published\/project-body\/([^/]+)\/([^/]+)$/,
+  // dynamic-template-images and ui-practice-images publish to the exact same
+  // path family (see outputFor() above) -- a project's template-instance
+  // images and UI Practice's gallery images are not distinguished on disk,
+  // only by which project referenced them.
+  "dynamic-template-images": /^\/images\/published\/template-images\/([^/]+)\/([^/]+)$/,
+  "ui-practice-images": /^\/images\/published\/template-images\/([^/]+)\/([^/]+)$/,
+  // A whole project body being inherited unedited (see
+  // import-production-bundle.mjs's per-project catalog/body merge) may
+  // itself reference a Playable Game cover -- that reference must resolve
+  // the same disk-fallback way every other asset type in an inherited body
+  // does, not just project-body/template images.
+  "playable-game-covers": /^\/images\/published\/playable-game-covers\/([^/]+)\/([^/]+)$/,
+};
+
+// The one shared source of truth for "is this reference actually satisfied
+// by a file the site already published," used identically by both publishing
+// preflight (buildPublishingPreflight, via resolveProjectBodyAssetFallbacks
+// below) and the confirmed importer (import-production-bundle.mjs), so the
+// two can never drift into judging the same reference differently. Both only
+// see what the exporting browser session's IndexedDB currently holds; if
+// that session never (re-)populated a blob -- e.g. a different
+// browser/profile than the one that originally published it, or a project
+// body being inherited unedited from the currently-published state, whose
+// own image references must resolve the same way a fresh edit's would -- the
+// asset would otherwise be treated as missing even though it was already
+// published to disk in an earlier cycle and the live site renders it fine
+// via that existing file. This checks the exact, already-declared publicPath
+// against disk before accepting it, so a same-directory file with a
+// different id can never satisfy the reference.
+export async function resolveAlreadyPublishedProjectBodyAsset(root, sourceAdapterId, assetId, declaredPublicPath) {
+  const pattern = PUBLISHED_ASSET_PATH_BY_ADAPTER[sourceAdapterId];
+  if (!pattern) return null;
+  if (typeof declaredPublicPath !== "string" || !declaredPublicPath.trim()) return null;
+  const trimmed = declaredPublicPath.trim();
+  const match = trimmed.match(pattern);
+  if (!match) return null;
+  const [, , fileName] = match;
+  if (path.parse(fileName).name !== assetId) return null;
+  const relativePath = `public${trimmed}`;
+  const info = await fileInfo(root, relativePath);
+  if (!info.exists) return null;
+  // An already-published file on disk is only a valid fallback if it is
+  // itself intact -- a prior corrupted write (see assetIntegrity.mjs) must
+  // never be treated as "available" just because a file exists at the
+  // expected path with a plausible-looking name.
+  if (isImageSourceAdapter(sourceAdapterId)) {
+    const bytes = await readFile(path.resolve(root, relativePath));
+    const integrity = validateImageBytes(bytes, info.mimeType);
+    if (!integrity.valid) return null;
+  }
+  return { relativePath, publicPath: trimmed, byteSize: info.byteSize, mimeType: info.mimeType };
+}
+
+async function resolveProjectBodyAssetFallbacks(root, manifest) {
+  for (const asset of manifest.assets) {
+    if (asset.status !== "discovered") continue;
+    const fallback = await resolveAlreadyPublishedProjectBodyAsset(root, asset.sourceAdapterId, asset.assetId, asset.declaredPublicPath);
+    if (!fallback) continue;
+    asset.status = "available";
+    asset.byteSize = fallback.byteSize;
+    asset.mimeType = fallback.mimeType;
+    asset.intendedProductionPath = fallback.relativePath;
+    asset.publishedFileFallback = true;
   }
 }
 
@@ -247,15 +334,39 @@ export async function buildPublishingPreflight({ root, bundle, rewrittenOutput }
 
   const bundleImages = Array.isArray(bundle?.images) ? bundle.images : [];
   const bundleImageIds = new Set();
+  // Any bundle image adapter that publishes actual image files must prove its
+  // decoded bytes are real before being trusted anywhere downstream (as a
+  // resolved reference, or eventually written to disk) -- see
+  // assetIntegrity.mjs for why (a corrupted export produced ~3-byte payloads
+  // for two adapters that no prior check caught). An asset that fails this is
+  // deliberately kept OUT of bundleImageIds, so any content-tree reference to
+  // it falls through the normal "collected" -> "discovered" -> disk-fallback
+  // -> MISSING_REFERENCED_ASSET path exactly as if the bundle never included
+  // it at all, rather than needing a second, parallel blocking mechanism.
   for (const image of bundleImages) {
     const adapter = adapterForBundleImage(registry, image);
     if (!adapter) {
       manifest.issues.push({ severity: "error", code: "UNREGISTERED_BUNDLE_ASSET", sourceAdapterId: "unknown", sourcePath: `${image?.database ?? "?"}/${image?.store ?? "?"}/${image?.id ?? "?"}`, message: "Exported asset has no registered source adapter." });
       continue;
     }
+    const declaredMime = mimeFor(image.fileName || "", image.mimeType);
+    const bytes = Buffer.from(image.dataBase64 || "", "base64");
+    const integrity = isImageSourceAdapter(adapter.id) ? validateImageBytes(bytes, declaredMime) : { valid: true };
+    const sourcePath = `browser:${image.database}/${image.store}/${image.id}`;
+    if (!integrity.valid) {
+      manifest.issues.push({ severity: "error", code: "INVALID_ASSET_BYTES", sourceAdapterId: adapter.id, sourcePath, message: `Asset ${image.id} failed integrity validation: ${integrity.reason}` });
+      manifest.assets.push({ assetId: image.id, projectId: image.projectId, sourceAdapterId: adapter.id, sourcePath, intendedProductionPath: outputFor(adapter.id, image.projectId, image.id, image.fileName), byteSize: bytes.length, mimeType: declaredMime, status: "invalid", integrityReason: integrity.reason });
+      continue;
+    }
+    // A declared/expected MIME type that disagrees with the real detected
+    // signature is recorded for visibility but never blocks -- see
+    // assetIntegrity.mjs for why (a widespread, harmless, pre-existing
+    // naming quirk in this repo, not corruption).
+    if (integrity.mimeMismatch) {
+      manifest.issues.push({ severity: "warning", code: "ASSET_MIME_MISMATCH", sourceAdapterId: adapter.id, sourcePath, message: `Asset ${image.id} is declared as ${declaredMime} but its decoded bytes are actually ${integrity.detectedMime}.` });
+    }
     bundleImageIds.add(`${adapter.id}\u0000${image.id}`);
-    const byteSize = typeof image.size === "number" ? image.size : Buffer.from(image.dataBase64 || "", "base64").length;
-    manifest.assets.push({ assetId: image.id, projectId: image.projectId, sourceAdapterId: adapter.id, sourcePath: `browser:${image.database}/${image.store}/${image.id}`, intendedProductionPath: outputFor(adapter.id, image.projectId, image.id, image.fileName), byteSize, mimeType: mimeFor(image.fileName || "", image.mimeType), status: "collected" });
+    manifest.assets.push({ assetId: image.id, projectId: image.projectId, sourceAdapterId: adapter.id, sourcePath, intendedProductionPath: outputFor(adapter.id, image.projectId, image.id, image.fileName), byteSize: bytes.length, mimeType: declaredMime, status: "collected" });
   }
 
   const catalog = bundle?.projectCatalog?.version === 1 ? bundle.projectCatalog : bundle?.publicMetadata;
@@ -285,6 +396,7 @@ export async function buildPublishingPreflight({ root, bundle, rewrittenOutput }
   collectContentTree(manifest, bundle?.uiPractice, { projectId: "ui-personal-practice", sourceAdapterId: "ui-practice-metadata", fieldPath: "uiPractice" }, registryIds, bundleImageIds);
   collectContentTree(manifest, bundle?.gameExperience, { sourceAdapterId: "game-experience-records", fieldPath: "gameExperience" }, registryIds, bundleImageIds);
   await addDiskManifests(root, manifest, registryIds);
+  await resolveProjectBodyAssetFallbacks(root, manifest);
 
   const collected = new Set(manifest.assets.filter((asset) => asset.status === "collected" || asset.status === "available" || asset.status === "external").map((asset) => `${asset.sourceAdapterId}\u0000${asset.assetId}`));
   for (const asset of manifest.assets) {
@@ -303,7 +415,16 @@ export async function buildPublishingPreflight({ root, bundle, rewrittenOutput }
     inspect(rewrittenOutput);
     const intendedReferences = new Set(manifest.assets.flatMap((asset) => typeof asset.intendedProductionPath === "string" && asset.intendedProductionPath.startsWith("public/images/published/") ? [`/${asset.intendedProductionPath.replace(/^public\//, "")}`] : []));
     for (const reference of publishedReferences) {
-      if (!intendedReferences.has(reference)) manifest.issues.push({ severity: "error", code: "PUBLISHED_FILE_NOT_IN_OUTPUT", sourceAdapterId: "published-assets", sourcePath: reference, message: `Published metadata references a file that is not included in the output manifest: ${reference}` });
+      if (intendedReferences.has(reference)) continue;
+      // This run's own bundle walk didn't produce this reference -- but a
+      // whole project inherited unedited from the currently-published state
+      // (see import-production-bundle.mjs's per-project catalog/body merge)
+      // legitimately carries references this run never (re-)discovered from
+      // scratch. That's not dangling as long as the exact file it names is
+      // already safely published on disk.
+      const info = await fileInfo(root, `public${reference}`);
+      if (info.exists) continue;
+      manifest.issues.push({ severity: "error", code: "PUBLISHED_FILE_NOT_IN_OUTPUT", sourceAdapterId: "published-assets", sourcePath: reference, message: `Published metadata references a file that is not included in the output manifest: ${reference}` });
     }
   }
 

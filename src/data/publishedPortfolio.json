@@ -1,7 +1,536 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-11T13:02:57.952Z",
+  "generatedAt": "2026-08-16T14:41:12.761Z",
   "drafts": {
+    "project-1ua2677": {
+      "version": 1,
+      "templateInstances": [
+        {
+          "instanceId": "image-row-31bd8cb3-6b44-41c0-a55d-896408f3f56a",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "案例参考",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "image-row-item-9fc010bc-ca26-4701-874f-2709bb50cc4a",
+                "image": {
+                  "imageId": "image-582a7b5e-6eaf-4020-acda-b0a1837b54e1",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-582a7b5e-6eaf-4020-acda-b0a1837b54e1.jpg"
+                },
+                "imageDisplayMode": "cover",
+                "hoverPreviewMode": "none",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                }
+              },
+              {
+                "id": "image-row-item-55987c3c-460d-4627-b340-d34ba05079a8",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "image": {
+                  "imageId": "image-f75395ad-780c-44e0-92ea-843854ebebad",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-f75395ad-780c-44e0-92ea-843854ebebad.jpg"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-2174a895-4a89-488f-a40f-943e2f39d06e",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "image": {
+                  "imageId": "image-cf17b766-9296-4612-ae5c-68e03fa7e849",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-cf17b766-9296-4612-ae5c-68e03fa7e849.jpg"
+                },
+                "imageDisplayMode": "cover"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "image-row-200d39c2-b8e2-4890-aa74-3c60507cea61",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "早期在FIGMA中重新思考交互设计",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "image-row-item-f4531138-5792-407c-806b-b5df62276a2e",
+                "image": {
+                  "imageId": "image-81b9b65a-266a-4b5f-aac2-dc5515d09bbc",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-81b9b65a-266a-4b5f-aac2-dc5515d09bbc.png"
+                },
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "floating",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "主界面",
+                  "en": ""
+                },
+                "startNewRow": true
+              },
+              {
+                "id": "image-row-item-87cbd1d0-2012-46f0-b722-e110608fd332",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "属性",
+                  "en": ""
+                },
+                "hoverPreviewMode": "floating",
+                "image": {
+                  "imageId": "image-ebf9040a-0920-4a62-88bb-1dcf6a969225",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-ebf9040a-0920-4a62-88bb-1dcf6a969225.png"
+                },
+                "imageDisplayMode": "natural"
+              },
+              {
+                "id": "image-row-item-b913f0c2-e196-4585-81af-7651ffff9ded",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "皮肤切换",
+                  "en": ""
+                },
+                "hoverPreviewMode": "floating",
+                "image": {
+                  "imageId": "image-aa39d15b-80a6-4cdb-ba5c-70008d8f6bce",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-aa39d15b-80a6-4cdb-ba5c-70008d8f6bce.png"
+                },
+                "imageDisplayMode": "natural"
+              },
+              {
+                "id": "image-row-item-0f78ade7-a960-4ccb-b3e1-3e968ad8b8d4",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "image": {
+                  "imageId": "image-0e017be5-f833-48b4-921b-d208ad5303bb",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-0e017be5-f833-48b4-921b-d208ad5303bb.png"
+                },
+                "imageDisplayMode": "cover"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "direction-compare-f5de4e51-ddc9-40c2-804c-7f64ccf7b130",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "升级升星方案对比",
+              "en": ""
+            },
+            "leftLabel": {
+              "zh": "早期",
+              "en": ""
+            },
+            "rightLabel": {
+              "zh": "迭代后",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "方案 A",
+              "en": ""
+            },
+            "rightTitle": {
+              "zh": "方案 B",
+              "en": ""
+            },
+            "leftDescription": {
+              "zh": "补充左侧方案说明。",
+              "en": ""
+            },
+            "rightDescription": {
+              "zh": "补充右侧方案说明。",
+              "en": ""
+            },
+            "leftImage": {
+              "imageId": "image-716b6e4b-037c-4879-a46b-c2956207515c",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-716b6e4b-037c-4879-a46b-c2956207515c.png",
+              "hoverPreviewMode": "none"
+            },
+            "rightImage": {
+              "imageId": "image-adf54a95-1cef-4260-875a-f4a8eed9fccc",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-adf54a95-1cef-4260-875a-f4a8eed9fccc.png",
+              "hoverPreviewMode": "none"
+            },
+            "direction": "left-to-right"
+          }
+        },
+        {
+          "instanceId": "direction-compare-06597f24-9cca-4a57-8de1-37ebbb88d767",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "装备合成路线方案对比",
+              "en": ""
+            },
+            "leftLabel": {
+              "zh": "早期",
+              "en": ""
+            },
+            "rightLabel": {
+              "zh": "迭代后",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "方案 A",
+              "en": ""
+            },
+            "rightTitle": {
+              "zh": "方案 B",
+              "en": ""
+            },
+            "leftDescription": {
+              "zh": "补充左侧方案说明。",
+              "en": ""
+            },
+            "rightDescription": {
+              "zh": "补充右侧方案说明。",
+              "en": ""
+            },
+            "leftImage": {
+              "imageId": "image-d09c61b7-cb2a-476d-99cf-4a8e14784932",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-d09c61b7-cb2a-476d-99cf-4a8e14784932.png",
+              "hoverPreviewMode": "none"
+            },
+            "rightImage": {
+              "imageId": "image-fea47f73-5aca-4095-94e6-c51927adb342",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-fea47f73-5aca-4095-94e6-c51927adb342.png",
+              "hoverPreviewMode": "none"
+            },
+            "direction": "left-to-right"
+          }
+        },
+        {
+          "instanceId": "direction-compare-bc673ce9-0d01-4b5b-97f0-d28ce804d241",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "竞技场方案对比",
+              "en": ""
+            },
+            "leftLabel": {
+              "zh": "早期",
+              "en": ""
+            },
+            "rightLabel": {
+              "zh": "迭代后",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "方案 A",
+              "en": ""
+            },
+            "rightTitle": {
+              "zh": "方案 B",
+              "en": ""
+            },
+            "leftDescription": {
+              "zh": "补充左侧方案说明。",
+              "en": ""
+            },
+            "rightDescription": {
+              "zh": "补充右侧方案说明。",
+              "en": ""
+            },
+            "leftImage": {
+              "imageId": "image-23b662af-c3d9-458b-8ed9-249097c7c89c",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-23b662af-c3d9-458b-8ed9-249097c7c89c.png",
+              "hoverPreviewMode": "none"
+            },
+            "rightImage": {
+              "imageId": "image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0.png",
+              "hoverPreviewMode": "none"
+            },
+            "direction": "left-to-right"
+          }
+        },
+        {
+          "instanceId": "image-row-d7ddc470-6b4c-4fc7-a497-7dd4d60b3abc",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "其他游戏的公会体验和交互拆解",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "image-row-item-4566d166-91d0-49c4-9cc3-09b9f5442127",
+                "image": {
+                  "imageId": "image-9dd922b4-cf29-4657-9e62-5298249cce68",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-9dd922b4-cf29-4657-9e62-5298249cce68.png"
+                },
+                "imageDisplayMode": "cover",
+                "hoverPreviewMode": "none",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                }
+              },
+              {
+                "id": "image-row-item-18f7b580-e618-45fe-ba02-c2970fcaaa97",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "image": {
+                  "imageId": "image-349eba40-bb5f-4a44-87f1-d65c4dc69070",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-349eba40-bb5f-4a44-87f1-d65c4dc69070.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-a44d4b02-b91c-44bf-8f89-c2be0928bea9",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "image": {
+                  "imageId": "image-9525cb26-54fc-469b-9482-3e6b75727d69",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-9525cb26-54fc-469b-9482-3e6b75727d69.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-fc342290-ee40-486b-a6da-c12e910b5945",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "image": {
+                  "imageId": "image-bebf04da-6b18-4181-a3c7-bb0fc80ca398",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-bebf04da-6b18-4181-a3c7-bb0fc80ca398.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-976ad1d1-bd2d-42b0-9471-ee67f205b4af",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "startNewRow": true,
+                "image": {
+                  "imageId": "image-c0434cbf-c8e4-4444-b76b-d9bf6fe46fbf",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-c0434cbf-c8e4-4444-b76b-d9bf6fe46fbf.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-d8c9f8f0-7329-4b24-8943-d87c9ffd3dfb",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "image": {
+                  "imageId": "image-15f0bb99-c1c0-4b77-a5a8-e1a266629d88",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-15f0bb99-c1c0-4b77-a5a8-e1a266629d88.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-4e276aa7-a5a1-45d8-8eaf-3bceec5a2e4d",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "image": {
+                  "imageId": "image-90fbb4b6-acd5-4c07-b27c-44a83f523784",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-90fbb4b6-acd5-4c07-b27c-44a83f523784.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-e0c94e1d-87cf-4d0e-b7e2-ea84123fc5f8",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "image": {
+                  "imageId": "image-75c6ad2f-c9fa-47b6-95e4-1998213a59e2",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-75c6ad2f-c9fa-47b6-95e4-1998213a59e2.png"
+                },
+                "imageDisplayMode": "cover"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "image-row-decf5f89-c020-4347-82c9-e0e970d226f0",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "综合目前游戏内的交互重新设计的公会各系统的交互",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "image-row-item-e4522e9a-e528-40f5-b392-7c27471d7f60",
+                "image": {
+                  "imageId": "image-bccae830-475e-486d-ad25-cedf55e8caae",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-bccae830-475e-486d-ad25-cedf55e8caae.png"
+                },
+                "imageDisplayMode": "cover",
+                "hoverPreviewMode": "none",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "每日公会任务是高活跃玩家经常点进的界面，我想保留很强的进度感和使命感",
+                  "en": ""
+                }
+              },
+              {
+                "id": "image-row-item-e2e6ec60-ea09-46a4-94b7-4c7c0960f932",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "每日付费后分发的公会红包界面，也是强调了荣誉感和进度感",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "image": {
+                  "imageId": "image-bb088f9f-b663-4be3-b8b4-462a6c2667b5",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-bb088f9f-b663-4be3-b8b4-462a6c2667b5.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-f686eb56-1d14-44bb-be6b-12fb5de431ff",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "每日公会boss界面的设计，也是将九头蛇的属性克制和单一以及总进度表现清晰",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "startNewRow": true,
+                "image": {
+                  "imageId": "image-3179a673-28c8-436c-b2da-3ffc84739a88",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-3179a673-28c8-436c-b2da-3ffc84739a88.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-0479b994-73c2-4d3c-bf0e-6db9df7551d0",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "image": {
+                  "imageId": "image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4.png"
+                },
+                "imageDisplayMode": "cover"
+              }
+            ]
+          }
+        }
+      ],
+      "updatedAt": "1970-01-01T00:00:00.000Z"
+    },
     "interaction-intelligence-system": {
       "version": 1,
       "templateInstances": [
@@ -3940,840 +4469,6 @@
       ],
       "updatedAt": "2026-08-07T06:06:30.473Z"
     },
-    "project-1ua2677": {
-      "version": 1,
-      "templateInstances": [
-        {
-          "instanceId": "supporting-note-e9346e84-cfeb-49f3-aaf0-49676548c9b5",
-          "templateId": "supporting-note",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "body": {
-              "zh": "项目建立在一套成熟的养成任务驱动型游戏框架上，玩家日常通过任务驱动在多个系统之间高频切换，UI 不只是辅助工具，也是主要的玩法承载面。随着项目希望将更多注意力留给3D角色、场景，原有系统逻辑开始暴露出节奏冲突。",
-              "en": "After 2016, influenced by Summoners War-like games and titles such as Soul Hunters, traditional mobile games increasingly organized their interfaces around system loops, resource feedback, and continuous guidance."
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-233060d1-59d6-49e4-ae61-734a794856af",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "01",
-              "en": "01"
-            },
-            "leftTitle": {
-              "zh": "传统手游痛点",
-              "en": "Traditional Mobile Game Pain Points"
-            },
-            "statement": {
-              "zh": "UI 在展示信息的同时还高强度指引玩家进行下一步操作。",
-              "en": "While presenting information, the UI also strongly directs the player's next action."
-            },
-            "body": {
-              "zh": "2016 年后，受“魔灵-like”与《小冰冰传奇》等影响，成熟手游逐渐形成以养成、合成、升级和概率获取为核心的循环。大量信息依赖 UI、文字和数字承载，导致游戏重 UI、轻表现，也让后来的 3D 场景与高密度界面产生冲突。随着 3D 从技术展示转向情感与内容支撑，交互也开始从平铺堆量转向更清晰的层级组织。",
-              "en": "After 2016, influenced by Summoners War-like games and titles such as Soul Hunters, traditional mobile games increasingly organized their interfaces around system loops, resource feedback, and continuous guidance."
-            }
-          }
-        },
-        {
-          "instanceId": "xmind-breakdown-e94b870e-b78d-4630-ad95-05c57f5f4629",
-          "templateId": "xmind-breakdown",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionTitle": {
-              "zh": "参考产品系统拆解",
-              "en": ""
-            },
-            "documentOne": {
-              "fileName": "reference-system-breakdown.xmind",
-              "sheetTitle": "系统结构",
-              "centerTopic": "长线养成系统",
-              "branches": [
-                {
-                  "id": "xmind-9bff2556-1da5-4a66-b002-6d7884a95932",
-                  "title": "任务驱动",
-                  "groups": [
-                    {
-                      "id": "xmind-4d154c3d-60d8-42a9-801f-0c4ff6781271",
-                      "title": "日常任务",
-                      "items": [
-                        "登录、活跃度与资源领取共同建立每日回访节奏",
-                        "体力消耗、角色养成和副本挑战被整合进连续任务链"
-                      ]
-                    },
-                    {
-                      "id": "xmind-e0f2192f-fc4c-49ac-95e8-4656ee56ca69",
-                      "title": "公会协作",
-                      "items": [
-                        "个人贡献与公会阶段奖励形成集体责任",
-                        "成员战力分配和协作次数推动持续交流"
-                      ]
-                    },
-                    {
-                      "id": "xmind-35deb5ba-83d8-43e0-897d-8fc8b00f3411",
-                      "title": "周期活动",
-                      "items": [
-                        "签到、通行证和限时任务提供阶段性目标",
-                        "充值与资源消耗返利强化短周期投入"
-                      ]
-                    },
-                    {
-                      "id": "xmind-194320d5-122c-4a90-a895-f98085a0ba36",
-                      "title": "战斗与竞争",
-                      "items": [
-                        "副本、竞技场和跨服玩法持续验证养成结果",
-                        "排名与周期结算将成长反馈转化为竞争动力"
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "id": "xmind-ad8a3fb1-117f-405f-983a-0977e20c6e97",
-                  "title": "多线养成",
-                  "groups": [
-                    {
-                      "id": "xmind-991f6ecc-ae14-4002-a9d1-abb6359c35c8",
-                      "title": "角色成长",
-                      "items": [
-                        "等级、阶级与技能共同构成基础成长路径",
-                        "玩家等级和材料产出控制阶段推进速度"
-                      ]
-                    },
-                    {
-                      "id": "xmind-66bf1d4c-6ea1-429e-8c75-d3cd50f6d978",
-                      "title": "装备与神器",
-                      "items": [
-                        "装备、神器和稀有材料延长中长期养成深度",
-                        "不同资源入口促使玩家反复切换系统"
-                      ]
-                    },
-                    {
-                      "id": "xmind-e5dc75a2-3695-4fe5-994a-8c198ab9425a",
-                      "title": "外观与数值",
-                      "items": [
-                        "皮肤兼具视觉差异和属性提升",
-                        "稀有外观、宝箱与直购构成主要付费节点"
-                      ]
-                    },
-                    {
-                      "id": "xmind-a3310128-98ca-462e-a380-66d9bdf76830",
-                      "title": "并行角色体系",
-                      "items": [
-                        "独立角色线拥有等级、灵魂石、皮肤和神器",
-                        "并行培养扩大资源需求与长期投入空间"
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "id": "xmind-167bcf45-cb88-4822-988e-3e7d10b08e27",
-                  "title": "社交与留存",
-                  "groups": [
-                    {
-                      "id": "xmind-ff85ef1e-4591-45d3-ab63-ec97288c4421",
-                      "title": "公会社交",
-                      "items": [
-                        "聊天、协作任务和成员贡献维持稳定关系",
-                        "公开积分与奖励分配增加参与压力"
-                      ]
-                    },
-                    {
-                      "id": "xmind-71d97176-d99a-4967-ac19-c64948aa2760",
-                      "title": "竞争反馈",
-                      "items": [
-                        "排行榜、竞技场和联赛提供可比较的成长结果",
-                        "个人排名与集体排名形成双重目标"
-                      ]
-                    },
-                    {
-                      "id": "xmind-9ba0e373-93cf-42d1-aa1e-988e515b432f",
-                      "title": "辅助入口",
-                      "items": [
-                        "邮件、新闻和背包承接奖励、资讯与资源管理",
-                        "个人信息与设置维持基础账户体验"
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "id": "xmind-1412c50d-6932-4638-a8e5-161069cd57e7",
-                  "title": "新手与回归",
-                  "groups": [
-                    {
-                      "id": "xmind-aa79f757-79ed-4e1d-86d5-79bc7662a579",
-                      "title": "新手目标",
-                      "items": [
-                        "阶段活动推动主线、体力消耗和基础养成",
-                        "连续奖励帮助玩家快速建立短期目标"
-                      ]
-                    },
-                    {
-                      "id": "xmind-d51db654-8996-42a9-b3ba-c99fdb56c0f9",
-                      "title": "首次付费",
-                      "items": [
-                        "高倍率资源与限时礼包降低首次付费门槛",
-                        "前期战力提升让付费效果更容易被感知"
-                      ]
-                    },
-                    {
-                      "id": "xmind-21e55426-bdbd-42bb-bb36-2ed1b356815a",
-                      "title": "回归补偿",
-                      "items": [
-                        "回归礼包补充角色材料、体力与成长资源",
-                        "集中奖励帮助玩家重新接入日常循环"
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            "documentTwo": null,
-            "referenceOneTitle": {
-              "zh": "成熟长线养成产品",
-              "en": ""
-            },
-            "referenceOneCategory": {
-              "zh": "系统结构参照 · 已上线产品",
-              "en": ""
-            },
-            "referenceOneSummary": {
-              "zh": "该产品以任务循环串联角色养成、战斗、公会社交与周期活动。大量系统共享资源入口和奖励出口，使玩家在每日回访中持续完成成长、协作和竞争目标。",
-              "en": ""
-            },
-            "referenceOneFocus": {
-              "zh": "重点观察任务如何调度不同系统，以及高频入口、养成反馈和付费节点如何共同维持长期活跃。",
-              "en": ""
-            },
-            "referenceTwoTitle": {
-              "zh": "",
-              "en": ""
-            },
-            "referenceTwoCategory": {
-              "zh": "",
-              "en": ""
-            },
-            "referenceTwoSummary": {
-              "zh": "",
-              "en": ""
-            },
-            "referenceTwoFocus": {
-              "zh": "",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "image-row-31bd8cb3-6b44-41c0-a55d-896408f3f56a",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "案例参考",
-              "en": ""
-            },
-            "items": [
-              {
-                "id": "image-row-item-9fc010bc-ca26-4701-874f-2709bb50cc4a",
-                "image": {
-                  "imageId": "image-582a7b5e-6eaf-4020-acda-b0a1837b54e1",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-582a7b5e-6eaf-4020-acda-b0a1837b54e1.jpg"
-                },
-                "imageDisplayMode": "cover",
-                "hoverPreviewMode": "none",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "小冰冰传奇like的游戏重交互轻美术的平铺表现，游戏内只关注信息的平铺，对信息的循序渐进的展示缺失",
-                  "en": ""
-                }
-              },
-              {
-                "id": "image-row-item-55987c3c-460d-4627-b340-d34ba05079a8",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "成长反馈偏向横幅不注重仪式感只注重数值增长，角色展示空间被压缩，滥用弹窗的现象较为明显",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-f75395ad-780c-44e0-92ea-843854ebebad",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-f75395ad-780c-44e0-92ea-843854ebebad.jpg"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-2174a895-4a89-488f-a40f-943e2f39d06e",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "毫无角色/剧情体验，局内也多为策略交互为主，所有的信息都会指引到任务跳转，玩家的思考被剥夺",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-cf17b766-9296-4612-ae5c-68e03fa7e849",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-cf17b766-9296-4612-ae5c-68e03fa7e849.jpg"
-                },
-                "imageDisplayMode": "cover"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-aa127d1a-9542-4b9d-9327-ee8bc02b50fa",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "02",
-              "en": "01"
-            },
-            "leftTitle": {
-              "zh": "养成交互重建",
-              "en": "Traditional Mobile Game Pain Points"
-            },
-            "statement": {
-              "zh": "重新从体验入手改变现有交互",
-              "en": "While presenting information, the UI also strongly directs the player's next action."
-            },
-            "body": {
-              "zh": "早期方案几乎沿用了原有养成界面的组织方式：为了让升级、升星和资源判断都能在一个页面中快速完成，按钮、材料信息、数值反馈和结果展示被集中放在首屏中。为了效率压缩了角色模型的展示空间，让界面本身变得比角色更抢眼。我后续的调整重点不是简单删减内容，而是重新分配界面权重与反馈节奏：保留高频操作所需的信息效率，同时把角色展示与关键成长反馈从拥挤的首屏中释放出来。",
-              "en": "After 2016, influenced by Summoners War-like games and titles such as Soul Hunters, traditional mobile games increasingly organized their interfaces around system loops, resource feedback, and continuous guidance."
-            }
-          }
-        },
-        {
-          "instanceId": "image-row-200d39c2-b8e2-4890-aa74-3c60507cea61",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "早期在FIGMA中重新思考交互设计",
-              "en": ""
-            },
-            "items": [
-              {
-                "id": "image-row-item-f4531138-5792-407c-806b-b5df62276a2e",
-                "image": {
-                  "imageId": "image-81b9b65a-266a-4b5f-aac2-dc5515d09bbc",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-81b9b65a-266a-4b5f-aac2-dc5515d09bbc.png"
-                },
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "floating",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "主界面",
-                  "en": ""
-                },
-                "startNewRow": true
-              },
-              {
-                "id": "image-row-item-87cbd1d0-2012-46f0-b722-e110608fd332",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "属性",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-ebf9040a-0920-4a62-88bb-1dcf6a969225",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-ebf9040a-0920-4a62-88bb-1dcf6a969225.png"
-                },
-                "imageDisplayMode": "natural"
-              },
-              {
-                "id": "image-row-item-b913f0c2-e196-4585-81af-7651ffff9ded",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "皮肤切换",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-aa39d15b-80a6-4cdb-ba5c-70008d8f6bce",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-aa39d15b-80a6-4cdb-ba5c-70008d8f6bce.png"
-                },
-                "imageDisplayMode": "natural"
-              },
-              {
-                "id": "image-row-item-0f78ade7-a960-4ccb-b3e1-3e968ad8b8d4",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "合成装备的预览",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-0e017be5-f833-48b4-921b-d208ad5303bb",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-0e017be5-f833-48b4-921b-d208ad5303bb.png"
-                },
-                "imageDisplayMode": "natural"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "figma-prototype-94c23e92-a1de-4391-a2dd-7ce817183066",
-          "templateId": "figma-prototype",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "项目资源演示",
-              "en": ""
-            },
-            "figmaUrl": "https://www.figma.com/proto/CtcXJQyA7C5y40lJbsgoqn/Untitled?node-id=0-1&p=f&t=A5YjFYkxOQ7n3GQD-0&scaling=scale-down&content-scaling=fixed&starting-point-node-id=2%3A4",
-            "caption": {
-              "zh": "后来部分交互被实装进项目",
-              "en": ""
-            },
-            "fallbackImage": {
-              "localImageId": "image-3d6e3b39-302a-4142-a2c0-7bde0d905b92",
-              "publicPath": "/images/published/project-body/project-1ua2677/image-3d6e3b39-302a-4142-a2c0-7bde0d905b92.png"
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-22c40df5-8327-4c56-8ee6-ba9eb3111d65",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "03",
-              "en": "01"
-            },
-            "leftTitle": {
-              "zh": "把握迭代规则",
-              "en": "Traditional Mobile Game Pain Points"
-            },
-            "statement": {
-              "zh": "选择几个重点系统进行进一步的交互优化",
-              "en": "While presenting information, the UI also strongly directs the player's next action."
-            },
-            "body": {
-              "zh": "选择了一测期间交互问题的收集，进行了多版本迭代后，着重在升级升阶/装备合成路径/竞技场美术表现为主要优化对象，这部分我设计的交互被最终采纳到上线版本获得项目组市场部的认可",
-              "en": "After 2016, influenced by Summoners War-like games and titles such as Soul Hunters, traditional mobile games increasingly organized their interfaces around system loops, resource feedback, and continuous guidance."
-            }
-          }
-        },
-        {
-          "instanceId": "direction-compare-f5de4e51-ddc9-40c2-804c-7f64ccf7b130",
-          "templateId": "direction-compare",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "升级升星方案对比",
-              "en": ""
-            },
-            "leftLabel": {
-              "zh": "早期",
-              "en": ""
-            },
-            "rightLabel": {
-              "zh": "迭代后",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "早期在角色下方",
-              "en": ""
-            },
-            "rightTitle": {
-              "zh": "后期改为右侧统一升级",
-              "en": ""
-            },
-            "leftDescription": {
-              "zh": "非常分散且后期技术实现的时候也不方便做适配，进阶按钮常驻在角色下方破坏了3d表现的流畅性，也太过于拘泥于旧2d时代游戏的交互",
-              "en": ""
-            },
-            "rightDescription": {
-              "zh": "不仅让可升级状态非常明显，也在技术层面更方便解决适配问题，让出更多空间给3d表现",
-              "en": ""
-            },
-            "leftImage": {
-              "imageId": "image-716b6e4b-037c-4879-a46b-c2956207515c",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-716b6e4b-037c-4879-a46b-c2956207515c.png",
-              "hoverPreviewMode": "none"
-            },
-            "rightImage": {
-              "imageId": "image-adf54a95-1cef-4260-875a-f4a8eed9fccc",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-adf54a95-1cef-4260-875a-f4a8eed9fccc.png",
-              "hoverPreviewMode": "none"
-            },
-            "direction": "left-to-right"
-          }
-        },
-        {
-          "instanceId": "direction-compare-06597f24-9cca-4a57-8de1-37ebbb88d767",
-          "templateId": "direction-compare",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "装备合成路线方案对比",
-              "en": ""
-            },
-            "leftLabel": {
-              "zh": "早期",
-              "en": ""
-            },
-            "rightLabel": {
-              "zh": "迭代后",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "早期只展示单一装备路径",
-              "en": ""
-            },
-            "rightTitle": {
-              "zh": "后期点击装备后平铺路径",
-              "en": ""
-            },
-            "leftDescription": {
-              "zh": "早期非常依赖弹窗，几乎所有内容都展示在弹窗内，空间狭小也无法突出此功能的重要性，其实各装备图标都可以点击但返回会比较吃力且合成的具体路径经常依赖玩家回忆",
-              "en": ""
-            },
-            "rightDescription": {
-              "zh": "和程序一起结合目前市面上存在的合成相关的游戏，且将所有装备的合成路径一一整合归纳，最终以平铺路径，表格化的方式展示，让玩家一眼知道自己所在装备合成路径的具体位置和渠道，也更直观的感受到这个合成的有趣之处",
-              "en": ""
-            },
-            "leftImage": {
-              "imageId": "image-d09c61b7-cb2a-476d-99cf-4a8e14784932",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-d09c61b7-cb2a-476d-99cf-4a8e14784932.png",
-              "hoverPreviewMode": "none"
-            },
-            "rightImage": {
-              "imageId": "image-fea47f73-5aca-4095-94e6-c51927adb342",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-fea47f73-5aca-4095-94e6-c51927adb342.png",
-              "hoverPreviewMode": "none"
-            },
-            "direction": "left-to-right"
-          }
-        },
-        {
-          "instanceId": "direction-compare-bc673ce9-0d01-4b5b-97f0-d28ce804d241",
-          "templateId": "direction-compare",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "竞技场方案对比",
-              "en": ""
-            },
-            "leftLabel": {
-              "zh": "早期",
-              "en": ""
-            },
-            "rightLabel": {
-              "zh": "迭代后",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "早期竞技场表现",
-              "en": ""
-            },
-            "rightTitle": {
-              "zh": "后期改为全屏展示",
-              "en": ""
-            },
-            "leftDescription": {
-              "zh": "又是过于依赖弹窗设计，此系统是玩家验证自己养成的重要系统，但不仅信息繁多且太依赖2d美术",
-              "en": ""
-            },
-            "rightDescription": {
-              "zh": "后期自己设计将3d队伍展示在场景中，通过右侧更符合手机的交互方式来进行战斗刷新等操作。最后的版本未采用3d展示队伍，替换为个人头像在左侧。",
-              "en": ""
-            },
-            "leftImage": {
-              "imageId": "image-23b662af-c3d9-458b-8ed9-249097c7c89c",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-23b662af-c3d9-458b-8ed9-249097c7c89c.png",
-              "hoverPreviewMode": "none"
-            },
-            "rightImage": {
-              "imageId": "image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0.png",
-              "hoverPreviewMode": "none"
-            },
-            "direction": "left-to-right"
-          }
-        },
-        {
-          "instanceId": "supporting-note-962886eb-9ed8-4b8c-8b2e-e2403b7e4148",
-          "templateId": "supporting-note",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "body": {
-              "zh": "根据以上经验，我更多注意到游戏的体验才能延伸出具体的交互，于是针对我铺量接近200页UI的公会系统，我继续区分不同游戏的公会体验从而延伸出的交互设计进行拆分，运用到公会系统的再设计上",
-              "en": "After 2016, influenced by Summoners War-like games and titles such as Soul Hunters, traditional mobile games increasingly organized their interfaces around system loops, resource feedback, and continuous guidance."
-            }
-          }
-        },
-        {
-          "instanceId": "image-row-d7ddc470-6b4c-4fc7-a497-7dd4d60b3abc",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "其他游戏的公会体验和交互拆解",
-              "en": ""
-            },
-            "items": [
-              {
-                "id": "image-row-item-4566d166-91d0-49c4-9cc3-09b9f5442127",
-                "image": {
-                  "imageId": "image-9dd922b4-cf29-4657-9e62-5298249cce68",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-9dd922b4-cf29-4657-9e62-5298249cce68.png"
-                },
-                "imageDisplayMode": "cover",
-                "hoverPreviewMode": "floating",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                }
-              },
-              {
-                "id": "image-row-item-18f7b580-e618-45fe-ba02-c2970fcaaa97",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-349eba40-bb5f-4a44-87f1-d65c4dc69070",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-349eba40-bb5f-4a44-87f1-d65c4dc69070.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-a44d4b02-b91c-44bf-8f89-c2be0928bea9",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-9525cb26-54fc-469b-9482-3e6b75727d69",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-9525cb26-54fc-469b-9482-3e6b75727d69.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-fc342290-ee40-486b-a6da-c12e910b5945",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-bebf04da-6b18-4181-a3c7-bb0fc80ca398",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-bebf04da-6b18-4181-a3c7-bb0fc80ca398.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-976ad1d1-bd2d-42b0-9471-ee67f205b4af",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "startNewRow": true,
-                "image": {
-                  "imageId": "image-c0434cbf-c8e4-4444-b76b-d9bf6fe46fbf",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-c0434cbf-c8e4-4444-b76b-d9bf6fe46fbf.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-d8c9f8f0-7329-4b24-8943-d87c9ffd3dfb",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-15f0bb99-c1c0-4b77-a5a8-e1a266629d88",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-15f0bb99-c1c0-4b77-a5a8-e1a266629d88.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-4e276aa7-a5a1-45d8-8eaf-3bceec5a2e4d",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-90fbb4b6-acd5-4c07-b27c-44a83f523784",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-90fbb4b6-acd5-4c07-b27c-44a83f523784.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-e0c94e1d-87cf-4d0e-b7e2-ea84123fc5f8",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-75c6ad2f-c9fa-47b6-95e4-1998213a59e2",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-75c6ad2f-c9fa-47b6-95e4-1998213a59e2.png"
-                },
-                "imageDisplayMode": "cover"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "image-row-decf5f89-c020-4347-82c9-e0e970d226f0",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "综合目前游戏内的交互重新设计的公会各系统的交互",
-              "en": ""
-            },
-            "items": [
-              {
-                "id": "image-row-item-e4522e9a-e528-40f5-b392-7c27471d7f60",
-                "image": {
-                  "imageId": "image-bccae830-475e-486d-ad25-cedf55e8caae",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-bccae830-475e-486d-ad25-cedf55e8caae.png"
-                },
-                "imageDisplayMode": "cover",
-                "hoverPreviewMode": "none",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "每日公会任务是高活跃玩家经常点进的界面，我想保留很强的进度感和使命感",
-                  "en": ""
-                }
-              },
-              {
-                "id": "image-row-item-e2e6ec60-ea09-46a4-94b7-4c7c0960f932",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "每日付费后分发的公会红包界面，也是强调了荣誉感和进度感",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-bb088f9f-b663-4be3-b8b4-462a6c2667b5",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-bb088f9f-b663-4be3-b8b4-462a6c2667b5.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-f686eb56-1d14-44bb-be6b-12fb5de431ff",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "每日公会boss界面的设计，也是将九头蛇的属性克制和单一以及总进度表现清晰",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "startNewRow": true,
-                "image": {
-                  "imageId": "image-3179a673-28c8-436c-b2da-3ffc84739a88",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-3179a673-28c8-436c-b2da-3ffc84739a88.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-0479b994-73c2-4d3c-bf0e-6db9df7551d0",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "公会获得的养成资源回馈到英雄体系，之前是不同一的交互，为了强调英雄养成的统一性，保持了和英雄界面的交互一致性",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4.png"
-                },
-                "imageDisplayMode": "cover"
-              }
-            ]
-          }
-        }
-      ],
-      "updatedAt": "2026-08-10T10:12:07.997Z"
-    },
     "game-jam-8lzejf": {
       "version": 1,
       "templateInstances": [
@@ -6863,7 +6558,7 @@
         },
         "stats": {
           "playtimeHours": 284,
-          "playtimeLabelZh": "语音转写为“283年9小时”，具体小时数需确认",
+          "playtimeLabelZh": "284h",
           "playtimeLabelEn": "284h",
           "achievementMode": "exact",
           "achievementUnlocked": 26,
@@ -6920,7 +6615,7 @@
           "archived": false
         },
         "createdAt": "2026-07-20T00:00:00.000Z",
-        "updatedAt": "2026-08-11T08:32:27.546Z"
+        "updatedAt": "2026-08-16T06:18:52.509Z"
       },
       {
         "schemaVersion": 1,
@@ -8119,9 +7814,9 @@
         "schemaVersion": 1,
         "id": "game-79e7b3fe-fd7c-404e-9db5-dd5650961813",
         "identity": {
-          "canonicalTitle": "弹丸论破 1/2/3（合集名称待确认）",
+          "canonicalTitle": "弹丸论破 1/2/3",
           "titleZh": "弹丸论破 1/2/3",
-          "titleEn": "弹丸论破 1/2/3（合集名称待确认）"
+          "titleEn": "弹丸论破 1/2/3"
         },
         "stats": {
           "playtimeLabelZh": "合集累计大约100小时"
@@ -8155,15 +7850,15 @@
           "archived": false
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
-        "updatedAt": "2026-08-11T10:47:51.414Z"
+        "updatedAt": "2026-08-16T06:21:59.356Z"
       },
       {
         "schemaVersion": 1,
         "id": "game-8ecc51bc-0f05-4ce3-8cd6-770614b72634",
         "identity": {
-          "canonicalTitle": "恋与制作人（标题需确认）",
+          "canonicalTitle": "恋与制作人",
           "titleZh": "恋与制作人",
-          "titleEn": "恋与制作人（标题需确认）"
+          "titleEn": "恋与制作人"
         },
         "stats": {
           "playtimeLabelZh": "约一年左右"
@@ -8197,7 +7892,7 @@
           "archived": false
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
-        "updatedAt": "2026-08-11T10:47:31.955Z"
+        "updatedAt": "2026-08-16T06:23:20.604Z"
       },
       {
         "schemaVersion": 1,
@@ -8496,13 +8191,11 @@
         "schemaVersion": 1,
         "id": "game-ed448859-f548-4f94-8db5-07e1262dd573",
         "identity": {
-          "canonicalTitle": "未确认：5v5英雄射击游戏",
+          "canonicalTitle": "守望先锋",
           "titleZh": "守望先锋",
-          "titleEn": "未确认：5v5英雄射击游戏"
+          "titleEn": "守望先锋"
         },
-        "stats": {
-          "playtimeLabelZh": "语音中提到近期约80小时，但表述不够清晰"
-        },
+        "stats": {},
         "presentation": {
           "tags": [],
           "homepageTagIds": [],
@@ -8532,7 +8225,7 @@
           "archived": false
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
-        "updatedAt": "2026-08-11T10:42:38.546Z"
+        "updatedAt": "2026-08-16T06:24:53.977Z"
       },
       {
         "schemaVersion": 1,
@@ -8577,7 +8270,7 @@
         "updatedAt": "2026-08-11T10:41:47.466Z"
       }
     ],
-    "updatedAt": "2026-08-11T10:50:41.308Z"
+    "updatedAt": "2026-08-16T06:24:53.977Z"
   },
   "covers": {
     "ui-personal-practice": "/images/published/covers/ui-personal-practice.webp",
@@ -8590,370 +8283,6 @@
     "ai-agent-6vaadf": "/images/published/covers/ai-agent-6vaadf.png"
   },
   "assets": [
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-0be30ac9-6cea-4aa6-b1f2-e36da30b932b",
-      "publicPath": "/images/published/template-images/interaction-intelligence-system/image-0be30ac9-6cea-4aa6-b1f2-e36da30b932b.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-84a21e7a-805d-4b28-a14a-6833513b526c",
-      "publicPath": "/images/published/template-images/interaction-intelligence-system/image-84a21e7a-805d-4b28-a14a-6833513b526c.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-6e329cc2-258d-41f6-8ca2-ba631c7d4780",
-      "publicPath": "/images/published/template-images/interaction-intelligence-system/image-6e329cc2-258d-41f6-8ca2-ba631c7d4780.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-36031fb4-fdc4-4ea5-88ec-4b0065e92d7f",
-      "publicPath": "/images/published/template-images/interaction-intelligence-system/image-36031fb4-fdc4-4ea5-88ec-4b0065e92d7f.jpg"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-353880fd-7b1c-4dec-bab4-923db08339c0",
-      "publicPath": "/images/published/template-images/interaction-intelligence-system/image-353880fd-7b1c-4dec-bab4-923db08339c0.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-1fc4df94-c172-45a4-a138-8dc31babfb13",
-      "publicPath": "/images/published/template-images/interaction-intelligence-system/image-1fc4df94-c172-45a4-a138-8dc31babfb13.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-e62d5a6b-c737-4f81-84c9-8a66a3512301",
-      "publicPath": "/images/published/template-images/interaction-intelligence-system/image-e62d5a6b-c737-4f81-84c9-8a66a3512301.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-6d213651-ec49-4cb7-bf27-80907a6e36a3",
-      "publicPath": "/images/published/template-images/interaction-intelligence-system/image-6d213651-ec49-4cb7-bf27-80907a6e36a3.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-ccfbfc31-9e80-4d55-a671-d577388128dd",
-      "publicPath": "/images/published/template-images/interaction-intelligence-system/image-ccfbfc31-9e80-4d55-a671-d577388128dd.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-2ada7937-0fed-4283-b1d1-970c677340db",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-2ada7937-0fed-4283-b1d1-970c677340db.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-4a5ccf58-48dc-4ece-bc8e-02d709c51ee1",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-4a5ccf58-48dc-4ece-bc8e-02d709c51ee1.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-130b9d3c-d87a-4f38-bac1-6ed3e11cc6bc",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-130b9d3c-d87a-4f38-bac1-6ed3e11cc6bc.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-711f2fcf-440d-44ea-89df-b92af190786e",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-711f2fcf-440d-44ea-89df-b92af190786e.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-7333f920-ad7d-4324-a246-77cbc52e79c5",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-7333f920-ad7d-4324-a246-77cbc52e79c5.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-43cf3e00-5c39-4e32-ab9c-ab20c6f54b2a",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-43cf3e00-5c39-4e32-ab9c-ab20c6f54b2a.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-b4634560-ad75-40fa-9005-171f18b0931f",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-b4634560-ad75-40fa-9005-171f18b0931f.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-7f3236ec-b38a-4cf6-9ac3-83812818b78f",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-7f3236ec-b38a-4cf6-9ac3-83812818b78f.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-c5804824-9366-40f4-b243-36c459944ad1",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-c5804824-9366-40f4-b243-36c459944ad1.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-4b1680af-7f8b-4895-8b76-281ba1294132",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-4b1680af-7f8b-4895-8b76-281ba1294132.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-b6426632-aa40-461b-8397-5baf7f045dfd",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-b6426632-aa40-461b-8397-5baf7f045dfd.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-ed5b8b33-7540-4637-bf91-b60d121d3a27",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-ed5b8b33-7540-4637-bf91-b60d121d3a27.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-5d026146-bc8d-4c2d-ab1d-b5f2eb780f84",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-5d026146-bc8d-4c2d-ab1d-b5f2eb780f84.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-f30932bf-341a-4e8f-9963-8ce9190ffaa9",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-f30932bf-341a-4e8f-9963-8ce9190ffaa9.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-720c2c9d-a1a0-4eff-8585-dbc3cd8b72eb",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-720c2c9d-a1a0-4eff-8585-dbc3cd8b72eb.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-b4082355-96e3-43c0-ad4a-4cb5376e1726",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-b4082355-96e3-43c0-ad4a-4cb5376e1726.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-aafe101a-8bf2-499f-bed4-945d0a8083f9",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-aafe101a-8bf2-499f-bed4-945d0a8083f9.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-82eb8558-d240-4fe8-b62c-8da7421a0da0",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-82eb8558-d240-4fe8-b62c-8da7421a0da0.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-65e49412-b5f5-4bb6-a06b-d4f74f8e1413",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-65e49412-b5f5-4bb6-a06b-d4f74f8e1413.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-50f6cbc4-a6ed-4b19-8c30-e44a9cabd9c8",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-50f6cbc4-a6ed-4b19-8c30-e44a9cabd9c8.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-575d0ad1-3db8-4895-a7a6-b7848d338312",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-575d0ad1-3db8-4895-a7a6-b7848d338312.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-cf748bd6-c746-4a17-8a79-380a383f0633",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-cf748bd6-c746-4a17-8a79-380a383f0633.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-3eea06a5-cf67-437b-930d-1cedeb1a0232",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-3eea06a5-cf67-437b-930d-1cedeb1a0232.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-7f553d30-670d-4b95-9db2-af7576dc072e",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-7f553d30-670d-4b95-9db2-af7576dc072e.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-1f831a8b-84cc-45cd-a587-1ecf2b339aff",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-1f831a8b-84cc-45cd-a587-1ecf2b339aff.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-e12fd427-9704-41ab-9186-55f73d19d255",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-e12fd427-9704-41ab-9186-55f73d19d255.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-55b5e6aa-a8a9-455c-b171-95d8de96c1c9",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-55b5e6aa-a8a9-455c-b171-95d8de96c1c9.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-f7a3b53f-9d25-48b2-9a06-31a85b1215bb",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-f7a3b53f-9d25-48b2-9a06-31a85b1215bb.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-6cebcd26-1996-4931-be7e-4390e53708b5",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-6cebcd26-1996-4931-be7e-4390e53708b5.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-f11e81f3-c86a-49ff-8439-9b0c451716a5",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-f11e81f3-c86a-49ff-8439-9b0c451716a5.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-dc840f70-1453-46cf-ab9a-d8d4c8d223a6",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-dc840f70-1453-46cf-ab9a-d8d4c8d223a6.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-dbdf22fb-73b6-461d-b342-e7fb2ab1eacf",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-dbdf22fb-73b6-461d-b342-e7fb2ab1eacf.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-04b1ac9f-353c-453f-96a3-a340b28667f8",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-04b1ac9f-353c-453f-96a3-a340b28667f8.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-df4b2070-56a7-4084-8a08-617bd31509b9",
-      "publicPath": "/images/published/template-images/ai-assisted-ui-environment-design/image-df4b2070-56a7-4084-8a08-617bd31509b9.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-507b25fd-dcb4-49ba-9cc9-89606f652360",
-      "publicPath": "/images/published/template-images/ui-16ienxj/image-507b25fd-dcb4-49ba-9cc9-89606f652360.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-18155569-bb55-4d95-8a6a-e5a4ccb7f1e7",
-      "publicPath": "/images/published/template-images/ui-16ienxj/image-18155569-bb55-4d95-8a6a-e5a4ccb7f1e7.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-009b73f9-72f1-4b5f-b1ce-7dc6fa16967f",
-      "publicPath": "/images/published/template-images/ui-16ienxj/image-009b73f9-72f1-4b5f-b1ce-7dc6fa16967f.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-1f229841-ad60-4ae9-a6f9-ae2b8c93a50b",
-      "publicPath": "/images/published/template-images/ui-16ienxj/image-1f229841-ad60-4ae9-a6f9-ae2b8c93a50b.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-e56dcd9e-f485-4691-9743-91be6edc2bb2",
-      "publicPath": "/images/published/template-images/ui-16ienxj/image-e56dcd9e-f485-4691-9743-91be6edc2bb2.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-1d430a93-3241-4afc-a2cb-62d5a329bb15",
-      "publicPath": "/images/published/template-images/ui-16ienxj/image-1d430a93-3241-4afc-a2cb-62d5a329bb15.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-36844170-ff55-4e11-a743-b666fff0abd5",
-      "publicPath": "/images/published/template-images/ui-16ienxj/image-36844170-ff55-4e11-a743-b666fff0abd5.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-60eb50b5-89d9-4ea5-a8ec-38fde092b542",
-      "publicPath": "/images/published/template-images/ui-16ienxj/image-60eb50b5-89d9-4ea5-a8ec-38fde092b542.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-cc272662-dfef-4c48-9ffa-2b6a7a1158d8",
-      "publicPath": "/images/published/template-images/ui-16ienxj/image-cc272662-dfef-4c48-9ffa-2b6a7a1158d8.png"
-    },
     {
       "sourceAdapterId": "dynamic-template-images",
       "sourceDatabase": "dilida-portfolio-template-images",
@@ -9130,118 +8459,6 @@
       "publicPath": "/images/published/template-images/project-1ua2677/image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4.png"
     },
     {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-3e66c1f3-6182-46a2-a7ae-c7f76669f1a1",
-      "publicPath": "/images/published/template-images/game-jam-8lzejf/image-3e66c1f3-6182-46a2-a7ae-c7f76669f1a1.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-a93a7c0b-42fd-4512-82a9-9cfff4f46712",
-      "publicPath": "/images/published/template-images/game-jam-8lzejf/image-a93a7c0b-42fd-4512-82a9-9cfff4f46712.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-71a0f0a3-f594-4e26-98c6-8a79b5182882",
-      "publicPath": "/images/published/template-images/game-jam-8lzejf/image-71a0f0a3-f594-4e26-98c6-8a79b5182882.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-cc135262-0268-408f-a095-44ac5cb9924e",
-      "publicPath": "/images/published/template-images/game-jam-8lzejf/image-cc135262-0268-408f-a095-44ac5cb9924e.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-f248cae0-b3f5-46eb-bee1-72569b8097a4",
-      "publicPath": "/images/published/template-images/game-jam-8lzejf/image-f248cae0-b3f5-46eb-bee1-72569b8097a4.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-d41a18d5-0541-49b8-ae46-fd13f4227a20",
-      "publicPath": "/images/published/template-images/3d-vdr4qg/image-d41a18d5-0541-49b8-ae46-fd13f4227a20.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-1b218f11-2920-4ef9-ac7f-1c18cfc4526f",
-      "publicPath": "/images/published/template-images/3d-vdr4qg/image-1b218f11-2920-4ef9-ac7f-1c18cfc4526f.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-6c4f41ee-68e1-4f4e-a71c-76c1acc15ec3",
-      "publicPath": "/images/published/template-images/3d-vdr4qg/image-6c4f41ee-68e1-4f4e-a71c-76c1acc15ec3.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-108f3f03-492e-47f3-ac30-bcf261797e17",
-      "publicPath": "/images/published/template-images/3d-vdr4qg/image-108f3f03-492e-47f3-ac30-bcf261797e17.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-1c56bb5b-47b6-4c01-912c-8debc61e7df4",
-      "publicPath": "/images/published/template-images/3d-vdr4qg/image-1c56bb5b-47b6-4c01-912c-8debc61e7df4.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-b8c2ee01-94f6-41e1-86ca-9bba0f8d1e62",
-      "publicPath": "/images/published/template-images/3d-vdr4qg/image-b8c2ee01-94f6-41e1-86ca-9bba0f8d1e62.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-ea38e8ba-ead1-4929-b4f6-42bbf3a921c2",
-      "publicPath": "/images/published/template-images/3d-vdr4qg/image-ea38e8ba-ead1-4929-b4f6-42bbf3a921c2.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-e62bb9df-ac64-41cd-b673-70d0857bb305",
-      "publicPath": "/images/published/template-images/3d-vdr4qg/image-e62bb9df-ac64-41cd-b673-70d0857bb305.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-542a66c2-cfc8-4e6d-893c-5f6d3ad61216",
-      "publicPath": "/images/published/template-images/3d-vdr4qg/image-542a66c2-cfc8-4e6d-893c-5f6d3ad61216.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-4ad4a745-1bfd-4470-8caa-3e59b75ab534",
-      "publicPath": "/images/published/template-images/3d-vdr4qg/image-4ad4a745-1bfd-4470-8caa-3e59b75ab534.png"
-    },
-    {
-      "sourceAdapterId": "dynamic-template-images",
-      "sourceDatabase": "dilida-portfolio-template-images",
-      "sourceStore": "images",
-      "sourceId": "image-31c2020b-6e83-45b5-b94a-b804aadc4bf5",
-      "publicPath": "/images/published/template-images/3d-vdr4qg/image-31c2020b-6e83-45b5-b94a-b804aadc4bf5.png"
-    },
-    {
       "sourceAdapterId": "ui-practice-images",
       "sourceDatabase": "dilida-portfolio-ui-practice-images",
       "sourceStore": "images",
@@ -9324,13 +8541,6 @@
       "sourceStore": "playable-game-covers",
       "sourceId": "cover-50be874a-0c4d-4c2b-a6fd-5c5c17f0810c",
       "publicPath": "/images/published/playable-game-covers/3d-vdr4qg/cover-50be874a-0c4d-4c2b-a6fd-5c5c17f0810c.png"
-    },
-    {
-      "sourceAdapterId": "project-body-indexeddb-assets",
-      "sourceDatabase": "dilida-portfolio-project-body-assets",
-      "sourceStore": "assets",
-      "sourceId": "image-3d6e3b39-302a-4142-a2c0-7bde0d905b92",
-      "publicPath": "/images/published/project-body/project-1ua2677/image-3d6e3b39-302a-4142-a2c0-7bde0d905b92.png"
     },
     {
       "sourceAdapterId": "game-experience-covers",
@@ -9425,141 +8635,141 @@
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-fe788bf4-b1f3-4063-8f71-82ad4483a01f",
       "publicPath": "/images/published/game-covers/game-cover-fe788bf4-b1f3-4063-8f71-82ad4483a01f.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-78c25ddc-5f7f-47ae-bc1d-0d8b6e25b0e1",
       "publicPath": "/images/published/game-covers/game-cover-78c25ddc-5f7f-47ae-bc1d-0d8b6e25b0e1.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-e88646b6-1404-42a3-8c74-0c4cd4aed1da",
       "publicPath": "/images/published/game-covers/game-cover-e88646b6-1404-42a3-8c74-0c4cd4aed1da.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-9a292337-1a1b-4d49-9875-711bedffa950",
       "publicPath": "/images/published/game-covers/game-cover-9a292337-1a1b-4d49-9875-711bedffa950.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-d44ddbae-d0bb-46ca-b619-07f798443264",
       "publicPath": "/images/published/game-covers/game-cover-d44ddbae-d0bb-46ca-b619-07f798443264.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-32543184-0877-4d57-afb9-49c665166740",
       "publicPath": "/images/published/game-covers/game-cover-32543184-0877-4d57-afb9-49c665166740.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-b01ecdcf-b057-493b-979e-93e74ca2fed6",
       "publicPath": "/images/published/game-covers/game-cover-b01ecdcf-b057-493b-979e-93e74ca2fed6.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-a0cba851-99a6-417c-bfa0-ae9a60aea344",
       "publicPath": "/images/published/game-covers/game-cover-a0cba851-99a6-417c-bfa0-ae9a60aea344.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-d18b3c0a-9b18-4638-8c85-37283df7a5bd",
       "publicPath": "/images/published/game-covers/game-cover-d18b3c0a-9b18-4638-8c85-37283df7a5bd.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-8caa7703-1732-415a-a320-68a6d850881f",
       "publicPath": "/images/published/game-covers/game-cover-8caa7703-1732-415a-a320-68a6d850881f.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-bc4cd4a7-f063-41e3-a1e3-67393574225c",
       "publicPath": "/images/published/game-covers/game-cover-bc4cd4a7-f063-41e3-a1e3-67393574225c.jpeg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-ad34e469-d4e0-4896-b3ba-395c3fdc2f33",
       "publicPath": "/images/published/game-covers/game-cover-ad34e469-d4e0-4896-b3ba-395c3fdc2f33.png"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-0ce46548-7fff-48ee-9090-ff89dbee3050",
       "publicPath": "/images/published/game-covers/game-cover-0ce46548-7fff-48ee-9090-ff89dbee3050.avif"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-de0fce11-e8cd-4b9f-9037-890d1962a012",
       "publicPath": "/images/published/game-covers/game-cover-de0fce11-e8cd-4b9f-9037-890d1962a012.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-72025a58-1d61-4546-b843-5277119d444c",
       "publicPath": "/images/published/game-covers/game-cover-72025a58-1d61-4546-b843-5277119d444c.jpeg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-cc9c492d-9cb6-4ef5-bc43-2a3a660a5809",
       "publicPath": "/images/published/game-covers/game-cover-cc9c492d-9cb6-4ef5-bc43-2a3a660a5809.webp"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-e9ee5cba-801f-4209-a30c-65b426bbc620",
       "publicPath": "/images/published/game-covers/game-cover-e9ee5cba-801f-4209-a30c-65b426bbc620.png"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-edea0323-4633-45a0-a4a2-582402a643e6",
       "publicPath": "/images/published/game-covers/game-cover-edea0323-4633-45a0-a4a2-582402a643e6.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-6a746260-cdac-4ee5-bd07-ce1865b3fa61",
       "publicPath": "/images/published/game-covers/game-cover-6a746260-cdac-4ee5-bd07-ce1865b3fa61.jpg"
     },
     {
       "sourceAdapterId": "game-experience-covers",
-      "sourceDatabase": "dilida-portfolio-game-assets",
-      "sourceStore": "covers",
+      "sourceDatabase": "disk",
+      "sourceStore": "published-game-covers",
       "sourceId": "game-cover-713250f0-8fa9-4b24-9a5f-2550f2c2dd5e",
       "publicPath": "/images/published/game-covers/game-cover-713250f0-8fa9-4b24-9a5f-2550f2c2dd5e.jpg"
     }

@@ -76,6 +76,7 @@ function counts(items) {
     new: items.filter((item) => item.status === "NEW").length,
     updated: items.filter((item) => item.status === "UPDATED").length,
     unchanged: items.filter((item) => item.status === "UNCHANGED").length,
+    removed: items.filter((item) => item.status === "REMOVED").length,
     blocked: items.filter((item) => item.status === "BLOCKED").length,
     published: items.filter((item) => item.status === "PUBLISHED").length,
     failed: items.filter((item) => item.status === "FAILED").length,
@@ -96,6 +97,7 @@ export async function writeBlockedPublishReport({ root, manifest, catalog = {}, 
     generatedAt: new Date().toISOString(),
     phase: "preflight",
     outcome: "blocked",
+    diffStatus: "not-run",
     productionUrl,
     counts: counts(items),
     items,
@@ -108,7 +110,7 @@ function combineStatus(contentExists, contentChanged, assetStates) {
   return "UNCHANGED";
 }
 
-export async function writePublishPlanReport({ root, manifest, output, uiPractice, assets, productionUrl }) {
+export async function writePublishPlanReport({ root, manifest, output, uiPractice, assets, productionUrl, deletedProjectIds = new Set(), inheritedProjectIds = new Set(), inheritedCatalogProjectIds = new Set() }) {
   const currentOutput = await readJson(path.join(root, "src/data/publishedPortfolio.json"), {});
   const currentUiPractice = await readJson(path.join(root, "src/data/uiPracticeMetadata.json"), null);
   const assetState = new Map();
@@ -127,26 +129,101 @@ export async function writePublishPlanReport({ root, manifest, output, uiPractic
     .filter((asset) => adapterIds.includes(asset.sourceAdapterId) && (!projectId || asset.projectId === projectId || asset.assetId === projectId))
     .map((asset) => assetState.get(`${asset.sourceAdapterId}\u0000${asset.assetId}`) ?? (asset.status === "missing" ? "UPDATED" : "UNCHANGED"));
   const items = [];
-  const projectIds = manifest.projects.map((project) => project.projectId);
+  // A previously-published project absent from this export's own catalog
+  // must be considered too, not just the ones the bundle happens to declare
+  // -- otherwise it gets no report line at all (the exact silent-omission
+  // gap this project-level union closes). output.projectCatalog is already
+  // the caller's fully-merged result (bundle + inherited + minus deletions),
+  // so it's the authoritative "who to report on" list for anything that
+  // survives into the output; manifest.projects is unioned in too in case
+  // preflight ever discovers a project this way that isn't reflected there
+  // yet. currentOutput.projectCatalog is unioned in as well specifically for
+  // the explicit-delete case: a project that was published before, is absent
+  // from this export's bundle catalog entirely, and is explicitly deleted
+  // has no entry in either of the other two sources (it was never in the
+  // bundle, and it's deliberately excluded from output) -- without this, the
+  // deletion itself would silently produce no report line at all.
+  const projectIds = [...new Set([...manifest.projects.map((project) => project.projectId), ...Object.keys(output.projectCatalog || {}), ...Object.keys(currentOutput.projectCatalog || {})])];
+  const catalogForTitles = { ...currentOutput.projectCatalog, ...output.projectCatalog };
   for (const projectId of projectIds) {
-    const title = projectTitle(output.projectCatalog, projectId);
+    const title = projectTitle(catalogForTitles, projectId);
     const currentMetadata = currentOutput.projectCatalog?.[projectId];
+    const nextMetadata = output.projectCatalog?.[projectId];
+    const previousHasProject = currentMetadata !== undefined;
+    const nextHasProject = nextMetadata !== undefined;
+    const catalogDeleteIntended = deletedProjectIds.has(projectId);
+    const catalogInherited = inheritedCatalogProjectIds.has(projectId);
+    const metadataStatus = !previousHasProject
+      ? "NEW"
+      : !nextHasProject
+        ? (catalogDeleteIntended ? "REMOVED" : "BLOCKED")
+        : equalJson(currentMetadata, nextMetadata)
+          ? "UNCHANGED"
+          : "UPDATED";
+    const metadataReason = catalogDeleteIntended
+      ? "Removed via explicit project deletion intent."
+      : "Published project is missing from the current export's catalog, and there is no explicit delete intent for it.";
     items.push({
       id: `${projectId}:metadata`, projectId, title, category: "Project metadata", sourceAdapterIds: ["project-catalog"],
-      status: !currentMetadata ? "NEW" : equalJson(currentMetadata, output.projectCatalog?.[projectId]) ? "UNCHANGED" : "UPDATED",
-      description: "Project title, summary, category, dates, visibility and archive metadata.",
+      status: metadataStatus,
+      description: metadataStatus === "REMOVED" || metadataStatus === "BLOCKED"
+        ? metadataReason
+        : metadataStatus === "UNCHANGED" && catalogInherited
+          ? "Not present in this export's catalog; inherited unchanged from the currently-published state."
+          : "Project title, summary, category, dates, visibility and archive metadata.",
+      ...(metadataStatus === "BLOCKED" ? { reason: metadataReason, action: "This should not happen once the export/import catalog-inherit path is intact -- investigate why this project was neither supplied by the export nor inherited from the currently-published catalog." } : {}),
+      ...(metadataStatus === "REMOVED" ? { reason: metadataReason } : {}),
     });
+
 
     const currentDraft = currentOutput.drafts?.[projectId];
     const currentDocument = currentOutput.projectDocuments?.documents?.[projectId];
     const nextDraft = output.drafts?.[projectId];
     const nextDocument = output.projectDocuments?.documents?.[projectId];
-    const hasBody = nextDraft !== undefined || nextDocument !== undefined;
-    if (hasBody) items.push({
-      id: `${projectId}:body`, projectId, title, category: "Project body", sourceAdapterIds: ["dynamic-project-drafts", "project-documents"],
-      status: currentDraft === undefined && currentDocument === undefined ? "NEW" : equalJson([currentDraft, currentDocument], [nextDraft, nextDocument]) ? "UNCHANGED" : "UPDATED",
-      description: "Project narrative, template instances, order and layout settings.",
-    });
+    const previousHasBody = currentDraft !== undefined || currentDocument !== undefined;
+    const nextHasBody = nextDraft !== undefined || nextDocument !== undefined;
+    // A project body that already exists in the currently-published site must
+    // never silently disappear just because this run's export doesn't include
+    // it (e.g. a browser session whose localStorage never had that project's
+    // draft) -- that is "no local edit this cycle," not "delete this body."
+    // The caller (import-production-bundle.mjs) already implements that:
+    // when its export has no fresh draft for a project, it inherits the
+    // currently-published body verbatim into `output`, so by the time this
+    // function compares current vs. output, a genuinely-untouched project's
+    // nextDraft equals its currentDraft and naturally resolves to UNCHANGED
+    // below -- no special case needed for that, it falls out of the normal
+    // equalJson comparison. previousHasBody && !nextHasBody can therefore
+    // only mean one of two things: an explicit, caller-supplied delete intent
+    // (deletedProjectIds) -- reported as REMOVED -- or some other, unforeseen
+    // way the body ended up missing from `output` despite previously existing
+    // -- which must still fail closed as BLOCKED rather than silently drop
+    // (never reported as UNCHANGED, never silently skipped).
+    if (previousHasBody || nextHasBody) {
+      const deleteIntended = deletedProjectIds.has(projectId);
+      const isInherited = inheritedProjectIds.has(projectId);
+      const status = !previousHasBody
+        ? "NEW"
+        : !nextHasBody
+          ? (deleteIntended ? "REMOVED" : "BLOCKED")
+          : equalJson([currentDraft, currentDocument], [nextDraft, nextDocument])
+            ? "UNCHANGED"
+            : "UPDATED";
+      const reason = deleteIntended
+        ? "Removed via explicit project deletion intent."
+        : "Published project body is missing from the current export, and there is no explicit delete intent for it.";
+      const description = status === "REMOVED" || status === "BLOCKED"
+        ? reason
+        : status === "UNCHANGED" && isInherited
+          ? "No local edit draft found in this export; inherited unchanged from the currently-published state."
+          : "Project narrative, template instances, order and layout settings.";
+      items.push({
+        id: `${projectId}:body`, projectId, title, category: "Project body", sourceAdapterIds: ["dynamic-project-drafts", "project-documents"],
+        status,
+        description,
+        ...(status === "BLOCKED" ? { reason, action: "This should not happen once the export/import inherit path is intact -- investigate why this project's body was neither supplied by the export nor inherited from the currently-published state." } : {}),
+        ...(status === "REMOVED" ? { reason } : {}),
+      });
+    }
 
     if (output.covers?.[projectId]) {
       const coverStates = statesFor(["project-covers-indexeddb", "project-covers-disk"], projectId);
@@ -185,10 +262,41 @@ export async function writePublishPlanReport({ root, manifest, output, uiPractic
   if (output.gameExperience) {
     const gameStates = statesFor(["game-experience-covers"]);
     const currentGame = currentOutput.gameExperience;
+    const currentRecordsById = new Map((currentGame?.records ?? []).map((record) => [record.id, record]));
+    const nextRecordIds = new Set((output.gameExperience.records ?? []).map((record) => record.id));
+    const changedRecordCount = (output.gameExperience.records ?? []).filter((record) => !equalJson(currentRecordsById.get(record.id), record)).length
+      + (currentGame?.records ?? []).filter((record) => !nextRecordIds.has(record.id)).length;
+    // Per-cover asset integrity breakdown -- 33 covers collapsed into one
+    // report item must never hide that any single one of them failed
+    // integrity validation (see assetIntegrity.mjs / the 2026-08-17
+    // incident): invalid = present in this bundle but failed validation
+    // (always drives BLOCKED, via manifest.issues -- see blockedItems below);
+    // valid = present in this bundle and passed; inherited = not re-supplied
+    // by this bundle at all, so the record's own already-resolved
+    // coverPublicPath carries forward unchanged (never re-validated here,
+    // same as any other untouched published asset).
+    const coverAssetIds = new Set((output.gameExperience.records ?? []).flatMap((record) => [
+      record.presentation?.coverAssetId, record.presentation?.detectedCoverAssetId,
+    ].filter((id) => typeof id === "string" && id)));
+    const gameCoverAssetsByAssetId = new Map(
+      manifest.assets.filter((asset) => asset.sourceAdapterId === "game-experience-covers").map((asset) => [asset.assetId, asset]),
+    );
+    let validCoverCount = 0;
+    let invalidCoverCount = 0;
+    let inheritedCoverCount = 0;
+    for (const id of coverAssetIds) {
+      const asset = gameCoverAssetsByAssetId.get(id);
+      if (asset?.status === "invalid") invalidCoverCount += 1;
+      else if (asset?.status === "collected") validCoverCount += 1;
+      else inheritedCoverCount += 1;
+    }
     items.push({
       id: "game-experience:records", projectId: "", title: "Game Experience", category: "Game Experience", sourceAdapterIds: ["game-experience-records", "game-experience-covers"],
       status: !currentGame ? "NEW" : !equalJson(currentGame, output.gameExperience) || gameStates.some((state) => state !== "UNCHANGED") ? "UPDATED" : "UNCHANGED",
-      description: `${output.gameExperience.records?.length ?? 0} records and configured cover images.`,
+      description: changedRecordCount > 0
+        ? `${changedRecordCount} records changed; ${output.gameExperience.records?.length ?? 0} records and configured cover images.`
+        : `${output.gameExperience.records?.length ?? 0} records and configured cover images.`,
+      assetIntegrity: { totalCovers: coverAssetIds.size, valid: validCoverCount, invalid: invalidCoverCount, inherited: inheritedCoverCount },
     });
   }
 
@@ -200,6 +308,7 @@ export async function writePublishPlanReport({ root, manifest, output, uiPractic
     generatedAt: new Date().toISOString(),
     phase: "preflight",
     outcome: isBlocked ? "blocked" : "ready",
+    diffStatus: "complete",
     productionUrl,
     counts: counts(items),
     items,

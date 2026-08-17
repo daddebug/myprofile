@@ -38,9 +38,51 @@ try {
   assert.equal(missingGameCover.ok, false);
   assert(missingGameCover.issues.some((issue) => issue.code === "MISSING_REFERENCED_ASSET" && issue.sourceAdapterId === "game-experience-covers"));
 
+  // project-body-indexeddb-assets: the exporting browser session's IndexedDB
+  // doesn't have this blob, but it was already published to disk in an
+  // earlier cycle at the exact publicPath declared alongside the reference.
+  // This must resolve as already-satisfied, not BLOCKED.
+  const alreadyPublishedAssetId = "already-published-body-asset";
+  const alreadyPublishedPath = `/images/published/project-body/fixture/${alreadyPublishedAssetId}.png`;
+  const projectBodyDirectory = path.join(temporaryRoot, "public", "images", "published", "project-body", "fixture");
+  await mkdir(projectBodyDirectory, { recursive: true });
+  // A minimal, real, valid 1x1 PNG -- the disk-fallback path now requires
+  // genuinely decodable image bytes (see assetIntegrity.mjs), so a
+  // placeholder text string no longer stands in for a published image file.
+  await writeFile(path.join(projectBodyDirectory, `${alreadyPublishedAssetId}.png`), Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNgAAIAAAUAAen63NgAAAAASUVORK5CYII=", "base64"));
+  const alreadyPublishedBundle = {
+    ...baseBundle,
+    projectDocuments: {
+      version: 1,
+      documents: { fixture: { blocks: [{ content: { fallbackImage: { localImageId: alreadyPublishedAssetId, publicPath: alreadyPublishedPath } } }] } },
+    },
+  };
+  const notBlocked = await buildPublishingPreflight({ root: temporaryRoot, bundle: alreadyPublishedBundle });
+  assert.equal(notBlocked.ok, true);
+  assert(!notBlocked.issues.some((issue) => issue.code === "MISSING_REFERENCED_ASSET" && issue.sourceAdapterId === "project-body-indexeddb-assets"));
+  assert(notBlocked.assets.some((asset) => asset.sourceAdapterId === "project-body-indexeddb-assets" && asset.assetId === alreadyPublishedAssetId && asset.status === "available" && asset.publishedFileFallback === true));
+
+  // Same shape, but genuinely missing from both IndexedDB and disk -- must
+  // still be BLOCKED.
+  const genuinelyMissingAssetId = "genuinely-missing-body-asset";
+  const genuinelyMissingBundle = {
+    ...baseBundle,
+    projectDocuments: {
+      version: 1,
+      documents: { fixture: { blocks: [{ content: { fallbackImage: { localImageId: genuinelyMissingAssetId, publicPath: `/images/published/project-body/fixture/${genuinelyMissingAssetId}.png` } } }] } },
+    },
+  };
+  const stillBlocked = await buildPublishingPreflight({ root: temporaryRoot, bundle: genuinelyMissingBundle });
+  assert.equal(stillBlocked.ok, false);
+  assert(stillBlocked.issues.some((issue) => issue.code === "MISSING_REFERENCED_ASSET" && issue.sourceAdapterId === "project-body-indexeddb-assets"));
+
   const forbidden = await buildPublishingPreflight({ root: temporaryRoot, bundle: baseBundle, rewrittenOutput: { image: "/portfolio-assets/project-images/fixture/image.png" } });
   assert.equal(forbidden.ok, false);
   assert(forbidden.issues.some((issue) => issue.code === "FORBIDDEN_PUBLISHED_REFERENCE"));
+
+  const localDeliverable = await buildPublishingPreflight({ root: temporaryRoot, bundle: baseBundle, rewrittenOutput: { attachment: "/local-deliverables/AI/portfolio.pdf" } });
+  assert.equal(localDeliverable.ok, false);
+  assert(localDeliverable.issues.some((issue) => issue.code === "FORBIDDEN_PUBLISHED_REFERENCE"));
 
   const absentOutput = await buildPublishingPreflight({ root: temporaryRoot, bundle: baseBundle, rewrittenOutput: { image: "/images/published/not-collected.png" } });
   assert.equal(absentOutput.ok, false);
