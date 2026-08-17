@@ -1,536 +1,7 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-16T14:41:12.761Z",
+  "generatedAt": "2026-08-17T15:35:42.529Z",
   "drafts": {
-    "project-1ua2677": {
-      "version": 1,
-      "templateInstances": [
-        {
-          "instanceId": "image-row-31bd8cb3-6b44-41c0-a55d-896408f3f56a",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "案例参考",
-              "en": ""
-            },
-            "items": [
-              {
-                "id": "image-row-item-9fc010bc-ca26-4701-874f-2709bb50cc4a",
-                "image": {
-                  "imageId": "image-582a7b5e-6eaf-4020-acda-b0a1837b54e1",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-582a7b5e-6eaf-4020-acda-b0a1837b54e1.jpg"
-                },
-                "imageDisplayMode": "cover",
-                "hoverPreviewMode": "none",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                }
-              },
-              {
-                "id": "image-row-item-55987c3c-460d-4627-b340-d34ba05079a8",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-f75395ad-780c-44e0-92ea-843854ebebad",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-f75395ad-780c-44e0-92ea-843854ebebad.jpg"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-2174a895-4a89-488f-a40f-943e2f39d06e",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-cf17b766-9296-4612-ae5c-68e03fa7e849",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-cf17b766-9296-4612-ae5c-68e03fa7e849.jpg"
-                },
-                "imageDisplayMode": "cover"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "image-row-200d39c2-b8e2-4890-aa74-3c60507cea61",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "早期在FIGMA中重新思考交互设计",
-              "en": ""
-            },
-            "items": [
-              {
-                "id": "image-row-item-f4531138-5792-407c-806b-b5df62276a2e",
-                "image": {
-                  "imageId": "image-81b9b65a-266a-4b5f-aac2-dc5515d09bbc",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-81b9b65a-266a-4b5f-aac2-dc5515d09bbc.png"
-                },
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "floating",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "主界面",
-                  "en": ""
-                },
-                "startNewRow": true
-              },
-              {
-                "id": "image-row-item-87cbd1d0-2012-46f0-b722-e110608fd332",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "属性",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-ebf9040a-0920-4a62-88bb-1dcf6a969225",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-ebf9040a-0920-4a62-88bb-1dcf6a969225.png"
-                },
-                "imageDisplayMode": "natural"
-              },
-              {
-                "id": "image-row-item-b913f0c2-e196-4585-81af-7651ffff9ded",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "皮肤切换",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-aa39d15b-80a6-4cdb-ba5c-70008d8f6bce",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-aa39d15b-80a6-4cdb-ba5c-70008d8f6bce.png"
-                },
-                "imageDisplayMode": "natural"
-              },
-              {
-                "id": "image-row-item-0f78ade7-a960-4ccb-b3e1-3e968ad8b8d4",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-0e017be5-f833-48b4-921b-d208ad5303bb",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-0e017be5-f833-48b4-921b-d208ad5303bb.png"
-                },
-                "imageDisplayMode": "cover"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "direction-compare-f5de4e51-ddc9-40c2-804c-7f64ccf7b130",
-          "templateId": "direction-compare",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "升级升星方案对比",
-              "en": ""
-            },
-            "leftLabel": {
-              "zh": "早期",
-              "en": ""
-            },
-            "rightLabel": {
-              "zh": "迭代后",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "方案 A",
-              "en": ""
-            },
-            "rightTitle": {
-              "zh": "方案 B",
-              "en": ""
-            },
-            "leftDescription": {
-              "zh": "补充左侧方案说明。",
-              "en": ""
-            },
-            "rightDescription": {
-              "zh": "补充右侧方案说明。",
-              "en": ""
-            },
-            "leftImage": {
-              "imageId": "image-716b6e4b-037c-4879-a46b-c2956207515c",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-716b6e4b-037c-4879-a46b-c2956207515c.png",
-              "hoverPreviewMode": "none"
-            },
-            "rightImage": {
-              "imageId": "image-adf54a95-1cef-4260-875a-f4a8eed9fccc",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-adf54a95-1cef-4260-875a-f4a8eed9fccc.png",
-              "hoverPreviewMode": "none"
-            },
-            "direction": "left-to-right"
-          }
-        },
-        {
-          "instanceId": "direction-compare-06597f24-9cca-4a57-8de1-37ebbb88d767",
-          "templateId": "direction-compare",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "装备合成路线方案对比",
-              "en": ""
-            },
-            "leftLabel": {
-              "zh": "早期",
-              "en": ""
-            },
-            "rightLabel": {
-              "zh": "迭代后",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "方案 A",
-              "en": ""
-            },
-            "rightTitle": {
-              "zh": "方案 B",
-              "en": ""
-            },
-            "leftDescription": {
-              "zh": "补充左侧方案说明。",
-              "en": ""
-            },
-            "rightDescription": {
-              "zh": "补充右侧方案说明。",
-              "en": ""
-            },
-            "leftImage": {
-              "imageId": "image-d09c61b7-cb2a-476d-99cf-4a8e14784932",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-d09c61b7-cb2a-476d-99cf-4a8e14784932.png",
-              "hoverPreviewMode": "none"
-            },
-            "rightImage": {
-              "imageId": "image-fea47f73-5aca-4095-94e6-c51927adb342",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-fea47f73-5aca-4095-94e6-c51927adb342.png",
-              "hoverPreviewMode": "none"
-            },
-            "direction": "left-to-right"
-          }
-        },
-        {
-          "instanceId": "direction-compare-bc673ce9-0d01-4b5b-97f0-d28ce804d241",
-          "templateId": "direction-compare",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "竞技场方案对比",
-              "en": ""
-            },
-            "leftLabel": {
-              "zh": "早期",
-              "en": ""
-            },
-            "rightLabel": {
-              "zh": "迭代后",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "方案 A",
-              "en": ""
-            },
-            "rightTitle": {
-              "zh": "方案 B",
-              "en": ""
-            },
-            "leftDescription": {
-              "zh": "补充左侧方案说明。",
-              "en": ""
-            },
-            "rightDescription": {
-              "zh": "补充右侧方案说明。",
-              "en": ""
-            },
-            "leftImage": {
-              "imageId": "image-23b662af-c3d9-458b-8ed9-249097c7c89c",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-23b662af-c3d9-458b-8ed9-249097c7c89c.png",
-              "hoverPreviewMode": "none"
-            },
-            "rightImage": {
-              "imageId": "image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0.png",
-              "hoverPreviewMode": "none"
-            },
-            "direction": "left-to-right"
-          }
-        },
-        {
-          "instanceId": "image-row-d7ddc470-6b4c-4fc7-a497-7dd4d60b3abc",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "其他游戏的公会体验和交互拆解",
-              "en": ""
-            },
-            "items": [
-              {
-                "id": "image-row-item-4566d166-91d0-49c4-9cc3-09b9f5442127",
-                "image": {
-                  "imageId": "image-9dd922b4-cf29-4657-9e62-5298249cce68",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-9dd922b4-cf29-4657-9e62-5298249cce68.png"
-                },
-                "imageDisplayMode": "cover",
-                "hoverPreviewMode": "none",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                }
-              },
-              {
-                "id": "image-row-item-18f7b580-e618-45fe-ba02-c2970fcaaa97",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-349eba40-bb5f-4a44-87f1-d65c4dc69070",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-349eba40-bb5f-4a44-87f1-d65c4dc69070.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-a44d4b02-b91c-44bf-8f89-c2be0928bea9",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-9525cb26-54fc-469b-9482-3e6b75727d69",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-9525cb26-54fc-469b-9482-3e6b75727d69.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-fc342290-ee40-486b-a6da-c12e910b5945",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-bebf04da-6b18-4181-a3c7-bb0fc80ca398",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-bebf04da-6b18-4181-a3c7-bb0fc80ca398.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-976ad1d1-bd2d-42b0-9471-ee67f205b4af",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "startNewRow": true,
-                "image": {
-                  "imageId": "image-c0434cbf-c8e4-4444-b76b-d9bf6fe46fbf",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-c0434cbf-c8e4-4444-b76b-d9bf6fe46fbf.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-d8c9f8f0-7329-4b24-8943-d87c9ffd3dfb",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-15f0bb99-c1c0-4b77-a5a8-e1a266629d88",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-15f0bb99-c1c0-4b77-a5a8-e1a266629d88.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-4e276aa7-a5a1-45d8-8eaf-3bceec5a2e4d",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-90fbb4b6-acd5-4c07-b27c-44a83f523784",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-90fbb4b6-acd5-4c07-b27c-44a83f523784.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-e0c94e1d-87cf-4d0e-b7e2-ea84123fc5f8",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-75c6ad2f-c9fa-47b6-95e4-1998213a59e2",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-75c6ad2f-c9fa-47b6-95e4-1998213a59e2.png"
-                },
-                "imageDisplayMode": "cover"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "image-row-decf5f89-c020-4347-82c9-e0e970d226f0",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "综合目前游戏内的交互重新设计的公会各系统的交互",
-              "en": ""
-            },
-            "items": [
-              {
-                "id": "image-row-item-e4522e9a-e528-40f5-b392-7c27471d7f60",
-                "image": {
-                  "imageId": "image-bccae830-475e-486d-ad25-cedf55e8caae",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-bccae830-475e-486d-ad25-cedf55e8caae.png"
-                },
-                "imageDisplayMode": "cover",
-                "hoverPreviewMode": "none",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "每日公会任务是高活跃玩家经常点进的界面，我想保留很强的进度感和使命感",
-                  "en": ""
-                }
-              },
-              {
-                "id": "image-row-item-e2e6ec60-ea09-46a4-94b7-4c7c0960f932",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "每日付费后分发的公会红包界面，也是强调了荣誉感和进度感",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-bb088f9f-b663-4be3-b8b4-462a6c2667b5",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-bb088f9f-b663-4be3-b8b4-462a6c2667b5.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-f686eb56-1d14-44bb-be6b-12fb5de431ff",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "每日公会boss界面的设计，也是将九头蛇的属性克制和单一以及总进度表现清晰",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "startNewRow": true,
-                "image": {
-                  "imageId": "image-3179a673-28c8-436c-b2da-3ffc84739a88",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-3179a673-28c8-436c-b2da-3ffc84739a88.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-0479b994-73c2-4d3c-bf0e-6db9df7551d0",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4.png"
-                },
-                "imageDisplayMode": "cover"
-              }
-            ]
-          }
-        }
-      ],
-      "updatedAt": "1970-01-01T00:00:00.000Z"
-    },
     "interaction-intelligence-system": {
       "version": 1,
       "templateInstances": [
@@ -6260,6 +5731,840 @@
         }
       ],
       "updatedAt": "2026-08-09T04:20:46.026Z"
+    },
+    "project-1ua2677": {
+      "version": 1,
+      "templateInstances": [
+        {
+          "instanceId": "supporting-note-e9346e84-cfeb-49f3-aaf0-49676548c9b5",
+          "templateId": "supporting-note",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "body": {
+              "zh": "项目建立在一套成熟的养成任务驱动型游戏框架上，玩家日常通过任务驱动在多个系统之间高频切换，UI 不只是辅助工具，也是主要的玩法承载面。随着项目希望将更多注意力留给3D角色、场景，原有系统逻辑开始暴露出节奏冲突。",
+              "en": "After 2016, influenced by Summoners War-like games and titles such as Soul Hunters, traditional mobile games increasingly organized their interfaces around system loops, resource feedback, and continuous guidance."
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-233060d1-59d6-49e4-ae61-734a794856af",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "01",
+              "en": "01"
+            },
+            "leftTitle": {
+              "zh": "传统手游痛点",
+              "en": "Traditional Mobile Game Pain Points"
+            },
+            "statement": {
+              "zh": "UI 在展示信息的同时还高强度指引玩家进行下一步操作。",
+              "en": "While presenting information, the UI also strongly directs the player's next action."
+            },
+            "body": {
+              "zh": "2016 年后，受“魔灵-like”与《小冰冰传奇》等影响，成熟手游逐渐形成以养成、合成、升级和概率获取为核心的循环。大量信息依赖 UI、文字和数字承载，导致游戏重 UI、轻表现，也让后来的 3D 场景与高密度界面产生冲突。随着 3D 从技术展示转向情感与内容支撑，交互也开始从平铺堆量转向更清晰的层级组织。",
+              "en": "After 2016, influenced by Summoners War-like games and titles such as Soul Hunters, traditional mobile games increasingly organized their interfaces around system loops, resource feedback, and continuous guidance."
+            }
+          }
+        },
+        {
+          "instanceId": "xmind-breakdown-e94b870e-b78d-4630-ad95-05c57f5f4629",
+          "templateId": "xmind-breakdown",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionTitle": {
+              "zh": "参考产品系统拆解",
+              "en": ""
+            },
+            "documentOne": {
+              "fileName": "reference-system-breakdown.xmind",
+              "sheetTitle": "系统结构",
+              "centerTopic": "长线养成系统",
+              "branches": [
+                {
+                  "id": "xmind-9bff2556-1da5-4a66-b002-6d7884a95932",
+                  "title": "任务驱动",
+                  "groups": [
+                    {
+                      "id": "xmind-4d154c3d-60d8-42a9-801f-0c4ff6781271",
+                      "title": "日常任务",
+                      "items": [
+                        "登录、活跃度与资源领取共同建立每日回访节奏",
+                        "体力消耗、角色养成和副本挑战被整合进连续任务链"
+                      ]
+                    },
+                    {
+                      "id": "xmind-e0f2192f-fc4c-49ac-95e8-4656ee56ca69",
+                      "title": "公会协作",
+                      "items": [
+                        "个人贡献与公会阶段奖励形成集体责任",
+                        "成员战力分配和协作次数推动持续交流"
+                      ]
+                    },
+                    {
+                      "id": "xmind-35deb5ba-83d8-43e0-897d-8fc8b00f3411",
+                      "title": "周期活动",
+                      "items": [
+                        "签到、通行证和限时任务提供阶段性目标",
+                        "充值与资源消耗返利强化短周期投入"
+                      ]
+                    },
+                    {
+                      "id": "xmind-194320d5-122c-4a90-a895-f98085a0ba36",
+                      "title": "战斗与竞争",
+                      "items": [
+                        "副本、竞技场和跨服玩法持续验证养成结果",
+                        "排名与周期结算将成长反馈转化为竞争动力"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "xmind-ad8a3fb1-117f-405f-983a-0977e20c6e97",
+                  "title": "多线养成",
+                  "groups": [
+                    {
+                      "id": "xmind-991f6ecc-ae14-4002-a9d1-abb6359c35c8",
+                      "title": "角色成长",
+                      "items": [
+                        "等级、阶级与技能共同构成基础成长路径",
+                        "玩家等级和材料产出控制阶段推进速度"
+                      ]
+                    },
+                    {
+                      "id": "xmind-66bf1d4c-6ea1-429e-8c75-d3cd50f6d978",
+                      "title": "装备与神器",
+                      "items": [
+                        "装备、神器和稀有材料延长中长期养成深度",
+                        "不同资源入口促使玩家反复切换系统"
+                      ]
+                    },
+                    {
+                      "id": "xmind-e5dc75a2-3695-4fe5-994a-8c198ab9425a",
+                      "title": "外观与数值",
+                      "items": [
+                        "皮肤兼具视觉差异和属性提升",
+                        "稀有外观、宝箱与直购构成主要付费节点"
+                      ]
+                    },
+                    {
+                      "id": "xmind-a3310128-98ca-462e-a380-66d9bdf76830",
+                      "title": "并行角色体系",
+                      "items": [
+                        "独立角色线拥有等级、灵魂石、皮肤和神器",
+                        "并行培养扩大资源需求与长期投入空间"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "xmind-167bcf45-cb88-4822-988e-3e7d10b08e27",
+                  "title": "社交与留存",
+                  "groups": [
+                    {
+                      "id": "xmind-ff85ef1e-4591-45d3-ab63-ec97288c4421",
+                      "title": "公会社交",
+                      "items": [
+                        "聊天、协作任务和成员贡献维持稳定关系",
+                        "公开积分与奖励分配增加参与压力"
+                      ]
+                    },
+                    {
+                      "id": "xmind-71d97176-d99a-4967-ac19-c64948aa2760",
+                      "title": "竞争反馈",
+                      "items": [
+                        "排行榜、竞技场和联赛提供可比较的成长结果",
+                        "个人排名与集体排名形成双重目标"
+                      ]
+                    },
+                    {
+                      "id": "xmind-9ba0e373-93cf-42d1-aa1e-988e515b432f",
+                      "title": "辅助入口",
+                      "items": [
+                        "邮件、新闻和背包承接奖励、资讯与资源管理",
+                        "个人信息与设置维持基础账户体验"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "xmind-1412c50d-6932-4638-a8e5-161069cd57e7",
+                  "title": "新手与回归",
+                  "groups": [
+                    {
+                      "id": "xmind-aa79f757-79ed-4e1d-86d5-79bc7662a579",
+                      "title": "新手目标",
+                      "items": [
+                        "阶段活动推动主线、体力消耗和基础养成",
+                        "连续奖励帮助玩家快速建立短期目标"
+                      ]
+                    },
+                    {
+                      "id": "xmind-d51db654-8996-42a9-b3ba-c99fdb56c0f9",
+                      "title": "首次付费",
+                      "items": [
+                        "高倍率资源与限时礼包降低首次付费门槛",
+                        "前期战力提升让付费效果更容易被感知"
+                      ]
+                    },
+                    {
+                      "id": "xmind-21e55426-bdbd-42bb-bb36-2ed1b356815a",
+                      "title": "回归补偿",
+                      "items": [
+                        "回归礼包补充角色材料、体力与成长资源",
+                        "集中奖励帮助玩家重新接入日常循环"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "documentTwo": null,
+            "referenceOneTitle": {
+              "zh": "成熟长线养成产品",
+              "en": ""
+            },
+            "referenceOneCategory": {
+              "zh": "系统结构参照 · 已上线产品",
+              "en": ""
+            },
+            "referenceOneSummary": {
+              "zh": "该产品以任务循环串联角色养成、战斗、公会社交与周期活动。大量系统共享资源入口和奖励出口，使玩家在每日回访中持续完成成长、协作和竞争目标。",
+              "en": ""
+            },
+            "referenceOneFocus": {
+              "zh": "重点观察任务如何调度不同系统，以及高频入口、养成反馈和付费节点如何共同维持长期活跃。",
+              "en": ""
+            },
+            "referenceTwoTitle": {
+              "zh": "",
+              "en": ""
+            },
+            "referenceTwoCategory": {
+              "zh": "",
+              "en": ""
+            },
+            "referenceTwoSummary": {
+              "zh": "",
+              "en": ""
+            },
+            "referenceTwoFocus": {
+              "zh": "",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "image-row-31bd8cb3-6b44-41c0-a55d-896408f3f56a",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "案例参考",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "image-row-item-9fc010bc-ca26-4701-874f-2709bb50cc4a",
+                "image": {
+                  "imageId": "image-582a7b5e-6eaf-4020-acda-b0a1837b54e1",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-582a7b5e-6eaf-4020-acda-b0a1837b54e1.jpg"
+                },
+                "imageDisplayMode": "cover",
+                "hoverPreviewMode": "none",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "小冰冰传奇like的游戏重交互轻美术的平铺表现，游戏内只关注信息的平铺，对信息的循序渐进的展示缺失",
+                  "en": ""
+                }
+              },
+              {
+                "id": "image-row-item-55987c3c-460d-4627-b340-d34ba05079a8",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "成长反馈偏向横幅不注重仪式感只注重数值增长，角色展示空间被压缩，滥用弹窗的现象较为明显",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "image": {
+                  "imageId": "image-f75395ad-780c-44e0-92ea-843854ebebad",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-f75395ad-780c-44e0-92ea-843854ebebad.jpg"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-2174a895-4a89-488f-a40f-943e2f39d06e",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "毫无角色/剧情体验，局内也多为策略交互为主，所有的信息都会指引到任务跳转，玩家的思考被剥夺",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "image": {
+                  "imageId": "image-cf17b766-9296-4612-ae5c-68e03fa7e849",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-cf17b766-9296-4612-ae5c-68e03fa7e849.jpg"
+                },
+                "imageDisplayMode": "cover"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-aa127d1a-9542-4b9d-9327-ee8bc02b50fa",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "02",
+              "en": "01"
+            },
+            "leftTitle": {
+              "zh": "养成交互重建",
+              "en": "Traditional Mobile Game Pain Points"
+            },
+            "statement": {
+              "zh": "重新从体验入手改变现有交互",
+              "en": "While presenting information, the UI also strongly directs the player's next action."
+            },
+            "body": {
+              "zh": "早期方案几乎沿用了原有养成界面的组织方式：为了让升级、升星和资源判断都能在一个页面中快速完成，按钮、材料信息、数值反馈和结果展示被集中放在首屏中。为了效率压缩了角色模型的展示空间，让界面本身变得比角色更抢眼。我后续的调整重点不是简单删减内容，而是重新分配界面权重与反馈节奏：保留高频操作所需的信息效率，同时把角色展示与关键成长反馈从拥挤的首屏中释放出来。",
+              "en": "After 2016, influenced by Summoners War-like games and titles such as Soul Hunters, traditional mobile games increasingly organized their interfaces around system loops, resource feedback, and continuous guidance."
+            }
+          }
+        },
+        {
+          "instanceId": "image-row-200d39c2-b8e2-4890-aa74-3c60507cea61",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "早期在FIGMA中重新思考交互设计",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "image-row-item-f4531138-5792-407c-806b-b5df62276a2e",
+                "image": {
+                  "imageId": "image-81b9b65a-266a-4b5f-aac2-dc5515d09bbc",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-81b9b65a-266a-4b5f-aac2-dc5515d09bbc.png"
+                },
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "floating",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "主界面",
+                  "en": ""
+                },
+                "startNewRow": true
+              },
+              {
+                "id": "image-row-item-87cbd1d0-2012-46f0-b722-e110608fd332",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "属性",
+                  "en": ""
+                },
+                "hoverPreviewMode": "floating",
+                "image": {
+                  "imageId": "image-ebf9040a-0920-4a62-88bb-1dcf6a969225",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-ebf9040a-0920-4a62-88bb-1dcf6a969225.png"
+                },
+                "imageDisplayMode": "natural"
+              },
+              {
+                "id": "image-row-item-b913f0c2-e196-4585-81af-7651ffff9ded",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "皮肤切换",
+                  "en": ""
+                },
+                "hoverPreviewMode": "floating",
+                "image": {
+                  "imageId": "image-aa39d15b-80a6-4cdb-ba5c-70008d8f6bce",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-aa39d15b-80a6-4cdb-ba5c-70008d8f6bce.png"
+                },
+                "imageDisplayMode": "natural"
+              },
+              {
+                "id": "image-row-item-0f78ade7-a960-4ccb-b3e1-3e968ad8b8d4",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "合成装备的预览",
+                  "en": ""
+                },
+                "hoverPreviewMode": "floating",
+                "image": {
+                  "imageId": "image-0e017be5-f833-48b4-921b-d208ad5303bb",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-0e017be5-f833-48b4-921b-d208ad5303bb.png"
+                },
+                "imageDisplayMode": "natural"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "figma-prototype-94c23e92-a1de-4391-a2dd-7ce817183066",
+          "templateId": "figma-prototype",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "项目资源演示",
+              "en": ""
+            },
+            "figmaUrl": "https://www.figma.com/proto/CtcXJQyA7C5y40lJbsgoqn/Untitled?node-id=0-1&p=f&t=A5YjFYkxOQ7n3GQD-0&scaling=scale-down&content-scaling=fixed&starting-point-node-id=2%3A4",
+            "caption": {
+              "zh": "后来部分交互被实装进项目",
+              "en": ""
+            },
+            "fallbackImage": {
+              "localImageId": "image-1d2a11cd-c23e-4ba2-a165-a616066258e0",
+              "publicPath": "/images/published/project-body/project-1ua2677/image-1d2a11cd-c23e-4ba2-a165-a616066258e0.png"
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-22c40df5-8327-4c56-8ee6-ba9eb3111d65",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "03",
+              "en": "01"
+            },
+            "leftTitle": {
+              "zh": "把握迭代规则",
+              "en": "Traditional Mobile Game Pain Points"
+            },
+            "statement": {
+              "zh": "选择几个重点系统进行进一步的交互优化",
+              "en": "While presenting information, the UI also strongly directs the player's next action."
+            },
+            "body": {
+              "zh": "选择了一测期间交互问题的收集，进行了多版本迭代后，着重在升级升阶/装备合成路径/竞技场美术表现为主要优化对象，这部分我设计的交互被最终采纳到上线版本获得项目组市场部的认可",
+              "en": "After 2016, influenced by Summoners War-like games and titles such as Soul Hunters, traditional mobile games increasingly organized their interfaces around system loops, resource feedback, and continuous guidance."
+            }
+          }
+        },
+        {
+          "instanceId": "direction-compare-f5de4e51-ddc9-40c2-804c-7f64ccf7b130",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "升级升星方案对比",
+              "en": ""
+            },
+            "leftLabel": {
+              "zh": "早期",
+              "en": ""
+            },
+            "rightLabel": {
+              "zh": "迭代后",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "早期在角色下方",
+              "en": ""
+            },
+            "rightTitle": {
+              "zh": "后期改为右侧统一升级",
+              "en": ""
+            },
+            "leftDescription": {
+              "zh": "非常分散且后期技术实现的时候也不方便做适配，进阶按钮常驻在角色下方破坏了3d表现的流畅性，也太过于拘泥于旧2d时代游戏的交互",
+              "en": ""
+            },
+            "rightDescription": {
+              "zh": "不仅让可升级状态非常明显，也在技术层面更方便解决适配问题，让出更多空间给3d表现",
+              "en": ""
+            },
+            "leftImage": {
+              "imageId": "image-716b6e4b-037c-4879-a46b-c2956207515c",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-716b6e4b-037c-4879-a46b-c2956207515c.png",
+              "hoverPreviewMode": "none"
+            },
+            "rightImage": {
+              "imageId": "image-adf54a95-1cef-4260-875a-f4a8eed9fccc",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-adf54a95-1cef-4260-875a-f4a8eed9fccc.png",
+              "hoverPreviewMode": "none"
+            },
+            "direction": "left-to-right"
+          }
+        },
+        {
+          "instanceId": "direction-compare-06597f24-9cca-4a57-8de1-37ebbb88d767",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "装备合成路线方案对比",
+              "en": ""
+            },
+            "leftLabel": {
+              "zh": "早期",
+              "en": ""
+            },
+            "rightLabel": {
+              "zh": "迭代后",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "早期只展示单一装备路径",
+              "en": ""
+            },
+            "rightTitle": {
+              "zh": "后期点击装备后平铺路径",
+              "en": ""
+            },
+            "leftDescription": {
+              "zh": "早期非常依赖弹窗，几乎所有内容都展示在弹窗内，空间狭小也无法突出此功能的重要性，其实各装备图标都可以点击但返回会比较吃力且合成的具体路径经常依赖玩家回忆",
+              "en": ""
+            },
+            "rightDescription": {
+              "zh": "和程序一起结合目前市面上存在的合成相关的游戏，且将所有装备的合成路径一一整合归纳，最终以平铺路径，表格化的方式展示，让玩家一眼知道自己所在装备合成路径的具体位置和渠道，也更直观的感受到这个合成的有趣之处",
+              "en": ""
+            },
+            "leftImage": {
+              "imageId": "image-d09c61b7-cb2a-476d-99cf-4a8e14784932",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-d09c61b7-cb2a-476d-99cf-4a8e14784932.png",
+              "hoverPreviewMode": "none"
+            },
+            "rightImage": {
+              "imageId": "image-fea47f73-5aca-4095-94e6-c51927adb342",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-fea47f73-5aca-4095-94e6-c51927adb342.png",
+              "hoverPreviewMode": "none"
+            },
+            "direction": "left-to-right"
+          }
+        },
+        {
+          "instanceId": "direction-compare-bc673ce9-0d01-4b5b-97f0-d28ce804d241",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "竞技场方案对比",
+              "en": ""
+            },
+            "leftLabel": {
+              "zh": "早期",
+              "en": ""
+            },
+            "rightLabel": {
+              "zh": "迭代后",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "早期竞技场表现",
+              "en": ""
+            },
+            "rightTitle": {
+              "zh": "后期改为全屏展示",
+              "en": ""
+            },
+            "leftDescription": {
+              "zh": "又是过于依赖弹窗设计，此系统是玩家验证自己养成的重要系统，但不仅信息繁多且太依赖2d美术",
+              "en": ""
+            },
+            "rightDescription": {
+              "zh": "后期自己设计将3d队伍展示在场景中，通过右侧更符合手机的交互方式来进行战斗刷新等操作。最后的版本未采用3d展示队伍，替换为个人头像在左侧。",
+              "en": ""
+            },
+            "leftImage": {
+              "imageId": "image-23b662af-c3d9-458b-8ed9-249097c7c89c",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-23b662af-c3d9-458b-8ed9-249097c7c89c.png",
+              "hoverPreviewMode": "none"
+            },
+            "rightImage": {
+              "imageId": "image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0.png",
+              "hoverPreviewMode": "none"
+            },
+            "direction": "left-to-right"
+          }
+        },
+        {
+          "instanceId": "supporting-note-962886eb-9ed8-4b8c-8b2e-e2403b7e4148",
+          "templateId": "supporting-note",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "body": {
+              "zh": "根据以上经验，我更多注意到游戏的体验才能延伸出具体的交互，于是针对我铺量接近200页UI的公会系统，我继续区分不同游戏的公会体验从而延伸出的交互设计进行拆分，运用到公会系统的再设计上",
+              "en": "After 2016, influenced by Summoners War-like games and titles such as Soul Hunters, traditional mobile games increasingly organized their interfaces around system loops, resource feedback, and continuous guidance."
+            }
+          }
+        },
+        {
+          "instanceId": "image-row-d7ddc470-6b4c-4fc7-a497-7dd4d60b3abc",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "其他游戏的公会体验和交互拆解",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "image-row-item-4566d166-91d0-49c4-9cc3-09b9f5442127",
+                "image": {
+                  "imageId": "image-9dd922b4-cf29-4657-9e62-5298249cce68",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-9dd922b4-cf29-4657-9e62-5298249cce68.png"
+                },
+                "imageDisplayMode": "cover",
+                "hoverPreviewMode": "floating",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                }
+              },
+              {
+                "id": "image-row-item-18f7b580-e618-45fe-ba02-c2970fcaaa97",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "floating",
+                "image": {
+                  "imageId": "image-349eba40-bb5f-4a44-87f1-d65c4dc69070",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-349eba40-bb5f-4a44-87f1-d65c4dc69070.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-a44d4b02-b91c-44bf-8f89-c2be0928bea9",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "floating",
+                "image": {
+                  "imageId": "image-9525cb26-54fc-469b-9482-3e6b75727d69",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-9525cb26-54fc-469b-9482-3e6b75727d69.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-fc342290-ee40-486b-a6da-c12e910b5945",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "floating",
+                "image": {
+                  "imageId": "image-bebf04da-6b18-4181-a3c7-bb0fc80ca398",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-bebf04da-6b18-4181-a3c7-bb0fc80ca398.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-976ad1d1-bd2d-42b0-9471-ee67f205b4af",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "floating",
+                "startNewRow": true,
+                "image": {
+                  "imageId": "image-c0434cbf-c8e4-4444-b76b-d9bf6fe46fbf",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-c0434cbf-c8e4-4444-b76b-d9bf6fe46fbf.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-d8c9f8f0-7329-4b24-8943-d87c9ffd3dfb",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "floating",
+                "image": {
+                  "imageId": "image-15f0bb99-c1c0-4b77-a5a8-e1a266629d88",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-15f0bb99-c1c0-4b77-a5a8-e1a266629d88.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-4e276aa7-a5a1-45d8-8eaf-3bceec5a2e4d",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "floating",
+                "image": {
+                  "imageId": "image-90fbb4b6-acd5-4c07-b27c-44a83f523784",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-90fbb4b6-acd5-4c07-b27c-44a83f523784.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-e0c94e1d-87cf-4d0e-b7e2-ea84123fc5f8",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "",
+                  "en": ""
+                },
+                "hoverPreviewMode": "floating",
+                "image": {
+                  "imageId": "image-75c6ad2f-c9fa-47b6-95e4-1998213a59e2",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-75c6ad2f-c9fa-47b6-95e4-1998213a59e2.png"
+                },
+                "imageDisplayMode": "cover"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "image-row-decf5f89-c020-4347-82c9-e0e970d226f0",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "综合目前游戏内的交互重新设计的公会各系统的交互",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "image-row-item-e4522e9a-e528-40f5-b392-7c27471d7f60",
+                "image": {
+                  "imageId": "image-bccae830-475e-486d-ad25-cedf55e8caae",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-bccae830-475e-486d-ad25-cedf55e8caae.png"
+                },
+                "imageDisplayMode": "cover",
+                "hoverPreviewMode": "none",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "每日公会任务是高活跃玩家经常点进的界面，我想保留很强的进度感和使命感",
+                  "en": ""
+                }
+              },
+              {
+                "id": "image-row-item-e2e6ec60-ea09-46a4-94b7-4c7c0960f932",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "每日付费后分发的公会红包界面，也是强调了荣誉感和进度感",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "image": {
+                  "imageId": "image-bb088f9f-b663-4be3-b8b4-462a6c2667b5",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-bb088f9f-b663-4be3-b8b4-462a6c2667b5.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-f686eb56-1d14-44bb-be6b-12fb5de431ff",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "每日公会boss界面的设计，也是将九头蛇的属性克制和单一以及总进度表现清晰",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "startNewRow": true,
+                "image": {
+                  "imageId": "image-3179a673-28c8-436c-b2da-3ffc84739a88",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-3179a673-28c8-436c-b2da-3ffc84739a88.png"
+                },
+                "imageDisplayMode": "cover"
+              },
+              {
+                "id": "image-row-item-0479b994-73c2-4d3c-bf0e-6db9df7551d0",
+                "alt": {
+                  "zh": "",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "公会获得的养成资源回馈到英雄体系，之前是不同一的交互，为了强调英雄养成的统一性，保持了和英雄界面的交互一致性",
+                  "en": ""
+                },
+                "hoverPreviewMode": "none",
+                "image": {
+                  "imageId": "image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4",
+                  "publicPath": "/images/published/template-images/project-1ua2677/image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4.png"
+                },
+                "imageDisplayMode": "cover"
+              }
+            ]
+          }
+        }
+      ],
+      "updatedAt": "2026-08-17T15:35:10.507Z"
     }
   },
   "projectCatalog": {
@@ -6558,7 +6863,7 @@
         },
         "stats": {
           "playtimeHours": 284,
-          "playtimeLabelZh": "284h",
+          "playtimeLabelZh": "283小时",
           "playtimeLabelEn": "284h",
           "achievementMode": "exact",
           "achievementUnlocked": 26,
@@ -6596,15 +6901,15 @@
         "reflection": {
           "whyPlayedZh": "碎片叙事 / 模拟经营",
           "whyPlayedEn": "",
-          "strengthsZh": "通过居民日常、四季行动和社区关系，把小镇叙事自然嵌入玩家的每日规划中。\n\n居民沟通和农场成长能够让玩家自然理解小镇关系，不依赖大量文化背景灌输。基础交互很克制，背包整理、储物等操作明显减少了经营中的重复劳动。",
+          "strengthsZh": "居民沟通和农场成长能够让玩家自然理解小镇关系，不依赖大量文化背景灌输。基础交互很克制，背包整理、储物等操作明显减少了经营中的重复劳动。",
           "strengthsEn": "",
           "weaknessesZh": "住宅扩建更多是在解锁厨房、家庭、孩子等新功能，对不热衷装修的玩家来说动力有限。主线和探索完成后，后期目标逐渐变成攒大量财富购买昂贵终局物品，但这些投入带来的体验变化不够大。",
           "weaknessesEn": "",
-          "contributionZh": "它最值得学习的是碎片化叙事如何与资源取舍、时间规划和角色关系自然绑定。\n\n我比较关注它如何用轻压力维持长期循环，也让我看到功能性成长如果不能继续改变玩家行为，后期目标即使数值很高，也可能失去推动力。",
+          "contributionZh": "它最值得学习的是碎片化叙事如何与资源取舍、时间规划和角色关系自然绑定。我比较关注它如何用轻压力维持长期循环，也让我看到功能性成长如果不能继续改变玩家行为，后期目标即使数值很高，也可能失去推动力。",
           "contributionEn": ""
         },
         "detail": {
-          "zh": "我喜欢它把日常社区关系和个人农场成长放在同一套生活循环里。时间和季节制造了一点紧张感，但不会压得玩家喘不过气。相对而言，房屋扩建到后期更像为了获得功能而扩建，完成主要探索后继续生活也越来越依赖单纯攒钱，因此不开新档时我的长期动力明显下降。",
+          "zh": "",
           "en": ""
         },
         "publication": {
@@ -6615,7 +6920,7 @@
           "archived": false
         },
         "createdAt": "2026-07-20T00:00:00.000Z",
-        "updatedAt": "2026-08-16T06:18:52.509Z"
+        "updatedAt": "2026-08-16T07:07:46.054Z"
       },
       {
         "schemaVersion": 1,
@@ -6663,13 +6968,13 @@
           "coverPublicPath": "/images/published/game-covers/game-cover-5bcbc174-fd11-47ae-a8d1-eb55088d227d.jpg"
         },
         "reflection": {
-          "whyPlayedZh": "网状叙事 / 选择自由\n\n我是在它获得TGA高度关注的时期开始玩的；之前尝试过《神界：原罪》，但觉得大量文本阅读对现在的单机玩家比较吃力。",
+          "whyPlayedZh": "我是在它获得TGA高度关注的时期开始玩的；之前尝试过《神界：原罪》，但觉得大量文本阅读对现在的单机玩家比较吃力。",
           "whyPlayedEn": "",
-          "strengthsZh": "平视演出、俯视探索和分支叙事共同支撑了高自由度体验。\n\n剧情演出显著降低了纯文本阅读负担。对话时的景深和镜头处理把体验从上帝视角拉回角色层面。大量可交互内容提供了自由感，同时主流玩家仍能形成相对稳定的行为路径。",
+          "strengthsZh": "平视演出、俯视探索和分支叙事共同支撑了高自由度体验。剧情演出显著降低了纯文本阅读负担。对话时的景深和镜头处理把体验从上帝视角拉回角色层面。大量可交互内容提供了自由感，同时主流玩家仍能形成相对稳定的行为路径。",
           "strengthsEn": "",
           "weaknessesZh": "如果设计大量大多数玩家本能上几乎不会尝试的自由行为，而对应内容量又跟不上，这些自由很容易只成为展示性的噱头。",
           "weaknessesEn": "",
-          "contributionZh": "骰子不是核心本身，真正的价值在于底层开放性和非线性网状叙事。\n\n它让我更明确地思考自由度不是“能做多少事”，而是玩家实际行为、内容成本和系统反馈之间应该保持怎样的比例。",
+          "contributionZh": "骰子不是核心本身，真正的价值在于底层开放性和非线性网状叙事。它让我更明确地思考自由度不是“能做多少事”，而是玩家实际行为、内容成本和系统反馈之间应该保持怎样的比例。",
           "contributionEn": ""
         },
         "detail": {
@@ -6684,7 +6989,7 @@
           "archived": false
         },
         "createdAt": "2026-07-20T00:00:00.000Z",
-        "updatedAt": "2026-08-11T08:32:27.546Z"
+        "updatedAt": "2026-08-16T07:09:36.909Z"
       },
       {
         "schemaVersion": 1,
@@ -6730,17 +7035,17 @@
           "coverPublicPath": "/images/published/game-covers/game-cover-dc478a8f-005a-420b-9952-59b76a3a79fe.jpg"
         },
         "reflection": {
-          "whyPlayedZh": "叙事系统 / 探索面板\n\n它争议很大，又以日本为核心背景。我很感兴趣欧美团队如何处理亚洲文化，因此主动去体验。",
+          "whyPlayedZh": "它争议很大，又以日本为核心背景。我很感兴趣欧美团队如何处理亚洲文化，因此主动去体验。",
           "whyPlayedEn": "",
-          "strengthsZh": "刺杀面板会随探索逐步解锁，促使玩家反思支线顺序与决策逻辑。\n\n刺杀面板不是固定模板，而像一张逐步展开的空白画布，玩家先遇到的故事和刺杀团体会优先进入自己的信息结构。四季变化也真正改变了重复走同一路线时的感受，风、雪、落叶让相同空间产生不同体验。道路本身的事件和叙事触发也很成熟。",
+          "strengthsZh": "刺杀面板会随探索逐步解锁，促使玩家反思支线顺序与决策逻辑。刺杀面板不是固定模板，而像一张逐步展开的空白画布，玩家先遇到的故事和刺杀团体会优先进入自己的信息结构。四季变化也真正改变了重复走同一路线时的感受，风、雪、落叶让相同空间产生不同体验。",
           "strengthsEn": "",
           "weaknessesZh": "自由度主要集中在设计好的道路和任务空间，进入山野后探索反馈明显减弱。日本本土地理条件下的野生动物和生态存在感也不足。重复返回已经清理过的地点执行后续刺杀任务，会和玩家主动探索的心理产生冲突。",
           "weaknessesEn": "",
-          "contributionZh": "动态信息解锁比固定模板更能强化玩家的探索参与感。\n\n它让我看到技术迭代真正有价值的方向之一，是让同一空间中的重复行为产生不同体验；同时也让我重新思考开放世界为什么需要给“再次回来”一个新的理由。",
+          "contributionZh": "动态信息解锁比固定模板更能强化玩家的探索参与感。它让我看到技术迭代真正有价值的方向之一，是让同一空间中的重复行为产生不同体验；同时也让我重新思考开放世界为什么需要给“再次回来”一个新的理由。",
           "contributionEn": ""
         },
         "detail": {
-          "zh": "我很喜欢它的刺杀信息结构和四季系统。相比单纯扩大地图，我更认可这种让空间随时间发生体验变化的方式。但如果玩家脱离道路进入山野，系统反馈明显变薄，我会觉得这是自由探索和设计边界之间仍未解决的问题。",
+          "zh": "",
           "en": ""
         },
         "publication": {
@@ -6751,7 +7056,7 @@
           "archived": false
         },
         "createdAt": "2026-07-20T00:00:00.000Z",
-        "updatedAt": "2026-08-11T08:32:27.546Z"
+        "updatedAt": "2026-08-16T07:12:30.984Z"
       },
       {
         "schemaVersion": 1,
@@ -6796,17 +7101,17 @@
           "coverPublicPath": "/images/published/game-covers/game-cover-babd4bd0-1e00-4e9f-af2d-dcd8f4fa5ecb.jpg"
         },
         "reflection": {
-          "whyPlayedZh": "开放世界 / 节奏控制",
+          "whyPlayedZh": "",
           "whyPlayedEn": "",
-          "strengthsZh": "开放世界结构通过等级能力锁控制节奏，同时保留自由捕捉和探索期待。\n\n前期很多高台、水域等区域无法直接到达，随着后续移动能力解锁，玩家可以重新理解已经经过的空间。能力锁让重复跑图不只是重复路线，而是获得新的可达性。",
+          "strengthsZh": "开放世界结构通过等级能力锁控制节奏，同时保留自由捕捉和探索期待。前期很多高台、水域等区域无法直接到达，随着后续移动能力解锁，玩家可以重新理解已经经过的空间。能力锁让重复跑图不只是重复路线，而是获得新的可达性。",
           "strengthsEn": "",
           "weaknessesZh": "我的主要批评不是针对这款游戏本身，而是借它对比一些开放世界：如果任务只是让玩家回到已经清理过的地点重复执行相似内容，会和主动探索的心理产生冲突。",
           "weaknessesEn": "",
-          "contributionZh": "能力门槛可以在不破坏自由感的前提下，柔性引导玩家推进主线。\n\n它让我更重视技能锁在开放世界中的价值。限制不一定减少自由，反而可以让玩家在获得新能力后重新认识旧地图，从而提高重复探索的意义。",
+          "contributionZh": "能力门槛可以在不破坏自由感的前提下，柔性引导玩家推进主线。它让我更重视技能锁在开放世界中的价值。限制不一定减少自由，反而可以让玩家在获得新能力后重新认识旧地图，从而提高重复探索的意义。",
           "contributionEn": ""
         },
         "detail": {
-          "zh": "我玩的是紫版。相比“地图一次性全部开放”，我更喜欢先看到暂时去不了的地方，再随着能力成长回来。这会让我记住空间，也会期待未来重新经过这里时发生什么变化。",
+          "zh": "",
           "en": ""
         },
         "publication": {
@@ -6817,7 +7122,7 @@
           "archived": false
         },
         "createdAt": "2026-07-20T00:00:00.000Z",
-        "updatedAt": "2026-08-11T08:32:27.546Z"
+        "updatedAt": "2026-08-16T07:25:39.659Z"
       },
       {
         "schemaVersion": 1,
@@ -6864,17 +7169,17 @@
           "coverPublicPath": "/images/published/game-covers/game-cover-1025e29d-0f04-479f-a77e-ec55e0d4105c.jpg"
         },
         "reflection": {
-          "whyPlayedZh": "双线节奏 / 心理学表达",
+          "whyPlayedZh": "",
           "whyPlayedEn": "",
-          "strengthsZh": "白天经营羁绊、夜晚潜入战斗的双线结构形成了强节奏感。\n\n部分伙伴关系会解锁很具体的机制能力，因此沟通不只是看剧情，也会形成明确的体验目的。心理学和人格主题也让角色成长不只是数值成长，而涉及人生阶段、死亡和内心追求。",
+          "strengthsZh": "白天经营羁绊、夜晚潜入战斗的双线结构形成了强节奏感。部分伙伴关系会解锁很具体的机制能力，因此沟通不只是看剧情，也会形成明确的体验目的。心理学和人格主题也让角色成长不只是数值成长，而涉及人生阶段、死亡和内心追求。",
           "strengthsEn": "",
           "weaknessesZh": "后期宫殿和相关流程对我来说会逐渐重复。",
           "weaknessesEn": "",
-          "contributionZh": "它把荣格心理学概念转化为角色、迷宫和成长系统，是思想表达与玩法结构结合的参考。\n\n它让我看到伙伴系统如果能和机制收益结合，社交就不会只是附属剧情；同时我也很在意游戏是否能真正把心理或哲学主题放进系统体验，而不是只停留在台词层面。",
+          "contributionZh": "它把荣格心理学概念转化为角色、迷宫和成长系统，是思想表达与玩法结构结合的参考。它让我看到伙伴系统如果能和机制收益结合，社交就不会只是附属剧情；同时我也很在意游戏是否能真正把心理或哲学主题放进系统体验，而不是只停留在台词层面。",
           "contributionEn": ""
         },
         "detail": {
-          "zh": "虽然伙伴系统本身并不复杂，但我喜欢某些能力只有通过特定关系才能获得，这让角色沟通具有了特别性和目的性。我也很认可它把人格心理学和角色成长放在一起。",
+          "zh": "",
           "en": ""
         },
         "publication": {
@@ -6885,7 +7190,7 @@
           "archived": false
         },
         "createdAt": "2026-07-20T00:00:00.000Z",
-        "updatedAt": "2026-08-11T08:32:27.546Z"
+        "updatedAt": "2026-08-16T07:33:56.519Z"
       },
       {
         "schemaVersion": 1,
@@ -6932,13 +7237,13 @@
           "coverPublicPath": "/images/published/game-covers/game-cover-aac6e163-6beb-48ec-9ba8-1179ff30f2f7.jpg"
         },
         "reflection": {
-          "whyPlayedZh": "角色关系 / 叙事选择",
+          "whyPlayedZh": "",
           "whyPlayedEn": "",
-          "strengthsZh": "长期角色关系和选择后果共同构成强烈的科幻叙事沉浸。\n\n太空背景让个人不再只是个人，而经常成为一个文明、组织或群体的代表，这使文明冲突被放大。我喜欢观察这种关系变化。多数箱庭和探索空间也能不断产生新的发现感。战斗中队友技能可以真正进入策略判断，让团队协作成为战斗系统的一部分。",
+          "strengthsZh": "太空背景让个人不再只是个人，而经常成为一个文明、组织或群体的代表，这使文明冲突被放大。我喜欢观察这种关系变化。多数箱庭和探索空间也能不断产生新的发现感。战斗中队友技能可以真正进入策略判断，让团队协作成为战斗系统的一部分。",
           "strengthsEn": "",
           "weaknessesZh": "部分线性探索和剧情段落会显得比较枯燥。",
           "weaknessesEn": "",
-          "contributionZh": "队友关系和世界状态变化是持续投入的重要来源。\n\n它强化了我对团队战斗设计的兴趣：角色差异不一定只靠个人技能模组体现，也可以让队友能力真正进入我的即时策略。",
+          "contributionZh": "队友关系和世界状态变化是持续投入的重要来源。它强化了我对团队战斗设计的兴趣：角色差异不一定只靠个人技能模组体现，也可以让队友能力真正进入我的即时策略。",
           "contributionEn": ""
         },
         "detail": {
@@ -6953,7 +7258,7 @@
           "archived": false
         },
         "createdAt": "2026-07-20T00:00:00.000Z",
-        "updatedAt": "2026-08-11T08:32:27.546Z"
+        "updatedAt": "2026-08-16T07:37:32.403Z"
       },
       {
         "schemaVersion": 1,
@@ -7000,17 +7305,17 @@
           "coverPublicPath": "/images/published/game-covers/game-cover-eb19d5fb-6e4c-4c32-88da-2772b5540ea7.jpg"
         },
         "reflection": {
-          "whyPlayedZh": "生存建造 / 多人探索",
+          "whyPlayedZh": "",
           "whyPlayedEn": "",
-          "strengthsZh": "探索、资源采集和基地建设形成稳定的地下世界循环。\n\n玩家可以根据性格和游玩偏好形成探索、战斗、制造等不同成长方向，而且对应行为会继续强化自己的能力。团队成员之间因此能拉开真正有意义的差异。",
+          "strengthsZh": "探索、资源采集和基地建设形成稳定的地下世界循环。玩家可以根据性格和游玩偏好形成探索、战斗、制造等不同成长方向，而且对应行为会继续强化自己的能力。团队成员之间因此能拉开真正有意义的差异。",
           "strengthsEn": "",
           "weaknessesZh": "很多合作游戏会把制造、战斗等系统绑得太紧，导致所有人最终都必须平均参与每一种活动。我认为这种相互制约更适合单人设计，不适合强调多人分工的系统。",
           "weaknessesEn": "",
-          "contributionZh": "轻量生存系统可以通过空间扩张和资源目标持续制造探索动力。\n\n它让我更明确地认为多人系统应该允许成员形成极端优势和真实分工，而不是为了保证单人完整性把所有人压回平均体验。",
+          "contributionZh": "轻量生存系统可以通过空间扩张和资源目标持续制造探索动力。它让我更明确地认为多人系统应该允许成员形成极端优势和真实分工，而不是为了保证单人完整性把所有人压回平均体验。",
           "contributionEn": ""
         },
         "detail": {
-          "zh": "我喜欢在线多人游戏，也很关注团队职责如何自然形成。这个游戏让我看到不需要职业名称，也可以通过技能和行为成长让团队成员自己决定“我在这个队伍里负责什么”。",
+          "zh": "",
           "en": ""
         },
         "publication": {
@@ -7021,7 +7326,7 @@
           "archived": false
         },
         "createdAt": "2026-07-20T00:00:00.000Z",
-        "updatedAt": "2026-08-11T08:32:27.546Z"
+        "updatedAt": "2026-08-16T07:39:00.265Z"
       },
       {
         "schemaVersion": 1,
@@ -7070,11 +7375,11 @@
         "reflection": {
           "whyPlayedZh": "",
           "whyPlayedEn": "",
-          "strengthsZh": "时间管理和角色成长结构形成持续推进压力。\n\n随着强度提升，怪物会从威胁变成主动躲避玩家的对象，玩家对塔的心理也会从谨慎变成主动重复进入。相比P5相对线性的地下探索，我更愿意反复回到塔的中间节点。3D与2D界面的融合也非常成熟。",
+          "strengthsZh": "时间管理和角色成长结构形成持续推进压力。随着强度提升，怪物会从威胁变成主动躲避玩家的对象，玩家对塔的心理也会从谨慎变成主动重复进入。相比P5相对线性的地下探索，我更愿意反复回到塔的中间节点。3D与2D界面的融合也非常成熟。",
           "strengthsEn": "",
           "weaknessesZh": "重复爬塔本身仍然可能让部分玩家觉得枯燥，体验是否成立很依赖成长速度和重复内容的变化。",
           "weaknessesEn": "",
-          "contributionZh": "有限日程可以强化选择重量，但也需要控制玩家焦虑。\n\n它让我意识到重复结构本身并不一定是问题，关键是同一个循环能否随着玩家成长改变速度、风险和心理感受。",
+          "contributionZh": "有限日程可以强化选择重量，但也需要控制玩家焦虑。它让我意识到重复结构本身并不一定是问题，关键是同一个循环能否随着玩家成长改变速度、风险和心理感受。",
           "contributionEn": ""
         },
         "detail": {
@@ -7089,7 +7394,7 @@
           "archived": false
         },
         "createdAt": "2026-07-20T00:00:00.000Z",
-        "updatedAt": "2026-08-11T08:32:27.546Z"
+        "updatedAt": "2026-08-16T07:40:44.424Z"
       },
       {
         "schemaVersion": 1,
@@ -7139,15 +7444,15 @@
         "reflection": {
           "whyPlayedZh": "",
           "whyPlayedEn": "",
-          "strengthsZh": "服饰系统和魔法世界观沉浸感出色，但后期内容同质化明显。\n\n魔法特效和技能组合很有表现力，装备系统也真正进入换装体验，不只是数值表格。不同魔法之间能形成明显的战斗组合。",
+          "strengthsZh": "服饰系统和魔法世界观沉浸感出色，但后期内容同质化明显。魔法特效和技能组合很有表现力，装备系统也真正进入换装体验，不只是数值表格。不同魔法之间能形成明显的战斗组合。",
           "strengthsEn": "",
           "weaknessesZh": "后期内容重复感很强，地下空间资源复用明显，魔法套路也会逐渐固定。数值碾压后，战斗的策略性和刺激感都会下降。",
           "weaknessesEn": "",
-          "contributionZh": "开放地图需要更强的探索动线和关卡节奏，否则容易在后期失去新鲜感。\n\n它让我更关注主题语言如何转化成系统语言：魔法不是只换一套特效，而是需要形成自己的技能组合和成长逻辑。",
+          "contributionZh": "开放地图需要更强的探索动线和关卡节奏，否则容易在后期失去新鲜感。它让我更关注主题语言如何转化成系统语言：魔法不是只换一套特效，而是需要形成自己的技能组合和成长逻辑。",
           "contributionEn": ""
         },
         "detail": {
-          "zh": "这是我第一次把魔法世界作为完整大世界来体验。前期我会被技能和视觉吸引，但后期资源复用和数值成长让战斗逐渐变成重复执行已经验证过的套路。",
+          "zh": "",
           "en": ""
         },
         "publication": {
@@ -7158,7 +7463,7 @@
           "archived": false
         },
         "createdAt": "2026-07-20T00:00:00.000Z",
-        "updatedAt": "2026-08-11T08:32:27.546Z"
+        "updatedAt": "2026-08-16T07:42:15.450Z"
       },
       {
         "schemaVersion": 1,
@@ -7584,13 +7889,13 @@
           "whyPlayedEn": "",
           "strengthsZh": "变身和精魄类能力让Boss、精英怪不只是一次性遭遇，而会成为后续技能组合的一部分。这让学习敌人的过程和角色成长发生了直接联系。",
           "strengthsEn": "",
-          "weaknessesZh": "我的笔记里没有展开具体缺点。",
+          "weaknessesZh": "",
           "weaknessesEn": "",
           "contributionZh": "它让我看到技能成长不一定只是“拿到新武器或新特效”，也可以把曾经遭遇过的敌人转化成玩家自身能力，从而让内容复用具有叙事和记忆价值。",
           "contributionEn": ""
         },
         "detail": {
-          "zh": "我觉得它在技能获得方式上非常有突破感。过去Boss通常打完就结束，而这里击败过的强敌可以继续进入我的技能结构，这会让我在后续周目里重新理解之前的战斗经验。",
+          "zh": "",
           "en": ""
         },
         "publication": {
@@ -7601,7 +7906,7 @@
           "archived": false
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
-        "updatedAt": "2026-08-11T10:50:24.452Z"
+        "updatedAt": "2026-08-16T07:08:16.909Z"
       },
       {
         "schemaVersion": 1,
@@ -7624,7 +7929,7 @@
           "whyPlayedEn": "",
           "strengthsZh": "叙事上从最初的不理解逐渐进入机构内部，玩家会一步步看到工作人员如何冷漠地对待异常和实验对象。关卡上，随着远程操控、漂浮等能力解锁，原本只能远远看到的空间会逐渐变成可到达区域。",
           "strengthsEn": "",
-          "weaknessesZh": "我的笔记里没有展开具体缺点。",
+          "weaknessesZh": "",
           "weaknessesEn": "",
           "contributionZh": "它是我以后很想拆解的关卡案例，因为它展示了如何在玩家移动能力不断扩张时，仍然精确控制可达高度、视线和空间揭示节奏。",
           "contributionEn": ""
@@ -7641,7 +7946,7 @@
           "archived": false
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
-        "updatedAt": "2026-08-11T10:50:04.437Z"
+        "updatedAt": "2026-08-16T07:08:47.866Z"
       },
       {
         "schemaVersion": 1,
@@ -7668,7 +7973,7 @@
           "whyPlayedEn": "",
           "strengthsZh": "它没有把宝可梦生态继续限制在捕捉，而是通过建造生态区域吸引宝可梦来生活，让“获得宝可梦”变成共建环境后的结果。系统目标没有消失，但行为表达变得更符合共同生活的世界观。",
           "strengthsEn": "",
-          "weaknessesZh": "目前我还没有通关，因此没有形成完整后期评价。",
+          "weaknessesZh": "",
           "weaknessesEn": "",
           "contributionZh": "它让我确认一个设计原则：单一体验目标可以被拆成完全不同的交互形式，不必总是沿用行业已经习惯的机制。只要目标和反馈仍然成立，甚至可以借此改变整个玩法的攻击性和世界观表达。",
           "contributionEn": ""
@@ -7685,7 +7990,7 @@
           "archived": false
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
-        "updatedAt": "2026-08-11T10:49:41.943Z"
+        "updatedAt": "2026-08-16T07:11:44.361Z"
       },
       {
         "schemaVersion": 1,
@@ -7708,7 +8013,7 @@
           "whyPlayedEn": "",
           "strengthsZh": "不同地图区域有明显生态差异，玩家很容易形成“哪些宝可梦住在哪里”的空间记忆。重复跑图时仍有收集和探索目标，因此不会完全失去意义。",
           "strengthsEn": "",
-          "weaknessesZh": "我的笔记里没有展开具体缺点。",
+          "weaknessesZh": "",
           "weaknessesEn": "",
           "contributionZh": "它让我看到生态设计可以直接成为地图识别系统：玩家不只是记地形，也会通过生物分布记住区域。",
           "contributionEn": ""
@@ -7725,7 +8030,7 @@
           "archived": false
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
-        "updatedAt": "2026-08-11T10:49:24.423Z"
+        "updatedAt": "2026-08-16T07:24:24.738Z"
       },
       {
         "schemaVersion": 1,
@@ -7751,7 +8056,7 @@
           "whyPlayedEn": "",
           "strengthsZh": "提交证据、现场调查和庭审中的错误惩罚共同制造紧张感。信息不是只靠阅读推进，而是需要玩家在限定情境中做判断。",
           "strengthsEn": "",
-          "weaknessesZh": "我的笔记主要是拿它和其他视觉小说对比，没有针对它展开明显缺点。",
+          "weaknessesZh": "",
           "weaknessesEn": "",
           "contributionZh": "它让我很明确地区分“剧情有紧张感”和“交互本身制造紧张感”。我更认可后者，因为玩法、信息和节奏被真正结合在一起。",
           "contributionEn": ""
@@ -7768,7 +8073,7 @@
           "archived": false
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
-        "updatedAt": "2026-08-11T10:48:41.496Z"
+        "updatedAt": "2026-08-16T07:25:59.070Z"
       },
       {
         "schemaVersion": 1,
@@ -7791,13 +8096,13 @@
           "whyPlayedEn": "",
           "strengthsZh": "挖矿本身的反馈很有吸引力，也能为收集和其他长期目标提供额外动力。虽然视觉表达很简单，但操作过程让我觉得很有“在挖东西”的真实感。",
           "strengthsEn": "",
-          "weaknessesZh": "我的笔记里没有展开具体缺点。",
+          "weaknessesZh": "",
           "weaknessesEn": "",
           "contributionZh": "它让我意识到真实感并不依赖复杂3D表现，简单的2D交互只要反馈结构正确，也可以产生很强的身体感和操作满足。",
           "contributionEn": ""
         },
         "detail": {
-          "zh": "我对这作最深的记忆不是主线，而是挖矿。这个玩法本身就足够让我反复进入，并且能和宝可梦收集形成额外动力。",
+          "zh": "",
           "en": ""
         },
         "publication": {
@@ -7808,7 +8113,7 @@
           "archived": false
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
-        "updatedAt": "2026-08-11T10:48:17.061Z"
+        "updatedAt": "2026-08-16T07:36:44.486Z"
       },
       {
         "schemaVersion": 1,
@@ -7833,13 +8138,13 @@
           "whyPlayedEn": "",
           "strengthsZh": "把证据作为“弹丸”攻击矛盾信息的形式，让信息筛选本身变成操作。唇枪舌战、互相怀疑和节奏推进共同制造心理压力。",
           "strengthsEn": "",
-          "weaknessesZh": "我的笔记里没有展开具体缺点。",
+          "weaknessesZh": "",
           "weaknessesEn": "",
           "contributionZh": "它进一步强化了我的判断：视觉小说如果只是阅读剧情，游戏感很容易不足；把证据、冲突和信息筛选转化成可操作机制后，节奏才真正属于玩家。",
           "contributionEn": ""
         },
         "detail": {
-          "zh": "我喜欢它把“找出有效信息”这件事直接做成攻击动作。相比只在选项里选答案，我会更明显地感觉自己正在参与这场争论。",
+          "zh": "",
           "en": ""
         },
         "publication": {
@@ -7850,15 +8155,15 @@
           "archived": false
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
-        "updatedAt": "2026-08-16T06:21:59.356Z"
+        "updatedAt": "2026-08-16T07:38:35.749Z"
       },
       {
         "schemaVersion": 1,
         "id": "game-8ecc51bc-0f05-4ce3-8cd6-770614b72634",
         "identity": {
-          "canonicalTitle": "恋与制作人",
+          "canonicalTitle": "恋与制作人（标题需确认）",
           "titleZh": "恋与制作人",
-          "titleEn": "恋与制作人"
+          "titleEn": "恋与制作人（标题需确认）"
         },
         "stats": {
           "playtimeLabelZh": "约一年左右"
@@ -7873,15 +8178,15 @@
         "reflection": {
           "whyPlayedZh": "这是我较早真正投入自己时间和情绪的一款手游，也是早期让我持续追主线剧情的恋爱向作品。",
           "whyPlayedEn": "",
-          "strengthsZh": "剧情演出和角色关系能够持续制造“我想继续看后面发生什么”的动力。",
+          "strengthsZh": "",
           "strengthsEn": "",
-          "weaknessesZh": "我的笔记主要是在回顾当时为什么沉迷，没有展开系统层面的缺点。",
+          "weaknessesZh": "",
           "weaknessesEn": "",
           "contributionZh": "这段经历让我意识到手游的长期动力有时并不来自复杂系统，而来自持续追剧情和情感关系的愿望。",
           "contributionEn": ""
         },
         "detail": {
-          "zh": "这是我早期真正愿意长期投入的一款手游。我当时会因为主线和角色表现非常想继续看后续内容，也能感受到它如何针对少女爱情幻想组织情绪节奏。",
+          "zh": "",
           "en": ""
         },
         "publication": {
@@ -7892,7 +8197,7 @@
           "archived": false
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
-        "updatedAt": "2026-08-16T06:23:20.604Z"
+        "updatedAt": "2026-08-16T07:39:39.803Z"
       },
       {
         "schemaVersion": 1,
@@ -7923,7 +8228,7 @@
           "contributionEn": ""
         },
         "detail": {
-          "zh": "我一直玩换装游戏，但我不认为换装天然需要非常复杂的数值系统。后期很多成长结构更像为了延长商业循环不断增加层级。我也越来越在意团队获取的时尚资源高度重叠后，为什么审美会快速趋同。",
+          "zh": "",
           "en": ""
         },
         "publication": {
@@ -7934,7 +8239,7 @@
           "archived": false
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
-        "updatedAt": "2026-08-11T10:47:08.417Z"
+        "updatedAt": "2026-08-16T07:40:22.464Z"
       },
       {
         "schemaVersion": 1,
@@ -7965,7 +8270,7 @@
           "contributionEn": ""
         },
         "detail": {
-          "zh": "我在手机和平板上玩时非常容易晕。后来和《鸣潮》比较后，我更确定镜头和移动反馈会直接改变探索舒适度。纵深地图如果只是不断叠加高度和洞穴，也可能把最初的新鲜感变成后期的导航负担。",
+          "zh": "",
           "en": ""
         },
         "publication": {
@@ -7976,7 +8281,7 @@
           "archived": false
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
-        "updatedAt": "2026-08-11T10:46:08.170Z"
+        "updatedAt": "2026-08-16T07:41:28.114Z"
       },
       {
         "schemaVersion": 1,
@@ -8191,11 +8496,13 @@
         "schemaVersion": 1,
         "id": "game-ed448859-f548-4f94-8db5-07e1262dd573",
         "identity": {
-          "canonicalTitle": "守望先锋",
+          "canonicalTitle": "未确认：5v5英雄射击游戏",
           "titleZh": "守望先锋",
-          "titleEn": "守望先锋"
+          "titleEn": "未确认：5v5英雄射击游戏"
         },
-        "stats": {},
+        "stats": {
+          "playtimeLabelZh": "语音中提到近期约80小时，但表述不够清晰"
+        },
         "presentation": {
           "tags": [],
           "homepageTagIds": [],
@@ -8208,7 +8515,7 @@
           "whyPlayedEn": "",
           "strengthsZh": "长枪位的准度会加分，但团队协作比单纯枪法更重要，因此不会因为某项操作能力不够成熟就完全被排除。角色设计也能通过体型、比例、姿态和技能直接传达性格与机制。",
           "strengthsEn": "",
-          "weaknessesZh": "我的笔记没有明确展开该游戏本身的系统缺点。",
+          "weaknessesZh": "",
           "weaknessesEn": "",
           "contributionZh": "它强化了我的一个设计判断：机制和角色设计应该同时发生。一个英雄站在那里时，玩家最好已经能感受到他的行动方式、性格和技能倾向，而不是所有角色只换皮肤和特效。",
           "contributionEn": ""
@@ -8225,7 +8532,7 @@
           "archived": false
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
-        "updatedAt": "2026-08-16T06:24:53.977Z"
+        "updatedAt": "2026-08-16T07:56:34.003Z"
       },
       {
         "schemaVersion": 1,
@@ -8250,7 +8557,7 @@
           "whyPlayedEn": "",
           "strengthsZh": "武侠大世界的整体呈现让我印象很深，尤其是PC端能够尽量减少手游式按钮和操作痕迹，让单机端拥有自己的交互逻辑。",
           "strengthsEn": "",
-          "weaknessesZh": "我的笔记更多是在拿它对比行业普遍问题，没有展开它自身明显缺点。",
+          "weaknessesZh": "",
           "weaknessesEn": "",
           "contributionZh": "它让我更加确定多端设计不能等于移植。很多所谓双端产品只是画面更精细，但PC端交互仍然像模拟器。我认为真正的多端未来需要针对设备重新设计信息密度、按钮和操作方式。",
           "contributionEn": ""
@@ -8267,7 +8574,7 @@
           "archived": false
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
-        "updatedAt": "2026-08-11T10:41:47.466Z"
+        "updatedAt": "2026-08-16T07:56:44.372Z"
       }
     ],
     "updatedAt": "2026-08-16T06:24:53.977Z"
@@ -8772,6 +9079,13 @@
       "sourceStore": "published-game-covers",
       "sourceId": "game-cover-713250f0-8fa9-4b24-9a5f-2550f2c2dd5e",
       "publicPath": "/images/published/game-covers/game-cover-713250f0-8fa9-4b24-9a5f-2550f2c2dd5e.jpg"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/project-body/project-1ua2677/image-1d2a11cd-c23e-4ba2-a165-a616066258e0.png",
+      "publicPath": "/images/published/project-body/project-1ua2677/image-1d2a11cd-c23e-4ba2-a165-a616066258e0.png"
     }
   ]
 }
