@@ -5,10 +5,15 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { finalizePublishReport } from "./publishing-report-lib.mjs";
+import { compareLocalAssetsToProduction, findDeploymentForSha } from "./publishing/deploymentStatus.mjs";
+import { emitOutcome, emitProgress } from "./publishing/syncProgress.mjs";
+import { decideAfterChangeDetection, decideAfterDeploymentCheck, decideAfterPreflight, SYNC_OUTCOME } from "./publishing/syncStateMachine.mjs";
 
 const OFFICIAL_ROOT = path.resolve("D:/myprofilegit/myprofile");
 const PRODUCTION_URL = "https://myprofile-teal.vercel.app";
 const VERCEL_DASHBOARD = "https://vercel.com/myprofile2/myprofile";
+const GITHUB_OWNER = "daddebug";
+const GITHUB_REPO = "myprofile";
 const LARGE_FILE_LIMIT = 50 * 1024 * 1024;
 const command = process.argv[2] ?? "check";
 const bundleArgument = process.argv.slice(3).find((argument) => argument !== "--");
@@ -40,7 +45,7 @@ const canonicalWebsitePrefixes = ["docs/", "scripts/", "skills/", "src/"];
 
 function fail(message) {
   console.error(`\nERROR: ${message}\n`);
-  if (command === "launcher-preflight" || command === "launcher-publish") throw new Error(message);
+  if (command === "launcher-preflight" || command === "launcher-publish" || command === "launcher-recheck-deployment") throw new Error(message);
   process.exit(1);
 }
 
@@ -59,6 +64,21 @@ function run(program, args, options = {}) {
   });
   if (result.error) fail(`${program} could not start: ${result.error.message}`);
   if (result.status !== 0) fail(`${program} ${args.join(" ")} failed. Nothing was committed or pushed.`);
+}
+
+// Non-throwing sibling of run() -- returns the real exit status instead of
+// calling fail()/throwing, so the launcher sync pipeline can attribute a
+// failure to its own specific stage (Section 9: one message per layer)
+// instead of every failure unwinding through the same generic catch.
+function runCapturingStatus(program, args) {
+  const runPackageManagerThroughNode = program === "pnpm" && Boolean(process.env.npm_execpath);
+  const executable = runPackageManagerThroughNode ? process.execPath : program;
+  const packageManagerIsPnpm = /pnpm/i.test(path.basename(process.env.npm_execpath ?? ""));
+  const commandArgs = runPackageManagerThroughNode
+    ? [process.env.npm_execpath, ...(packageManagerIsPnpm ? args : ["run", ...args])]
+    : args;
+  const result = spawnSync(executable, commandArgs, { cwd: OFFICIAL_ROOT, encoding: "utf8", stdio: "inherit" });
+  return result.status ?? 1;
 }
 
 function capture(program, args) {
@@ -200,6 +220,16 @@ async function runChecks() {
   return files;
 }
 
+// Kept for the standalone `pnpm portfolio:verify` / `publish` commands
+// (manual, non-launcher use) exactly as before -- hashed-asset-filename
+// comparison as the sole gate, with its own throw-on-mismatch/timeout
+// behavior. The launcher pipeline (launcherPublish below) no longer uses
+// this function to decide success -- see deploymentStatus.mjs's own header
+// comment for why (a confirmed false negative: commit a6fb0bf was Ready on
+// Vercel, matching SHA, alias correctly pointed at it, and this exact
+// comparison still reported failure because two builds of unrelated commits
+// can happen to reference differently-hashed filenames with no relationship
+// to which commit is actually deployed).
 async function verifyProduction() {
   const localIndex = await readFile(path.join(OFFICIAL_ROOT, "dist", "index.html"), "utf8");
   const expectedAssets = [...localIndex.matchAll(/(?:src|href)="(\/assets\/[^"?#]+)"/g)].map((match) => match[1]).sort();
@@ -276,52 +306,211 @@ async function publish() {
 }
 
 async function launcherPreflight() {
+  emitProgress("prepare", "running", "准备发布");
   assertOfficialDirectory();
   requireBundlePath();
   const files = changedFiles();
   assertLauncherHasNoUnrelatedStagedFiles();
   assertLauncherHasOnlyCanonicalWebsiteChanges(files);
   await inspectChangedFiles(files);
-  console.log("Running the canonical production import dry run...");
-  run("pnpm", ["portfolio:import", "--", bundlePath]);
-  console.log("Launcher preflight passed. No production files were changed.");
+  emitProgress("prepare", "success", "准备完成");
+
+  emitProgress("check-content", "running", "正在检查发布内容");
+  const status = runCapturingStatus("pnpm", ["portfolio:import", "--", bundlePath]);
+  const report = await readLauncherReport();
+  const decision = decideAfterPreflight({
+    blocked: status !== 0 || report?.outcome === "blocked",
+    blockedItems: report?.items?.filter((item) => item.status === "BLOCKED") ?? [],
+  });
+  if (decision.done) {
+    emitProgress("check-content", "error", decision.messageZh, { blockedItems: decision.blockedItems });
+    emitOutcome(decision);
+    return decision;
+  }
+  emitProgress("check-content", "success", "发布内容检查通过");
+  const result = { outcome: SYNC_OUTCOME.LOCAL_PUBLISH_SUCCESS, stage: "check-content", messageZh: "预检查通过，未写入任何生产文件" };
+  emitOutcome(result);
+  return result;
+}
+
+async function readLauncherReport() {
+  try {
+    return JSON.parse(await readFile(path.join(OFFICIAL_ROOT, "output", "publishing-launcher-report.json"), "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+// Bounded poll for the pushed commit's own deployment record -- never an
+// unbounded/indefinite wait, and every attempt emits a progress event with
+// elapsed time + attempt count + whatever deployment state is currently
+// known, so a consuming UI never has to render a black screen while this
+// runs (Section 3/6 of the launcher UX spec).
+async function pollDeployment(sha, { intervalMs = 10000, maxAttempts = 12 } = {}) {
+  let attempts = 0;
+  let lastCheck = { found: false };
+  while (attempts < maxAttempts) {
+    attempts += 1;
+    lastCheck = await findDeploymentForSha({ owner: GITHUB_OWNER, repo: GITHUB_REPO, sha });
+    emitProgress("await-deployment", "running", "正在等待 Vercel 部署……", {
+      pushedSha: sha,
+      attempts,
+      elapsedSeconds: Math.round((attempts * intervalMs) / 1000),
+      deploymentState: lastCheck.found ? lastCheck.state : "not-found",
+    });
+    if (lastCheck.found && (lastCheck.state === "success" || lastCheck.state === "failure" || lastCheck.state === "error")) break;
+    if (attempts < maxAttempts) await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+  return { lastCheck, attempts };
+}
+
+async function failStage(stage, messageZh, extra = {}) {
+  emitProgress(stage, "error", messageZh);
+  const result = { outcome: SYNC_OUTCOME.PUBLISH_FAILED, stage, messageZh, ...extra };
+  emitOutcome(result);
+  await finalizePublishReport({ root: OFFICIAL_ROOT, outcome: "failed", error: messageZh });
+  return result;
 }
 
 async function launcherPublish() {
-  assertOfficialDirectory();
-  requireBundlePath();
-  const beforeImport = changedFiles();
-  assertLauncherHasNoUnrelatedStagedFiles();
-  assertLauncherHasOnlyCanonicalWebsiteChanges(beforeImport);
-  await inspectChangedFiles(beforeImport);
+  emitProgress("prepare", "running", "准备发布");
+  try {
+    assertOfficialDirectory();
+    requireBundlePath();
+    const beforeImport = changedFiles();
+    assertLauncherHasNoUnrelatedStagedFiles();
+    assertLauncherHasOnlyCanonicalWebsiteChanges(beforeImport);
+    await inspectChangedFiles(beforeImport);
+  } catch (error) {
+    return failStage("prepare", "准备发布失败", { error: error instanceof Error ? error.message : String(error) });
+  }
+  emitProgress("prepare", "success", "准备完成");
 
-  console.log("Running the canonical production import dry run...");
-  run("pnpm", ["portfolio:import", "--", bundlePath]);
-  console.log("Applying the confirmed canonical production import...");
-  run("pnpm", ["portfolio:import", "--", bundlePath, "--confirm"]);
+  emitProgress("check-content", "running", "正在检查发布内容");
+  const preflightStatus = runCapturingStatus("pnpm", ["portfolio:import", "--", bundlePath]);
+  const preflightReport = await readLauncherReport();
+  const preflightDecision = decideAfterPreflight({
+    blocked: preflightStatus !== 0 || preflightReport?.outcome === "blocked",
+    blockedItems: preflightReport?.items?.filter((item) => item.status === "BLOCKED") ?? [],
+  });
+  if (preflightDecision.done) {
+    emitProgress("check-content", "error", preflightDecision.messageZh, { blockedItems: preflightDecision.blockedItems });
+    emitOutcome(preflightDecision);
+    await finalizePublishReport({ root: OFFICIAL_ROOT, outcome: "failed", error: "PUBLISH_BLOCKED" });
+    return preflightDecision;
+  }
+  emitProgress("check-content", "success", "发布内容检查通过");
+
+  emitProgress("write-data", "running", "正在写入发布数据");
+  if (runCapturingStatus("pnpm", ["portfolio:import", "--", bundlePath, "--confirm"]) !== 0) {
+    return failStage("write-data", "写入发布数据失败");
+  }
+  emitProgress("write-data", "success", "发布数据已写入");
 
   const changedAfterImport = changedFiles();
-  assertLauncherHasOnlyCanonicalWebsiteChanges(changedAfterImport);
+  try {
+    assertLauncherHasOnlyCanonicalWebsiteChanges(changedAfterImport);
+    assertLauncherHasNoUnrelatedStagedFiles();
+  } catch (error) {
+    return failStage("write-data", "发布数据校验失败", { error: error instanceof Error ? error.message : String(error) });
+  }
   const files = changedAfterImport.filter(isCanonicalWebsiteFile);
-  assertLauncherHasNoUnrelatedStagedFiles();
-  await runChecks();
+
+  emitProgress("typecheck", "running", "正在进行类型检查");
+  if (runCapturingStatus("pnpm", ["typecheck"]) !== 0) return failStage("typecheck", "类型检查失败");
+  emitProgress("typecheck", "success", "类型检查通过");
+
+  emitProgress("build", "running", "正在进行生产构建");
+  if (runCapturingStatus("pnpm", ["build"]) !== 0) return failStage("build", "Production build 失败");
+  try {
+    await scanBuild();
+  } catch (error) {
+    return failStage("build", "Production build 安全检查失败", { error: error instanceof Error ? error.message : String(error) });
+  }
+  emitProgress("build", "success", "生产构建完成");
+
+  // Section 7: writeset was empty / canonical output unchanged -- never
+  // fabricate an empty commit to "confirm" a status. Check the already
+  // -pushed HEAD's own deployment instead.
   if (!files.length) {
-    console.log("No canonical publishing output changed. Verifying the current production site.");
-    await verifyProduction();
+    emitProgress("git-commit", "success", "没有需要发布的新修改");
+    emitProgress("git-push", "success", "没有需要发布的新修改");
+    const headSha = capture("git", ["rev-parse", "HEAD"]);
+    const deploymentCheck = await findDeploymentForSha({ owner: GITHUB_OWNER, repo: GITHUB_REPO, sha: headSha });
+    const decision = decideAfterChangeDetection([], deploymentCheck.found ? deploymentCheck : null);
+    const status = decision.outcome === SYNC_OUTCOME.DEPLOYMENT_FAILED ? "error" : decision.outcome === SYNC_OUTCOME.DEPLOYMENT_PENDING ? "warning" : "success";
+    emitProgress("verify-production", status, decision.messageZh, { deploymentCheck });
+    const result = { ...decision, pushedSha: headSha };
+    emitOutcome(result);
     await finalizePublishReport({ root: OFFICIAL_ROOT, outcome: "published" });
-    return;
+    return result;
   }
 
-  console.log("\nCanonical website implementation and publishing files proposed for commit:");
-  files.forEach((file) => console.log(`  ${file}`));
-  run("git", ["add", "--", ...files]);
+  emitProgress("git-commit", "running", "正在提交");
   const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Australia/Sydney" }).format(new Date());
-  run("git", ["commit", "-m", `Update portfolio ${date}`]);
-  run("git", ["push", "origin", "main"]);
-  console.log("\nPush completed. Waiting briefly before production verification...");
-  await new Promise((resolve) => setTimeout(resolve, 15000));
-  await verifyProduction();
+  if (runCapturingStatus("git", ["add", "--", ...files]) !== 0 || runCapturingStatus("git", ["commit", "-m", `Update portfolio ${date}`]) !== 0) {
+    return failStage("git-commit", "Git 提交失败");
+  }
+  const commitSha = capture("git", ["rev-parse", "HEAD"]);
+  emitProgress("git-commit", "success", "已提交", { commit: commitSha });
+
+  emitProgress("git-push", "running", "正在推送到 GitHub");
+  if (runCapturingStatus("git", ["push", "origin", "main"]) !== 0) {
+    return failStage("git-push", "GitHub 推送失败", { commit: commitSha });
+  }
+  const pushedAt = new Date().toISOString();
+  emitProgress("git-push", "success", "已同步到 GitHub", { commit: commitSha });
+
+  emitProgress("await-deployment", "running", "正在等待 Vercel 部署……", { pushedSha: commitSha, pushedAt, attempts: 0 });
+  const { lastCheck, attempts } = await pollDeployment(commitSha);
+  const deploymentDecision = decideAfterDeploymentCheck(lastCheck, { pushedSha: commitSha, pushedAt, attempts });
+
+  if (deploymentDecision.outcome === SYNC_OUTCOME.DEPLOYMENT_PENDING) {
+    emitProgress("await-deployment", "warning", deploymentDecision.messageZh, deploymentDecision);
+    emitOutcome(deploymentDecision);
+    // Publishing + push already succeeded -- this is not a publish failure.
+    await finalizePublishReport({ root: OFFICIAL_ROOT, outcome: "published" });
+    return deploymentDecision;
+  }
+  if (deploymentDecision.outcome === SYNC_OUTCOME.DEPLOYMENT_FAILED) {
+    emitProgress("await-deployment", "error", deploymentDecision.messageZh, deploymentDecision);
+    emitOutcome(deploymentDecision);
+    await finalizePublishReport({ root: OFFICIAL_ROOT, outcome: "failed", error: "Vercel deployment failed" });
+    return deploymentDecision;
+  }
+
+  // DEPLOYMENT_VERIFIED, decided from the GitHub/Vercel deployment SHA+state
+  // alone -- asset-hash comparison is fetched purely as an attached
+  // diagnostic below, never as part of the verdict above.
+  emitProgress("verify-production", "running", "正在验证线上版本");
+  let assetDiagnostic = null;
+  try {
+    const localIndexHtml = await readFile(path.join(OFFICIAL_ROOT, "dist", "index.html"), "utf8");
+    assetDiagnostic = await compareLocalAssetsToProduction({ localIndexHtml, productionUrl: `${PRODUCTION_URL}/zh` });
+  } catch {
+    // Diagnostic only -- never blocks DEPLOYMENT_VERIFIED.
+  }
+  emitProgress("verify-production", "success", "线上部署完成", { deploymentCheck: lastCheck, assetDiagnostic });
+  const result = { ...deploymentDecision, assetDiagnostic };
+  emitOutcome(result);
   await finalizePublishReport({ root: OFFICIAL_ROOT, outcome: "published" });
+  return result;
+}
+
+// Section 6 (retry): purely read-only. Never exports/imports/typechecks/
+// builds/commits/pushes -- only re-checks deployment state for an
+// already-pushed commit and reports the same outcome vocabulary as
+// launcherPublish's own deployment stage.
+async function launcherRecheckDeployment() {
+  assertOfficialDirectory();
+  const sha = bundleArgument || capture("git", ["rev-parse", "HEAD"]);
+  emitProgress("await-deployment", "running", "正在重新检查线上状态", { pushedSha: sha });
+  const deploymentCheck = await findDeploymentForSha({ owner: GITHUB_OWNER, repo: GITHUB_REPO, sha });
+  const decision = decideAfterDeploymentCheck(deploymentCheck, { pushedSha: sha, pushedAt: "", attempts: 1 });
+  const status = decision.outcome === SYNC_OUTCOME.DEPLOYMENT_VERIFIED ? "success" : decision.outcome === SYNC_OUTCOME.DEPLOYMENT_FAILED ? "error" : "warning";
+  emitProgress("await-deployment", status, decision.messageZh, decision);
+  emitOutcome(decision);
+  return decision;
 }
 
 if (command === "check") await runChecks();
@@ -336,11 +525,24 @@ else if (command === "launcher-preflight") {
   }
 } else if (command === "launcher-publish") {
   try {
-    await launcherPublish();
+    const result = await launcherPublish();
+    if (result.outcome === SYNC_OUTCOME.PUBLISH_BLOCKED || result.outcome === SYNC_OUTCOME.PUBLISH_FAILED || result.outcome === SYNC_OUTCOME.DEPLOYMENT_FAILED) {
+      process.exitCode = 1;
+    }
+    // NO_CHANGES / DEPLOYMENT_PENDING / DEPLOYMENT_VERIFIED all exit 0 --
+    // a pending deployment is not a sync failure (Section 4/5).
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await finalizePublishReport({ root: OFFICIAL_ROOT, outcome: "failed", error: message });
     console.error(message);
+    process.exitCode = 1;
+  }
+} else if (command === "launcher-recheck-deployment") {
+  try {
+    const result = await launcherRecheckDeployment();
+    if (result.outcome === SYNC_OUTCOME.DEPLOYMENT_FAILED) process.exitCode = 1;
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
   }
 }

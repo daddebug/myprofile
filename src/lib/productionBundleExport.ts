@@ -8,6 +8,7 @@ import uiPracticeMetadata from "../data/uiPracticeMetadata.json";
 import { getPublishSourceAdapter, publishSourceRegistry } from "./publishing/publishSourceRegistry";
 import { getDiskProjectCover, getDiskPlayableGameCover } from "./portfolioContentClient";
 import { getPublishedProjectDraft } from "./publishedPortfolio";
+import { hydrateTranslations } from "./translationHydration";
 
 type ExportedImage = {
   sourceAdapterId: string;
@@ -390,7 +391,18 @@ export async function exportProductionBundle(options?: { launcherRequestToken?: 
     if (!projectCatalog.projects[projectId]?.isDynamic) continue;
     const draft = readDynamicProjectDraft(projectId, dynamicProjectWarnings);
     if (draft === undefined) continue;
-    drafts[projectId] = draft;
+    // Translation Persistence fix, export-time safety net: this reader is
+    // deliberately separate from DynamicProjectPage.tsx's own loadDraft()
+    // (see that function's comment), so a hydration fix there does not
+    // reach here on its own. Without this, a browser draft whose `en`
+    // fields are still empty -- because this browser session never
+    // reopened the editor after publishedPortfolio.json gained real
+    // English -- would export verbatim and silently erase already-published
+    // English on the next publish that touches this project. Hydrating
+    // against the current published draft here, right before it enters the
+    // bundle, closes that gap regardless of whether the editor UI was ever
+    // reopened in this browser.
+    drafts[projectId] = hydrateTranslations(draft, getPublishedProjectDraft(projectId));
     collectLocalImageIds(draft).forEach((id) => bodyAssetIds.add(id));
 
     const templateImageRefs = collectTemplateImageRefs(draft);

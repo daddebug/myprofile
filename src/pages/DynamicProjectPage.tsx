@@ -23,6 +23,7 @@ import { getStagedDynamicDraft, isCollectionExportCapture, isCollectionStagingMo
 import { getPublishedProjectDraft } from "../lib/publishedPortfolio";
 import { markProjectDirty } from "../lib/publishIntent";
 import { backfillMatchingTemplateImagePublicPaths } from "../lib/templateImageReferences";
+import { hydrateTranslations } from "../lib/translationHydration";
 
 const dynamicProjectPickerExcludedTemplateIds = ["project-header"];
 
@@ -99,7 +100,7 @@ function loadDraft(projectId: string): DynamicProjectDraft {
       ? {
           ...localDraft,
           templateInstances: backfillMatchingTemplateImagePublicPaths(
-            localDraft.templateInstances,
+            hydrateTranslations(localDraft.templateInstances, publishedDraft.templateInstances),
             publishedDraft.templateInstances,
           ),
         }

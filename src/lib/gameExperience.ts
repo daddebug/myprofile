@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { gameArchiveItems, homeGameArchiveIds } from "../data/gameArchive";
 import { getPublishedGameExperience } from "./publishedPortfolio";
+import { hydrateTranslations } from "./translationHydration";
 
 export const GAME_EXPERIENCE_SCHEMA_VERSION = 1 as const;
 export const GAME_EXPERIENCE_STORAGE_KEY = "dilida-portfolio:game-experience-library:v1";
@@ -337,6 +338,27 @@ export function backfillPublishedGameExperienceMetadata(
   return changed ? { ...draftStore, records } : draftStore;
 }
 
+// Translation Persistence fix -- kept deliberately separate from
+// backfillPublishedGameExperienceMetadata() above (which only ever repairs
+// one narrow field, coverPublicPath) so the two backfill rules stay
+// independently readable rather than merging into one function that does
+// two unrelated things. Applies the canonical zh-identity-gated `en`
+// backfill (see translationHydration.ts) per record, matched by id --
+// covers presentation.tags[].en, detail.en, identity.titleEn, and every
+// reflection.*En field generically, with no per-field special-casing.
+export function hydrateGameExperienceTranslations(
+  draftStore: GameExperienceStore,
+  publishedStore: GameExperienceStore | null,
+): GameExperienceStore {
+  if (!publishedStore) return draftStore;
+  const publishedById = new Map(publishedStore.records.map((record) => [record.id, record]));
+  const records = draftStore.records.map((record) => {
+    const publishedRecord = publishedById.get(record.id);
+    return publishedRecord ? hydrateTranslations(record, publishedRecord) : record;
+  });
+  return { ...draftStore, records };
+}
+
 let snapshotCache: { raw: string | null; store: GameExperienceStore } | null = null;
 
 export function getGameExperienceStore(): GameExperienceStore {
@@ -346,7 +368,7 @@ export function getGameExperienceStore(): GameExperienceStore {
   const publishedStore = normalizeGameExperienceStore(getPublishedGameExperience());
   const draftStore = readStoredGameExperience();
   const store = draftStore
-    ? backfillPublishedGameExperienceMetadata(draftStore, publishedStore)
+    ? backfillPublishedGameExperienceMetadata(hydrateGameExperienceTranslations(draftStore, publishedStore), publishedStore)
     : publishedStore ?? createLegacyGameExperienceStore();
   snapshotCache = { raw, store };
   return store;

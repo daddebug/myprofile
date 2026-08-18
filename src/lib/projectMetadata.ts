@@ -1,6 +1,7 @@
 import { projects } from "../data/projects";
 import { getPublishedPublicMetadata } from "./publishedPortfolio";
 import { getAllStagedProjectIds, getStagedPublicMetaEntry, isCollectionStagingMode } from "./collectionExportStaging";
+import { hydrateTranslations } from "./translationHydration";
 
 export const PROJECT_PUBLIC_META_STORAGE_KEY = "dilida-portfolio:project-public-meta:v1";
 export const PROJECT_PUBLIC_META_CHANGED_EVENT = "dilida-portfolio:project-public-meta-changed";
@@ -251,14 +252,28 @@ export function readProjectPublicMetaOverrides(): Record<string, ProjectPublicMe
     ...Object.keys(publishedOverrides),
     ...Object.keys(storedOverrides),
   ]);
-  return Object.fromEntries([...projectIds].map((projectId) => [
-    projectId,
-    {
-      ...publishedOverrides[projectId],
-      ...storedOverrides[projectId],
+  return Object.fromEntries([...projectIds].map((projectId) => {
+    const published = publishedOverrides[projectId];
+    const stored = storedOverrides[projectId];
+    // Translation Persistence fix -- a stored override that already
+    // carries an explicit (possibly stale-empty) titleEn/summaryEn/
+    // categoryEn key would otherwise shadow published english forever,
+    // even when its own zh still matches published zh exactly. Hydrate
+    // the stored override against published BEFORE it gets spread on top,
+    // so only a genuinely empty local en with matching zh ever inherits;
+    // any other stored field (including a real, non-empty local en, or an
+    // en left empty because zh has since changed) is spread through
+    // unchanged, same as before this fix.
+    const hydratedStored = stored ? hydrateTranslations(stored, published) : stored;
+    return [
       projectId,
-    },
-  ]));
+      {
+        ...published,
+        ...hydratedStored,
+        projectId,
+      },
+    ];
+  }));
 }
 
 export function setProjectPublicMetaOverride(
