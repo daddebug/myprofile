@@ -20,6 +20,10 @@ import {
 } from "react-router-dom";
 import { PageTransition } from "../components/PageTransition";
 import {
+  replaceCircleSummaryItemAt,
+  type CircleSummaryEditorItem,
+} from "../lib/circleSummaryItems";
+import {
   TemplatePreviewFrame,
   TemplateRenderBoundary,
 } from "../components/template-tools/TemplatePreviewFrame";
@@ -1255,11 +1259,6 @@ export function PhaseMilestonesContentEditor({
   );
 }
 
-type CircleSummaryEditorItem = {
-  id: string;
-  text: { zh: string; en: string };
-};
-
 export function CircleSummaryContentEditor({
   content,
   language,
@@ -1282,15 +1281,17 @@ export function CircleSummaryContentEditor({
     onChange({ ...content, items: nextItems });
   };
 
-  const updateItem = (
-    id: string,
+  // Targets by array position, not item.id — imported/legacy content can
+  // have every item missing an id entirely (undefined), and matching on
+  // `item.id === id` then means `undefined === undefined` is true for
+  // every item at once, so the first edit silently overwrote all of them
+  // with the same text. Position is always unambiguous regardless of
+  // whether the underlying data has stable ids.
+  const updateItemAt = (
+    index: number,
     updates: Partial<CircleSummaryEditorItem>,
   ) => {
-    updateItems(
-      items.map((item) =>
-        item.id === id ? { ...item, ...updates } : item,
-      ),
-    );
+    updateItems(replaceCircleSummaryItemAt(items, index, updates));
   };
 
   const moveItem = (index: number, direction: -1 | 1) => {
@@ -1342,7 +1343,7 @@ export function CircleSummaryContentEditor({
           const currentText = item.text?.[language] ?? "";
           return (
             <div
-              key={item.id}
+              key={index}
               className="grid gap-3 border-b border-softWhite/10 pb-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end"
             >
               <label>
@@ -1355,7 +1356,7 @@ export function CircleSummaryContentEditor({
                   className="min-h-20 w-full resize-y border border-softWhite/14 bg-deepIndigo/28 px-3 py-2 text-sm leading-6 text-softWhite outline-none focus:border-acidGreen"
                   value={currentText}
                   onChange={(event) =>
-                    updateItem(item.id, {
+                    updateItemAt(index, {
                       text: {
                         zh: item.text?.zh ?? "",
                         en: item.text?.en ?? "",
@@ -1395,7 +1396,7 @@ export function CircleSummaryContentEditor({
                   className="editor-action text-peach"
                   onClick={() =>
                     updateItems(
-                      items.filter((current) => current.id !== item.id),
+                      items.filter((_current, currentIndex) => currentIndex !== index),
                     )
                   }
                 >
