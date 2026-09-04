@@ -1,21 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useReducedMotion } from "framer-motion";
 import { AnimatedLogo } from "./AnimatedLogo";
+import { HomeHeroArtworkDepth } from "./HomeHeroArtworkDepth";
 import { PortfolioTrackTabs } from "./PortfolioTrackTabs";
 import type { ActivePortfolioTrack } from "../lib/portfolioTrackContext";
 import { useLocale } from "../locales/LocaleContext";
 
 const heroIllustration = "/images/profile/home-hero-artwork.jpg";
+const heroIllustrationDepth = "/images/profile/home-hero-artwork-depth.webp";
 
 export function HomePortfolioCover({ onSelectTrack }: { onSelectTrack?: (track: ActivePortfolioTrack) => void }) {
   const { locale } = useLocale();
   const reduceMotion = useReducedMotion();
   const [openingComplete, setOpeningComplete] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (reduceMotion) setOpeningComplete(true);
   }, [reduceMotion]);
+
   const copy = locale === "zh"
     ? {
         intro: "关注游戏体验、系统交互与 AI 辅助设计，持续将复杂机制转化为更清晰、可验证、可落地的体验。拥有商业游戏项目与跨平台设计经验，擅长从玩法目标、信息结构与界面表现之间建立更稳定的连接。",
@@ -29,9 +33,14 @@ export function HomePortfolioCover({ onSelectTrack }: { onSelectTrack?: (track: 
       };
 
   return (
-    <section className="home-portfolio-hero" data-home-portfolio-cover>
+    <section ref={heroRef} className="home-portfolio-hero" data-home-portfolio-cover>
       <div className="home-hero-visual" aria-hidden="true">
-        <img src={heroIllustration} alt="" />
+        <HomeHeroArtworkDepth
+          heroRef={heroRef}
+          imageSrc={heroIllustration}
+          depthSrc={heroIllustrationDepth}
+          disabled={Boolean(reduceMotion)}
+        />
         <div className="home-hero-water-grid" />
         <div className="home-hero-caustic" />
       </div>

@@ -530,13 +530,45 @@ a {
     pointer-events: none;
   }
 
-  .home-hero-visual img {
+  .home-hero-artwork-layer {
+    position: absolute;
+    inset: -2.5%;
+    width: 105%;
+    height: 105%;
+    pointer-events: none;
+  }
+
+  .home-hero-artwork,
+  .home-hero-depth-canvas {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
+  }
+
+  .home-hero-artwork {
     object-fit: cover;
     object-position: 42% center;
     opacity: 0.88;
     filter: saturate(0.92) contrast(1.03);
+    transition: opacity 180ms ease-out;
+  }
+
+  .home-hero-depth-canvas {
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    filter: saturate(0.92) contrast(1.03);
+    transition: opacity 180ms ease-out;
+    will-change: transform;
+  }
+
+  .home-hero-artwork-layer.is-depth-ready .home-hero-artwork {
+    opacity: 0;
+  }
+
+  .home-hero-artwork-layer.is-depth-ready .home-hero-depth-canvas {
+    opacity: 0.88;
   }
 
   .home-hero-visual::after {
@@ -821,7 +853,9 @@ a {
   }
 
   @media (max-width: 767px) {
-    .home-hero-visual img { object-position: 36% center; opacity: .7; }
+    .home-hero-artwork-layer { inset: 0; width: 100%; height: 100%; }
+    .home-hero-artwork { object-position: 36% center; opacity: .7 !important; }
+    .home-hero-depth-canvas { display: none; transform: none !important; will-change: auto; }
     .home-hero-visual::after { background: linear-gradient(180deg, rgba(24,23,67,.06) 0%, rgba(24,23,67,.32) 52%, #181743 100%), linear-gradient(90deg, transparent, rgba(24,23,67,.38)); }
     .home-hero-composition { padding-top: 7rem; padding-bottom: 1.75rem; }
     .home-hero-copy { width: 100%; margin-right: 0; margin-left: 0; }
@@ -835,6 +869,8 @@ a {
     .home-hero-composition,
     .home-opening-layer,
     .animated-logo-scene svg { animation: none; }
+    .home-hero-artwork { opacity: .88 !important; }
+    .home-hero-depth-canvas { display: none; transform: none !important; will-change: auto; }
   }
 }
 
