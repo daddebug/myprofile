@@ -5,6 +5,7 @@ import { useGameCover } from "../hooks/useGameCover";
 import { formatPlaytime, gameTitle, getHomepageGames, useGameExperienceStore, type GameExperienceRecord } from "../lib/gameExperience";
 import { useLocale } from "../locales/LocaleContext";
 import { GameCoverImage } from "./GameCoverImage";
+import logoMarkUrl from "../../logo.svg";
 
 const albumPositions = [
   "md:left-[2%] md:top-[72px]",
@@ -40,6 +41,21 @@ export function HomePlayExperience() {
           {locale === "zh" ? "查看完整游戏经历" : "View full game log"}<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
         </Link>
       </div>
+
+      {/* Page-end signature mark, not a CTA/button -- reuses the same logo
+          asset as the Hero's opening AnimatedLogo (already the site's only
+          real logo resource), rendered as a plain static image (no motion of
+          its own; it inherits this component's existing whileInView fade
+          from the wrapping motion.div above) at low opacity with a faint
+          acid-green glow, matching the existing soft-glow language used
+          elsewhere on Home (e.g. .home-hero-name's own drop-shadow). */}
+      <img
+        src={logoMarkUrl}
+        alt=""
+        aria-hidden="true"
+        className="mx-auto mt-24 block w-32 opacity-100 md:mt-28 md:w-40"
+        style={{ filter: "drop-shadow(0 0 20px rgba(52,241,37,0.2))" }}
+      />
     </motion.div>
   );
 }

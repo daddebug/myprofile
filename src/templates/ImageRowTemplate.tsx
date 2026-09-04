@@ -10,6 +10,8 @@ import type {
 } from "../lib/templateLibrary";
 import { InlineTemplateField } from "../components/template-tools/InlineTemplateField";
 import { FloatingImagePreview } from "../components/template-tools/FloatingImagePreview";
+import { ImageAnnotationLayer, normalizeImageAnnotations, type ImageAnnotation } from "../components/template-tools/ImageAnnotation";
+import { ImageAnnotationEditor } from "../components/template-tools/ImageAnnotationEditor";
 import { isCollectionExportCapture } from "../lib/collectionExportStaging";
 import { recordEmptySlotCollapsed, recordEmptySlotFound, recordModuleOmitted } from "../lib/collectionMediaDiagnostics";
 
@@ -63,6 +65,8 @@ type ImageRowItem = {
   imageCropRatio?: "16:9" | "1:1";
   imageWidthMode?: "card" | "wide" | "full";
   hoverPreviewMode?: "none" | "floating";
+  annotationEnabled?: boolean;
+  annotations?: ImageAnnotation[];
   startNewRow?: boolean;
   alt?: string | LocalizedText;
   caption?: string | LocalizedText;
@@ -130,7 +134,7 @@ function hasPlaceholder(item: ImageRowItem) {
   return Boolean(localizedValue(item.placeholder, "zh") || localizedValue(item.placeholder, "en") || item.suggestedAspectRatio);
 }
 
-function RowImage({ image, imageDisplayMode, imageCropRatio, hoverPreviewMode, alt, placeholder, ratio, purpose, locale, editing, slotId }: { image?: ImageRowImage; imageDisplayMode?: "cover" | "natural"; imageCropRatio?: "16:9" | "1:1"; hoverPreviewMode?: "none" | "floating"; alt: string; placeholder: string; ratio: string; purpose: string; locale: "zh" | "en"; editing: boolean; slotId: string }) {
+function RowImage({ image, imageDisplayMode, imageCropRatio, hoverPreviewMode, annotationEnabled, annotations = [], alt, placeholder, ratio, purpose, locale, editing, slotId }: { image?: ImageRowImage; imageDisplayMode?: "cover" | "natural"; imageCropRatio?: "16:9" | "1:1"; hoverPreviewMode?: "none" | "floating"; annotationEnabled?: boolean; annotations?: ImageAnnotation[]; alt: string; placeholder: string; ratio: string; purpose: string; locale: "zh" | "en"; editing: boolean; slotId: string }) {
   const src = image?.publicPath || "";
   const [loadFailed, setLoadFailed] = useState(false);
   // "empty" (nothing was ever supposed to be here — no publicPath assigned)
@@ -152,6 +156,7 @@ function RowImage({ image, imageDisplayMode, imageCropRatio, hoverPreviewMode, a
   const frameClassName = imageCropRatio === "1:1"
     ? "case-study-media-frame case-study-media-frame--square"
     : "case-study-media-frame";
+  const annotationActive = !editing && annotationEnabled === true && hoverPreviewMode !== "floating";
 
   const previewImage = (className: string) => (
     <FloatingImagePreview src={src} alt={alt} enabled={hoverPreviewMode === "floating"} resetKey={editing} imageDisplayMode={imageDisplayMode ?? "cover"} imageCropRatio={imageCropRatio ?? "16:9"}>
@@ -171,14 +176,15 @@ function RowImage({ image, imageDisplayMode, imageCropRatio, hoverPreviewMode, a
 
   if (src && imageDisplayMode === "natural") {
     return (
-      <div className="flex w-full justify-center overflow-hidden rounded-[18px] bg-[rgba(21,27,77,0.52)] shadow-[inset_0_1px_0_rgba(244,245,250,0.06)]" data-media-slot-state={mediaSlotState} data-media-slot-id={slotId}>
+      <div className="relative flex w-full justify-center overflow-hidden rounded-[18px] bg-[rgba(21,27,77,0.52)] shadow-[inset_0_1px_0_rgba(244,245,250,0.06)]" data-media-slot-state={mediaSlotState} data-media-slot-id={slotId}>
         {previewImage("block h-auto max-w-full object-contain")}
+        <ImageAnnotationLayer annotations={annotations} locale={locale} enabled={annotationActive} />
       </div>
     );
   }
 
   return (
-    <div className={frameClassName} data-media-slot-state={mediaSlotState} data-media-slot-id={slotId}>
+    <div className={`relative ${frameClassName}`} data-media-slot-state={mediaSlotState} data-media-slot-id={slotId}>
       {src ? (
         previewImage("case-study-media-image")
       ) : suppressPlaceholder ? null : (
@@ -189,6 +195,7 @@ function RowImage({ image, imageDisplayMode, imageCropRatio, hoverPreviewMode, a
           <span className="mt-1 text-xs font-semibold text-softWhite/42">{locale === "zh" ? "上传图片" : "Upload image"}</span>
         </div>
       )}
+      <ImageAnnotationLayer annotations={annotations} locale={locale} enabled={annotationActive} />
     </div>
   );
 }
@@ -303,7 +310,7 @@ export default function ImageRowTemplate({ content, locale, horizontalInset, inl
         ) : null}
         {inlineEditor?.imageRow && item.id ? (
           <div className="relative">
-            <RowImage image={item.image} imageDisplayMode={item.imageDisplayMode} imageCropRatio={item.imageCropRatio} hoverPreviewMode={item.hoverPreviewMode} alt={alt} placeholder={placeholder} ratio={item.suggestedAspectRatio ?? ""} purpose={caption} locale={locale} editing={Boolean(inlineEditor)} slotId={item.id ?? String(index)} />
+            <RowImage image={item.image} imageDisplayMode={item.imageDisplayMode} imageCropRatio={item.imageCropRatio} hoverPreviewMode={item.hoverPreviewMode} annotationEnabled={item.annotationEnabled} annotations={normalizeImageAnnotations(item.annotations)} alt={alt} placeholder={placeholder} ratio={item.suggestedAspectRatio ?? ""} purpose={caption} locale={locale} editing={Boolean(inlineEditor)} slotId={item.id ?? String(index)} />
             <>
               <div className="absolute right-2 top-2 z-20 flex flex-wrap justify-end gap-1.5">
                 <button type="button" className="rounded-[5px] bg-deepIndigo/88 px-2.5 py-1.5 text-xs font-semibold text-softWhite shadow-sm backdrop-blur" onClick={() => inlineEditor.imageRow?.onReplaceImage(item.id!)}>
@@ -382,8 +389,20 @@ export default function ImageRowTemplate({ content, locale, horizontalInset, inl
             </>
           </div>
         ) : (
-          <RowImage image={item.image} imageDisplayMode={item.imageDisplayMode} imageCropRatio={item.imageCropRatio} hoverPreviewMode={item.hoverPreviewMode} alt={alt} placeholder={placeholder} ratio={item.suggestedAspectRatio ?? ""} purpose={caption} locale={locale} editing={Boolean(inlineEditor)} slotId={item.id ?? String(index)} />
+          <RowImage image={item.image} imageDisplayMode={item.imageDisplayMode} imageCropRatio={item.imageCropRatio} hoverPreviewMode={item.hoverPreviewMode} annotationEnabled={item.annotationEnabled} annotations={normalizeImageAnnotations(item.annotations)} alt={alt} placeholder={placeholder} ratio={item.suggestedAspectRatio ?? ""} purpose={caption} locale={locale} editing={Boolean(inlineEditor)} slotId={item.id ?? String(index)} />
         )}
+        {inlineEditor?.imageRow && item.id && hasImage(item) ? (
+          <ImageAnnotationEditor
+            locale={locale}
+            enabled={item.annotationEnabled === true}
+            disabled={item.hoverPreviewMode === "floating"}
+            annotations={normalizeImageAnnotations(item.annotations)}
+            onEnabledChange={(annotationEnabled) => inlineEditor.imageRow?.onItemChange(item.id!, { annotationEnabled })}
+            onAnnotationsChange={(annotations) => inlineEditor.imageRow?.onItemChange(item.id!, { annotations })}
+            onUploadEvidence={(annotationId) => inlineEditor.imageRow?.onUploadAnnotationEvidence(item.id!, annotationId)}
+            onRemoveEvidence={(annotationId, evidenceId) => inlineEditor.imageRow?.onRemoveAnnotationEvidence(item.id!, annotationId, evidenceId)}
+          />
+        ) : null}
         {inlineEditor?.imageRow && item.id && hasImage(item) ? (
           <InlineTemplateField
             value={(item.caption as LocalizedText | undefined)?.[locale] ?? ""}

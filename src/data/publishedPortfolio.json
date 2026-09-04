@@ -1,7 +1,742 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-26T03:38:44.862Z",
+  "generatedAt": "2026-09-04T11:43:14.273Z",
   "drafts": {
+    "ai-agent-6vaadf": {
+      "version": 1,
+      "templateInstances": [
+        {
+          "instanceId": "statement-longform-9ba81b60-9caa-4e9c-9527-13f2e05e75cb",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "01",
+              "en": "01"
+            },
+            "leftTitle": {
+              "zh": "核心 命题",
+              "en": "Core Premise"
+            },
+            "statement": {
+              "zh": "AI 能不能减少求职中的重复劳动，却不替用户做最终决定？",
+              "en": "Can AI cut repetitive labor in job hunting without making the final decision for the user?"
+            },
+            "body": {
+              "zh": "我最初在 DILIDA DESK 中设计 Job Search，是为了集中保存公司、岗位和求职信息。但真正开始使用后，我发现维护工具本身也变成了一项额外工作：浏览招聘网站、阅读 JD、重复填写姓名和教育经历、上传简历、完成投递以后，还要重新回到 Desk 手动创建记录，并反向确认当时投了什么岗位、使用了哪份简历。于是我开始重新设计这套流程，希望把浏览器中的真实投递行为直接连接到个人求职数据库，让系统承担重复识别、填写和记录，而把岗位判断、重要问题确认和最终提交留给用户。",
+              "en": "I originally designed Job Search in DILIDA DESK to keep company, role, and application information in one place. But once I actually started using it, I realized maintaining the tool had become its own extra chore: browsing job boards, reading JDs, filling in my name and education history over and over, uploading a resume, finishing the application, then going back to Desk to manually create a record and figure out after the fact which role I'd applied to and which resume I'd used. So I started redesigning the flow, aiming to connect real application activity in the browser directly to my personal job-search database — letting the system handle the repetitive recognition, filling, and record-keeping, while leaving role judgment, confirming important questions, and the final submission to me."
+            }
+          }
+        },
+        {
+          "instanceId": "supporting-note-419d1ce3-b535-41de-909a-bbe2c8d82ee6",
+          "templateId": "supporting-note",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "body": {
+              "zh": "现有流程最大的成本并不只来自填写表单，而是信息不断在招聘网站、简历文件、作品集和个人记录之间断开。单个公司的资料可以保存，但真正投递时仍然需要重新寻找、复制和确认；完成申请后，JD 和当时使用的材料也容易失去对应关系。",
+              "en": "The biggest cost in the old flow wasn't just filling out forms — it was that information kept breaking apart across job boards, resume files, portfolios, and personal records. A company's details could be saved, but when it came time to actually apply, I'd still have to go find, copy, and confirm everything again; and after submitting, the JD and the materials I'd used for it easily lost their connection to each other."
+            }
+          }
+        },
+        {
+          "instanceId": "direction-compare-58ec5653-43ef-4bf9-8eb0-e790c1d3aeab",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "投递流程重新组织",
+              "en": "Reorganizing the Application Flow"
+            },
+            "leftLabel": {
+              "zh": "原有流程",
+              "en": "Old Flow"
+            },
+            "rightLabel": {
+              "zh": "目标流程",
+              "en": "Target Flow"
+            },
+            "leftTitle": {
+              "zh": "用户维护工具",
+              "en": "User Maintains the Tool"
+            },
+            "rightTitle": {
+              "zh": "投递行为自动形成记录",
+              "en": "Application Activity Automatically Becomes a Record"
+            },
+            "leftDescription": {
+              "zh": "浏览 JD、手动寻找资料、逐项填写、完成申请，再回到 Desk 创建公司和岗位记录。真实投递和个人数据库之间存在重复录入。",
+              "en": "Browse the JD, manually dig up the needed information, fill in each field, complete the application, then go back to Desk to create the company and role record. Real applications and the personal database end up duplicating data entry."
+            },
+            "rightDescription": {
+              "zh": "浏览器插件读取当前 JD 和表单，从 Desk 调用已有资料辅助填写；用户确认并提交后，岗位信息和投递材料自动形成一条 Application 记录。",
+              "en": "The browser extension reads the current JD and form, pulls existing data from Desk to help fill it in; once the user confirms and submits, the role information and application materials automatically become a single Application record."
+            },
+            "leftImage": null,
+            "rightImage": null,
+            "direction": "left-to-right"
+          }
+        },
+        {
+          "instanceId": "process-flow-d45f525d-6ca2-48ab-9fc0-f16c7fb32306",
+          "templateId": "process-flow",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "一次投递如何自然形成完整记录",
+              "en": "How One Application Naturally Becomes a Complete Record"
+            },
+            "items": [
+              {
+                "id": "job-flow-01",
+                "number": {
+                  "zh": "01",
+                  "en": "01"
+                },
+                "title": {
+                  "zh": "打开招聘页面",
+                  "en": "Open a Job Listing"
+                },
+                "description": {
+                  "zh": "用户按照原本的求职习惯浏览招聘网站，不需要先在 Desk 中建立公司或岗位。",
+                  "en": "The user browses job boards the way they normally would, with no need to create a company or role in Desk first."
+                }
+              },
+              {
+                "id": "job-flow-02",
+                "number": {
+                  "zh": "02",
+                  "en": "02"
+                },
+                "title": {
+                  "zh": "识别 JD",
+                  "en": "Recognize the JD"
+                },
+                "description": {
+                  "zh": "插件读取用户当前可见页面中的公司、岗位名称、JD、URL、地点等信息，并形成当前岗位上下文。",
+                  "en": "The extension reads the company, role title, JD, URL, location, and other information visible on the current page, and builds the current role's context."
+                }
+              },
+              {
+                "id": "job-flow-03",
+                "number": {
+                  "zh": "03",
+                  "en": "03"
+                },
+                "title": {
+                  "zh": "匹配表单字段",
+                  "en": "Match Form Fields"
+                },
+                "description": {
+                  "zh": "系统根据字段语义、标签、占位文字和周边提示，将网页输入项映射到 Desk 中已有的个人资料。",
+                  "en": "The system maps the page's input fields to the existing personal profile in Desk, based on field semantics, labels, placeholder text, and surrounding hints."
+                }
+              },
+              {
+                "id": "job-flow-04",
+                "number": {
+                  "zh": "04",
+                  "en": "04"
+                },
+                "title": {
+                  "zh": "辅助填写",
+                  "en": "Assist with Filling"
+                },
+                "description": {
+                  "zh": "基础信息可以一键填入；无法确定、未识别或涉及重要选择的字段保持待确认，不进行猜测。",
+                  "en": "Basic information can be filled in with one click; fields that can't be determined, aren't recognized, or involve an important choice are left pending for confirmation rather than guessed at."
+                }
+              },
+              {
+                "id": "job-flow-05",
+                "number": {
+                  "zh": "05",
+                  "en": "05"
+                },
+                "title": {
+                  "zh": "用户确认提交",
+                  "en": "User Confirms and Submits"
+                },
+                "description": {
+                  "zh": "用户检查实际填写内容，并亲自完成最终投递。系统不自动点击最终提交，也不绕过验证码和网站安全控制。",
+                  "en": "The user reviews what's actually been filled in and completes the final submission themselves. The system never auto-clicks the final submit button and never bypasses CAPTCHAs or a site's security controls."
+                }
+              },
+              {
+                "id": "job-flow-06",
+                "number": {
+                  "zh": "06",
+                  "en": "06"
+                },
+                "title": {
+                  "zh": "生成投递档案",
+                  "en": "Generate an Application Record"
+                },
+                "description": {
+                  "zh": "申请完成后保存 JD 快照、投递时间、使用的简历和作品集以及关键填写信息，直接进入 Job Search 的后续跟踪。",
+                  "en": "Once the application is done, a JD snapshot, the submission time, the resume and portfolio used, and key filled-in information are all saved, and it moves straight into Job Search's follow-up tracking."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-4d9bcd59-0ccf-4a9c-b315-47ca0adc1675",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "02",
+              "en": "02"
+            },
+            "leftTitle": {
+              "zh": "系统 分工",
+              "en": "System Division of Labor"
+            },
+            "statement": {
+              "zh": "浏览器负责观察与操作，Desk 负责长期记忆",
+              "en": "The browser handles observation and action, Desk handles long-term memory"
+            },
+            "body": {
+              "zh": "我不希望浏览器插件再维护一套独立的求职资料，因此系统采用一个明确的数据边界：DILIDA DESK 是个人资料、字段映射、简历版本、作品集和投递记录的唯一数据源；浏览器插件只负责读取当前招聘页面、请求需要的资料、执行辅助填写，并把新的岗位和投递行为传回 Desk。这样更换电脑或重新安装插件时，不需要重新配置全部信息，也能避免浏览器和桌面端出现两套相互冲突的数据。",
+              "en": "I didn't want the browser extension to maintain a separate copy of my job-search data, so the system draws a clear data boundary: DILIDA DESK is the single source of truth for personal profile data, field mappings, resume versions, portfolios, and application records; the browser extension only reads the current job page, requests the data it needs, assists with filling in the form, and sends new role and application activity back to Desk. That way, switching computers or reinstalling the extension doesn't mean reconfiguring everything from scratch, and it avoids ending up with two conflicting sets of data between the browser and the desktop app."
+            }
+          }
+        },
+        {
+          "instanceId": "decision-table-f4de7693-b478-4bf3-a60f-84d0fca150be",
+          "templateId": "decision-table",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "插件、Desk 与用户的职责边界",
+              "en": "Division of Responsibility: Extension, Desk, and User"
+            },
+            "columns": [
+              {
+                "id": "task",
+                "title": {
+                  "zh": "任务",
+                  "en": "Task"
+                }
+              },
+              {
+                "id": "extension",
+                "title": {
+                  "zh": "浏览器插件",
+                  "en": "Browser Extension"
+                }
+              },
+              {
+                "id": "desk",
+                "title": {
+                  "zh": "DILIDA DESK",
+                  "en": "DILIDA DESK"
+                }
+              },
+              {
+                "id": "user",
+                "title": {
+                  "zh": "用户",
+                  "en": "User"
+                }
+              }
+            ],
+            "rows": [
+              {
+                "id": "jd",
+                "cells": {
+                  "task": {
+                    "zh": "岗位信息",
+                    "en": "Role Information"
+                  },
+                  "extension": {
+                    "zh": "读取当前页面中用户可见的岗位和 JD。",
+                    "en": "Reads the role and JD visible on the current page."
+                  },
+                  "desk": {
+                    "zh": "保存 JD 快照和岗位记录。",
+                    "en": "Saves the JD snapshot and role record."
+                  },
+                  "user": {
+                    "zh": "判断岗位是否值得投递。",
+                    "en": "Judges whether the role is worth applying to."
+                  }
+                }
+              },
+              {
+                "id": "autofill",
+                "cells": {
+                  "task": {
+                    "zh": "表单填写",
+                    "en": "Form Filling"
+                  },
+                  "extension": {
+                    "zh": "识别字段并填入可确认的基础资料。",
+                    "en": "Recognizes fields and fills in the basic data that can be confirmed."
+                  },
+                  "desk": {
+                    "zh": "提供个人资料和字段映射。",
+                    "en": "Provides the personal profile and field mappings."
+                  },
+                  "user": {
+                    "zh": "处理不确定字段并检查结果。",
+                    "en": "Handles uncertain fields and reviews the result."
+                  }
+                }
+              },
+              {
+                "id": "submit",
+                "cells": {
+                  "task": {
+                    "zh": "最终提交",
+                    "en": "Final Submission"
+                  },
+                  "extension": {
+                    "zh": "不自动提交。",
+                    "en": "Never auto-submits."
+                  },
+                  "desk": {
+                    "zh": "不控制招聘网站提交动作。",
+                    "en": "Doesn't control the job site's submit action."
+                  },
+                  "user": {
+                    "zh": "确认内容并亲自提交申请。",
+                    "en": "Confirms the content and submits the application personally."
+                  }
+                }
+              },
+              {
+                "id": "application",
+                "cells": {
+                  "task": {
+                    "zh": "投递记录",
+                    "en": "Application Record"
+                  },
+                  "extension": {
+                    "zh": "识别可能的成功状态并发送当前上下文。",
+                    "en": "Detects a likely success state and sends the current context."
+                  },
+                  "desk": {
+                    "zh": "生成 Application 并持续管理进度。",
+                    "en": "Generates the Application and keeps managing its progress."
+                  },
+                  "user": {
+                    "zh": "补充面试、拒绝、Offer 等后续状态。",
+                    "en": "Adds follow-up status like interviews, rejections, and offers."
+                  }
+                }
+              },
+              {
+                "id": "learning",
+                "cells": {
+                  "task": {
+                    "zh": "系统学习",
+                    "en": "System Learning"
+                  },
+                  "extension": {
+                    "zh": "暴露未识别或歧义字段。",
+                    "en": "Surfaces unrecognized or ambiguous fields."
+                  },
+                  "desk": {
+                    "zh": "保存新的全局或站点字段别名。",
+                    "en": "Saves new global or site-specific field aliases."
+                  },
+                  "user": {
+                    "zh": "只需完成一次正确映射。",
+                    "en": "Only needs to map it correctly once."
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-d1c34365-09e2-4f60-80d9-6fbc3eb59bd9",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "03",
+              "en": "03"
+            },
+            "leftTitle": {
+              "zh": "语义 识别",
+              "en": "Semantic Recognition"
+            },
+            "statement": {
+              "zh": "网页叫它什么，不应该决定系统能不能认识它",
+              "en": "What a webpage calls something shouldn't determine whether the system can recognize it"
+            },
+            "body": {
+              "zh": "不同招聘网站对同一信息的命名并不统一。例如“姓名”也可能被写成“名字”“应聘人姓名”“Full Name”或“Candidate Name”。因此我没有把网页上的可见文案直接当成字段 ID，而是设计了一层稳定的语义字段。系统内部只保存 fullName、phone、email、preferredCity、portfolioUrl 等标准字段，每个字段可以拥有多个可编辑别名。匹配时同时参考 label、placeholder、name、aria-label、周边提示文字和输入控件类型。当系统遇到无法识别的字段时，用户可以将它映射到已有字段、新建字段或忽略；这个结果会被保存下来，让系统随着真实使用逐渐适应更多网站。",
+              "en": "Different job sites don't name the same information consistently. \"Name\" might also appear as \"Full Name,\" \"Applicant Name,\" or \"Candidate Name.\" So instead of treating the visible label on a page as the field ID directly, I designed a stable semantic-field layer underneath. Internally, the system only stores standard fields like fullName, phone, email, preferredCity, and portfolioUrl, and each one can have multiple editable aliases. Matching draws on the label, placeholder, name, aria-label, surrounding hint text, and the input control's type all at once. When the system hits a field it can't recognize, the user can map it to an existing field, create a new one, or ignore it — and that choice gets saved, so the system gradually adapts to more sites as it's actually used."
+            }
+          }
+        },
+        {
+          "instanceId": "circle-summary-14d5824b-ca92-4655-b52f-b94156c16ee5",
+          "templateId": "circle-summary",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "字段识别的三个原则",
+              "en": "Three Principles for Field Recognition"
+            },
+            "items": [
+              {
+                "id": "semantic",
+                "text": {
+                  "zh": "稳定语义字段作为唯一数据源",
+                  "en": "Stable semantic fields as the single source of truth"
+                }
+              },
+              {
+                "id": "aliases",
+                "text": {
+                  "zh": "全局别名与站点别名持续学习",
+                  "en": "Global and site-specific aliases that keep learning"
+                }
+              },
+              {
+                "id": "uncertainty",
+                "text": {
+                  "zh": "不确定的信息必须交还用户确认",
+                  "en": "Uncertain information always goes back to the user to confirm"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "image-row-006ee24e-d79d-4ad2-92ed-67971123374a",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "字段识别与自动填写界面",
+              "en": "Field Recognition and Autofill Interface"
+            },
+            "columns": 3,
+            "rowAlignment": "center",
+            "items": [
+              {
+                "id": "image-row-item-893f90b0-e641-493f-9f16-34e374b2be17",
+                "alt": {
+                  "zh": "招聘网页字段识别结果",
+                  "en": "Job Listing Field Recognition Results"
+                },
+                "caption": {
+                  "zh": "插件识别当前页面中的岗位信息和可填写字段。",
+                  "en": "The extension recognizes the role information and fillable fields on the current page."
+                },
+                "placeholder": {
+                  "zh": "上传招聘网页中字段识别状态截图",
+                  "en": "Upload a screenshot of field-recognition status on a job listing page"
+                },
+                "suggestedAspectRatio": "16:9",
+                "suggestedImageCount": 1,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "card",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-805b498b-a9f9-4f3c-a17a-8a43dfa9982c",
+                "alt": {
+                  "zh": "未识别字段映射界面",
+                  "en": "Unrecognized Field Mapping Interface"
+                },
+                "caption": {
+                  "zh": "用户可以把陌生网页文案映射到已有语义字段。",
+                  "en": "The user can map an unfamiliar page label to an existing semantic field."
+                },
+                "placeholder": {
+                  "zh": "上传字段映射或别名管理截图",
+                  "en": "Upload a screenshot of field mapping or alias management"
+                },
+                "suggestedAspectRatio": "16:9",
+                "suggestedImageCount": 1,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "card",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-f786e06c-4f6c-4f7f-adba-f6aa412fbc5f",
+                "alt": {
+                  "zh": "自动填写后的确认状态",
+                  "en": "Confirmation State After Autofill"
+                },
+                "caption": {
+                  "zh": "系统区分已填写、待确认和未识别字段，减少逐项检查成本。",
+                  "en": "The system distinguishes between filled, pending, and unrecognized fields, cutting down the cost of checking each one by hand."
+                },
+                "placeholder": {
+                  "zh": "上传一键填写后的字段状态截图",
+                  "en": "Upload a screenshot of field status after one-click fill"
+                },
+                "suggestedAspectRatio": "16:9",
+                "suggestedImageCount": 1,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "card",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-936e8553-64d5-4ea5-bc90-77e705055286",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "04",
+              "en": "04"
+            },
+            "leftTitle": {
+              "zh": "投递 记忆",
+              "en": "Application Memory"
+            },
+            "statement": {
+              "zh": "真正需要保存的不是一个网址，而是当时发生过什么",
+              "en": "What actually needs saving isn't a URL — it's what happened at the time"
+            },
+            "body": {
+              "zh": "招聘页面可能下线、JD 可能修改，单独保存 URL 并不能还原一次真实投递。因此每条 Application 需要保存当时的 JD 快照，并和投递时间、使用的简历版本、作品集版本、内推码以及关键填写信息建立关系。这样 Job Search 不再是一张需要手工维护的公司列表，而更像一份由真实求职行为自然形成的时间记录。之后准备面试时，可以直接回到当时的岗位要求和投递材料，而不需要重新寻找已经失效的招聘页面。",
+              "en": "A job listing can go offline, and a JD can be edited — saving just the URL can't reconstruct what an application actually looked like at the time. So every Application needs to save a snapshot of the JD as it was then, linked to the submission time, the resume version used, the portfolio version, any referral code, and the key filled-in information. That way Job Search stops being a company list that has to be maintained by hand, and becomes more like a timeline that forms naturally out of real application activity. Later, when preparing for an interview, I can go straight back to the role requirements and materials as they were at the time, instead of hunting for a job listing that's already gone offline."
+            }
+          }
+        },
+        {
+          "instanceId": "image-row-6ac02295-19c6-41d6-908c-e1e6fecbeedb",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "从招聘页面到投递档案",
+              "en": "From Job Listing to Application Record"
+            },
+            "columns": 2,
+            "rowAlignment": "center",
+            "items": [
+              {
+                "id": "image-row-item-98dfeed9-a7f7-4c3f-aead-903d937669c4",
+                "alt": {
+                  "zh": "浏览器插件读取招聘岗位",
+                  "en": "Browser Extension Reading a Job Listing"
+                },
+                "caption": {
+                  "zh": "打开招聘页面后，系统自动获得公司、岗位、JD 和当前申请上下文。",
+                  "en": "Once a job page is open, the system automatically captures the company, the role, the JD, and the current application context."
+                },
+                "placeholder": {
+                  "zh": "上传浏览器助手读取 JD 的实际截图",
+                  "en": "Upload an actual screenshot of the browser assistant reading a JD"
+                },
+                "suggestedAspectRatio": "16:9",
+                "suggestedImageCount": 1,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-5320526a-88a8-4f6c-a564-0782db59aa4a",
+                "alt": {
+                  "zh": "DILIDA DESK 投递记录",
+                  "en": "DILIDA DESK Application Record"
+                },
+                "caption": {
+                  "zh": "申请完成后，同一份上下文转化为可继续跟踪的 Application。",
+                  "en": "Once the application is complete, that same context turns into an Application that can keep being tracked."
+                },
+                "placeholder": {
+                  "zh": "上传 Job Search 中自动生成的投递记录截图",
+                  "en": "Upload a screenshot of an automatically generated application record in Job Search"
+                },
+                "suggestedAspectRatio": "16:9",
+                "suggestedImageCount": 1,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "phase-milestones-4569b0b7-148a-4800-858e-361ba1e824c3",
+          "templateId": "phase-milestones",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "验证路径",
+              "en": "Validation Path"
+            },
+            "items": [
+              {
+                "id": "milestone-01",
+                "state": "active",
+                "number": {
+                  "zh": "01",
+                  "en": "01"
+                },
+                "title": {
+                  "zh": "真实招聘页识别",
+                  "en": "Real Job Listing Recognition"
+                },
+                "hoverTitle": {
+                  "zh": "先验证通用 DOM 读取",
+                  "en": "Validate General-Purpose DOM Reading First"
+                },
+                "hoverText": {
+                  "zh": "使用真实招聘页面验证公司、岗位、JD 和基础字段是否能够被稳定识别，不先针对单一公司制作专用逻辑。",
+                  "en": "Use real job listings to verify that the company, role, JD, and basic fields can be recognized reliably, without building site-specific logic for a single company first."
+                },
+                "targetId": "real-page-detection"
+              },
+              {
+                "id": "milestone-02",
+                "state": "outline",
+                "number": {
+                  "zh": "02",
+                  "en": "02"
+                },
+                "title": {
+                  "zh": "字段映射与填写",
+                  "en": "Field Mapping and Filling"
+                },
+                "hoverTitle": {
+                  "zh": "建立可学习的语义字段系统",
+                  "en": "Build a Semantic Field System That Learns"
+                },
+                "hoverText": {
+                  "zh": "验证常见表单可以从 Desk 调用资料，并让用户修正未识别字段后持续复用。",
+                  "en": "Verify that common forms can pull data from Desk, and that once a user corrects an unrecognized field, that correction keeps getting reused."
+                },
+                "targetId": "semantic-autofill"
+              },
+              {
+                "id": "milestone-03",
+                "state": "outline",
+                "number": {
+                  "zh": "03",
+                  "en": "03"
+                },
+                "title": {
+                  "zh": "投递自动归档",
+                  "en": "Automatic Application Archiving"
+                },
+                "hoverTitle": {
+                  "zh": "让真实投递形成 Application",
+                  "en": "Turn Real Applications into Application Records"
+                },
+                "hoverText": {
+                  "zh": "保存 JD 快照、材料版本和投递时间，并进入后续面试与结果管理。",
+                  "en": "Saves the JD snapshot, material versions, and submission time, then moves into follow-up interview and outcome management."
+                },
+                "targetId": "application-capture"
+              },
+              {
+                "id": "milestone-04",
+                "state": "outline",
+                "number": {
+                  "zh": "04",
+                  "en": "04"
+                },
+                "title": {
+                  "zh": "跨设备安装",
+                  "en": "Cross-Device Installation"
+                },
+                "hoverTitle": {
+                  "zh": "插件保持轻量可替换",
+                  "en": "Keep the Extension Lightweight and Replaceable"
+                },
+                "hoverText": {
+                  "zh": "让用户能够从 Desk 随时重新安装浏览器助手，并继续使用已有字段和投递数据。",
+                  "en": "Lets the user reinstall the browser assistant from Desk at any time and keep using their existing fields and application data."
+                },
+                "targetId": "portable-extension"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-7d90dd60-19b4-4fd3-b54d-b5585e20a431",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "05",
+              "en": "05"
+            },
+            "leftTitle": {
+              "zh": "Agent 边界",
+              "en": "Agent Boundaries"
+            },
+            "statement": {
+              "zh": "高效不等于把所有决定都交给自动化",
+              "en": "Being efficient doesn't mean handing every decision to automation"
+            },
+            "body": {
+              "zh": "这个项目并不把“自动投更多岗位”作为目标。招聘网站包含很多需要真实判断的信息，例如工作地点、到岗时间、调剂意愿、身份问题和额外问答。如果 Agent 为了追求全自动而替用户猜测这些内容，效率反而会带来新的风险。因此我更关注自动化边界：让系统处理重复、结构明确、能够验证的信息，让不确定的字段明确暴露出来，并把最终提交保留给用户。Agent 的价值不在于替用户完成所有操作，而在于减少低价值重复劳动，同时保持用户对求职决策和个人信息的控制。",
+              "en": "This project doesn't treat \"submit more applications automatically\" as the goal. Job listings contain a lot of information that genuinely needs a human judgment call — work location, start date, willingness to relocate, eligibility questions, extra open-ended questions. If an agent guesses at these just to chase full automation, that efficiency ends up introducing new risk instead. So I focused more on where automation should stop: let the system handle information that's repetitive, well-structured, and verifiable, surface uncertain fields explicitly, and leave the final submission to the user. The value of an agent here isn't doing every step for the user — it's cutting low-value repetitive work while keeping the user in control of their job-search decisions and personal information."
+            }
+          }
+        },
+        {
+          "instanceId": "circle-summary-3df257a2-2a80-4377-9d7e-ea8a9bd4efdf",
+          "templateId": "circle-summary",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "我希望保留的三条产品原则",
+              "en": "Three Product Principles I Wanted to Keep"
+            },
+            "items": [
+              {
+                "id": "principle-01",
+                "text": {
+                  "zh": "真实投递自然产生数据，不要求用户重复维护数据库",
+                  "en": "Real applications generate data naturally — users shouldn't have to maintain a database by hand"
+                }
+              },
+              {
+                "id": "principle-02",
+                "text": {
+                  "zh": "Agent 自动处理确定性任务，把歧义主动暴露给用户",
+                  "en": "The agent automatically handles deterministic tasks and actively surfaces ambiguity to the user"
+                }
+              },
+              {
+                "id": "principle-03",
+                "text": {
+                  "zh": "插件可以替换，个人资料与长期记忆必须留在自己的系统中",
+                  "en": "The extension is replaceable, but personal data and long-term memory must stay in the user's own system"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "updatedAt": "2026-08-09T04:20:46.026Z"
+    },
     "interaction-intelligence-system": {
       "version": 1,
       "templateInstances": [
@@ -4863,41 +5598,9 @@
               }
             ]
           }
-        },
-        {
-          "instanceId": "circle-summary-c1c1f93c-df47-4c60-9956-6b9c47426972",
-          "templateId": "circle-summary",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "这个项目形成的三个交互判断",
-              "en": "Three Interaction Principles I Took Forward"
-            },
-            "items": [
-              {
-                "text": {
-                  "zh": "先确认玩家进入系统时要完成什么",
-                  "en": "First define what the player is trying to accomplish in a system, then decide how information and actions should be organized."
-                }
-              },
-              {
-                "text": {
-                  "zh": "信息效率、操作稳定性和角色表现并不需要争夺",
-                  "en": "Information efficiency, operational stability, and character presentation do not need to compete for the same first-screen space; they can operate at different rhythms."
-                }
-              },
-              {
-                "text": {
-                  "zh": "需要经过实现成本、适配和既有系统边界的验证",
-                  "en": "Conceptual experience improvements still need to be tested against implementation cost, adaptation, and existing system boundaries; unshipped directions can still clarify design constraints."
-                }
-              }
-            ]
-          }
         }
       ],
-      "updatedAt": "2026-08-18T14:01:17.078Z"
+      "updatedAt": "2026-08-26T06:15:18.552Z"
     },
     "game-jam-8lzejf": {
       "version": 1,
@@ -5956,756 +6659,9 @@
       ],
       "updatedAt": "2026-08-10T01:30:39.701Z"
     },
-    "ai-agent-6vaadf": {
-      "version": 1,
-      "templateInstances": [
-        {
-          "instanceId": "statement-longform-9ba81b60-9caa-4e9c-9527-13f2e05e75cb",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "01",
-              "en": "01"
-            },
-            "leftTitle": {
-              "zh": "核心 命题",
-              "en": "Core Premise"
-            },
-            "statement": {
-              "zh": "AI 能不能减少求职中的重复劳动，却不替用户做最终决定？",
-              "en": "Can AI cut repetitive labor in job hunting without making the final decision for the user?"
-            },
-            "body": {
-              "zh": "我最初在 DILIDA DESK 中设计 Job Search，是为了集中保存公司、岗位和求职信息。但真正开始使用后，我发现维护工具本身也变成了一项额外工作：浏览招聘网站、阅读 JD、重复填写姓名和教育经历、上传简历、完成投递以后，还要重新回到 Desk 手动创建记录，并反向确认当时投了什么岗位、使用了哪份简历。于是我开始重新设计这套流程，希望把浏览器中的真实投递行为直接连接到个人求职数据库，让系统承担重复识别、填写和记录，而把岗位判断、重要问题确认和最终提交留给用户。",
-              "en": "I originally designed Job Search in DILIDA DESK to keep company, role, and application information in one place. But once I actually started using it, I realized maintaining the tool had become its own extra chore: browsing job boards, reading JDs, filling in my name and education history over and over, uploading a resume, finishing the application, then going back to Desk to manually create a record and figure out after the fact which role I'd applied to and which resume I'd used. So I started redesigning the flow, aiming to connect real application activity in the browser directly to my personal job-search database — letting the system handle the repetitive recognition, filling, and record-keeping, while leaving role judgment, confirming important questions, and the final submission to me."
-            }
-          }
-        },
-        {
-          "instanceId": "supporting-note-419d1ce3-b535-41de-909a-bbe2c8d82ee6",
-          "templateId": "supporting-note",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "body": {
-              "zh": "现有流程最大的成本并不只来自填写表单，而是信息不断在招聘网站、简历文件、作品集和个人记录之间断开。单个公司的资料可以保存，但真正投递时仍然需要重新寻找、复制和确认；完成申请后，JD 和当时使用的材料也容易失去对应关系。",
-              "en": "The biggest cost in the old flow wasn't just filling out forms — it was that information kept breaking apart across job boards, resume files, portfolios, and personal records. A company's details could be saved, but when it came time to actually apply, I'd still have to go find, copy, and confirm everything again; and after submitting, the JD and the materials I'd used for it easily lost their connection to each other."
-            }
-          }
-        },
-        {
-          "instanceId": "direction-compare-58ec5653-43ef-4bf9-8eb0-e790c1d3aeab",
-          "templateId": "direction-compare",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "投递流程重新组织",
-              "en": "Reorganizing the Application Flow"
-            },
-            "leftLabel": {
-              "zh": "原有流程",
-              "en": "Old Flow"
-            },
-            "rightLabel": {
-              "zh": "目标流程",
-              "en": "Target Flow"
-            },
-            "leftTitle": {
-              "zh": "用户维护工具",
-              "en": "User Maintains the Tool"
-            },
-            "rightTitle": {
-              "zh": "投递行为自动形成记录",
-              "en": "Application Activity Automatically Becomes a Record"
-            },
-            "leftDescription": {
-              "zh": "浏览 JD、手动寻找资料、逐项填写、完成申请，再回到 Desk 创建公司和岗位记录。真实投递和个人数据库之间存在重复录入。",
-              "en": "Browse the JD, manually dig up the needed information, fill in each field, complete the application, then go back to Desk to create the company and role record. Real applications and the personal database end up duplicating data entry."
-            },
-            "rightDescription": {
-              "zh": "浏览器插件读取当前 JD 和表单，从 Desk 调用已有资料辅助填写；用户确认并提交后，岗位信息和投递材料自动形成一条 Application 记录。",
-              "en": "The browser extension reads the current JD and form, pulls existing data from Desk to help fill it in; once the user confirms and submits, the role information and application materials automatically become a single Application record."
-            },
-            "leftImage": null,
-            "rightImage": null,
-            "direction": "left-to-right"
-          }
-        },
-        {
-          "instanceId": "process-flow-d45f525d-6ca2-48ab-9fc0-f16c7fb32306",
-          "templateId": "process-flow",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "一次投递如何自然形成完整记录",
-              "en": "How One Application Naturally Becomes a Complete Record"
-            },
-            "items": [
-              {
-                "id": "job-flow-01",
-                "number": {
-                  "zh": "01",
-                  "en": "01"
-                },
-                "title": {
-                  "zh": "打开招聘页面",
-                  "en": "Open a Job Listing"
-                },
-                "description": {
-                  "zh": "用户按照原本的求职习惯浏览招聘网站，不需要先在 Desk 中建立公司或岗位。",
-                  "en": "The user browses job boards the way they normally would, with no need to create a company or role in Desk first."
-                }
-              },
-              {
-                "id": "job-flow-02",
-                "number": {
-                  "zh": "02",
-                  "en": "02"
-                },
-                "title": {
-                  "zh": "识别 JD",
-                  "en": "Recognize the JD"
-                },
-                "description": {
-                  "zh": "插件读取用户当前可见页面中的公司、岗位名称、JD、URL、地点等信息，并形成当前岗位上下文。",
-                  "en": "The extension reads the company, role title, JD, URL, location, and other information visible on the current page, and builds the current role's context."
-                }
-              },
-              {
-                "id": "job-flow-03",
-                "number": {
-                  "zh": "03",
-                  "en": "03"
-                },
-                "title": {
-                  "zh": "匹配表单字段",
-                  "en": "Match Form Fields"
-                },
-                "description": {
-                  "zh": "系统根据字段语义、标签、占位文字和周边提示，将网页输入项映射到 Desk 中已有的个人资料。",
-                  "en": "The system maps the page's input fields to the existing personal profile in Desk, based on field semantics, labels, placeholder text, and surrounding hints."
-                }
-              },
-              {
-                "id": "job-flow-04",
-                "number": {
-                  "zh": "04",
-                  "en": "04"
-                },
-                "title": {
-                  "zh": "辅助填写",
-                  "en": "Assist with Filling"
-                },
-                "description": {
-                  "zh": "基础信息可以一键填入；无法确定、未识别或涉及重要选择的字段保持待确认，不进行猜测。",
-                  "en": "Basic information can be filled in with one click; fields that can't be determined, aren't recognized, or involve an important choice are left pending for confirmation rather than guessed at."
-                }
-              },
-              {
-                "id": "job-flow-05",
-                "number": {
-                  "zh": "05",
-                  "en": "05"
-                },
-                "title": {
-                  "zh": "用户确认提交",
-                  "en": "User Confirms and Submits"
-                },
-                "description": {
-                  "zh": "用户检查实际填写内容，并亲自完成最终投递。系统不自动点击最终提交，也不绕过验证码和网站安全控制。",
-                  "en": "The user reviews what's actually been filled in and completes the final submission themselves. The system never auto-clicks the final submit button and never bypasses CAPTCHAs or a site's security controls."
-                }
-              },
-              {
-                "id": "job-flow-06",
-                "number": {
-                  "zh": "06",
-                  "en": "06"
-                },
-                "title": {
-                  "zh": "生成投递档案",
-                  "en": "Generate an Application Record"
-                },
-                "description": {
-                  "zh": "申请完成后保存 JD 快照、投递时间、使用的简历和作品集以及关键填写信息，直接进入 Job Search 的后续跟踪。",
-                  "en": "Once the application is done, a JD snapshot, the submission time, the resume and portfolio used, and key filled-in information are all saved, and it moves straight into Job Search's follow-up tracking."
-                }
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-4d9bcd59-0ccf-4a9c-b315-47ca0adc1675",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "02",
-              "en": "02"
-            },
-            "leftTitle": {
-              "zh": "系统 分工",
-              "en": "System Division of Labor"
-            },
-            "statement": {
-              "zh": "浏览器负责观察与操作，Desk 负责长期记忆",
-              "en": "The browser handles observation and action, Desk handles long-term memory"
-            },
-            "body": {
-              "zh": "我不希望浏览器插件再维护一套独立的求职资料，因此系统采用一个明确的数据边界：DILIDA DESK 是个人资料、字段映射、简历版本、作品集和投递记录的唯一数据源；浏览器插件只负责读取当前招聘页面、请求需要的资料、执行辅助填写，并把新的岗位和投递行为传回 Desk。这样更换电脑或重新安装插件时，不需要重新配置全部信息，也能避免浏览器和桌面端出现两套相互冲突的数据。",
-              "en": "I didn't want the browser extension to maintain a separate copy of my job-search data, so the system draws a clear data boundary: DILIDA DESK is the single source of truth for personal profile data, field mappings, resume versions, portfolios, and application records; the browser extension only reads the current job page, requests the data it needs, assists with filling in the form, and sends new role and application activity back to Desk. That way, switching computers or reinstalling the extension doesn't mean reconfiguring everything from scratch, and it avoids ending up with two conflicting sets of data between the browser and the desktop app."
-            }
-          }
-        },
-        {
-          "instanceId": "decision-table-f4de7693-b478-4bf3-a60f-84d0fca150be",
-          "templateId": "decision-table",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "插件、Desk 与用户的职责边界",
-              "en": "Division of Responsibility: Extension, Desk, and User"
-            },
-            "columns": [
-              {
-                "id": "task",
-                "title": {
-                  "zh": "任务",
-                  "en": "Task"
-                }
-              },
-              {
-                "id": "extension",
-                "title": {
-                  "zh": "浏览器插件",
-                  "en": "Browser Extension"
-                }
-              },
-              {
-                "id": "desk",
-                "title": {
-                  "zh": "DILIDA DESK",
-                  "en": "DILIDA DESK"
-                }
-              },
-              {
-                "id": "user",
-                "title": {
-                  "zh": "用户",
-                  "en": "User"
-                }
-              }
-            ],
-            "rows": [
-              {
-                "id": "jd",
-                "cells": {
-                  "task": {
-                    "zh": "岗位信息",
-                    "en": "Role Information"
-                  },
-                  "extension": {
-                    "zh": "读取当前页面中用户可见的岗位和 JD。",
-                    "en": "Reads the role and JD visible on the current page."
-                  },
-                  "desk": {
-                    "zh": "保存 JD 快照和岗位记录。",
-                    "en": "Saves the JD snapshot and role record."
-                  },
-                  "user": {
-                    "zh": "判断岗位是否值得投递。",
-                    "en": "Judges whether the role is worth applying to."
-                  }
-                }
-              },
-              {
-                "id": "autofill",
-                "cells": {
-                  "task": {
-                    "zh": "表单填写",
-                    "en": "Form Filling"
-                  },
-                  "extension": {
-                    "zh": "识别字段并填入可确认的基础资料。",
-                    "en": "Recognizes fields and fills in the basic data that can be confirmed."
-                  },
-                  "desk": {
-                    "zh": "提供个人资料和字段映射。",
-                    "en": "Provides the personal profile and field mappings."
-                  },
-                  "user": {
-                    "zh": "处理不确定字段并检查结果。",
-                    "en": "Handles uncertain fields and reviews the result."
-                  }
-                }
-              },
-              {
-                "id": "submit",
-                "cells": {
-                  "task": {
-                    "zh": "最终提交",
-                    "en": "Final Submission"
-                  },
-                  "extension": {
-                    "zh": "不自动提交。",
-                    "en": "Never auto-submits."
-                  },
-                  "desk": {
-                    "zh": "不控制招聘网站提交动作。",
-                    "en": "Doesn't control the job site's submit action."
-                  },
-                  "user": {
-                    "zh": "确认内容并亲自提交申请。",
-                    "en": "Confirms the content and submits the application personally."
-                  }
-                }
-              },
-              {
-                "id": "application",
-                "cells": {
-                  "task": {
-                    "zh": "投递记录",
-                    "en": "Application Record"
-                  },
-                  "extension": {
-                    "zh": "识别可能的成功状态并发送当前上下文。",
-                    "en": "Detects a likely success state and sends the current context."
-                  },
-                  "desk": {
-                    "zh": "生成 Application 并持续管理进度。",
-                    "en": "Generates the Application and keeps managing its progress."
-                  },
-                  "user": {
-                    "zh": "补充面试、拒绝、Offer 等后续状态。",
-                    "en": "Adds follow-up status like interviews, rejections, and offers."
-                  }
-                }
-              },
-              {
-                "id": "learning",
-                "cells": {
-                  "task": {
-                    "zh": "系统学习",
-                    "en": "System Learning"
-                  },
-                  "extension": {
-                    "zh": "暴露未识别或歧义字段。",
-                    "en": "Surfaces unrecognized or ambiguous fields."
-                  },
-                  "desk": {
-                    "zh": "保存新的全局或站点字段别名。",
-                    "en": "Saves new global or site-specific field aliases."
-                  },
-                  "user": {
-                    "zh": "只需完成一次正确映射。",
-                    "en": "Only needs to map it correctly once."
-                  }
-                }
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-d1c34365-09e2-4f60-80d9-6fbc3eb59bd9",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "03",
-              "en": "03"
-            },
-            "leftTitle": {
-              "zh": "语义 识别",
-              "en": "Semantic Recognition"
-            },
-            "statement": {
-              "zh": "网页叫它什么，不应该决定系统能不能认识它",
-              "en": "What a webpage calls something shouldn't determine whether the system can recognize it"
-            },
-            "body": {
-              "zh": "不同招聘网站对同一信息的命名并不统一。例如“姓名”也可能被写成“名字”“应聘人姓名”“Full Name”或“Candidate Name”。因此我没有把网页上的可见文案直接当成字段 ID，而是设计了一层稳定的语义字段。系统内部只保存 fullName、phone、email、preferredCity、portfolioUrl 等标准字段，每个字段可以拥有多个可编辑别名。匹配时同时参考 label、placeholder、name、aria-label、周边提示文字和输入控件类型。当系统遇到无法识别的字段时，用户可以将它映射到已有字段、新建字段或忽略；这个结果会被保存下来，让系统随着真实使用逐渐适应更多网站。",
-              "en": "Different job sites don't name the same information consistently. \"Name\" might also appear as \"Full Name,\" \"Applicant Name,\" or \"Candidate Name.\" So instead of treating the visible label on a page as the field ID directly, I designed a stable semantic-field layer underneath. Internally, the system only stores standard fields like fullName, phone, email, preferredCity, and portfolioUrl, and each one can have multiple editable aliases. Matching draws on the label, placeholder, name, aria-label, surrounding hint text, and the input control's type all at once. When the system hits a field it can't recognize, the user can map it to an existing field, create a new one, or ignore it — and that choice gets saved, so the system gradually adapts to more sites as it's actually used."
-            }
-          }
-        },
-        {
-          "instanceId": "circle-summary-14d5824b-ca92-4655-b52f-b94156c16ee5",
-          "templateId": "circle-summary",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "字段识别的三个原则",
-              "en": "Three Principles for Field Recognition"
-            },
-            "items": [
-              {
-                "id": "semantic",
-                "text": {
-                  "zh": "稳定语义字段作为唯一数据源",
-                  "en": "Stable semantic fields as the single source of truth"
-                }
-              },
-              {
-                "id": "aliases",
-                "text": {
-                  "zh": "全局别名与站点别名持续学习",
-                  "en": "Global and site-specific aliases that keep learning"
-                }
-              },
-              {
-                "id": "uncertainty",
-                "text": {
-                  "zh": "不确定的信息必须交还用户确认",
-                  "en": "Uncertain information always goes back to the user to confirm"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "image-row-006ee24e-d79d-4ad2-92ed-67971123374a",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "字段识别与自动填写界面",
-              "en": "Field Recognition and Autofill Interface"
-            },
-            "columns": 3,
-            "rowAlignment": "center",
-            "items": [
-              {
-                "id": "image-row-item-893f90b0-e641-493f-9f16-34e374b2be17",
-                "alt": {
-                  "zh": "招聘网页字段识别结果",
-                  "en": "Job Listing Field Recognition Results"
-                },
-                "caption": {
-                  "zh": "插件识别当前页面中的岗位信息和可填写字段。",
-                  "en": "The extension recognizes the role information and fillable fields on the current page."
-                },
-                "placeholder": {
-                  "zh": "上传招聘网页中字段识别状态截图",
-                  "en": "Upload a screenshot of field-recognition status on a job listing page"
-                },
-                "suggestedAspectRatio": "16:9",
-                "suggestedImageCount": 1,
-                "imageDisplayMode": "cover",
-                "imageCropRatio": "16:9",
-                "imageWidthMode": "card",
-                "hoverPreviewMode": "none"
-              },
-              {
-                "id": "image-row-item-805b498b-a9f9-4f3c-a17a-8a43dfa9982c",
-                "alt": {
-                  "zh": "未识别字段映射界面",
-                  "en": "Unrecognized Field Mapping Interface"
-                },
-                "caption": {
-                  "zh": "用户可以把陌生网页文案映射到已有语义字段。",
-                  "en": "The user can map an unfamiliar page label to an existing semantic field."
-                },
-                "placeholder": {
-                  "zh": "上传字段映射或别名管理截图",
-                  "en": "Upload a screenshot of field mapping or alias management"
-                },
-                "suggestedAspectRatio": "16:9",
-                "suggestedImageCount": 1,
-                "imageDisplayMode": "cover",
-                "imageCropRatio": "16:9",
-                "imageWidthMode": "card",
-                "hoverPreviewMode": "none"
-              },
-              {
-                "id": "image-row-item-f786e06c-4f6c-4f7f-adba-f6aa412fbc5f",
-                "alt": {
-                  "zh": "自动填写后的确认状态",
-                  "en": "Confirmation State After Autofill"
-                },
-                "caption": {
-                  "zh": "系统区分已填写、待确认和未识别字段，减少逐项检查成本。",
-                  "en": "The system distinguishes between filled, pending, and unrecognized fields, cutting down the cost of checking each one by hand."
-                },
-                "placeholder": {
-                  "zh": "上传一键填写后的字段状态截图",
-                  "en": "Upload a screenshot of field status after one-click fill"
-                },
-                "suggestedAspectRatio": "16:9",
-                "suggestedImageCount": 1,
-                "imageDisplayMode": "cover",
-                "imageCropRatio": "16:9",
-                "imageWidthMode": "card",
-                "hoverPreviewMode": "none"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-936e8553-64d5-4ea5-bc90-77e705055286",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "04",
-              "en": "04"
-            },
-            "leftTitle": {
-              "zh": "投递 记忆",
-              "en": "Application Memory"
-            },
-            "statement": {
-              "zh": "真正需要保存的不是一个网址，而是当时发生过什么",
-              "en": "What actually needs saving isn't a URL — it's what happened at the time"
-            },
-            "body": {
-              "zh": "招聘页面可能下线、JD 可能修改，单独保存 URL 并不能还原一次真实投递。因此每条 Application 需要保存当时的 JD 快照，并和投递时间、使用的简历版本、作品集版本、内推码以及关键填写信息建立关系。这样 Job Search 不再是一张需要手工维护的公司列表，而更像一份由真实求职行为自然形成的时间记录。之后准备面试时，可以直接回到当时的岗位要求和投递材料，而不需要重新寻找已经失效的招聘页面。",
-              "en": "A job listing can go offline, and a JD can be edited — saving just the URL can't reconstruct what an application actually looked like at the time. So every Application needs to save a snapshot of the JD as it was then, linked to the submission time, the resume version used, the portfolio version, any referral code, and the key filled-in information. That way Job Search stops being a company list that has to be maintained by hand, and becomes more like a timeline that forms naturally out of real application activity. Later, when preparing for an interview, I can go straight back to the role requirements and materials as they were at the time, instead of hunting for a job listing that's already gone offline."
-            }
-          }
-        },
-        {
-          "instanceId": "image-row-6ac02295-19c6-41d6-908c-e1e6fecbeedb",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "从招聘页面到投递档案",
-              "en": "From Job Listing to Application Record"
-            },
-            "columns": 2,
-            "rowAlignment": "center",
-            "items": [
-              {
-                "id": "image-row-item-98dfeed9-a7f7-4c3f-aead-903d937669c4",
-                "alt": {
-                  "zh": "浏览器插件读取招聘岗位",
-                  "en": "Browser Extension Reading a Job Listing"
-                },
-                "caption": {
-                  "zh": "打开招聘页面后，系统自动获得公司、岗位、JD 和当前申请上下文。",
-                  "en": "Once a job page is open, the system automatically captures the company, the role, the JD, and the current application context."
-                },
-                "placeholder": {
-                  "zh": "上传浏览器助手读取 JD 的实际截图",
-                  "en": "Upload an actual screenshot of the browser assistant reading a JD"
-                },
-                "suggestedAspectRatio": "16:9",
-                "suggestedImageCount": 1,
-                "imageDisplayMode": "cover",
-                "imageCropRatio": "16:9",
-                "imageWidthMode": "wide",
-                "hoverPreviewMode": "none"
-              },
-              {
-                "id": "image-row-item-5320526a-88a8-4f6c-a564-0782db59aa4a",
-                "alt": {
-                  "zh": "DILIDA DESK 投递记录",
-                  "en": "DILIDA DESK Application Record"
-                },
-                "caption": {
-                  "zh": "申请完成后，同一份上下文转化为可继续跟踪的 Application。",
-                  "en": "Once the application is complete, that same context turns into an Application that can keep being tracked."
-                },
-                "placeholder": {
-                  "zh": "上传 Job Search 中自动生成的投递记录截图",
-                  "en": "Upload a screenshot of an automatically generated application record in Job Search"
-                },
-                "suggestedAspectRatio": "16:9",
-                "suggestedImageCount": 1,
-                "imageDisplayMode": "cover",
-                "imageCropRatio": "16:9",
-                "imageWidthMode": "wide",
-                "hoverPreviewMode": "none"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "phase-milestones-4569b0b7-148a-4800-858e-361ba1e824c3",
-          "templateId": "phase-milestones",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "验证路径",
-              "en": "Validation Path"
-            },
-            "items": [
-              {
-                "id": "milestone-01",
-                "state": "active",
-                "number": {
-                  "zh": "01",
-                  "en": "01"
-                },
-                "title": {
-                  "zh": "真实招聘页识别",
-                  "en": "Real Job Listing Recognition"
-                },
-                "hoverTitle": {
-                  "zh": "先验证通用 DOM 读取",
-                  "en": "Validate General-Purpose DOM Reading First"
-                },
-                "hoverText": {
-                  "zh": "使用真实招聘页面验证公司、岗位、JD 和基础字段是否能够被稳定识别，不先针对单一公司制作专用逻辑。",
-                  "en": "Use real job listings to verify that the company, role, JD, and basic fields can be recognized reliably, without building site-specific logic for a single company first."
-                },
-                "targetId": "real-page-detection"
-              },
-              {
-                "id": "milestone-02",
-                "state": "outline",
-                "number": {
-                  "zh": "02",
-                  "en": "02"
-                },
-                "title": {
-                  "zh": "字段映射与填写",
-                  "en": "Field Mapping and Filling"
-                },
-                "hoverTitle": {
-                  "zh": "建立可学习的语义字段系统",
-                  "en": "Build a Semantic Field System That Learns"
-                },
-                "hoverText": {
-                  "zh": "验证常见表单可以从 Desk 调用资料，并让用户修正未识别字段后持续复用。",
-                  "en": "Verify that common forms can pull data from Desk, and that once a user corrects an unrecognized field, that correction keeps getting reused."
-                },
-                "targetId": "semantic-autofill"
-              },
-              {
-                "id": "milestone-03",
-                "state": "outline",
-                "number": {
-                  "zh": "03",
-                  "en": "03"
-                },
-                "title": {
-                  "zh": "投递自动归档",
-                  "en": "Automatic Application Archiving"
-                },
-                "hoverTitle": {
-                  "zh": "让真实投递形成 Application",
-                  "en": "Turn Real Applications into Application Records"
-                },
-                "hoverText": {
-                  "zh": "保存 JD 快照、材料版本和投递时间，并进入后续面试与结果管理。",
-                  "en": "Saves the JD snapshot, material versions, and submission time, then moves into follow-up interview and outcome management."
-                },
-                "targetId": "application-capture"
-              },
-              {
-                "id": "milestone-04",
-                "state": "outline",
-                "number": {
-                  "zh": "04",
-                  "en": "04"
-                },
-                "title": {
-                  "zh": "跨设备安装",
-                  "en": "Cross-Device Installation"
-                },
-                "hoverTitle": {
-                  "zh": "插件保持轻量可替换",
-                  "en": "Keep the Extension Lightweight and Replaceable"
-                },
-                "hoverText": {
-                  "zh": "让用户能够从 Desk 随时重新安装浏览器助手，并继续使用已有字段和投递数据。",
-                  "en": "Lets the user reinstall the browser assistant from Desk at any time and keep using their existing fields and application data."
-                },
-                "targetId": "portable-extension"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-7d90dd60-19b4-4fd3-b54d-b5585e20a431",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "05",
-              "en": "05"
-            },
-            "leftTitle": {
-              "zh": "Agent 边界",
-              "en": "Agent Boundaries"
-            },
-            "statement": {
-              "zh": "高效不等于把所有决定都交给自动化",
-              "en": "Being efficient doesn't mean handing every decision to automation"
-            },
-            "body": {
-              "zh": "这个项目并不把“自动投更多岗位”作为目标。招聘网站包含很多需要真实判断的信息，例如工作地点、到岗时间、调剂意愿、身份问题和额外问答。如果 Agent 为了追求全自动而替用户猜测这些内容，效率反而会带来新的风险。因此我更关注自动化边界：让系统处理重复、结构明确、能够验证的信息，让不确定的字段明确暴露出来，并把最终提交保留给用户。Agent 的价值不在于替用户完成所有操作，而在于减少低价值重复劳动，同时保持用户对求职决策和个人信息的控制。",
-              "en": "This project doesn't treat \"submit more applications automatically\" as the goal. Job listings contain a lot of information that genuinely needs a human judgment call — work location, start date, willingness to relocate, eligibility questions, extra open-ended questions. If an agent guesses at these just to chase full automation, that efficiency ends up introducing new risk instead. So I focused more on where automation should stop: let the system handle information that's repetitive, well-structured, and verifiable, surface uncertain fields explicitly, and leave the final submission to the user. The value of an agent here isn't doing every step for the user — it's cutting low-value repetitive work while keeping the user in control of their job-search decisions and personal information."
-            }
-          }
-        },
-        {
-          "instanceId": "circle-summary-3df257a2-2a80-4377-9d7e-ea8a9bd4efdf",
-          "templateId": "circle-summary",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "我希望保留的三条产品原则",
-              "en": "Three Product Principles I Wanted to Keep"
-            },
-            "items": [
-              {
-                "id": "principle-01",
-                "text": {
-                  "zh": "真实投递自然产生数据，不要求用户重复维护数据库",
-                  "en": "Real applications generate data naturally — users shouldn't have to maintain a database by hand"
-                }
-              },
-              {
-                "id": "principle-02",
-                "text": {
-                  "zh": "Agent 自动处理确定性任务，把歧义主动暴露给用户",
-                  "en": "The agent automatically handles deterministic tasks and actively surfaces ambiguity to the user"
-                }
-              },
-              {
-                "id": "principle-03",
-                "text": {
-                  "zh": "插件可以替换，个人资料与长期记忆必须留在自己的系统中",
-                  "en": "The extension is replaceable, but personal data and long-term memory must stay in the user's own system"
-                }
-              }
-            ]
-          }
-        }
-      ],
-      "updatedAt": "2026-08-09T04:20:46.026Z"
-    },
     "project-1hp5k4t": {
       "version": 1,
       "templateInstances": [
-        {
-          "instanceId": "supporting-note-9ae88108-c5b1-4814-a8c8-730306da9ab2",
-          "templateId": "supporting-note",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "body": {
-              "zh": "项目主要围绕家园建造功能展开，梳理玩家进入建造模式后，从选择物件、放置与调整，到保存布局和管理设计图的完整基础操作流程。",
-              "en": ""
-            }
-          }
-        },
         {
           "instanceId": "process-flow-2e5bea2d-b106-48de-b782-b9424143062c",
           "templateId": "process-flow",
@@ -6821,7 +6777,7 @@
               "en": ""
             },
             "leftTitle": {
-              "zh": "建造模式",
+              "zh": "建造 模式",
               "en": ""
             },
             "statement": {
@@ -6848,103 +6804,143 @@
             "rowAlignment": "start",
             "items": [
               {
-                "id": "image-row-item-a2f01a80-74cb-4994-b39e-827f7c0a70eb",
+                "id": "image-row-item-eff341d9-e5d4-426e-b879-3cbd226bb0d2",
                 "alt": {
-                  "zh": "建造模式一级界面",
+                  "zh": "",
                   "en": ""
                 },
                 "caption": {
                   "zh": "一级建造界面与物件分类。",
                   "en": ""
                 },
-                "placeholder": {
-                  "zh": "绑定：建造模式一级界面",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 4,
-                "imageDisplayMode": "natural",
-                "imageWidthMode": "wide",
                 "hoverPreviewMode": "none",
                 "image": {
-                  "imageId": "image-fffe44b3-4265-4370-b282-08a75727dfba",
-                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-fffe44b3-4265-4370-b282-08a75727dfba.png"
-                }
+                  "imageId": "image-959660b9-f265-4a99-badb-f5506b94ebec",
+                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-959660b9-f265-4a99-badb-f5506b94ebec.png"
+                },
+                "imageDisplayMode": "cover",
+                "annotationEnabled": true,
+                "annotations": [
+                  {
+                    "id": "annotation-0fe0b5bb-6292-4f76-abec-39e7f86450cd",
+                    "title": {
+                      "zh": "",
+                      "en": ""
+                    },
+                    "explanation": {
+                      "zh": "",
+                      "en": ""
+                    },
+                    "region": {
+                      "x": 35,
+                      "y": 35,
+                      "width": 30,
+                      "height": 30
+                    },
+                    "evidenceImages": []
+                  }
+                ]
               },
               {
-                "id": "image-row-item-5b638c1e-6db3-48e1-8e52-aae2caaeedaa",
+                "id": "image-row-item-36256a48-2079-4779-aca6-cbd0638459e0",
                 "alt": {
-                  "zh": "未选中物件状态",
+                  "zh": "",
                   "en": ""
                 },
                 "caption": {
                   "zh": "未选中物件时保持以浏览和选择内容为主。",
                   "en": ""
                 },
-                "placeholder": {
-                  "zh": "绑定：未选中物体",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 4,
-                "imageDisplayMode": "natural",
-                "imageWidthMode": "wide",
                 "hoverPreviewMode": "none",
                 "image": {
-                  "imageId": "image-29905a91-7120-49a2-9614-cf7627249c37",
-                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-29905a91-7120-49a2-9614-cf7627249c37.png"
-                }
+                  "imageId": "image-2a3dc0b7-f82e-4da1-b9d9-013840f02829",
+                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-2a3dc0b7-f82e-4da1-b9d9-013840f02829.png"
+                },
+                "imageDisplayMode": "cover"
               },
               {
-                "id": "image-row-item-c868c851-a1e3-4285-ac49-81de07a7cda4",
+                "id": "image-row-item-5fdcab50-32a3-4062-8faf-d0297051689d",
                 "alt": {
-                  "zh": "搜索功能",
+                  "zh": "",
                   "en": ""
                 },
                 "caption": {
                   "zh": "通过搜索快速定位建造素材。",
                   "en": ""
                 },
-                "placeholder": {
-                  "zh": "绑定：搜索界面",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 4,
-                "imageDisplayMode": "natural",
-                "imageWidthMode": "wide",
                 "hoverPreviewMode": "none",
-                "startNewRow": true,
                 "image": {
-                  "imageId": "image-025f4656-a02e-4177-8f1c-2750c00ce912",
-                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-025f4656-a02e-4177-8f1c-2750c00ce912.png"
-                }
+                  "imageId": "image-54470d92-2ad2-48c7-8a6b-929c027beba7",
+                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-54470d92-2ad2-48c7-8a6b-929c027beba7.png"
+                },
+                "imageDisplayMode": "cover",
+                "startNewRow": true
               },
               {
-                "id": "image-row-item-c4efff0e-6e5e-4767-aafc-7ad00a5c1f88",
+                "id": "image-row-item-a611a50f-fb52-448f-9e69-050097d42bcf",
                 "alt": {
-                  "zh": "建造设置",
+                  "zh": "",
                   "en": ""
                 },
                 "caption": {
-                  "zh": "网格、时间和环境等建造辅助设置。",
+                  "zh": "设置编辑完成后离开的二次提醒",
                   "en": ""
                 },
-                "placeholder": {
-                  "zh": "绑定：设置界面",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 4,
-                "imageDisplayMode": "natural",
-                "imageWidthMode": "wide",
                 "hoverPreviewMode": "none",
                 "image": {
-                  "imageId": "image-4939046c-c63b-4ee0-88cf-11fad9b4c287",
-                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-4939046c-c63b-4ee0-88cf-11fad9b4c287.png"
-                }
+                  "imageId": "image-e2c20ac4-20fd-47b5-9eed-acd5d760866f",
+                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-e2c20ac4-20fd-47b5-9eed-acd5d760866f.png"
+                },
+                "imageDisplayMode": "cover"
               }
             ]
+          }
+        },
+        {
+          "instanceId": "direction-compare-2c844c5d-b59d-4b67-8423-bcb14e3ecda3",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "网格、时间和环境等建造辅助设置对比",
+              "en": ""
+            },
+            "leftLabel": {
+              "zh": "方向 A",
+              "en": ""
+            },
+            "rightLabel": {
+              "zh": "方向 B",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "实机的内容",
+              "en": ""
+            },
+            "rightTitle": {
+              "zh": "优化后的交互",
+              "en": ""
+            },
+            "leftDescription": {
+              "zh": "",
+              "en": ""
+            },
+            "rightDescription": {
+              "zh": "",
+              "en": ""
+            },
+            "leftImage": {
+              "imageId": "image-3f8dfeea-8227-4c4b-8e30-5fe3c31f0922",
+              "publicPath": "/images/published/template-images/project-1hp5k4t/image-3f8dfeea-8227-4c4b-8e30-5fe3c31f0922.png",
+              "hoverPreviewMode": "none"
+            },
+            "rightImage": {
+              "imageId": "image-545a5480-3bf6-4136-a531-65e9cb97b740",
+              "publicPath": "/images/published/template-images/project-1hp5k4t/image-545a5480-3bf6-4136-a531-65e9cb97b740.png",
+              "hoverPreviewMode": "none"
+            },
+            "direction": "left-to-right"
           }
         },
         {
@@ -6958,7 +6954,7 @@
               "en": ""
             },
             "leftTitle": {
-              "zh": "物件编辑",
+              "zh": "物件 编辑",
               "en": ""
             },
             "statement": {
@@ -6985,126 +6981,73 @@
             "rowAlignment": "start",
             "items": [
               {
-                "id": "image-row-item-da3f4748-9325-48ac-bb18-b8a7ea8dcd1b",
+                "id": "image-row-item-fa7a80c0-623d-49ea-a157-a85ad37403af",
                 "alt": {
-                  "zh": "普通移动",
+                  "zh": "",
                   "en": ""
                 },
                 "caption": {
                   "zh": "选中物件后的基础移动操作。",
                   "en": ""
                 },
-                "placeholder": {
-                  "zh": "绑定：移动",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 6,
-                "imageDisplayMode": "natural",
-                "imageWidthMode": "wide",
                 "hoverPreviewMode": "none",
                 "image": {
-                  "imageId": "image-e08c4c54-6302-452e-9152-7545400369ad",
-                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-e08c4c54-6302-452e-9152-7545400369ad.png"
-                }
+                  "imageId": "image-661f6c3d-592f-4181-a224-6995b12fd71a",
+                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-661f6c3d-592f-4181-a224-6995b12fd71a.png"
+                },
+                "imageDisplayMode": "cover"
               },
               {
-                "id": "image-row-item-f59c9387-2f33-40c2-8daf-58d68c9e2d97",
+                "id": "image-row-item-845053e8-5a2e-4285-8a26-2549c52eb39c",
                 "alt": {
-                  "zh": "自由模式移动",
+                  "zh": "",
                   "en": ""
                 },
                 "caption": {
                   "zh": "自由模式下进一步调整物件位置。",
                   "en": ""
                 },
-                "placeholder": {
-                  "zh": "绑定：自由模式移动",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 6,
-                "imageDisplayMode": "natural",
-                "imageWidthMode": "wide",
                 "hoverPreviewMode": "none",
                 "image": {
-                  "imageId": "image-b62c0d38-bdc2-4774-ab48-292220075dea",
-                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-b62c0d38-bdc2-4774-ab48-292220075dea.png"
-                }
+                  "imageId": "image-232a30d3-e5a2-422f-8a6f-c1e665c6a45f",
+                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-232a30d3-e5a2-422f-8a6f-c1e665c6a45f.png"
+                },
+                "imageDisplayMode": "cover"
               },
               {
-                "id": "image-row-item-ae80d589-6047-42ba-a8d2-8cc05182cebd",
+                "id": "image-row-item-319c9ebf-f682-4d2b-bf38-39e3f57ad8b0",
                 "alt": {
-                  "zh": "自由模式旋转",
+                  "zh": "",
                   "en": ""
                 },
                 "caption": {
                   "zh": "自由模式下调整物件旋转角度。",
                   "en": ""
                 },
-                "placeholder": {
-                  "zh": "绑定：自由模式旋转",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 6,
-                "imageDisplayMode": "natural",
-                "imageWidthMode": "wide",
                 "hoverPreviewMode": "none",
-                "startNewRow": true,
                 "image": {
-                  "imageId": "image-6f13e6d0-9d33-4c1c-85c6-23bb677fa3f1",
-                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-6f13e6d0-9d33-4c1c-85c6-23bb677fa3f1.png"
-                }
+                  "imageId": "image-47ff9334-92cd-4661-9788-3d0630c7ede0",
+                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-47ff9334-92cd-4661-9788-3d0630c7ede0.png"
+                },
+                "imageDisplayMode": "cover",
+                "startNewRow": true
               },
               {
-                "id": "image-row-item-de179805-a9de-4c52-839b-4c6e3efdc14c",
+                "id": "image-row-item-7086b2f1-d6aa-496f-a8ba-5670190a607c",
                 "alt": {
-                  "zh": "物件操作",
+                  "zh": "",
                   "en": ""
                 },
                 "caption": {
                   "zh": "围绕当前物件提供复制、收纳、删除等操作。",
                   "en": ""
                 },
-                "placeholder": {
-                  "zh": "绑定：物件操作状态",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 6,
-                "imageDisplayMode": "natural",
-                "imageWidthMode": "wide",
                 "hoverPreviewMode": "none",
                 "image": {
-                  "imageId": "image-8610639b-a5b9-4481-a30c-10ed55674516",
-                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-8610639b-a5b9-4481-a30c-10ed55674516.png"
-                }
-              },
-              {
-                "id": "image-row-item-3bf19a22-3ad2-45fb-8fac-953bbbd528d4",
-                "alt": {
-                  "zh": "保存退出",
-                  "en": ""
+                  "imageId": "image-0c40321d-a257-4f45-a11b-6296efb8583e",
+                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-0c40321d-a257-4f45-a11b-6296efb8583e.png"
                 },
-                "caption": {
-                  "zh": "离开建造模式前确认是否保存当前修改。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "绑定：保存后离开",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 6,
-                "imageDisplayMode": "natural",
-                "imageWidthMode": "wide",
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-7ca47da9-67bd-47c1-83b7-e43e11263b41",
-                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-7ca47da9-67bd-47c1-83b7-e43e11263b41.png"
-                },
-                "startNewRow": true
+                "imageDisplayMode": "cover"
               }
             ]
           }
@@ -7147,128 +7090,87 @@
             "rowAlignment": "start",
             "items": [
               {
-                "id": "image-row-item-7c354080-aa75-4247-b646-8d2e1c56f956",
+                "id": "image-row-item-6063e5a2-710f-469e-b62d-89cfd0628578",
                 "alt": {
-                  "zh": "设计图命名",
+                  "zh": "",
                   "en": ""
                 },
                 "caption": {
                   "zh": "为当前家园方案命名并保存。",
                   "en": ""
                 },
-                "placeholder": {
-                  "zh": "绑定：设计图命名",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 5,
-                "imageDisplayMode": "natural",
-                "imageWidthMode": "wide",
                 "hoverPreviewMode": "none",
                 "image": {
-                  "imageId": "image-8f5c50b9-1820-4a79-84e0-15cac1269d50",
-                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-8f5c50b9-1820-4a79-84e0-15cac1269d50.png"
-                }
+                  "imageId": "image-3e930be3-f30d-46d3-bd59-a0b55753bd6e",
+                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-3e930be3-f30d-46d3-bd59-a0b55753bd6e.png"
+                },
+                "imageDisplayMode": "cover"
               },
               {
-                "id": "image-row-item-a9432970-c6cb-4c76-a2e5-436ba364be00",
+                "id": "image-row-item-db6f4268-948b-43bb-a8bc-d2c40af8f6d9",
                 "alt": {
-                  "zh": "设计图管理",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "对已有设计图进行加载、备份、初始化和发布。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "绑定：家园设计图管理",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 5,
-                "imageDisplayMode": "natural",
-                "imageWidthMode": "wide",
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-15c0adec-b433-4754-b651-23ba739dc313",
-                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-15c0adec-b433-4754-b651-23ba739dc313.png"
-                }
-              },
-              {
-                "id": "image-row-item-0b1d9490-66e5-46be-96be-ec48a0fb69ed",
-                "alt": {
-                  "zh": "收藏设计图",
+                  "zh": "",
                   "en": ""
                 },
                 "caption": {
                   "zh": "浏览并收藏其他家园方案。",
                   "en": ""
                 },
-                "placeholder": {
-                  "zh": "绑定：设计图收藏",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 5,
-                "imageDisplayMode": "natural",
-                "imageWidthMode": "wide",
-                "hoverPreviewMode": "none",
-                "startNewRow": true,
-                "image": {
-                  "imageId": "image-4a897305-5617-48af-b117-43f4506e6cc8",
-                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-4a897305-5617-48af-b117-43f4506e6cc8.png"
-                }
-              },
-              {
-                "id": "image-row-item-b05b74d6-e247-4013-b3a8-2afb5f2fa94d",
-                "alt": {
-                  "zh": "已有存档",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "进入已有家园方案继续编辑。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "绑定：进入已有存档",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 5,
-                "imageDisplayMode": "natural",
-                "imageWidthMode": "wide",
                 "hoverPreviewMode": "none",
                 "image": {
-                  "imageId": "image-d9db8100-05f3-4246-b4f5-4eaf4bcb61f1",
-                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-d9db8100-05f3-4246-b4f5-4eaf4bcb61f1.png"
-                }
-              },
-              {
-                "id": "image-row-item-b4d9cf02-030f-40ba-a862-a6d3b285039e",
-                "alt": {
-                  "zh": "模板状态",
-                  "en": ""
+                  "imageId": "image-2cd7d435-9ab2-4849-b1ec-89fbdbcfbdac",
+                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-2cd7d435-9ab2-4849-b1ec-89fbdbcfbdac.png"
                 },
-                "caption": {
-                  "zh": "模板中没有内容时的基础状态。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "绑定：模板上建造空白内容",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 5,
-                "imageDisplayMode": "natural",
-                "imageWidthMode": "wide",
-                "hoverPreviewMode": "none",
-                "startNewRow": true,
-                "image": {
-                  "imageId": "image-75096fc2-97b2-4161-9d9a-9501dbbaf3c7",
-                  "publicPath": "/images/published/template-images/project-1hp5k4t/image-75096fc2-97b2-4161-9d9a-9501dbbaf3c7.png"
-                }
+                "imageDisplayMode": "cover"
               }
             ]
+          }
+        },
+        {
+          "instanceId": "direction-compare-22b01603-17b7-424d-b9b2-77a8dbe726f9",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "对已有设计图进行加载、备份、初始化和发布对比",
+              "en": ""
+            },
+            "leftLabel": {
+              "zh": "方向 A",
+              "en": ""
+            },
+            "rightLabel": {
+              "zh": "方向 B",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "比较偏程序角度的功能设计",
+              "en": ""
+            },
+            "rightTitle": {
+              "zh": "转为玩家视角的交互设计",
+              "en": ""
+            },
+            "leftDescription": {
+              "zh": "",
+              "en": ""
+            },
+            "rightDescription": {
+              "zh": "",
+              "en": ""
+            },
+            "leftImage": {
+              "imageId": "image-6a390e07-2a87-41f0-8052-662af5e9e1f6",
+              "publicPath": "/images/published/template-images/project-1hp5k4t/image-6a390e07-2a87-41f0-8052-662af5e9e1f6.png",
+              "hoverPreviewMode": "none"
+            },
+            "rightImage": {
+              "imageId": "image-210e6c8f-60c8-4467-85f3-04dd30b8e7b0",
+              "publicPath": "/images/published/template-images/project-1hp5k4t/image-210e6c8f-60c8-4467-85f3-04dd30b8e7b0.png",
+              "hoverPreviewMode": "none"
+            },
+            "direction": "left-to-right"
           }
         },
         {
@@ -7325,13 +7227,13 @@
           }
         }
       ],
-      "updatedAt": "2026-08-26T03:18:27.058Z"
+      "updatedAt": "2026-09-02T02:39:33.782Z"
     }
   },
   "projectCatalog": {
     "ui-personal-practice": {
       "featured": true,
-      "updatedAt": "2026-08-26T03:20:48.868Z",
+      "updatedAt": "2026-08-31T09:59:17.654Z",
       "archiveOrder": 7,
       "slug": "ui-personal-practice",
       "route": "/work/ui-personal-practice",
@@ -7355,7 +7257,8 @@
       "collaborators": [],
       "tools": [],
       "visibility": "public",
-      "publicationState": "published"
+      "publicationState": "published",
+      "portfolioTrack": "ux-ui"
     },
     "interaction-intelligence-system": {
       "isDynamic": true,
@@ -7394,7 +7297,8 @@
         "AI Prototyping"
       ],
       "coverImage": "",
-      "updatedAt": "2026-08-26T03:20:48.868Z"
+      "updatedAt": "2026-08-31T09:58:30.270Z",
+      "portfolioTrack": "ai-product"
     },
     "ai-assisted-ui-environment-design": {
       "isDynamic": true,
@@ -7438,7 +7342,8 @@
         "Figma"
       ],
       "coverImage": "",
-      "updatedAt": "2026-08-26T03:20:48.868Z"
+      "updatedAt": "2026-08-31T09:59:03.299Z",
+      "portfolioTrack": "ai-product"
     },
     "ui-16ienxj": {
       "isDynamic": true,
@@ -7463,7 +7368,8 @@
       "collaborators": [],
       "tools": [],
       "coverImage": "",
-      "updatedAt": "2026-08-26T03:31:40.260Z"
+      "updatedAt": "2026-08-31T09:57:43.657Z",
+      "portfolioTrack": "ux-ui"
     },
     "project-1ua2677": {
       "isDynamic": true,
@@ -7488,7 +7394,8 @@
       "collaborators": [],
       "tools": [],
       "coverImage": "",
-      "updatedAt": "2026-08-26T03:37:53.598Z"
+      "updatedAt": "2026-08-31T09:57:33.808Z",
+      "portfolioTrack": "ux-ui"
     },
     "game-jam-8lzejf": {
       "isDynamic": true,
@@ -7509,7 +7416,7 @@
       "tagsEn": [],
       "categoryZh": "游戏策划与交互设计",
       "categoryEn": "Game Design and Interaction Design",
-      "duration": "72 小时 Game Jam · 2026",
+      "duration": "2026",
       "archiveOrder": 5,
       "featured": true,
       "group": "work",
@@ -7529,7 +7436,8 @@
         "Codex / AI-assisted development"
       ],
       "coverImage": "",
-      "updatedAt": "2026-08-26T03:20:48.868Z"
+      "updatedAt": "2026-09-01T07:38:23.850Z",
+      "portfolioTrack": "game-design"
     },
     "3d-vdr4qg": {
       "isDynamic": true,
@@ -7566,7 +7474,8 @@
         "Blender"
       ],
       "coverImage": "",
-      "updatedAt": "2026-08-26T03:20:48.868Z"
+      "updatedAt": "2026-08-31T09:58:04.703Z",
+      "portfolioTrack": "game-design"
     },
     "ai-agent-6vaadf": {
       "isDynamic": true,
@@ -7634,7 +7543,8 @@
         "Figma"
       ],
       "coverImage": "",
-      "updatedAt": "2026-08-26T03:20:48.868Z"
+      "updatedAt": "2026-08-31T09:57:52.642Z",
+      "portfolioTrack": "ue"
     }
   },
   "projectDocuments": {
@@ -9367,6 +9277,86 @@
         },
         "createdAt": "2026-08-11T08:32:27.546Z",
         "updatedAt": "2026-08-16T07:56:44.372Z"
+      },
+      {
+        "schemaVersion": 1,
+        "id": "game-9ac334e6-d033-47d2-b303-fc8db4192a76",
+        "identity": {
+          "canonicalTitle": "塞尔达",
+          "titleZh": "塞尔达系列",
+          "titleEn": "zelda"
+        },
+        "stats": {
+          "playtimeHours": 150
+        },
+        "presentation": {
+          "tags": [],
+          "homepageTagIds": [],
+          "coverAssetId": "game-cover-bd857cf0-fb85-4c6a-a1be-6cc5c7e7e520",
+          "coverPublicPath": "/images/published/game-covers/game-cover-bd857cf0-fb85-4c6a-a1be-6cc5c7e7e520.jpg"
+        },
+        "reflection": {
+          "whyPlayedZh": "",
+          "whyPlayedEn": "",
+          "strengthsZh": "",
+          "strengthsEn": "",
+          "weaknessesZh": "",
+          "weaknessesEn": "",
+          "contributionZh": "",
+          "contributionEn": ""
+        },
+        "detail": {
+          "zh": "",
+          "en": ""
+        },
+        "publication": {
+          "visibility": "public",
+          "showOnHomepage": false,
+          "homepageOrder": 999,
+          "libraryOrder": 33,
+          "archived": false
+        },
+        "createdAt": "2026-08-26T13:32:53.917Z",
+        "updatedAt": "2026-08-26T13:33:26.674Z"
+      },
+      {
+        "schemaVersion": 1,
+        "id": "game-f9a64785-86fa-4a2d-8821-3113d2064e85",
+        "identity": {
+          "canonicalTitle": "恋与深空",
+          "titleZh": "恋与深空",
+          "titleEn": "恋与深空"
+        },
+        "stats": {},
+        "presentation": {
+          "tags": [],
+          "homepageTagIds": [],
+          "coverAssetId": "game-cover-3fff00dd-c7d9-4309-a5f4-b369a303c14e",
+          "coverPublicPath": "/images/published/game-covers/game-cover-3fff00dd-c7d9-4309-a5f4-b369a303c14e.jpg"
+        },
+        "reflection": {
+          "whyPlayedZh": "",
+          "whyPlayedEn": "",
+          "strengthsZh": "",
+          "strengthsEn": "",
+          "weaknessesZh": "",
+          "weaknessesEn": "",
+          "contributionZh": "",
+          "contributionEn": ""
+        },
+        "detail": {
+          "zh": "",
+          "en": ""
+        },
+        "publication": {
+          "visibility": "public",
+          "showOnHomepage": false,
+          "homepageOrder": 999,
+          "libraryOrder": 34,
+          "archived": false
+        },
+        "createdAt": "2026-08-26T13:34:18.792Z",
+        "updatedAt": "2026-08-26T13:35:21.051Z"
       }
     ],
     "updatedAt": "2026-08-16T06:24:53.977Z"
@@ -10026,6 +10016,118 @@
       "sourceStore": "",
       "sourceId": "public/images/published/covers/project-1hp5k4t.png",
       "publicPath": "/images/published/covers/project-1hp5k4t.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1hp5k4t/image-959660b9-f265-4a99-badb-f5506b94ebec.png",
+      "publicPath": "/images/published/template-images/project-1hp5k4t/image-959660b9-f265-4a99-badb-f5506b94ebec.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1hp5k4t/image-2a3dc0b7-f82e-4da1-b9d9-013840f02829.png",
+      "publicPath": "/images/published/template-images/project-1hp5k4t/image-2a3dc0b7-f82e-4da1-b9d9-013840f02829.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1hp5k4t/image-54470d92-2ad2-48c7-8a6b-929c027beba7.png",
+      "publicPath": "/images/published/template-images/project-1hp5k4t/image-54470d92-2ad2-48c7-8a6b-929c027beba7.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1hp5k4t/image-e2c20ac4-20fd-47b5-9eed-acd5d760866f.png",
+      "publicPath": "/images/published/template-images/project-1hp5k4t/image-e2c20ac4-20fd-47b5-9eed-acd5d760866f.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1hp5k4t/image-3f8dfeea-8227-4c4b-8e30-5fe3c31f0922.png",
+      "publicPath": "/images/published/template-images/project-1hp5k4t/image-3f8dfeea-8227-4c4b-8e30-5fe3c31f0922.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1hp5k4t/image-545a5480-3bf6-4136-a531-65e9cb97b740.png",
+      "publicPath": "/images/published/template-images/project-1hp5k4t/image-545a5480-3bf6-4136-a531-65e9cb97b740.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1hp5k4t/image-661f6c3d-592f-4181-a224-6995b12fd71a.png",
+      "publicPath": "/images/published/template-images/project-1hp5k4t/image-661f6c3d-592f-4181-a224-6995b12fd71a.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1hp5k4t/image-232a30d3-e5a2-422f-8a6f-c1e665c6a45f.png",
+      "publicPath": "/images/published/template-images/project-1hp5k4t/image-232a30d3-e5a2-422f-8a6f-c1e665c6a45f.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1hp5k4t/image-47ff9334-92cd-4661-9788-3d0630c7ede0.png",
+      "publicPath": "/images/published/template-images/project-1hp5k4t/image-47ff9334-92cd-4661-9788-3d0630c7ede0.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1hp5k4t/image-0c40321d-a257-4f45-a11b-6296efb8583e.png",
+      "publicPath": "/images/published/template-images/project-1hp5k4t/image-0c40321d-a257-4f45-a11b-6296efb8583e.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1hp5k4t/image-3e930be3-f30d-46d3-bd59-a0b55753bd6e.png",
+      "publicPath": "/images/published/template-images/project-1hp5k4t/image-3e930be3-f30d-46d3-bd59-a0b55753bd6e.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1hp5k4t/image-2cd7d435-9ab2-4849-b1ec-89fbdbcfbdac.png",
+      "publicPath": "/images/published/template-images/project-1hp5k4t/image-2cd7d435-9ab2-4849-b1ec-89fbdbcfbdac.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1hp5k4t/image-6a390e07-2a87-41f0-8052-662af5e9e1f6.png",
+      "publicPath": "/images/published/template-images/project-1hp5k4t/image-6a390e07-2a87-41f0-8052-662af5e9e1f6.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1hp5k4t/image-210e6c8f-60c8-4467-85f3-04dd30b8e7b0.png",
+      "publicPath": "/images/published/template-images/project-1hp5k4t/image-210e6c8f-60c8-4467-85f3-04dd30b8e7b0.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/game-covers/game-cover-bd857cf0-fb85-4c6a-a1be-6cc5c7e7e520.jpg",
+      "publicPath": "/images/published/game-covers/game-cover-bd857cf0-fb85-4c6a-a1be-6cc5c7e7e520.jpg"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/game-covers/game-cover-3fff00dd-c7d9-4309-a5f4-b369a303c14e.jpg",
+      "publicPath": "/images/published/game-covers/game-cover-3fff00dd-c7d9-4309-a5f4-b369a303c14e.jpg"
     }
   ]
 }

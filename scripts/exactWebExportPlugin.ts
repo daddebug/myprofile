@@ -205,6 +205,37 @@ async function measureAndConstrainVisibleContent(page: Page) {
         visibleBottoms.push(rect.bottom - rootRect.top);
       }
     }
+    // Text nodes and the five media tags above miss any element whose
+    // visible extent comes purely from CSS painting — e.g.
+    // CircleSummaryTemplate's rounded-full circles are plain <div>s whose
+    // background-color/border-radius extend well past their own centered
+    // text, so the walker above reported a bottom up to ~40-45px above
+    // where the circle actually ends, letting the Collection page chrome
+    // sit right against (or overlapping) real visible pixels. This pass
+    // adds any visible, non-zero-size element that has real paint — a
+    // non-transparent background-color, a real border, or a box-shadow —
+    // regardless of tag or template/project id, so it also covers any
+    // future template using the same "shape drawn in CSS" technique.
+    // Ordinary layout wrappers (TemplateSurface/TemplateContent, section
+    // elements) are excluded automatically because they are explicitly
+    // background: transparent (see template-library.css) and have no
+    // border/shadow of their own — they contribute nothing here, exactly
+    // like today.
+    for (const element of Array.from(root.querySelectorAll<HTMLElement>("*"))) {
+      const style = window.getComputedStyle(element);
+      if (style.display === "none" || style.visibility === "hidden") continue;
+      const rect = element.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) continue;
+      const backgroundColor = style.backgroundColor;
+      const hasPaintedBackground = Boolean(backgroundColor) && backgroundColor !== "rgba(0, 0, 0, 0)" && backgroundColor !== "transparent";
+      const hasBorder = (["Top", "Right", "Bottom", "Left"] as const).some((side) => {
+        const width = Number.parseFloat(style[`border${side}Width` as "borderTopWidth"]);
+        return width > 0 && style[`border${side}Style` as "borderTopStyle"] !== "none";
+      });
+      const hasShadow = Boolean(style.boxShadow) && style.boxShadow !== "none";
+      if (!hasPaintedBackground && !hasBorder && !hasShadow) continue;
+      visibleBottoms.push(rect.bottom - rootRect.top);
+    }
     const measuredContentBottom = Math.ceil(Math.max(0, ...visibleBottoms));
     if (measuredContentBottom < 100) throw new Error(`Rendered export content has an invalid visible bottom (${measuredContentBottom}px).`);
     const finalPageHeight = measuredContentBottom + bottomPadding;
@@ -234,6 +265,62 @@ async function measureAndConstrainVisibleContent(page: Page) {
       trailingBlankHeight: finalPageHeight - measuredContentBottom,
     };
   }, exactProjectBottomPaddingPx);
+}
+
+// Reads the full-bleed markers ProjectExactWebExportAction.tsx's
+// markFullBleedRegions stamped onto the clone before this page was ever
+// loaded (data-exact-full-bleed*). Measured here, at the exact same
+// settled layout that produces the PDF bytes below, in the same
+// root-relative px coordinate space as measuredContentBottom — so these
+// Y-ranges stay valid once portfolioCollectionExportPlugin.ts converts
+// them into this project's own PDF-point space (see applyCollectionPageChrome).
+async function measureFullBleedRegions(page: Page) {
+  return page.evaluate(() => {
+    const root = document.querySelector<HTMLElement>("[data-exact-web-export]");
+    if (!root) return [];
+    const rootRect = root.getBoundingClientRect();
+    const nodes = Array.from(root.querySelectorAll<HTMLElement>('[data-exact-full-bleed="true"]'));
+    return nodes.map((node) => {
+      const rect = node.getBoundingClientRect();
+      return {
+        top: Math.round(rect.top - rootRect.top),
+        bottom: Math.round(rect.bottom - rootRect.top),
+        color: node.dataset.exactFullBleedColor ?? "",
+        safe: node.dataset.exactFullBleedSafe === "true",
+        templateInstanceId: node.closest<HTMLElement>("[data-template-instance-id]")?.getAttribute("data-template-instance-id") ?? null,
+        templateId: node.closest<HTMLElement>("[data-template-instance-template-id]")?.getAttribute("data-template-instance-template-id") ?? null,
+      };
+    });
+  });
+}
+
+async function measureExportRailNormalizations(page: Page) {
+  return page.evaluate(() => {
+    const root = document.querySelector<HTMLElement>("[data-exact-web-export]");
+    if (!root) return [];
+    const nodes = Array.from(root.querySelectorAll<HTMLElement>('[data-exact-export-rail-normalized="true"]'));
+    return nodes.map((surface) => {
+      const instance = surface.closest<HTMLElement>("[data-template-instance-id]");
+      const content = surface.querySelector<HTMLElement>(".template-library-content");
+      const frame = surface.querySelector<HTMLElement>('[data-exact-horizontal-frame="true"]');
+      const strip = frame?.querySelector<HTMLElement>('[data-exact-horizontal-strip="true"]');
+      const surfaceRect = surface.getBoundingClientRect();
+      const contentRect = content?.getBoundingClientRect();
+      return {
+        templateInstanceId: instance?.dataset.templateInstanceId ?? null,
+        templateId: instance?.dataset.templateInstanceTemplateId ?? null,
+        sourceSurfaceWidth: Number.parseFloat(surface.dataset.exactExportSourceWidth ?? "0"),
+        sourceRailWidth: Number.parseFloat(surface.dataset.exactExportRailWidth ?? "0"),
+        renderedSurfaceWidth: Math.round(surfaceRect.width * 100) / 100,
+        renderedSurfaceHeight: Math.round(surfaceRect.height * 100) / 100,
+        renderedContentWidth: contentRect ? Math.round(contentRect.width * 100) / 100 : 0,
+        horizontalStripScale: Number.parseFloat(strip?.dataset.exactHorizontalScale ?? "1"),
+        horizontalItemCount: strip
+          ? Array.from(strip.children).filter((child) => getComputedStyle(child).position !== "absolute").length
+          : 0,
+      };
+    });
+  });
 }
 
 async function addSectionPageRules(page: Page, width: number) {
@@ -384,6 +471,8 @@ async function createExactWebPdf(payload: SnapshotPayload, root: string, origin:
     // image's measured CSS box reflects its real, final rendered size.
     await page.evaluate(resizeOversizedExportImages);
     const contentBounds = await measureAndConstrainVisibleContent(page);
+    const fullBleedRegions = await measureFullBleedRegions(page);
+    const exportRailNormalizations = await measureExportRailNormalizations(page);
     const renderDiagnostics = await page.evaluate(() => {
       const root = document.querySelector<HTMLElement>("[data-exact-web-export]")!;
       const rect = root.getBoundingClientRect();
@@ -455,6 +544,8 @@ async function createExactWebPdf(payload: SnapshotPayload, root: string, origin:
       nonUniformRatios,
       renderDiagnostics,
       ...contentBounds,
+      fullBleedRegions,
+      exportRailNormalizations,
       generatedAt: new Date().toISOString(),
     };
     await fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");

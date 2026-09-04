@@ -337,7 +337,7 @@ a {
   }
 
   .home-project-slide {
-    flex: 0 0 min(84vw, 365px);
+    flex: 0 0 min(90vw, 430px);
     min-width: 0;
   }
 
@@ -348,7 +348,7 @@ a {
     }
 
     .home-project-slide {
-      flex-basis: calc((100% - 1.75rem) / 2);
+      flex-basis: calc((100% - 1.5rem) / 2);
     }
   }
 
@@ -366,7 +366,7 @@ a {
     }
 
     .home-project-slide {
-      flex-basis: calc((100% - 4rem) / 3);
+      flex-basis: calc((100% - 3rem) / 3);
     }
   }
 
@@ -508,16 +508,266 @@ a {
     font-family: "IBM Plex Mono", SFMono-Regular, Consolas, "Liberation Mono", monospace;
   }
 
+  .home-portfolio-hero {
+    position: relative;
+    min-height: 100svh;
+    overflow: hidden;
+    /* Same base tone the rest of the site's ambient background/deepIndigo
+       sections settle to (#181743) -- not a hero-local color -- so the
+       bottom of the fade below has nothing to visibly seam against. */
+    background: #181743;
+    color: #f4f5fa;
+    isolation: isolate;
+  }
+
+  .home-hero-visual,
+  .home-hero-visual::after,
+  .home-hero-water-grid,
+  .home-hero-caustic,
+  .home-hero-horizon-fade {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .home-hero-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 42% center;
+    opacity: 0.88;
+    filter: saturate(0.92) contrast(1.03);
+  }
+
+  .home-hero-visual::after {
+    content: "";
+    background: linear-gradient(180deg, rgba(24,23,67,.03) 0%, rgba(24,23,67,.08) 48%, rgba(24,23,67,.34) 78%, rgba(24,23,67,.72) 100%), linear-gradient(90deg, rgba(24,23,67,.06) 0%, rgba(24,23,67,.03) 38%, rgba(24,23,67,.48) 72%, rgba(24,23,67,.74) 100%);
+  }
+
+  .home-hero-water-grid {
+    top: 42%;
+    opacity: .16;
+    transform: perspective(620px) rotateX(62deg) scale(1.34, .82);
+    transform-origin: center bottom;
+    background-image: linear-gradient(rgba(142,184,255,.2) 1px, transparent 1px), linear-gradient(90deg, rgba(142,184,255,.18) 1px, transparent 1px);
+    background-size: 72px 52px;
+    mask-image: linear-gradient(to bottom, transparent, #000 24%, #000 66%, transparent 96%);
+    filter: blur(.15px);
+  }
+
+  .home-hero-caustic {
+    left: -10%;
+    right: 34%;
+    opacity: .38;
+    background: radial-gradient(ellipse at 36% 42%, rgba(52,241,37,.2), transparent 28%), radial-gradient(ellipse at 58% 25%, rgba(146,220,255,.18), transparent 24%);
+    filter: blur(34px);
+  }
+
+  .home-hero-horizon-fade {
+    z-index: 2;
+    top: auto;
+    /* Tall and slow-ramping on purpose: the illustration should still read
+       clearly through the first ~fifth of this zone, then progressively
+       lose detail, and the darkening itself must not reach near-solid
+       #181743 until right at the very last stop -- reaching it early (the
+       previous 72%->100% stop pair) left a visibly flat, featureless solid-
+       color band for the last ~28% of this zone before the section below
+       even began, which is what read as "two independent gradients spliced
+       together". Delaying the ramp removes that dead zone so the fade is
+       still visibly deepening all the way to the boundary. */
+    height: 88%;
+    background:
+      linear-gradient(180deg, transparent 0%, rgba(24,23,67,.04) 22%, rgba(24,23,67,.16) 46%, rgba(24,23,67,.34) 66%, rgba(24,23,67,.58) 82%, rgba(24,23,67,.84) 94%, #181743 100%),
+      radial-gradient(ellipse at 42% 18%, rgba(63,118,174,.09), transparent 52%);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    /* The same top-to-bottom progression also gates how much of the blur
+       above is actually revealed, so blur ramps in alongside the darkening
+       instead of applying uniformly across the whole zone. */
+    mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.3) 38%, #000 78%, #000 100%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.3) 38%, #000 78%, #000 100%);
+  }
+
+  .home-hero-horizon-fade::after {
+    content: "";
+    position: absolute;
+    inset: 30% 0 0;
+    opacity: .08;
+    background-image: radial-gradient(circle at 1px 1px, rgba(210,229,255,.55) .7px, transparent .9px);
+    background-size: 4px 4px;
+    mask-image: linear-gradient(180deg, transparent, #000 30%, transparent 96%);
+  }
+
+  .home-hero-composition {
+    position: relative;
+    z-index: 3;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    /* "end" (not "center") so the whole identity block sits low in the
+       viewport, weight resting in the lower half against the illustration,
+       rather than floating in the vertical middle of the hero. */
+    align-items: end;
+    min-height: 100svh;
+    padding-top: 7.5rem;
+    padding-bottom: 3.5rem;
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(8px);
+  }
+
+  .home-hero-composition.is-opening {
+    animation: home-hero-content-enter 920ms cubic-bezier(.22,1,.36,1) 620ms both;
+  }
+
+  .home-hero-composition.is-revealed {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+
+  .home-hero-copy {
+    position: relative;
+    width: min(78rem, 94vw);
+    margin: 0 auto;
+    /* Replaces the vertical space the removed role/eyebrow line used to
+       occupy above the name, so the name doesn't jump up against the
+       composition's bottom anchor (.home-hero-composition's align-items:
+       end) once that line is gone. */
+    padding-top: 1.75rem;
+    text-align: center;
+  }
+
+  .home-hero-tracks > p {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  .home-hero-name {
+    font-family: inherit;
+    /* Same three clamp values scaled by ~1.11x (a uniform +11%, within the
+       requested 10-15%) so the name is the Hero's single strongest focal
+       point at every viewport width, not just at one breakpoint. */
+    font-size: clamp(6rem, 8vw, 8.5rem);
+    font-weight: 690;
+    line-height: .84;
+    letter-spacing: 0;
+    color: #f4f5fa;
+    text-shadow: 0 0 30px rgba(147,199,255,.17), 0 0 65px rgba(52,241,37,.08);
+    filter: drop-shadow(0 14px 30px rgba(2,4,24,.22));
+  }
+
+  .home-hero-intro {
+    max-width: 70rem;
+    margin-top: 2.15rem;
+    margin-right: auto;
+    margin-left: auto;
+    font-size: 1.14rem;
+    line-height: 1.78;
+    color: rgba(244,245,250,.76);
+  }
+
+  .home-hero-caption {
+    margin-top: 1.1rem;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    color: rgba(169,202,255,.56);
+  }
+
+  .home-hero-tracks {
+    width: 100%;
+    padding-top: 2.5rem;
+    text-align: center;
+  }
+
+  .home-hero-tracks > p {
+    margin-bottom: .8rem;
+    color: rgba(244,245,250,.44);
+  }
+
+  /* Home Hero tabs only (scoped via .home-hero-tracks, not the shared
+     PortfolioTrackTabs component itself -- Work's tabs are untouched).
+     Nudges the whole tab group down without touching the "选择作品方向"
+     heading above it, the Hero name/intro, the projects section below, or
+     any tab's own font-size/height/color/spacing -- only the nav's own
+     position shifts, not text position within each button. */
+  .home-hero-tracks [data-portfolio-track-tabs] {
+    transform: translateY(10px);
+  }
+
+  /* Home-only: the Hero/Projects boundary jump was never a Hero-side
+     smoothness problem -- it's that the Hero ends fully opaque #181743
+     (the fixed ambient layer is 100% blocked there), while this section's
+     own background-color (--ambient-section-surface, rgba(24,23,67,.4),
+     set globally in ambient-light-background.css -- untouched here) lets
+     that same ambient layer show through at 60% from its very first pixel.
+     Fixing it must happen entirely on this side: a background-IMAGE layer
+     (a separate property from background-color, so it composes with the
+     existing rule rather than fighting its !important) that starts as an
+     opaque copy of the Hero's own ending color and fades its own alpha out
+     over the top ~360px -- masking, not repainting, the existing
+     background-color underneath, which is what keeps the revealed color
+     the real dynamic ambient composite instead of a hardcoded RGB. No flat
+     hold at the top and no single linear ramp -- eight stops approximate an
+     ease-in-out curve (near-imperceptible change at first, steepest through
+     the middle, soft landing into alpha 0) so there's no felt "this is
+     where the fade starts" point. Confined to background-size's own top
+     360px box (no negative top, no DOM that reaches back into the Hero),
+     so it can only ever sit on top of this section's own background/
+     content -- it cannot affect the Hero, its tabs, or introduce a new
+     stacking context. */
+  .home-projects-top-fade {
+    background-image: linear-gradient(
+      180deg,
+      rgba(24,23,67,1) 0px,
+      rgba(24,23,67,.98) 28px,
+      rgba(24,23,67,.92) 70px,
+      rgba(24,23,67,.78) 125px,
+      rgba(24,23,67,.58) 185px,
+      rgba(24,23,67,.36) 245px,
+      rgba(24,23,67,.16) 305px,
+      rgba(24,23,67,0) 360px
+    );
+    background-repeat: no-repeat;
+    background-position: top;
+    background-size: 100% 360px;
+  }
+
+  .home-opening-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 12;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 50% 42%, rgba(34,91,104,.34), transparent 48%),
+      linear-gradient(135deg, rgba(7,11,43,.94), rgba(13,24,67,.9) 52%, rgba(7,42,55,.88));
+    backdrop-filter: blur(2px) saturate(.9);
+    pointer-events: none;
+    animation: home-opening-layer-exit 720ms cubic-bezier(.22,1,.36,1) 980ms both;
+  }
+
+  .home-opening-layer::after {
+    content: none;
+  }
+
   .animated-logo-size {
-    width: clamp(320px, 92vw, 1320px);
-    max-width: 92vw;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: clamp(320px, 82vw, 1180px);
+    transform: translate(-50%, -50%);
   }
 
   .animated-logo-scene svg {
     display: block;
+    width: 100%;
     height: auto;
     overflow: visible;
-    width: 100%;
+    transform-origin: center;
+    will-change: opacity, filter;
+    animation: home-logo-whole-exit 900ms cubic-bezier(.22,1,.36,1) 720ms both;
   }
 
   .animated-logo-scene svg > g[data-logo-panel],
@@ -526,6 +776,21 @@ a {
     opacity: 0;
     transform-box: fill-box;
     transform-origin: center;
+  }
+
+  @keyframes home-logo-whole-exit {
+    0%, 12% { opacity: 1; filter: blur(0); }
+    100% { opacity: 0; filter: blur(7px); }
+  }
+
+  @keyframes home-hero-content-enter {
+    0% { opacity: 0; filter: blur(8px); transform: translateY(8px); }
+    100% { opacity: 1; filter: blur(0); transform: translateY(0); }
+  }
+
+  @keyframes home-opening-layer-exit {
+    0% { opacity: 1; filter: blur(0); }
+    100% { opacity: 0; filter: blur(10px); }
   }
 
 .thinking-map-scroll {
@@ -555,11 +820,21 @@ a {
     display: none;
   }
 
-  @media (min-width: 768px) {
-    .animated-logo-size {
-      width: clamp(760px, 72vw, 1320px);
-      max-width: 88vw;
-    }
+  @media (max-width: 767px) {
+    .home-hero-visual img { object-position: 36% center; opacity: .7; }
+    .home-hero-visual::after { background: linear-gradient(180deg, rgba(24,23,67,.06) 0%, rgba(24,23,67,.32) 52%, #181743 100%), linear-gradient(90deg, transparent, rgba(24,23,67,.38)); }
+    .home-hero-composition { padding-top: 7rem; padding-bottom: 1.75rem; }
+    .home-hero-copy { width: 100%; margin-right: 0; margin-left: 0; }
+    .home-hero-name { font-size: 4.3rem; }
+    .home-hero-intro { max-width: 29rem; font-size: 1rem; }
+    .home-hero-tracks { margin-top: 3.5rem; padding-top: 0; }
+    .animated-logo-size { width: 92vw; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .home-hero-composition,
+    .home-opening-layer,
+    .animated-logo-scene svg { animation: none; }
   }
 }
 

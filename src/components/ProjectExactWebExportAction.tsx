@@ -177,6 +177,97 @@ function markHorizontalExportRows(sourceRoot: HTMLElement, cloneRoot: HTMLElemen
   });
 }
 
+// phase-milestones deliberately paints a viewport-wide surface on the live
+// site. Exact-Web artifacts cannot scroll and may be captured from an
+// unusually wide owner viewport, so keep its existing content rail as the
+// export surface width instead of carrying the decorative 100vw breakout
+// into the PDF. This only mutates the detached snapshot clone; the live DOM
+// and the generic horizontal-row fit below remain unchanged.
+function normalizeExportOnlyFullBleedTemplates(sourceRoot: HTMLElement, cloneRoot: HTMLElement) {
+  const sourceInstances = Array.from(
+    sourceRoot.querySelectorAll<HTMLElement>('[data-template-instance-template-id="phase-milestones"]'),
+  );
+  for (const sourceInstance of sourceInstances) {
+    const instanceId = sourceInstance.dataset.templateInstanceId;
+    if (!instanceId) continue;
+    const cloneInstance = Array.from(
+      cloneRoot.querySelectorAll<HTMLElement>('[data-template-instance-template-id="phase-milestones"]'),
+    ).find((candidate) => candidate.dataset.templateInstanceId === instanceId);
+    const sourceSurface = sourceInstance.querySelector<HTMLElement>(".template-library-surface");
+    const sourceContent = sourceInstance.querySelector<HTMLElement>(".template-library-content");
+    const cloneSurface = cloneInstance?.querySelector<HTMLElement>(".template-library-surface");
+    const cloneContent = cloneInstance?.querySelector<HTMLElement>(".template-library-content");
+    if (!sourceSurface || !sourceContent || !cloneSurface || !cloneContent) continue;
+
+    const sourceSurfaceWidth = sourceSurface.getBoundingClientRect().width;
+    const railWidth = sourceContent.getBoundingClientRect().width;
+    if (sourceSurfaceWidth <= 0 || railWidth <= 0) continue;
+
+    cloneSurface.style.width = `${railWidth}px`;
+    cloneSurface.style.maxWidth = "100%";
+    cloneSurface.style.left = "auto";
+    cloneSurface.style.transform = "none";
+    cloneSurface.style.marginInline = "auto";
+    cloneContent.style.width = "100%";
+    cloneContent.style.maxWidth = "100%";
+    cloneSurface.dataset.exactExportRailNormalized = "true";
+    cloneSurface.dataset.exactExportSourceWidth = sourceSurfaceWidth.toFixed(2);
+    cloneSurface.dataset.exactExportRailWidth = railWidth.toFixed(2);
+  }
+}
+
+// Structural, template-agnostic full-bleed detector — the Collection
+// merge stage needs to know which elements intentionally break out to the
+// true viewport edge (e.g. PhaseMilestonesTemplate's `calc(100vw - 8px)` +
+// `left-1/2 -translate-x-1/2` trick) so it can extend their background
+// into any canvas padding added later when unifying merged-PDF page
+// widths, instead of leaving a visible inset. Detection is purely
+// geometric (does the rendered rect actually reach both viewport edges)
+// plus a computed-style check for a real background paint — never a
+// template/project ID allowlist, so any future template using the same or
+// a different CSS technique to achieve the same visual result is covered
+// automatically. Only a background-color fill is safe to extend losslessly
+// (a flat color composites identically wherever it's repainted); an
+// element whose edge treatment involves a background-image, gradient, or
+// backdrop-filter is marked unsafe instead of silently approximated — the
+// merge stage must fall back to the normal page background for those and
+// surface the case for a human decision (see the Collection width
+// invariant in skills/portfolio-collection/SKILL.md).
+function markFullBleedRegions(sourceRoot: HTMLElement, cloneRoot: HTMLElement) {
+  const viewportWidth = window.innerWidth;
+  const edgeTolerancePx = 12;
+  const sourceElements = [sourceRoot, ...Array.from(sourceRoot.querySelectorAll<HTMLElement>("*"))];
+  const cloneElements = [cloneRoot, ...Array.from(cloneRoot.querySelectorAll<HTMLElement>("*"))];
+  sourceElements.forEach((source, index) => {
+    if (index === 0) return; // the export root itself spanning full width is not a deliberate breakout
+    // Scope to template-authored content only (a descendant of some
+    // per-instance wrapper — data-template-instance-id for the template
+    // library, data-document-section for legacy ProjectDocument bodies).
+    // This is what excludes ordinary page-level layout/chrome wrappers
+    // (body, #root, header, main) that also happen to span the full
+    // viewport with an explicit solid background but were never a
+    // deliberate breakout — still no specific template or project ID
+    // check, just "is this part of a template instance's own content".
+    if (!source.closest("[data-template-instance-id], [data-document-section]")) return;
+    const rect = source.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+    const reachesLeftEdge = rect.left <= edgeTolerancePx;
+    const reachesRightEdge = rect.right >= viewportWidth - edgeTolerancePx;
+    if (!reachesLeftEdge || !reachesRightEdge) return;
+    const style = getComputedStyle(source);
+    const backgroundColor = style.backgroundColor;
+    const hasPaintedBackground = Boolean(backgroundColor) && backgroundColor !== "rgba(0, 0, 0, 0)" && backgroundColor !== "transparent";
+    if (!hasPaintedBackground) return;
+    const clone = cloneElements[index];
+    if (!(clone instanceof HTMLElement)) return;
+    if (clone.dataset.exactExportRailNormalized === "true") return;
+    const isSafe = style.backgroundImage === "none" && (style.backdropFilter === "none" || style.backdropFilter === "");
+    clone.dataset.exactFullBleed = "true";
+    clone.dataset.exactFullBleedSafe = isSafe ? "true" : "false";
+    clone.dataset.exactFullBleedColor = backgroundColor;
+  });
+}
+
 function horizontalExportLayoutScript() {
   return `<script>
     (() => {
@@ -317,6 +408,8 @@ export async function buildExactSnapshotResult(options: ExactSnapshotOptions = {
   const cloneRoot = sourceRoot.cloneNode(true) as HTMLElement;
   cloneRoot.dataset.exactWebExport = "true";
   markHorizontalExportRows(sourceRoot, cloneRoot);
+  normalizeExportOnlyFullBleedTemplates(sourceRoot, cloneRoot);
+  markFullBleedRegions(sourceRoot, cloneRoot);
   await embedProjectAssets(sourceRoot, cloneRoot);
 
   cloneRoot.querySelectorAll("details").forEach((details) => { details.open = false; });

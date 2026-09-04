@@ -1471,6 +1471,19 @@ function validateDynamicImageInstance(
   }
   const content = structuredClone(instance.content as Record<string, unknown>);
   if (requiredImage) {
+    const containsAnnotationEvidence = (value: unknown): boolean => {
+      if (!value || typeof value !== "object") return false;
+      if (Array.isArray(value)) return value.some(containsAnnotationEvidence);
+      const record = value as Record<string, unknown>;
+      if (
+        requiredImage.itemId.startsWith("annotation-evidence-")
+        && record.id === requiredImage.itemId
+        && record.imageId === requiredImage.imageId
+        && record.publicPath === requiredImage.publicUrl
+      ) return true;
+      return Object.values(record).some(containsAnnotationEvidence);
+    };
+    let primaryImageMatches = false;
     if (instance.templateId === "image-row") {
       const items = Array.isArray(content.items) ? content.items : null;
       if (!items) throw new RequestError("Image Row items are required.", 400);
@@ -1478,19 +1491,17 @@ function validateDynamicImageInstance(
       const image = item?.image && typeof item.image === "object" && !Array.isArray(item.image)
         ? item.image as Record<string, unknown>
         : null;
-      if (!item || !image || image.imageId !== requiredImage.imageId || image.publicPath !== requiredImage.publicUrl) {
-        throw new RequestError("The Image Row snapshot does not reference the staged image.", 409);
-      }
-    } else {
-      if (requiredImage.itemId !== "leftImage" && requiredImage.itemId !== "rightImage") {
-        throw new RequestError(`Invalid Direction Compare image slot: ${JSON.stringify(requiredImage.itemId)}.`, 400);
-      }
+      primaryImageMatches = Boolean(item && image && image.imageId === requiredImage.imageId && image.publicPath === requiredImage.publicUrl);
+    } else if (requiredImage.itemId === "leftImage" || requiredImage.itemId === "rightImage") {
       const image = content[requiredImage.itemId];
-      if (!image || typeof image !== "object" || Array.isArray(image)
-        || (image as Record<string, unknown>).imageId !== requiredImage.imageId
-        || (image as Record<string, unknown>).publicPath !== requiredImage.publicUrl) {
-        throw new RequestError("The Direction Compare snapshot does not reference the staged image.", 409);
-      }
+      primaryImageMatches = Boolean(
+        image && typeof image === "object" && !Array.isArray(image)
+        && (image as Record<string, unknown>).imageId === requiredImage.imageId
+        && (image as Record<string, unknown>).publicPath === requiredImage.publicUrl,
+      );
+    }
+    if (!primaryImageMatches && !containsAnnotationEvidence(content)) {
+      throw new RequestError("The template snapshot does not reference the staged image.", 409);
     }
   } else if (instance.templateId === "image-row" && !Array.isArray(content.items)) {
     throw new RequestError("Image Row items are required.", 400);

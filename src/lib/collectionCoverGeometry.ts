@@ -1,6 +1,6 @@
-// Deterministic geometry for the Portfolio Collection cover and index
-// pages — two separate, independently-sized pages, both 1440 wide (see
-// scripts/collectionCoverRenderer.ts):
+// Deterministic baseline geometry for the Portfolio Collection cover and
+// index pages. 1440px is the authored reference canvas; the renderer scales
+// this entire composition to the Collection's final physical target width.
 //   PAGE 1 (cover): identity graphic (panels+circles) + brand title +
 //     footer only. No project content. Fixed compact height — cover
 //     content never depends on the selection.
@@ -28,7 +28,7 @@
 // (scripts/collectionCoverRenderer.ts writes a debug PNG every export) —
 // not measured against an external reference.
 //
-// This file is the single source of truth for both pages' geometry — both
+// This file is the single source of truth for both pages' baseline geometry — both
 // the client (src/lib/portfolioCollectionExport.ts, to cap/order entries)
 // and the server (scripts/collectionCoverRenderer.ts, to build and measure
 // the actual SVGs) import from here. Nothing here is computed via CSS
@@ -36,6 +36,13 @@
 // small deterministic function of the selection count.
 
 export const MAX_COLLECTION_PROJECTS = 4;
+
+export const COLLECTION_COVER_BASE_WIDTH = 1440;
+
+export function collectionCoverScale(targetWidthPx: number): number {
+  if (!Number.isFinite(targetWidthPx) || targetWidthPx <= 0) throw new Error("Collection cover target width must be positive.");
+  return targetWidthPx / COLLECTION_COVER_BASE_WIDTH;
+}
 
 export type CoverPanel = {
   rect: { x: number; y: number; width: number; height: number };
@@ -49,7 +56,7 @@ export const COLLECTION_FIXED_PAGE_CONTENT = {
 } as const;
 
 export const COVER_GEOMETRY = {
-  width: 1440,
+  width: COLLECTION_COVER_BASE_WIDTH,
   // Compact height: ends shortly after the footer, not the old fixed
   // 900px canvas (which left a large empty area below the identity
   // graphic + title). 700 = graphic bottom (574) + title + a modest
@@ -208,4 +215,14 @@ export function computeIndexNavRects(entries: CoverTocEntry[]): IndexNavRect[] {
     const bottom = pos.thumbY + pos.thumbHeight;
     return { sectionId: entry.id, x: pos.x, y: top, width: pos.width, height: bottom - top };
   });
+}
+
+export function scaleIndexNavRects(entries: CoverTocEntry[], scale: number): IndexNavRect[] {
+  return computeIndexNavRects(entries).map((rect) => ({
+    sectionId: rect.sectionId,
+    x: rect.x * scale,
+    y: rect.y * scale,
+    width: rect.width * scale,
+    height: rect.height * scale,
+  }));
 }

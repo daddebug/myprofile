@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { InlineTemplateField } from "../components/template-tools/InlineTemplateField";
 import { FloatingImagePreview } from "../components/template-tools/FloatingImagePreview";
+import { ImageAnnotationLayer, normalizeImageAnnotations, type ImageAnnotation } from "../components/template-tools/ImageAnnotation";
+import { ImageAnnotationEditor } from "../components/template-tools/ImageAnnotationEditor";
 import {
   TemplateContent,
   TemplateSurface,
@@ -15,7 +17,7 @@ import { recordEmptySlotCollapsed, recordEmptySlotFound } from "../lib/collectio
 import "./direction-compare-template.css";
 
 type LocalizedText = { zh: string; en: string };
-type CompareImage = { imageId?: string; publicPath?: string; hoverPreviewMode?: "none" | "floating" };
+type CompareImage = { imageId?: string; publicPath?: string; hoverPreviewMode?: "none" | "floating"; annotationEnabled?: boolean; annotations?: ImageAnnotation[] };
 type CompareSide = "left" | "right";
 type Direction = "left-to-right" | "right-to-left" | "none";
 type DirectionCompareEditor = NonNullable<NonNullable<TemplateProps["inlineEditor"]>["directionCompare"]> & {
@@ -157,6 +159,7 @@ function CompareUnit({
         ) : (
           <div className="direction-compare__empty direction-compare__empty--display" aria-hidden="true" />
         )}
+        <ImageAnnotationLayer annotations={normalizeImageAnnotations(image?.annotations)} locale={locale} enabled={Boolean(image && !inlineEditor && image.annotationEnabled && image.hoverPreviewMode !== "floating")} />
 
         {inlineEditor && image ? (
           <div className="direction-compare__image-actions">
@@ -176,6 +179,19 @@ function CompareUnit({
           </div>
         ) : null}
       </div>
+
+      {inlineEditor && image ? (
+        <ImageAnnotationEditor
+          locale={locale}
+          enabled={image.annotationEnabled === true}
+          disabled={image.hoverPreviewMode === "floating"}
+          annotations={normalizeImageAnnotations(image.annotations)}
+          onEnabledChange={(annotationEnabled) => editor?.onImageSettingChange(side, { annotationEnabled })}
+          onAnnotationsChange={(annotations) => editor?.onImageSettingChange(side, { annotations })}
+          onUploadEvidence={(annotationId) => editor?.onUploadAnnotationEvidence(side, annotationId)}
+          onRemoveEvidence={(annotationId, evidenceId) => editor?.onRemoveAnnotationEvidence(side, annotationId, evidenceId)}
+        />
+      ) : null}
 
       <div className="direction-compare__copy">
         {inlineEditor ? (

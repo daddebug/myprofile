@@ -5,6 +5,7 @@ import { Shell } from "./layouts/Shell";
 import { DEFAULT_LOCALE, isLocale, LocaleProvider, localizePath, readPreferredLocale } from "./locales/LocaleContext";
 import { AmbientLightBackground } from "./components/AmbientLightBackground";
 import { ProjectRouteLoadingLayer, ProjectRouteTransitionCover } from "./components/ProjectEntryGate";
+import { PortfolioTrackProvider } from "./lib/portfolioTrackContext";
 
 const HomePage = lazy(() => import("./pages/HomePage").then((module) => ({ default: module.HomePage })));
 const WorkPage = lazy(() => import("./pages/WorkPage").then((module) => ({ default: module.WorkPage })));
@@ -79,7 +80,7 @@ export default function App() {
     : null;
 
   return (
-    <>
+    <PortfolioTrackProvider>
       <AmbientLightBackground />
       {projectRouteKey ? (
         <ProjectRouteTransitionCover key={projectRouteKey} routeKey={projectRouteKey} />
@@ -112,6 +113,6 @@ export default function App() {
           </Routes>
         </Suspense>
       </AnimatePresence>
-    </>
+    </PortfolioTrackProvider>
   );
 }

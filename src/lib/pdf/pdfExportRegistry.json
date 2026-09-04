@@ -22,13 +22,13 @@
     },
     "collectionPageChrome": {
       "implementedIn": "scripts/portfolioCollectionExportPlugin.ts",
-      "sizing": "fixed-height layer appended to each variable-height project page",
+      "sizing": "content-measured height layer appended to each variable-height project page — never a fixed constant",
       "widthPx": 1440,
-      "heightPx": 96,
+      "heightPx": "measured per-project from the chrome's own real rendered content (label + summary, however many lines it wraps to, + back-link) via renderCollectionPageChrome's two-pass measure-then-print; a wrapping summary grows the chrome naturally instead of being clipped",
       "contentSeparationPx": 32,
       "finalMarginPx": 24,
       "usedBy": ["dynamic-project", "ui-personal-practice"],
-      "note": "Independent PDF page furniture only. It spans page-level safe margins, carries PROJECT END / canonical summary / selected-order indicator / Back to Index, and never participates in project DOM measurement."
+      "note": "Independent PDF page furniture only. It spans page-level safe margins, carries PROJECT END / canonical summary / selected-order indicator / Back to Index, and never participates in project DOM measurement. finalMarginPx (the small bottom safe area) is tracked separately from heightPx (the footer's own measured content height) and is the only value in this geometry still a stable fixed constant."
     },
     "renderSectionPdf": {
       "implementedIn": "scripts/portfolioCollectionExportPlugin.ts",
@@ -43,6 +43,12 @@
       "widthPx": 1440,
       "heightPx": 900,
       "usedBy": ["cover", "toc"]
+    },
+    "unifyCollectionPageWidths": {
+      "implementedIn": "scripts/portfolioCollectionExportPlugin.ts",
+      "role": "Final merge-stage-only canvas framing that enforces the Collection page geometry HARD INVARIANT: every physical page in the merged PDF ends at one identical MediaBox width (targetWidth = max(actual width of every page in this export), computed fresh per export — never a fixed constant like 1440). Runs once in mergeCollection, after every source page is already copied in and after addLinkAnnotations/addBackToIndexAnnotations have added their annotations. Never scales content and never touches project capture width/viewport — a narrower page's MediaBox is extended (page.setSize) and its already-rendered content stream is re-centered (page.translateContent), the same pattern collectionPageChrome already uses to extend page height. A page already at targetWidth is left completely untouched.",
+      "fullBleedHandling": "Structural, not template/project-ID-based. src/components/ProjectExactWebExportAction.tsx's markFullBleedRegions tags any snapshot-clone element whose rendered rect reaches both viewport edges with a real painted background-color; scripts/exactWebExportPlugin.ts's measureFullBleedRegions records each one's Y-range and computed color at final layout; applyCollectionPageChrome converts those into this page's own final PDF-point space. unifyCollectionPageWidths extends that exact flat color (alpha-composited against the page base color #181743) into the new left/right strips for that Y-range, so a full-bleed element (e.g. PhaseMilestonesTemplate.tsx) keeps touching both new edges. Only a solid background-color with no background-image/gradient/backdrop-filter is losslessly extendable (safe: true); anything else is recorded per-page as fullBleedUnsafeSkipped and left with the plain page background — never silently approximated — for postflight's FULL_BLEED_REGION_NOT_LOSSLESSLY_EXTENDED warning to surface for a human decision.",
+      "usedBy": ["cover", "toc", "dynamic-project", "ui-personal-practice", "ui-works", "game-experience", "contact"]
     }
   },
   "sharedGeometry": {
@@ -51,7 +57,7 @@
     "pageHeightPx": 900,
     "horizontalSafeArea": { "leftPx": 80, "rightPx": 1360, "widthPx": 1280 },
     "coverSafeArea": { "topPx": 60, "bottomPx": 870 },
-    "note": "Cover (page 1, identity only) and index (page 2, editorial contents list) were split into two separate pages on 2026-08-09 — there is no longer a dot/label TOC grid on the cover. The index page's own column grid (heading, per-column number/title/metadata/thumbnail, equal-width columns, vertical separators) is computed by indexColumnPositions() against INDEX_PAGE in src/lib/collectionCoverGeometry.ts — see that file rather than a duplicated constant table here, since duplicating the numbers here would drift."
+    "note": "1440px is the authored baseline for Cover and index, not a permanent final output width. captureCoverPage passes the export's final target physical width into collectionCoverRenderer, which scales every coordinate, graphic, font, image, gap, footer and TOC nav rectangle together before PDF embedding. Project pages remain unscaled and may only receive MediaBox expansion plus centering."
   },
   "knownEngineQuirks": [
     {
@@ -76,13 +82,13 @@
       "sizing": "fixed",
       "width": 1440,
       "height": 700,
-      "note": "height changed 900->700 (2026-08-09) to end shortly after the identity graphic/title/footer instead of leaving a large empty area — a fixed constant since cover content never depends on the selection.",
+      "note": "width/height are authored baseline values. The renderer generates this entire composition at finalTargetWidth/1440, preserving the historical proportional visual on wider Collection pages; no merged PDF page scaling is used.",
       "horizontalSafeArea": { "left": 80, "right": 1360 },
       "padding": { "top": 60, "bottom": 30 },
       "imageHandling": "none — cover graphic is vector SVG, no raster photography embedded, no project thumbnails (moved to the index page, 2026-08-09)",
       "emptyContentBehavior": "cover always renders; brandLine/footerLabel are static strings, not user content",
       "segmentation": "single physical page (page 1 of the cover+index section), no pagination",
-      "verificationRules": ["panel/circle geometry matches collectionCoverGeometry.ts constants", "cover page itself has zero link annotations — all click targets live on the index page"]
+      "verificationRules": ["panel/circle geometry matches collectionCoverGeometry.ts constants multiplied by rendererScaleRatio", "rendererTargetWidthPx equals the final target physical width before merge", "cover page itself has zero link annotations — all click targets live on the index page"]
     },
     {
       "id": "toc",
@@ -92,7 +98,7 @@
       "sizing": "content-driven",
       "width": 1440,
       "height": "computeIndexPageHeight(count) — top margin + actual row content + a modest bottom margin, e.g. 376px for the real 3-project case; never a fixed canvas",
-      "note": "No heading (removed 2026-08-09 — the page is just the project entries). Thumbnail aspect 4.3:1->3.2:1 (2026-08-09), within the 3:1-3.5:1 range, so the cover image is actually legible rather than a shallow strip.",
+      "note": "No heading (removed 2026-08-09 — the page is just the project entries). Width and all listed geometry are 1440px baseline values multiplied by the same renderer scale used by Cover; thumbnail aspect remains 3.2:1.",
       "horizontalSafeArea": { "left": 80, "right": 1360 },
       "padding": { "top": 0, "bottom": 0 },
       "imageHandling": "each project's own resolved cover image, cropped (never squashed, preserveAspectRatio=xMidYMid slice) to a ~3.2:1 thumbnail per column — same source image as elsewhere, no separate re-encoding pass",
@@ -100,6 +106,7 @@
       "segmentation": "a separate physical page (page 2 of the cover+index section, immediately after the cover) — no longer part of the cover page (changed 2026-08-09)",
       "verificationRules": [
         "column count equals selected entry count; columns are equal-width and fill horizontalSafeArea exactly",
+        "nav rectangles are multiplied by the same renderer scale and use rendererTargetWidthPx/actual index height as their annotation source canvas",
         "every column's clickable navRect (number through thumbnail bottom) resolves to the correct target page",
         "vertical separators sit only between columns in the same row"
       ]
@@ -111,18 +118,18 @@
       "renderer": "captureProjectPage",
       "sizing": "variable-height",
       "width": 1440,
-      "height": "variable: bottom-most visible rendered project-content bound + 32px separation + 96px Collection page chrome + 24px final margin",
+      "height": "variable: bottom-most visible rendered project-content bound + 32px separation + measured Collection page chrome (real footer content height, no fixed constant) + 24px final margin",
       "horizontalSafeArea": { "left": 0, "right": 1440, "note": "safe area is enforced per-template via each template's own horizontalInset, not a page-level constant like the cover/section pages" },
       "padding": { "top": "template-defined", "bottom": "intendedBottomPadding (see diagnostics)" },
       "imageHandling": "each template-instance image resolved by imageId/localImageId to a data URL before capture; missing images are hard media-slot failures, not silently skipped",
       "emptyContentBehavior": "an empty template wrapper (layoutAudit.emptyTemplateWrappers) is a hard-fail, not rendered blank",
-      "segmentation": "one continuous physical PDF page per project; exact-web prints only canonical project content through its measured bottom plus 32px separation, then Collection appends the shared 96px page chrome and 24px final margin; historical generated project PDFs are never selected as capture inputs",
+      "segmentation": "one continuous physical PDF page per project; exact-web prints canonical project content without fixed-height page slicing, then Collection appends the shared, content-measured page chrome and 24px final margin",
       "verificationRules": [
-        "measuredContentBottom must be >100px and finalPageHeight must equal measuredContentBottom + 32px + 96px + 24px",
+        "measuredContentBottom must be >100px and finalPageHeight must equal measuredContentBottom + 32px + collectionPageChromeHeight + 24px",
         "mediaSlotAudit.failed must be 0",
         "every templateFitAudit entry's overflowAfterFit must be 0",
         "layoutAudit.emptyTemplateWrappers must be empty",
-        "trailingBlankHeight must equal the final page margin (24px); projectContentSeparation must equal 32px; collectionPageChromeHeight must equal 96px",
+        "trailingBlankHeight must equal the final page margin (24px); projectContentSeparation must equal 32px; collectionPageChromeOverflow must equal 0 (footer not truncated)",
         "captureWidth must equal the canonical Collection capture width and overflowRight must be 0",
         "exactWebMode must be continuous and exactWebPdfPages must equal 1",
         "PROJECT END must exist only in the shared Collection page-chrome layer, projectNumber/projectCount must follow selected order, and collectionBackLinkRect must target the Collection index page"
@@ -135,7 +142,7 @@
       "renderer": "captureProjectPage",
       "sizing": "variable-height",
       "width": 1440,
-      "height": "variable, same content bound + 32px separation + 96px page chrome + 24px final margin as dynamic-project",
+      "height": "variable, same content bound + 32px separation + measured page chrome + 24px final margin as dynamic-project",
       "horizontalSafeArea": { "left": 0, "right": 1440 },
       "padding": { "top": "template-defined", "bottom": "intendedBottomPadding" },
       "imageHandling": "images are pre-published, source-controlled paths — no localStorage/IndexedDB/blob resolution step, unlike ordinary dynamic projects",
@@ -149,32 +156,32 @@
     {
       "id": "ui-works",
       "family": "fixed-section",
-      "sourceOfTruth": "UiPracticeCatalogItem[] passed into buildUiWorksSectionsHtml (src/lib/portfolioCollectionExport.ts), one section page per UI_WORKS_PER_PAGE items",
+      "sourceOfTruth": "UiPracticeCatalogItem[] passed into buildUiWorksSectionsHtml (src/lib/portfolioCollectionExport.ts), all selected items on one content-driven section page",
       "renderer": "renderSectionPdf",
-      "sizing": "fixed",
+      "sizing": "content-driven",
       "width": 1440,
-      "height": 900,
+      "height": "measured from the two-column grid holding every selected UI Work",
       "horizontalSafeArea": { "left": 80, "right": 1360 },
       "padding": { "top": 60, "bottom": 54 },
-      "imageHandling": "every grid image is downscaled to a JPEG data URL (UI_WORKS_CARD_MAX_WIDTH x UI_WORKS_CARD_MAX_HEIGHT) client-side before staging — never embeds the original source asset",
+      "imageHandling": "every grid image is preserved in a 16:9 contain frame and downscaled to a JPEG data URL (UI_WORKS_CARD_MAX_WIDTH x UI_WORKS_CARD_MAX_HEIGHT) client-side before staging — never cropped or embedded at original source size",
       "emptyContentBehavior": "buildUiWorksSectionsHtml returns [] and the section is omitted entirely when items.length is 0 — never renders an empty page",
-      "segmentation": "one physical page per HTML snapshot; multi-page pagination is done by the client pre-splitting items into pages, not by page.pdf() auto-pagination",
-      "verificationRules": ["page count matches ceil(itemCount / UI_WORKS_PER_PAGE)", "no card image exceeds its downscale target dimensions"]
+      "segmentation": "one physical page for the whole section; no per-count pagination, no fixed 900px page height — the page grows with however many works are selected",
+      "verificationRules": ["exactly one physical page regardless of selected item count", "no title numbering (\"/01\", \"/02\") appears", "page uses the measured content height rather than a fixed 900px blank canvas", "no card image exceeds its downscale target dimensions"]
     },
     {
       "id": "game-experience",
       "family": "fixed-section",
       "sourceOfTruth": "GameExperienceRecord[] from getGameExperienceStore(), filtered to selection.selectedGameIds",
       "renderer": "renderSectionPdf",
-      "sizing": "fixed",
+      "sizing": "content-driven",
       "width": 1440,
-      "height": 900,
+      "height": "measured from the compact three-column grid on each pre-split page",
       "horizontalSafeArea": { "left": 80, "right": 1360 },
       "padding": { "top": 60, "bottom": 54 },
       "imageHandling": "each game cover resolved via resolveGameCoverSrc (IndexedDB blob by coverAssetId, falling back to record.presentation.coverPublicPath), then downscaled to a 160x160 JPEG data URL — 2.5x the 64x64 CSS display size",
       "emptyContentBehavior": "buildGameExperienceSectionsHtml returns [] and the section is omitted when records.length is 0; a game with no resolvable cover renders an empty placeholder div, not a missing-image failure",
-      "segmentation": "one physical page per HTML snapshot, client pre-split into pages of GAMES_PER_PAGE=5 rows each",
-      "verificationRules": ["page count matches ceil(selectedGameCount / 5)", "cover images are <=160x160"]
+      "segmentation": "one physical page per HTML snapshot, client pre-split into compact pages of GAMES_PER_PAGE=18 records each",
+      "verificationRules": ["page count matches ceil(selectedGameCount / 18)", "every page uses the measured content height rather than a fixed 900px blank canvas", "cover images are <=160x160"]
     },
     {
       "id": "contact",
@@ -244,7 +251,7 @@
   "templates": [
     { "id": "project-header", "file": "src/templates/ProjectHeaderTemplate.tsx", "pdfBehavior": "standard — renders as captured, no confirmed special print/PDF branch" },
     { "id": "statement-longform", "file": "src/templates/StatementLongformTemplate.tsx", "pdfBehavior": "standard" },
-    { "id": "phase-milestones", "file": "src/templates/PhaseMilestonesTemplate.tsx", "pdfBehavior": "has a dedicated export fit rule in captureProjectPage's templateFitAudit (see TASKS #106 history) — treat as having confirmed special handling, not yet fully re-documented here" },
+    { "id": "phase-milestones", "file": "src/templates/PhaseMilestonesTemplate.tsx", "pdfBehavior": "live rendering keeps the template's calc(100vw - 8px) full-bleed surface. Exact-Web/PDF snapshot production normalizes only the detached clone's outer surface to the already-rendered template content rail, so a wide owner viewport cannot turn the background into an oversized PDF canvas. Instances with more than 6 milestones continue through the canonical generic horizontal-row fit (markHorizontalExportRows/horizontalExportLayoutScript); there is no dedicated component zoom, no project-ID branch, and no templateFitAudit entry for this template." },
     { "id": "process-flow", "file": "src/templates/ProcessFlowTemplate.tsx", "pdfBehavior": "wide-content template with a scoped fit-scale applied only in collection-export capture mode to avoid horizontal clipping" },
     { "id": "image-row", "file": "src/templates/ImageRowTemplate.tsx", "pdfBehavior": "standard — image slots resolved via the dynamic-template-images source row above" },
     { "id": "direction-compare", "file": "src/templates/DirectionCompareTemplate.tsx", "pdfBehavior": "standard — image slots resolved via the dynamic-template-images source row above" },

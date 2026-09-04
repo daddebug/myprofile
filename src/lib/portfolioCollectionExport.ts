@@ -194,54 +194,58 @@ async function downscaleToJpegDataUrl(src: string, maxWidth: number, maxHeight: 
 // --- UI Works page(s) ---
 
 const uiWorksPageCss = `${coverPageCss}
+  html, body { height: auto; min-height: 0; }
   .cx-brand { position: absolute; right: ${SAFE_MARGIN_PX}px; bottom: ${Math.round(SAFE_MARGIN_PX * 0.6)}px; font: 700 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; color: rgba(244,245,250,0.34); }
-  .cx-ui-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 8px; }
-  .cx-ui-card { border: 1px solid rgba(133,165,255,0.22); border-radius: 12px; overflow: hidden; background: rgba(10,14,40,0.5); aspect-ratio: 4 / 3; }
-  .cx-ui-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cx-ui-page { height: auto; min-height: 0; padding-bottom: ${SAFE_MARGIN_PX}px; }
+  .cx-ui-grid { width: min(100%, 1180px); align-self: center; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 8px; }
+  .cx-ui-card { border: 1px solid rgba(133,165,255,0.22); border-radius: 12px; overflow: hidden; background: rgba(10,14,40,0.5); aspect-ratio: 16 / 9; }
+  .cx-ui-card img { width: 100%; height: 100%; object-fit: contain; display: block; }
 `;
 
-const UI_WORKS_PER_PAGE = 6;
-
-// Cards render at roughly 400x300 CSS px (3-column grid inside the
-// 1440px page minus safe margins) — 880x660 is a comfortable 2x for a
+// Cards render at roughly 583x328 CSS px (2-column grid inside the
+// 1440px page safe area) — 1200x675 is a comfortable 2x for a
 // sharp print without embedding each source image at full original size.
-const UI_WORKS_CARD_MAX_WIDTH = 880;
-const UI_WORKS_CARD_MAX_HEIGHT = 660;
+const UI_WORKS_CARD_MAX_WIDTH = 1200;
+const UI_WORKS_CARD_MAX_HEIGHT = 675;
 
+// One continuous, content-driven page for every selected UI Work — no
+// per-count pagination, no fixed 900px page height. Mirrors
+// buildGameExperienceSectionsHtml's own content-driven page below:
+// data-collection-height="content" tells renderSectionPdf
+// (scripts/portfolioCollectionExportPlugin.ts) to measure this section's
+// real rendered height instead of defaulting to the fixed 1440x900
+// section-page size, so the page grows with however many works are
+// selected instead of splitting into "/01" "/02" fixed-height pages.
 async function buildUiWorksSectionsHtml(items: UiPracticeCatalogItem[], locale: Locale) {
   if (!items.length) return [];
-  const pages: UiPracticeCatalogItem[][] = [];
-  for (let index = 0; index < items.length; index += UI_WORKS_PER_PAGE) pages.push(items.slice(index, index + UI_WORKS_PER_PAGE));
   const title = locale === "zh" ? "UI 作品" : "UI Works";
-  const downscaled = await Promise.all(pages.map((pageItems) => Promise.all(
-    pageItems.map((item) => downscaleToJpegDataUrl(item.src, UI_WORKS_CARD_MAX_WIDTH, UI_WORKS_CARD_MAX_HEIGHT)),
-  )));
-  return pages.map((pageItems, pageIndex) => {
-    const eyebrow = `${locale === "zh" ? "UI 作品" : "UI WORKS"} / ${String(pageIndex + 1).padStart(2, "0")}`;
-    const grid = pageItems.map((_item, itemIndex) => `<div class="cx-ui-card"><img src="${escapeHtml(downscaled[pageIndex][itemIndex])}" alt="" /></div>`).join("");
-    const body = `<p class="cx-eyebrow">${escapeHtml(eyebrow)}</p>
-      <h1 class="cx-title">${escapeHtml(title)}</h1>
-      <div class="cx-ui-grid">${grid}</div>
-      ${brandFooterHtml}`;
-    return `<!doctype html><html lang="${locale}"><head><meta charset="utf-8">${absoluteStylesheetMarkup()}<style>${uiWorksPageCss}</style></head>
-      <body><div data-collection-export-section><div class="cx-page" style="position:relative;">${body}</div></div></body></html>`;
-  });
+  const downscaled = await Promise.all(items.map((item) => downscaleToJpegDataUrl(item.src, UI_WORKS_CARD_MAX_WIDTH, UI_WORKS_CARD_MAX_HEIGHT)));
+  const grid = items.map((_item, index) => `<div class="cx-ui-card"><img src="${escapeHtml(downscaled[index])}" alt="" /></div>`).join("");
+  const body = `<p class="cx-eyebrow">${escapeHtml(locale === "zh" ? "UI 作品" : "UI WORKS")}</p>
+    <h1 class="cx-title">${escapeHtml(title)}</h1>
+    <div class="cx-ui-grid">${grid}</div>
+    ${brandFooterHtml}`;
+  const html = `<!doctype html><html lang="${locale}"><head><meta charset="utf-8">${absoluteStylesheetMarkup()}<style>${uiWorksPageCss}</style></head>
+    <body><div data-collection-export-section data-collection-height="content"><div class="cx-page cx-ui-page" style="position:relative;">${body}</div></div></body></html>`;
+  return [html];
 }
 
 // --- Game Experience page(s) ---
 
 const gamesPageCss = `${coverPageCss}
+  html, body { height: auto; min-height: 0; }
   .cx-brand { position: absolute; right: ${SAFE_MARGIN_PX}px; bottom: ${Math.round(SAFE_MARGIN_PX * 0.6)}px; font: 700 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; color: rgba(244,245,250,0.34); }
-  .cx-game-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px 32px; margin-top: 10px; }
-  .cx-game-row { display: flex; gap: 12px; }
-  .cx-game-cover { flex: none; width: 64px; height: 64px; border-radius: 8px; object-fit: cover; background: rgba(133,165,255,0.14); }
-  .cx-game-title { font: 650 15px/1.3 system-ui, sans-serif; color: #f4f5fa; margin: 0 0 4px; }
-  .cx-game-meta { font: 400 10.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; color: rgba(244,245,250,0.5); margin: 0 0 6px; }
-  .cx-game-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-  .cx-game-tag { font: 600 9px/1.6 system-ui, sans-serif; padding: 2px 8px; border-radius: 999px; background: rgba(52,240,37,0.12); color: #34f025; }
+  .cx-game-page { height: auto; min-height: 0; padding-bottom: ${SAFE_MARGIN_PX}px; }
+  .cx-game-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 20px; margin-top: 12px; }
+  .cx-game-row { min-width: 0; display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; padding: 10px 0 12px; border-bottom: 1px solid rgba(244,245,250,0.09); }
+  .cx-game-cover { width: 72px; height: 72px; border-radius: 8px; object-fit: cover; background: rgba(133,165,255,0.14); }
+  .cx-game-title { font: 650 14px/1.28 system-ui, sans-serif; color: #f4f5fa; margin: 0 0 3px; }
+  .cx-game-meta { font: 400 9.5px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; color: rgba(244,245,250,0.5); margin: 0 0 5px; }
+  .cx-game-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .cx-game-tag { font: 600 8.5px/1.5 system-ui, sans-serif; padding: 1px 7px; border-radius: 999px; background: rgba(52,240,37,0.1); color: #34f025; }
 `;
 
-const GAMES_PER_PAGE = 5;
+const GAMES_PER_PAGE = 18;
 
 async function resolveGameCoverSrc(record: GameExperienceRecord): Promise<string> {
   const assetId = record.presentation.coverAssetId;
@@ -292,7 +296,7 @@ async function buildGameExperienceSectionsHtml(records: GameExperienceRecord[], 
       <div class="cx-game-grid">${rows}</div>
       ${brandFooterHtml}`;
     return `<!doctype html><html lang="${locale}"><head><meta charset="utf-8">${absoluteStylesheetMarkup()}<style>${gamesPageCss}</style></head>
-      <body><div data-collection-export-section><div class="cx-page" style="position:relative;">${body}</div></div></body></html>`;
+      <body><div data-collection-export-section data-collection-height="content"><div class="cx-page cx-game-page" style="position:relative;">${body}</div></div></body></html>`;
   });
 }
 
@@ -447,23 +451,18 @@ export async function runPortfolioCollectionExport(
     report("staging");
     const staged: StagedToken[] = [];
 
-    // The cover's own table of contents follows the same sectionOrder the
-    // rest of this loop stages in — TOC and generated pages always reflect
-    // the exact same selection, never two independently-decided lists.
-    const coverEntries: CoverTocEntry[] = sectionOrder.flatMap((section): CoverTocEntry[] => {
-      if (section === "projects") return projectCoverEntries;
-      if (section === "ui-works") return uiWorks.length ? [{ id: "ui-works", title: locale === "zh" ? "UI 作品" : "UI Works" }] : [];
-      if (section === "game-experience") return games.length ? [{ id: "games", title: locale === "zh" ? "游戏经历" : "Game Experience" }] : [];
-      if (section === "contact") return includeContact ? [{ id: "contact", title: locale === "zh" ? "联系方式" : "Contact" }] : [];
-      return [];
-    });
+    // The directory is intentionally a project index, not a list of every
+    // supporting section in the PDF. UI Works, Game Experience and Contact
+    // remain staged in sectionOrder, but only selected main projects receive
+    // directory cards and directory-to-project links.
+    const coverEntries: CoverTocEntry[] = sectionOrder.includes("projects") ? projectCoverEntries : [];
 
     for (const section of sectionOrder) {
       checkCancelled();
       if (section === "cover") {
         const { token } = await stageSection({
           sectionId: "cover", label: "Cover", kind: "cover",
-          entries: coverEntries, brandLine: buildCoverBrandLine(locale), footerLabel: buildCoverFooterLabel(), captureWidthPx: window.innerWidth,
+          entries: coverEntries, brandLine: buildCoverBrandLine(locale), footerLabel: buildCoverFooterLabel(), captureWidthPx: Math.max(PAGE_WIDTH, window.innerWidth),
         }, signal);
         staged.push({ sectionId: "cover", label: "Cover", token });
         completed += 1;

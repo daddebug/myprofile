@@ -89,16 +89,19 @@
 }
 
 .ambient-public-shell > main > main.bg-deepIndigo,
-.ambient-public-shell > [data-project-route-shell] > main > main.bg-deepIndigo,
-.ambient-public-shell > [data-project-route-shell] > main > article.bg-deepIndigo {
+.ambient-public-shell [data-project-route-shell] > main.bg-deepIndigo,
+.ambient-public-shell [data-project-route-shell] > article.bg-deepIndigo,
+.ambient-public-shell [data-project-route-shell] > main > article.bg-deepIndigo {
   background-color: transparent !important;
 }
 
 .ambient-public-shell > main > section.bg-deepIndigo,
 .ambient-public-shell > main > main.bg-deepIndigo > section.bg-deepIndigo,
-.ambient-public-shell > [data-project-route-shell] > main > main.bg-deepIndigo > section.bg-deepIndigo,
-.ambient-public-shell > [data-project-route-shell] > main > article.bg-deepIndigo > section.bg-deepIndigo,
-.ambient-public-shell > [data-project-route-shell] > main > article.bg-deepIndigo > nav.bg-deepIndigo {
+.ambient-public-shell [data-project-route-shell] > main.bg-deepIndigo > section.bg-deepIndigo,
+.ambient-public-shell [data-project-route-shell] > article.bg-deepIndigo > section.bg-deepIndigo,
+.ambient-public-shell [data-project-route-shell] > article.bg-deepIndigo > nav.bg-deepIndigo,
+.ambient-public-shell [data-project-route-shell] > main > article.bg-deepIndigo > section.bg-deepIndigo,
+.ambient-public-shell [data-project-route-shell] > main > article.bg-deepIndigo > nav.bg-deepIndigo {
   background-color: var(--ambient-section-surface) !important;
 }
 

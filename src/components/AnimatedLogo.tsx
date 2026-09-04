@@ -2,40 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import logoUrl from "../../logo.svg";
 
-type AnimatedPart = {
-  element: SVGGraphicsElement;
-  centerX: number;
-  centerY: number;
-  entranceComplete: boolean;
-  enterDelay: number;
-  fromX: number;
-  fromY: number;
-  fromScale: number;
-  idleX: number;
-  idleY: number;
-  idleScale: number;
-  duration: number;
-  phase: number;
-  parallaxX: number;
-  parallaxY: number;
-};
-
-const easeOut = (value: number) => 1 - Math.pow(1 - value, 3);
 const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
 const svgNamespace = "http://www.w3.org/2000/svg";
-
-function getTransformOrigin(element: SVGGraphicsElement) {
-  const box = element.getBBox();
-  return {
-    centerX: box.x + box.width / 2,
-    centerY: box.y + box.height / 2,
-  };
-}
-
-function setLayerTransform(element: SVGGraphicsElement, x: number, y: number, scale: number, centerX: number, centerY: number) {
-  element.style.transform =
-    `translate(${x}px, ${y}px) translate(${centerX}px, ${centerY}px) scale(${scale}) translate(${-centerX}px, ${-centerY}px)`;
-}
 
 function getPanelGroups(svg: SVGSVGElement) {
   const existingGroups = Array.from(svg.querySelectorAll(":scope > g[data-logo-panel]")) as SVGGraphicsElement[];
@@ -52,10 +20,17 @@ function getPanelGroups(svg: SVGSVGElement) {
   });
 }
 
-export function AnimatedLogo() {
+export function AnimatedLogo({ onComplete }: { onComplete?: () => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const completedRef = useRef(false);
   const [logoMarkup, setLogoMarkup] = useState("");
   const reduceMotion = useReducedMotion();
+
+  const finishOpening = () => {
+    if (completedRef.current) return;
+    completedRef.current = true;
+    onComplete?.();
+  };
 
   useEffect(() => {
     let active = true;
@@ -66,7 +41,10 @@ export function AnimatedLogo() {
         if (active) setLogoMarkup(markup);
       })
       .catch(() => {
-        if (active) setLogoMarkup("");
+        if (active) {
+          setLogoMarkup("");
+          finishOpening();
+        }
       });
 
     return () => {
@@ -96,68 +74,25 @@ export function AnimatedLogo() {
       window.matchMedia("(hover: hover)").matches &&
       window.matchMedia("(pointer: fine)").matches;
 
-    const panelMotion = [
-      { idleX: -8, idleY: 0, duration: 7.4, phase: 0.1, parallaxX: -2.5, parallaxY: 1.5 },
-      { idleX: 0, idleY: 7, duration: 8.6, phase: 0.34, parallaxX: 2.2, parallaxY: -1.6 },
-      { idleX: 6, idleY: 0, duration: 6.8, phase: 0.58, parallaxX: -3.8, parallaxY: -2.2 },
-      { idleX: 0, idleY: -8, duration: 9.7, phase: 0.76, parallaxX: 4.2, parallaxY: 2.4 },
-      { idleX: 5, idleY: 0, duration: 8.1, phase: 0.9, parallaxX: 3.1, parallaxY: -2.8 },
-    ];
-
-    const circleMotion = [
-      { idleX: 2, idleY: -3, idleScale: 0.026, duration: 6.3, phase: 0.2, parallaxX: 3.2, parallaxY: -2.5 },
-      { idleX: -3, idleY: 2, idleScale: 0.018, duration: 7.6, phase: 0.52, parallaxX: -2.6, parallaxY: 3.4 },
-      { idleX: 2.5, idleY: 2, idleScale: 0.032, duration: 8.9, phase: 0.74, parallaxX: 3.6, parallaxY: 2.1 },
-      { idleX: -2, idleY: -2.5, idleScale: 0.014, duration: 7.1, phase: 0.08, parallaxX: -3.1, parallaxY: -2.8 },
-      { idleX: 3, idleY: 1.5, idleScale: 0.024, duration: 9.4, phase: 0.38, parallaxX: 2.4, parallaxY: 3.5 },
-      { idleX: -2.5, idleY: 3, idleScale: 0.02, duration: 6.9, phase: 0.66, parallaxX: -3.4, parallaxY: 2.2 },
-      { idleX: 2, idleY: -2, idleScale: 0.03, duration: 8.2, phase: 0.86, parallaxX: 2.8, parallaxY: -3.2 },
-    ];
-
-    const parts: AnimatedPart[] = [
-      ...panelGroups.map((element, index) => {
-        const motion = panelMotion[index % panelMotion.length];
-        const origin = getTransformOrigin(element);
-        return {
-          element,
-          ...origin,
-          entranceComplete: false,
-          enterDelay: index * 60,
-          fromX: index % 2 === 0 ? -14 : 14,
-          fromY: index % 2 === 0 ? 8 : -8,
-          fromScale: 0.96,
-          idleScale: 0,
-          ...motion,
-        };
-      }),
-      ...circles.map((element, index) => {
-        const motion = circleMotion[index % circleMotion.length];
-        const origin = getTransformOrigin(element);
-        return {
-          element,
-          ...origin,
-          entranceComplete: false,
-          enterDelay: 300 + index * 45,
-          fromX: index % 2 === 0 ? 6 : -6,
-          fromY: index % 3 === 0 ? -7 : 7,
-          fromScale: 0.94,
-          ...motion,
-        };
-      }),
-    ];
-
-    parts.forEach(({ element }) => {
-      element.style.willChange = reduceMotion ? "opacity" : "opacity, transform";
-      element.style.opacity = "0";
-      element.style.transformOrigin = "0px 0px";
+    // The logo is one complete mark, not a set of independently choreographed
+    // parts: every panel/circle is simply opaque and fixed relative to the
+    // others. The single subtle idle drift + pointer parallax below is
+    // applied once, to this container, so the whole mark moves together --
+    // never per-panel/per-circle motion.
+    const parts = [...panelGroups, ...circles];
+    parts.forEach((element) => {
+      element.style.opacity = "1";
       element.removeAttribute("transform");
     });
 
+    const idleMotion = { x: 7, y: 5, duration: 8.4, phase: 0.12 };
+    const parallaxAmount = { x: 9, y: 6 };
     const pointer = { x: 0, y: 0 };
     const easedPointer = { x: 0, y: 0 };
     let frame = 0;
     let active = true;
     const startedAt = performance.now();
+    const completionTimer = window.setTimeout(finishOpening, reduceMotion ? 0 : 1700);
 
     const handlePointerMove = (event: PointerEvent) => {
       const x = event.clientX / window.innerWidth - 0.5;
@@ -176,84 +111,62 @@ export function AnimatedLogo() {
       window.addEventListener("pointerleave", handlePointerLeave);
     }
 
-    const render = (now: number) => {
-      if (!active) return;
+    if (reduceMotion) {
+      container.style.transform = "";
+    } else {
+      container.style.willChange = "transform";
 
-      easedPointer.x += (pointer.x - easedPointer.x) * 0.075;
-      easedPointer.y += (pointer.y - easedPointer.y) * 0.075;
+      const render = (now: number) => {
+        if (!active) return;
 
-      let entranceStillRunning = false;
+        easedPointer.x += (pointer.x - easedPointer.x) * 0.075;
+        easedPointer.y += (pointer.y - easedPointer.y) * 0.075;
 
-      parts.forEach((part) => {
-        const enterProgress = part.entranceComplete ? 1 : clamp01((now - startedAt - part.enterDelay) / 620);
-        const easedEnter = easeOut(enterProgress);
-        const introX = part.fromX * (1 - easedEnter);
-        const introY = part.fromY * (1 - easedEnter);
-        const introScale = part.fromScale + (1 - part.fromScale) * easedEnter;
+        const idleRamp = clamp01((now - startedAt) / 280);
+        const wave = Math.sin((now / (idleMotion.duration * 1000) + idleMotion.phase) * Math.PI * 2);
+        const alternateWave = Math.cos((now / (idleMotion.duration * 1000) + idleMotion.phase) * Math.PI * 2);
+        const idleX = idleMotion.x * wave * idleRamp;
+        const idleY = idleMotion.y * alternateWave * idleRamp;
+        const parallaxX = canParallax ? parallaxAmount.x * easedPointer.x : 0;
+        const parallaxY = canParallax ? parallaxAmount.y * easedPointer.y : 0;
 
-        if (enterProgress >= 1 && !part.entranceComplete) {
-          part.entranceComplete = true;
-          part.element.style.opacity = "1";
+        // .animated-logo-size already centers this container via a CSS
+        // translate(-50%,-50%); layering the idle/parallax offset on top of
+        // that same transform (rather than replacing it) keeps the centering
+        // intact.
+        container.style.transform = `translate(-50%, -50%) translate(${idleX + parallaxX}px, ${idleY + parallaxY}px)`;
+
+        frame = requestAnimationFrame(render);
+      };
+
+      const visibilityObserver = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            if (!frame) frame = requestAnimationFrame(render);
+          } else if (frame) {
+            cancelAnimationFrame(frame);
+            frame = 0;
+          }
+        },
+        { threshold: 0 },
+      );
+      visibilityObserver.observe(container);
+
+      return () => {
+        active = false;
+        visibilityObserver.disconnect();
+        cancelAnimationFrame(frame);
+        window.clearTimeout(completionTimer);
+        if (canParallax) {
+          window.removeEventListener("pointermove", handlePointerMove);
+          window.removeEventListener("pointerleave", handlePointerLeave);
         }
-
-        if (!part.entranceComplete) {
-          entranceStillRunning = true;
-          part.element.style.opacity = `${easedEnter}`;
-        }
-
-        if (reduceMotion) {
-          setLayerTransform(part.element, introX, introY, introScale, part.centerX, part.centerY);
-          return;
-        }
-
-        const idleRamp = clamp01((now - startedAt - 950) / 500);
-        const wave = Math.sin((now / (part.duration * 1000) + part.phase) * Math.PI * 2);
-        const alternateWave = Math.cos((now / (part.duration * 1000) + part.phase) * Math.PI * 2);
-        const idleX = part.idleX * wave * idleRamp;
-        const idleY = part.idleY * alternateWave * idleRamp;
-        const idleScale = 1 + part.idleScale * wave * idleRamp;
-        const parallaxX = canParallax ? part.parallaxX * easedPointer.x : 0;
-        const parallaxY = canParallax ? part.parallaxY * easedPointer.y : 0;
-
-        setLayerTransform(
-          part.element,
-          introX + idleX + parallaxX,
-          introY + idleY + parallaxY,
-          introScale * idleScale,
-          part.centerX,
-          part.centerY,
-        );
-      });
-
-      if (reduceMotion && !entranceStillRunning) {
-        parts.forEach(({ element }) => {
-          element.style.opacity = "1";
-          element.removeAttribute("transform");
-          element.style.willChange = "auto";
-        });
-        return;
-      }
-
-      frame = requestAnimationFrame(render);
-    };
-
-    const visibilityObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          if (!frame) frame = requestAnimationFrame(render);
-        } else if (frame) {
-          cancelAnimationFrame(frame);
-          frame = 0;
-        }
-      },
-      { threshold: 0 },
-    );
-    visibilityObserver.observe(container);
+      };
+    }
 
     return () => {
       active = false;
-      visibilityObserver.disconnect();
-      cancelAnimationFrame(frame);
+      window.clearTimeout(completionTimer);
       if (canParallax) {
         window.removeEventListener("pointermove", handlePointerMove);
         window.removeEventListener("pointerleave", handlePointerLeave);

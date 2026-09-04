@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-08-26 - Collection Cover/TOC target-width composition
+
+- Restored the historical wide-page visual relationship without restoring global PDF page scaling. Cover and TOC now generate natively at the final target physical width from their 1440px authored baseline; graphics, type, thumbnails, gaps, footer and link rectangles all share one renderer scale.
+- Kept Project pages on their existing capture geometry. Final merge still only expands and centers narrower MediaBoxes and never calls `scaleContent()`.
+- Verified through a real 1920px-wide `/zh/export`: final width 1440pt on all 8 pages; Cover/TOC renderer 1440px -> 1920px (`1.333333x`); three Project pages entered merge at 1440pt with zero translation; TOC contains three synchronized internal links; postflight passed with zero issues. `pnpm typecheck` and `pnpm build` pass.
+
 ## 2026-08-17 - Production asset integrity gate + confirmed publish
 
 - Ran a real `EXPORT FOR PUBLISH` → preflight → dry-run → `--confirm` publish. The confirmed write discovered that ~half the exported `game-experience-covers`/`ui-practice-images` bundle images decoded to ~3 null bytes (base64 `"AAAA"`), and had already begun overwriting 70 real published image files with that garbage before detection. Immediately restored all 104 affected files (including ~34 separately pre-existing, unrelated corrupted files traced to `import-production-bundle-confirm-gate.test.mjs`'s own "ready" scenario, which previously reconstructed bundle images from every real published asset using placeholder `dataBase64: "AAAA"` and ran a real `--confirm` against them with no asset-level cleanup in `finally`) from git HEAD; verified `publishedPortfolio.json`/`uiPracticeMetadata.json` and every file under `public/images/published/` byte-identical to the pre-incident state, and no commit/push occurred.

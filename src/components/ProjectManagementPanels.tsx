@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent, type ReactNode } from "react";
 import { AlertTriangle, ArrowLeft, ArrowRight, FilePlus2, Save, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { createDynamicProject, getProjectPublicMetaStoreSnapshot, restoreProjectPublicMetaStore, setProjectPublicMetaOverride, type ProjectCatalogItem, type ProjectVisibility, type ResolvedProjectMetadata } from "../lib/projectMetadata";
+import { createDynamicProject, getProjectPublicMetaStoreSnapshot, getPortfolioTrackLabel, restoreProjectPublicMetaStore, setProjectPublicMetaOverride, PORTFOLIO_TRACK_OPTIONS, type PortfolioTrack, type ProjectCatalogItem, type ProjectVisibility, type ResolvedProjectMetadata } from "../lib/projectMetadata";
 import { markProjectDirty } from "../lib/publishIntent";
 import { ProjectCoverEditor } from "./ProjectCoverEditor";
 import { useLocale } from "../locales/LocaleContext";
@@ -10,10 +10,10 @@ type WizardStatus = "draft" | "public" | "coming-soon";
 type MetadataDraft = {
   id: string; slug: string; titleZh: string; titleEn: string; summaryZh: string; summaryEn: string;
   year: string; categoryZh: string; categoryEn: string; tagsZh: string; tagsEn: string; role: string; collaborators: string; tools: string;
-  status: WizardStatus; visibility: ProjectVisibility; featured: boolean; archiveOrder: number;
+  status: WizardStatus; visibility: ProjectVisibility; featured: boolean; archiveOrder: number; portfolioTrack: PortfolioTrack | null;
 };
 
-const emptyMetadata = (archiveOrder: number): MetadataDraft => ({ id: "", slug: "", titleZh: "", titleEn: "", summaryZh: "", summaryEn: "", year: new Date().getFullYear().toString(), categoryZh: "", categoryEn: "", tagsZh: "", tagsEn: "", role: "", collaborators: "", tools: "", status: "draft", visibility: "hidden", featured: false, archiveOrder });
+const emptyMetadata = (archiveOrder: number): MetadataDraft => ({ id: "", slug: "", titleZh: "", titleEn: "", summaryZh: "", summaryEn: "", year: new Date().getFullYear().toString(), categoryZh: "", categoryEn: "", tagsZh: "", tagsEn: "", role: "", collaborators: "", tools: "", status: "draft", visibility: "hidden", featured: false, archiveOrder, portfolioTrack: null });
 
 function validateDuration(value: string) {
   return /^\d{4}(?:[./-]\d{1,2}(?:[./-]\d{1,2})?)?(?:\s*(?:[-–—]|to)\s*(?:(?:\d{4}(?:[./-]\d{1,2}(?:[./-]\d{1,2})?)?)|(?:\d{1,2}(?:[./-]\d{1,2})?)|进行中|至今|present|ongoing))?$/i.test(value.trim());
@@ -148,6 +148,7 @@ export function ProjectInfoEditor({ project, catalog, onClose, onSaved }: { proj
     visibility: project.visibility,
     featured: project.featured,
     archiveOrder: project.archiveOrder,
+    portfolioTrack: project.portfolioTrack ?? null,
   }));
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
@@ -175,6 +176,7 @@ export function ProjectInfoEditor({ project, catalog, onClose, onSaved }: { proj
       featured: metadata.featured,
       visibility: metadata.visibility,
       publicationState: metadata.status === "public" ? "published" : metadata.status,
+      portfolioTrack: metadata.portfolioTrack,
     });
     markProjectDirty(project.id);
     setError("");
@@ -337,6 +339,20 @@ function MetadataStep({ value, onChange, coverUrl, onCover, idReadOnly = false, 
     <Input label="Chinese short description" value={value.summaryZh} onChange={(next) => field("summaryZh", next)} multiline /><Input label="English short description" value={value.summaryEn} onChange={(next) => field("summaryEn", next)} multiline />
     <Input label="Year / duration" value={value.year} onChange={(next) => field("year", next)} hint="Examples: 2026.07 or 2026.07.03–07.05" /><Input label="Role" value={value.role} onChange={(next) => field("role", next)} />
     <Input label="Chinese category" value={value.categoryZh} onChange={(next) => field("categoryZh", next)} hint="Main classification shown prominently, e.g. Game Jam" /><Input label="English category" value={value.categoryEn} onChange={(next) => field("categoryEn", next)} hint="Main classification shown prominently" />
+    <label>
+      <span className="editor-label">PORTFOLIO TRACK / 作品方向</span>
+      <select
+        className="editor-input"
+        value={value.portfolioTrack ?? ""}
+        onChange={(event) => onChange({ ...value, portfolioTrack: (event.target.value || null) as PortfolioTrack | null })}
+      >
+        <option value="">{getPortfolioTrackLabel(null)}</option>
+        {PORTFOLIO_TRACK_OPTIONS.map((track) => (
+          <option key={track} value={track}>{getPortfolioTrackLabel(track)}</option>
+        ))}
+      </select>
+      <small className="mt-1 block text-xs text-softWhite/38">Owner-only, not yet shown on the public site. Independent of the category/tags fields above.</small>
+    </label>
     <Input label="Chinese tags (comma separated)" value={value.tagsZh} onChange={(next) => field("tagsZh", next)} hint="Smaller supporting labels" /><Input label="English tags (comma separated)" value={value.tagsEn} onChange={(next) => field("tagsEn", next)} hint="Smaller supporting labels" />
     <Input label="Collaborators (comma separated)" value={value.collaborators} onChange={(next) => field("collaborators", next)} /><Input label="Tools (comma separated)" value={value.tools} onChange={(next) => field("tools", next)} />
     <label><span className="editor-label">Publication status</span><select className="editor-input" value={value.status} onChange={(event) => field("status", event.target.value)}><option value="draft">Draft</option><option value="public">Public</option><option value="coming-soon">Coming Soon</option></select><small className="mt-1 block text-xs text-softWhite/38">Draft / Public / Coming Soon describes editorial readiness.</small></label>

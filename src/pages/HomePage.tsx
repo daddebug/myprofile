@@ -7,9 +7,8 @@ import { FeaturedProjectCard, type FeaturedProjectCardItem } from "../components
 import { HomePlayExperience } from "../components/HomePlayExperience";
 import { useProjectCatalog } from "../hooks/useProjectCatalog";
 import type { ResolvedProjectMetadata } from "../lib/projectMetadata";
+import { resolveHomeTrack, usePortfolioTrack } from "../lib/portfolioTrackContext";
 import { useLocale } from "../locales/LocaleContext";
-
-const homeIllustrationSrc = "/images/profile/home-illustration.webp";
 
 type ResolvedHomeProjectCard = FeaturedProjectCardItem & { projectId: string };
 
@@ -50,13 +49,14 @@ function resolveHomeProjectCard(project: ResolvedProjectMetadata, index: number)
 export function HomePage() {
   const { locale } = useLocale();
   const projectCatalog = useProjectCatalog(locale);
+  const { activeTrack } = usePortfolioTrack();
+  const projectOverviewSectionRef = useRef<HTMLElement>(null);
   const [activeFeaturedIndex, setActiveFeaturedIndex] = useState<number | null>(null);
   // Tracks the nearest card's LOGICAL project index (0..homeProjects.length-1)
   // — used for the mobile "01/08" indicator and hover glow, never the
   // render index below, so it reads the same whether the nearest card is a
   // real slide or one of the cloned boundary slides representing it.
   const [activeProjectIndex, setActiveProjectIndex] = useState(0);
-  const [illustrationFailed, setIllustrationFailed] = useState(false);
   const projectRailRef = useRef<HTMLDivElement>(null);
   const pointerFocusRef = useRef(false);
   // The rail's current target position in RENDER-index space (position
@@ -71,13 +71,21 @@ export function HomePage() {
   // from wrapping the index itself.
   const renderIndexRef = useRef(VISIBLE_COUNT);
   const settleTimeoutRef = useRef<number | undefined>(undefined);
+  // True only while a Track-tab click's programmatic scroll is in flight --
+  // guards card hover-activation so it can't fire (and touch layout) while
+  // the browser's native smooth scroll is running. Cleared by the scrollend
+  // handler in scrollToProjectOverview, with a bounded fallback in case
+  // scrollend isn't supported.
+  const isTrackScrollingRef = useRef(false);
+  const trackScrollFallbackRef = useRef<number | undefined>(undefined);
   const prefersReducedMotion = useReducedMotion();
+  const homeActiveTrack = resolveHomeTrack(activeTrack);
   const homeProjects = useMemo(() => {
     return projectCatalog
-      .filter((project) => project.featured && project.visibility === "public")
+      .filter((project) => project.featured && project.visibility === "public" && project.portfolioTrack === homeActiveTrack)
       .sort((left, right) => left.archiveOrder - right.archiveOrder)
       .map(resolveHomeProjectCard);
-  }, [projectCatalog]);
+  }, [projectCatalog, homeActiveTrack]);
   // Real pagination state, not a hardcoded "3 projects" check: with
   // VISIBLE_COUNT cards shown per page, there is another page to navigate to
   // only once the catalog needs more than one page to hold every card.
@@ -103,9 +111,61 @@ export function HomePage() {
     }));
     return [...prepend, ...real, ...append];
   }, [homeProjects]);
-  const projectOverviewTitle = locale === "zh" ? "项目总览" : "Project Overview";
   const previousGroupLabel = locale === "zh" ? "上一组项目" : "Previous project group";
   const nextGroupLabel = locale === "zh" ? "下一组项目" : "Next project group";
+  const emptyTrackLabel = locale === "zh" ? "该方向暂无项目" : "No projects in this track yet";
+
+  // Only ever called from a track tab's onClick (see HomePortfolioCover
+  // below) -- never on mount, refresh, or locale change, per the "no
+  // auto-scroll" requirement.
+  //
+  // Deliberately NOT scrollIntoView({block:"start"}) -- that scrolls until
+  // the project section's own top touches the viewport top, which (since
+  // the section sits right after a 100svh hero) scrolls past enough of the
+  // page to cross Shell's home-header reveal threshold, popping the site's
+  // fixed top nav into view and pushing the tabs themselves off-screen.
+  // Instead, scroll by exactly enough to land the *tabs* (an existing,
+  // already-visible element right above the section) at a fixed, modest
+  // distance from the viewport top -- derived from the tabs' own live
+  // position, not a guessed pixel offset tied to one screenshot.
+  const scrollToProjectOverview = () => {
+    const tabs = document.querySelector<HTMLElement>("[data-portfolio-track-tabs]");
+    if (!tabs) {
+      projectOverviewSectionRef.current?.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
+      return;
+    }
+    const desiredTabsTop = 96; // comfortably below Shell's header height, well under the ~0.96*viewportHeight scroll needed to reveal it
+
+    // Card hover must not be able to touch layout -- and, before that was
+    // fixed at the source (see FeaturedProjectCard.tsx), could cancel this
+    // in-flight native smooth scroll. Suppress hover-activation for the
+    // duration as extra insurance, clearing anything already active first.
+    isTrackScrollingRef.current = true;
+    setActiveFeaturedIndex(null);
+
+    const finishTrackScroll = () => {
+      if (!isTrackScrollingRef.current) return;
+      isTrackScrollingRef.current = false;
+      window.removeEventListener("scrollend", finishTrackScroll);
+      window.clearTimeout(trackScrollFallbackRef.current);
+      // Re-measure now that layout has actually settled -- a late web-font
+      // swap or other reflow during the animation can leave the one
+      // pre-scroll measurement stale -- and instantly correct any residual
+      // drift so the tabs land exactly at desiredTabsTop, never short of it.
+      const settledDelta = tabs.getBoundingClientRect().top - desiredTabsTop;
+      if (Math.abs(settledDelta) > 1) {
+        window.scrollTo({ top: window.scrollY + settledDelta, behavior: "auto" });
+      }
+    };
+    window.addEventListener("scrollend", finishTrackScroll, { once: true });
+    window.clearTimeout(trackScrollFallbackRef.current);
+    // Bounded safety net only, in case scrollend ever fails to fire -- not
+    // the primary completion signal.
+    trackScrollFallbackRef.current = window.setTimeout(finishTrackScroll, 1000);
+
+    const deltaY = tabs.getBoundingClientRect().top - desiredTabsTop;
+    window.scrollTo({ top: window.scrollY + deltaY, behavior: prefersReducedMotion ? "auto" : "smooth" });
+  };
 
   const scrollToRenderIndex = (renderIndex: number, instant = false) => {
     const rail = projectRailRef.current;
@@ -166,18 +226,15 @@ export function HomePage() {
 
   return (
     <PageTransition>
-      <HomePortfolioCover />
+      <HomePortfolioCover onSelectTrack={scrollToProjectOverview} />
 
-      <section className="bg-deepIndigo pb-14 pt-24 text-softWhite md:pb-20 md:pt-36 lg:pt-[156px]">
+      <section ref={projectOverviewSectionRef} className="home-projects-top-fade bg-deepIndigo pb-8 pt-8 text-softWhite md:pb-10 md:pt-10 lg:pt-12">
         <div className="site-container">
-          <div className="mb-10 text-center md:mb-12">
-            <h2 className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-acidGreen/86">
-              {projectOverviewTitle}
-            </h2>
-          </div>
-
+          {homeProjects.length === 0 ? (
+            <p className="text-center text-sm leading-6 text-softWhite/48">{emptyTrackLabel}</p>
+          ) : (
           <div
-            className={hasMultipleGroups ? "xl:grid xl:grid-cols-[6.5rem_minmax(0,1fr)_6.5rem] xl:items-center xl:gap-2" : ""}
+            className={hasMultipleGroups ? "xl:grid xl:grid-cols-[5.5rem_minmax(0,1fr)_5.5rem] xl:items-center xl:gap-2" : ""}
             data-carousel-nav-grid
           >
             {hasMultipleGroups ? (
@@ -189,7 +246,7 @@ export function HomePage() {
             <div className="min-w-0">
               <div
                 ref={projectRailRef}
-                className="home-project-rail flex snap-x snap-mandatory gap-3.5 overflow-x-auto md:gap-7 xl:gap-8"
+                className="home-project-rail flex snap-x snap-mandatory gap-3.5 overflow-x-auto md:gap-6 xl:gap-6"
                 data-featured-project-group={homeProjects.map((project) => project.projectId).join("-") || "empty"}
                 aria-label={locale === "zh" ? "精选项目，可横向滑动" : "Featured projects, horizontally scrollable"}
                 onScroll={syncActiveProject}
@@ -217,7 +274,10 @@ export function HomePage() {
                     index={slide.logicalIndex}
                     isActive={activeFeaturedIndex === slide.logicalIndex}
                     hasActive={activeFeaturedIndex !== null}
-                    onActivate={() => setActiveFeaturedIndex(slide.logicalIndex)}
+                    onActivate={() => {
+                      if (isTrackScrollingRef.current) return;
+                      setActiveFeaturedIndex(slide.logicalIndex);
+                    }}
                     onDeactivate={() => setActiveFeaturedIndex(null)}
                   />
                   </div>
@@ -238,6 +298,7 @@ export function HomePage() {
               </div>
             ) : null}
           </div>
+          )}
         </div>
       </section>
 
@@ -254,27 +315,6 @@ export function HomePage() {
 
         <HomePlayExperience />
 
-        <motion.div
-          className="mt-[96px] grid h-[88px] w-[88px] place-items-center overflow-hidden rounded-full border border-softWhite/12 bg-archiveBlue/24 md:mt-[112px] md:h-24 md:w-24 lg:h-28 lg:w-28"
-          initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.6 }}
-          transition={{ duration: prefersReducedMotion ? 0.01 : 0.42, ease: "easeOut" }}
-          data-home-illustration-slot
-        >
-          {!illustrationFailed ? (
-            <img
-              src={homeIllustrationSrc}
-              alt=""
-              className="h-full w-full object-cover"
-              loading="lazy"
-              decoding="async"
-              onError={() => setIllustrationFailed(true)}
-            />
-          ) : (
-            <span className="h-2 w-2 rounded-full bg-acidGreen/24" aria-hidden="true" />
-          )}
-        </motion.div>
       </section>
     </PageTransition>
   );
@@ -300,7 +340,7 @@ function ProjectGroupButton({
       aria-label={label}
     >
       <Icon
-        className={`h-20 w-11 stroke-[2.6] transition-transform duration-200 motion-reduce:transform-none motion-reduce:transition-none sm:h-24 sm:w-14 lg:h-32 lg:w-20 ${
+        className={`h-20 w-11 stroke-[2.6] transition-transform duration-200 motion-reduce:transform-none motion-reduce:transition-none sm:h-24 sm:w-14 lg:h-32 lg:w-16 ${
           isPrevious
             ? "group-hover:-translate-x-1 group-hover:scale-105 group-focus-visible:-translate-x-1 group-focus-visible:scale-105"
             : "group-hover:translate-x-1 group-hover:scale-105 group-focus-visible:translate-x-1 group-focus-visible:scale-105"

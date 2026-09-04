@@ -40,7 +40,7 @@ const OUTPUT_DATA = path.join("src", "data", "publishedPortfolio.json");
 const OUTPUT_UI_PRACTICE_DATA = path.join("src", "data", "uiPracticeMetadata.json");
 const OUTPUT_ASSET_ROOT = path.join("public", "images", "published");
 const CONFIRM_FLAG = "--confirm";
-const PRODUCTION_URL = "https://myprofile-teal.vercel.app/zh/";
+const PRODUCTION_URL = "https://www.deldaduman.com/zh/";
 
 // Permanently retired legacy project ids -- must never republish even if a
 // stale browser session's export still carries them. Preserved verbatim from

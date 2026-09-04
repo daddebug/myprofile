@@ -57,12 +57,16 @@ export type TemplateProps = {
       onRemoveItem: (itemId: string) => void;
       onCancelPlaceholder: (itemId: string) => void;
       onItemChange: (itemId: string, updates: Record<string, unknown>) => void;
+      onUploadAnnotationEvidence: (itemId: string, annotationId: string) => void;
+      onRemoveAnnotationEvidence: (itemId: string, annotationId: string, evidenceId: string) => void;
       error?: string;
     };
     directionCompare?: {
       onUploadImage: (side: "left" | "right") => void;
       onRemoveImage: (side: "left" | "right") => void;
-      onImageSettingChange: (side: "left" | "right", updates: { hoverPreviewMode: "none" | "floating" }) => void;
+      onImageSettingChange: (side: "left" | "right", updates: Record<string, unknown>) => void;
+      onUploadAnnotationEvidence: (side: "left" | "right", annotationId: string) => void;
+      onRemoveAnnotationEvidence: (side: "left" | "right", annotationId: string, evidenceId: string) => void;
       onDirectionChange: (direction: "left-to-right" | "right-to-left" | "none") => void;
       error?: string;
     };

@@ -4,13 +4,13 @@ import { statSync } from "node:fs";
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import { finalizePublishReport } from "./publishing-report-lib.mjs";
+import { attachFileReviewToPublishReport, finalizePublishReport, writeFileReviewBlockedReport } from "./publishing-report-lib.mjs";
 import { compareLocalAssetsToProduction, findDeploymentForSha } from "./publishing/deploymentStatus.mjs";
 import { emitOutcome, emitProgress } from "./publishing/syncProgress.mjs";
 import { decideAfterChangeDetection, decideAfterDeploymentCheck, decideAfterPreflight, SYNC_OUTCOME } from "./publishing/syncStateMachine.mjs";
 
 const OFFICIAL_ROOT = path.resolve("D:/myprofilegit/myprofile");
-const PRODUCTION_URL = "https://myprofile-teal.vercel.app";
+const PRODUCTION_URL = "https://www.deldaduman.com";
 const VERCEL_DASHBOARD = "https://vercel.com/myprofile2/myprofile";
 const GITHUB_OWNER = "daddebug";
 const GITHUB_REPO = "myprofile";
@@ -41,7 +41,7 @@ const canonicalWebsiteRootFiles = new Set([
   "vercel.json",
   "vite.config.ts",
 ]);
-const canonicalWebsitePrefixes = ["docs/", "scripts/", "skills/", "src/"];
+const canonicalWebsitePrefixes = ["docs/", "scripts/", "skills/", "src/", "public/images/profile/"];
 
 function fail(message) {
   console.error(`\nERROR: ${message}\n`);
@@ -119,6 +119,26 @@ function isCanonicalWebsiteFile(file) {
   return isCanonicalPublishOutput(normalized)
     || canonicalWebsiteRootFiles.has(normalized)
     || canonicalWebsitePrefixes.some((prefix) => normalized.startsWith(prefix));
+}
+
+function buildLauncherFileReview(files = changedFiles()) {
+  return {
+    total: files.length,
+    allowed: files.filter(isCanonicalWebsiteFile),
+    blocked: files.filter((file) => !isCanonicalWebsiteFile(file)),
+    staged: stagedFiles(),
+  };
+}
+
+async function assertLauncherFileReview(fileReview) {
+  const unrelatedStaged = fileReview.staged.filter((file) => !isCanonicalWebsiteFile(file));
+  if (!unrelatedStaged.length && !fileReview.blocked.length) return;
+
+  const error = unrelatedStaged.length
+    ? `Sync is blocked because unrelated files are already staged for commit:\n- ${unrelatedStaged.join("\n- ")}\nUnstage or commit those files separately before using DILIDA DESK sync.`
+    : `Sync is blocked because these changes are outside the canonical website implementation and publishing output:\n- ${fileReview.blocked.join("\n- ")}\nReview them separately before using DILIDA DESK sync.`;
+  await writeFileReviewBlockedReport({ root: OFFICIAL_ROOT, productionUrl: PRODUCTION_URL, fileReview, error });
+  fail(error);
 }
 
 function assertLauncherHasOnlyCanonicalWebsiteChanges(files) {
@@ -310,13 +330,14 @@ async function launcherPreflight() {
   assertOfficialDirectory();
   requireBundlePath();
   const files = changedFiles();
-  assertLauncherHasNoUnrelatedStagedFiles();
-  assertLauncherHasOnlyCanonicalWebsiteChanges(files);
+  const fileReview = buildLauncherFileReview(files);
+  await assertLauncherFileReview(fileReview);
   await inspectChangedFiles(files);
   emitProgress("prepare", "success", "准备完成");
 
   emitProgress("check-content", "running", "正在检查发布内容");
   const status = runCapturingStatus("pnpm", ["portfolio:import", "--", bundlePath]);
+  await attachFileReviewToPublishReport({ root: OFFICIAL_ROOT, fileReview });
   const report = await readLauncherReport();
   const decision = decideAfterPreflight({
     blocked: status !== 0 || report?.outcome === "blocked",
@@ -378,8 +399,8 @@ async function launcherPublish() {
     assertOfficialDirectory();
     requireBundlePath();
     const beforeImport = changedFiles();
-    assertLauncherHasNoUnrelatedStagedFiles();
-    assertLauncherHasOnlyCanonicalWebsiteChanges(beforeImport);
+    const fileReview = buildLauncherFileReview(beforeImport);
+    await assertLauncherFileReview(fileReview);
     await inspectChangedFiles(beforeImport);
   } catch (error) {
     return failStage("prepare", "准备发布失败", { error: error instanceof Error ? error.message : String(error) });
@@ -388,6 +409,7 @@ async function launcherPublish() {
 
   emitProgress("check-content", "running", "正在检查发布内容");
   const preflightStatus = runCapturingStatus("pnpm", ["portfolio:import", "--", bundlePath]);
+  await attachFileReviewToPublishReport({ root: OFFICIAL_ROOT, fileReview: buildLauncherFileReview() });
   const preflightReport = await readLauncherReport();
   const preflightDecision = decideAfterPreflight({
     blocked: preflightStatus !== 0 || preflightReport?.outcome === "blocked",
@@ -405,6 +427,7 @@ async function launcherPublish() {
   if (runCapturingStatus("pnpm", ["portfolio:import", "--", bundlePath, "--confirm"]) !== 0) {
     return failStage("write-data", "写入发布数据失败");
   }
+  await attachFileReviewToPublishReport({ root: OFFICIAL_ROOT, fileReview: buildLauncherFileReview() });
   emitProgress("write-data", "success", "发布数据已写入");
 
   const changedAfterImport = changedFiles();

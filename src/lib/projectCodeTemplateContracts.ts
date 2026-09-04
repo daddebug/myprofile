@@ -391,7 +391,7 @@ export function validateProjectCodeTemplateContent(
     for (const field of ["leftImage", "rightImage"] as const) {
       const image = content[field];
       if (isRecord(image)) {
-        addUnknownFieldIssues(issues, image, field, ["imageId", "publicPath", "hoverPreviewMode"], "Only the hover preview setting may accompany the preserved stable image reference.");
+        addUnknownFieldIssues(issues, image, field, ["imageId", "publicPath", "hoverPreviewMode", "annotationEnabled", "annotations"], "Only existing editor-managed interaction settings may accompany the preserved stable image reference.");
         addEnumIssue(issues, image.hoverPreviewMode, `${field}.hoverPreviewMode`, ["none", "floating"]);
       }
     }
@@ -426,7 +426,7 @@ const specificRules: Record<ProjectCodeTemplateId, string[]> = {
   "image-row": ["New instances require 1-12 empty slots.", "image must be null or omitted.", "alt, caption, placeholder use {zh:string,en:string}; en may be empty.", "columns: 1|2|3|4; rowAlignment: start|center.", "imageDisplayMode: cover|natural; imageCropRatio: 16:9|1:1 (only meaningful when imageDisplayMode is cover; omitted/legacy items default to 16:9); imageWidthMode: card|wide|full; hoverPreviewMode: none|floating; startNewRow: boolean.", "New empty slots default to hoverPreviewMode:none.", "Never return localImageId, assetId, publicPath, publicUrl, Blob, Base64, CSS, className, style, grid coordinates, or span values."],
   "figma-prototype": ["New instances must use an empty figmaUrl and no fallbackImage; real resources are added later in the editor.", "heading and caption are localized.", "captionTitle is not a supported field — it has been removed from this template. Use caption instead."],
   "playable-game": ["New instances must use game:null and cover:null.", "Never invent gameId, entryPublicPath, coverId, publicUrl, or file paths.", "status: prototype|in-development|complete|archived; aspectRatio: 16:9|4:3|auto.", "heading, description, versionLabel and control key/action are localized."],
-  "direction-compare": ["Native fields only: heading, leftLabel, rightLabel, leftTitle, rightTitle, leftDescription, rightDescription, leftImage, rightImage, direction.", "All seven text fields use localized {zh,en} objects.", "New instances must use leftImage:null and rightImage:null (or omit them).", "Existing leftImage/rightImage may use hoverPreviewMode:none|floating; never change their real imageId or publicPath.", "direction: left-to-right|right-to-left|none.", "Never invent imageId, assetId, localImageId, publicPath, publicUrl, file paths, CSS, className, style, coordinates, columns, or spans."],
+  "direction-compare": ["Native fields only: heading, leftLabel, rightLabel, leftTitle, rightTitle, leftDescription, rightDescription, leftImage, rightImage, direction.", "All seven text fields use localized {zh,en} objects.", "New instances must use leftImage:null and rightImage:null (or omit them).", "Existing leftImage/rightImage may preserve editor-managed hoverPreviewMode, annotationEnabled, and annotations; never create or change their real imageId, publicPath, or annotation evidence resources.", "direction: left-to-right|right-to-left|none.", "Never invent imageId, assetId, localImageId, publicPath, publicUrl, file paths, CSS, className, style, coordinates, columns, or spans."],
 };
 
 export function projectCodeTemplateRulesForPrompt(

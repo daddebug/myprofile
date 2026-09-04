@@ -1,7 +1,7 @@
 // Builds the Portfolio Collection's cover (page 1) and index (page 2) as
-// two separate SVG compositions, each sized to its own actual content
-// (both 1440 wide, independently short/compact heights — never a fixed
-// tall canvas with leftover empty space):
+// two separate SVG compositions, each sized to its own actual content.
+// Their authored baseline is 1440px, then every coordinate, image, font,
+// gap and footer is scaled together to the final Collection target width.
 //   - the cover is identity only — background, graphic (panels+circles),
 //     brand title, footer. No project content, no heading.
 //   - the index is just the project entries — no heading — one column per
@@ -15,7 +15,7 @@
 import type { Browser } from "playwright-core";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { COVER_GEOMETRY, INDEX_PAGE, indexColumnPositions, computeIndexPageHeight, MAX_COLLECTION_PROJECTS, type CoverTocEntry } from "../src/lib/collectionCoverGeometry";
+import { COVER_GEOMETRY, INDEX_PAGE, collectionCoverScale, indexColumnPositions, computeIndexPageHeight, MAX_COLLECTION_PROJECTS, scaleIndexNavRects, type CoverTocEntry, type IndexNavRect } from "../src/lib/collectionCoverGeometry";
 
 const FONT_SANS = `"Inter","Avenir Next","Segoe UI",Arial,sans-serif`;
 const FONT_MONO = `"IBM Plex Mono",SFMono-Regular,Consolas,"Liberation Mono",monospace`;
@@ -146,8 +146,10 @@ export async function fitIndexTitles(browser: Browser, entries: CoverTocEntry[])
 
 // Page 1: identity only — background, graphic (panels+circles), brand
 // title, footer. No project content, no TOC/index elements.
-export function buildCoverPageSvg(brandLine: string, footerLabel: string): string {
+export function buildCoverPageSvg(brandLine: string, footerLabel: string, scale = 1): string {
   const g = COVER_GEOMETRY;
+  const width = g.width * scale;
+  const height = g.height * scale;
 
   const panelsAndCircles = g.panels.map((panel, panelIndex) => {
     // The reference's rightmost panel dissolves into the background near
@@ -172,7 +174,7 @@ export function buildCoverPageSvg(brandLine: string, footerLabel: string): strin
   // text, position anchor, or font size.
   const footer = `<text x="${g.footer.rightX}" y="${g.footer.baselineY}" text-anchor="end" font-family='${FONT_MONO}' font-size="${g.footer.fontSize}" font-weight="700" letter-spacing="2.2" fill="${g.softWhite}" fill-opacity="0.34">${escapeXml(footerLabel)}</text>`;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${g.width}" height="${g.height}" viewBox="0 0 ${g.width} ${g.height}">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
   <defs>
     <linearGradient id="panelGradient" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="${g.panelGradientFrom}" />
@@ -184,10 +186,12 @@ export function buildCoverPageSvg(brandLine: string, footerLabel: string): strin
       <stop offset="100%" stop-color="${g.panelGradientTo}" stop-opacity="0" />
     </linearGradient>
   </defs>
-  <rect width="${g.width}" height="${g.height}" fill="${g.background}" />
-  ${panelsAndCircles}
-  ${title}
-  ${footer}
+  <rect width="${width}" height="${height}" fill="${g.background}" />
+  <g transform="scale(${scale})">
+    ${panelsAndCircles}
+    ${title}
+    ${footer}
+  </g>
 </svg>`;
 }
 
@@ -198,11 +202,13 @@ export function buildCoverPageSvg(brandLine: string, footerLabel: string): strin
 // separator between them. An entry with no coverUrl (non-project section
 // entries) falls back to a plain panel-toned rect instead of a
 // placeholder/X — the column, its title, and its click target still work.
-export function buildIndexPageSvg(entries: CoverTocEntry[], fits: LabelFitDiagnostics[]): string {
+export function buildIndexPageSvg(entries: CoverTocEntry[], fits: LabelFitDiagnostics[], scale = 1): string {
   const g = COVER_GEOMETRY;
   const p = INDEX_PAGE;
   const positions = indexColumnPositions(entries.length);
-  const height = computeIndexPageHeight(entries.length);
+  const baseHeight = computeIndexPageHeight(entries.length);
+  const width = g.width * scale;
+  const height = baseHeight * scale;
 
   const columns = entries.map((entry, index) => {
     const pos = positions[index];
@@ -241,14 +247,19 @@ export function buildIndexPageSvg(entries: CoverTocEntry[], fits: LabelFitDiagno
     });
   }).join("\n");
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${g.width}" height="${height}" viewBox="0 0 ${g.width} ${height}">
-  <rect width="${g.width}" height="${height}" fill="${g.background}" />
-  ${columns}
-  ${separators}
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <rect width="${width}" height="${height}" fill="${g.background}" />
+  <g transform="scale(${scale})">
+    ${columns}
+    ${separators}
+  </g>
 </svg>`;
 }
 
 export type CoverRenderResult = {
+  baseWidthPx: number;
+  targetWidthPx: number;
+  scale: number;
   coverSvg: string;
   coverPng: Buffer;
   coverHeightPx: number;
@@ -260,10 +271,11 @@ export type CoverRenderResult = {
   coverPngPath: string;
   indexSvgPath: string;
   indexPngPath: string;
+  navRects: IndexNavRect[];
 };
 
-async function screenshotSvg(browser: Browser, svg: string, heightPx: number): Promise<Buffer> {
-  const renderPage = await browser.newPage({ viewport: { width: COVER_GEOMETRY.width, height: heightPx }, deviceScaleFactor: 1 });
+async function screenshotSvg(browser: Browser, svg: string, widthPx: number, heightPx: number): Promise<Buffer> {
+  const renderPage = await browser.newPage({ viewport: { width: Math.ceil(widthPx), height: Math.ceil(heightPx) }, deviceScaleFactor: 1 });
   try {
     await renderPage.setContent(`<!doctype html><html><body style="margin:0;padding:0;">${svg}</body></html>`, { waitUntil: "load" });
     await renderPage.evaluate(() => document.fonts.ready);
@@ -287,16 +299,19 @@ export async function renderCollectionCoverPages(
   brandLine: string,
   footerLabel: string,
   debugDir: string,
+  targetWidthPx: number,
 ): Promise<CoverRenderResult> {
   const cappedEntries = entries.slice(0, MAX_COLLECTION_PROJECTS + 3); // generous cap; MAX_COLLECTION_PROJECTS already bounds real project entries upstream
+  const scale = collectionCoverScale(targetWidthPx);
   const fits = await fitIndexTitles(browser, cappedEntries);
-  const coverSvg = buildCoverPageSvg(brandLine, footerLabel);
-  const indexSvg = buildIndexPageSvg(cappedEntries, fits);
-  const indexHeight = computeIndexPageHeight(cappedEntries.length);
+  const coverHeight = COVER_GEOMETRY.height * scale;
+  const indexHeight = computeIndexPageHeight(cappedEntries.length) * scale;
+  const coverSvg = buildCoverPageSvg(brandLine, footerLabel, scale);
+  const indexSvg = buildIndexPageSvg(cappedEntries, fits, scale);
 
   const [coverPng, indexPng] = await Promise.all([
-    screenshotSvg(browser, coverSvg, COVER_GEOMETRY.height),
-    screenshotSvg(browser, indexSvg, indexHeight),
+    screenshotSvg(browser, coverSvg, targetWidthPx, coverHeight),
+    screenshotSvg(browser, indexSvg, targetWidthPx, indexHeight),
   ]);
 
   await fs.mkdir(debugDir, { recursive: true });
@@ -312,9 +327,11 @@ export async function renderCollectionCoverPages(
   ]);
 
   return {
-    coverSvg, coverPng, coverHeightPx: COVER_GEOMETRY.height,
+    baseWidthPx: COVER_GEOMETRY.width, targetWidthPx, scale,
+    coverSvg, coverPng, coverHeightPx: coverHeight,
     indexSvg, indexPng, indexHeightPx: indexHeight,
     fits, coverSvgPath, coverPngPath, indexSvgPath, indexPngPath,
+    navRects: scaleIndexNavRects(cappedEntries, scale),
   };
 }
 

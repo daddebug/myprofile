@@ -11,6 +11,29 @@ export type ProjectCollectionGroup = "work" | "play";
 export type ProjectVisibility = "public" | "hidden";
 export type ProjectPublicationState = "draft" | "published" | "coming-soon";
 
+// Phase 1 of the proposed public-facing category nav (owner-editable only —
+// see PROJECT_STATUS.md/TASKS.md for scope). Deliberately separate from the
+// existing free-text categoryZh/categoryEn (a descriptive subtitle, not a
+// closed taxonomy): each project belongs to exactly one Track, or none.
+// Additive-only — absent/undefined on any pre-existing project means
+// Unclassified, never inferred from categoryZh/categoryEn/tags.
+export type PortfolioTrack = "ux-ui" | "ue" | "game-design" | "ai-product";
+
+export const PORTFOLIO_TRACK_OPTIONS: PortfolioTrack[] = ["ux-ui", "ue", "game-design", "ai-product"];
+
+const PORTFOLIO_TRACK_LABELS: Record<PortfolioTrack, string> = {
+  "ux-ui": "UX/UI / 用户体验与界面",
+  "ue": "UE / 交互设计",
+  "game-design": "GAME DESIGN / 游戏设计",
+  "ai-product": "AI PRODUCT / AI产品",
+};
+
+export const UNCLASSIFIED_PORTFOLIO_TRACK_LABEL = "UNCLASSIFIED / 未分类";
+
+export function getPortfolioTrackLabel(track: PortfolioTrack | null | undefined): string {
+  return track ? PORTFOLIO_TRACK_LABELS[track] : UNCLASSIFIED_PORTFOLIO_TRACK_LABEL;
+}
+
 export type ProjectPublicMetaOverride = {
   projectId: string;
   isDynamic?: boolean;
@@ -27,6 +50,7 @@ export type ProjectPublicMetaOverride = {
   duration?: string;
   archiveOrder?: number;
   featured?: boolean;
+  portfolioTrack?: PortfolioTrack | null;
   group?: ProjectCollectionGroup;
   visibility?: ProjectVisibility;
   publicationState?: ProjectPublicationState;
@@ -55,6 +79,7 @@ export type ProjectCatalogItem = {
   duration?: string;
   archiveOrder: number;
   featured: boolean;
+  portfolioTrack?: PortfolioTrack | null;
   group: ProjectCollectionGroup;
   visibility: ProjectVisibility;
   publicationState: ProjectPublicationState;
@@ -203,7 +228,13 @@ function readDynamicProjectDefaults(): ProjectCatalogItem[] {
     }),
   );
   const stored = import.meta.env.DEV ? readStoredProjectsWithStaging() : {};
-  const projectsValue = { ...published, ...stored };
+  const projectIds = new Set([...Object.keys(published), ...Object.keys(stored)]);
+  const projectsValue = Object.fromEntries(
+    [...projectIds].map((projectId) => [
+      projectId,
+      { ...(published[projectId] ?? {}), ...(stored[projectId] ?? {}) },
+    ]),
+  );
   return Object.entries(projectsValue).flatMap(([projectId, value]) => {
     if (!value.isDynamic || typeof value.slug !== "string" || typeof value.route !== "string") return [];
     if (!value.titleZh || !value.summaryZh) return [];

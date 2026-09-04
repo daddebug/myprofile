@@ -2,10 +2,12 @@ import { useEffect, useState, type DragEvent } from "react";
 import { AlertTriangle, ArrowDown, ArrowRight, ArrowUp, Copy, Edit3, Eye, EyeOff, FilePlus2, GripVertical, Pencil, RotateCcw, Save, Star, Trash2, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PageTransition } from "../components/PageTransition";
+import { PortfolioTrackTabs } from "../components/PortfolioTrackTabs";
 import { ProjectCoverEditor } from "../components/ProjectCoverEditor";
 import { NewProjectWizard, ProjectInfoEditor } from "../components/ProjectManagementPanels";
 import { useProjectCatalog } from "../hooks/useProjectCatalog";
-import { createDynamicProject, setProjectArchiveOrder, setProjectFeatured, setProjectPublicMetaOverride, type ProjectCatalogItem, type ResolvedProjectMetadata } from "../lib/projectMetadata";
+import { createDynamicProject, getPortfolioTrackLabel, setProjectArchiveOrder, setProjectFeatured, setProjectPublicMetaOverride, PORTFOLIO_TRACK_OPTIONS, type PortfolioTrack, type ProjectCatalogItem, type ResolvedProjectMetadata } from "../lib/projectMetadata";
+import { usePortfolioTrack } from "../lib/portfolioTrackContext";
 import { createStableId, getProjectDocument, saveProjectDocument } from "../lib/projectDocuments";
 import { finalizeProjectDeletion, markProjectPendingDeletion, undoProjectPendingDeletion } from "../lib/deletePortfolioProject";
 import { useDirtyIntents } from "../lib/dirtyIntentStore";
@@ -63,10 +65,12 @@ export function WorkPage() {
   const { locale, pathFor } = useLocale();
   const projectCatalog = useProjectCatalog(locale);
   const ownerMode = useOwnerMode();
+  const { activeTrack } = usePortfolioTrack();
   const [isEditingOrder, setIsEditingOrder] = useState(false);
   const [draftOrder, setDraftOrder] = useState<string[]>([]);
   const [draftFeatured, setDraftFeatured] = useState<Record<string, boolean>>({});
   const [draftVisibility, setDraftVisibility] = useState<Record<string, "public" | "hidden">>({});
+  const [draftTrack, setDraftTrack] = useState<Record<string, PortfolioTrack | null>>({});
   const [draggedProjectId, setDraggedProjectId] = useState<string | null>(null);
   const [managementPanel, setManagementPanel] = useState<"new" | null>(null);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
@@ -100,7 +104,7 @@ export function WorkPage() {
     .sort((left, right) => left.archiveOrder - right.archiveOrder);
   const managedProjects = fullArchive.filter((project) => project.group === "work");
   const orderedProjects = managedProjects.filter(
-    (project) => project.group === "work" && project.visibility === "public",
+    (project) => project.group === "work" && project.visibility === "public" && (activeTrack === "all" || project.portfolioTrack === activeTrack),
   );
   const projectsById = new Map(managedProjects.map((project) => [project.id, project]));
 
@@ -130,6 +134,7 @@ export function WorkPage() {
     setDraftOrder(managedProjects.map((project) => project.id));
     setDraftFeatured(Object.fromEntries(managedProjects.map((project) => [project.id, project.featured])));
     setDraftVisibility(Object.fromEntries(managedProjects.map((project) => [project.id, project.visibility])));
+    setDraftTrack(Object.fromEntries(managedProjects.map((project) => [project.id, project.portfolioTrack ?? null])));
     setDraggedProjectId(null);
     setIsEditingOrder(true);
   };
@@ -138,6 +143,7 @@ export function WorkPage() {
     setDraftOrder([]);
     setDraftFeatured({});
     setDraftVisibility({});
+    setDraftTrack({});
     setDraggedProjectId(null);
     setIsEditingOrder(false);
   };
@@ -174,12 +180,15 @@ export function WorkPage() {
       if (nextFeatured !== project.featured) setProjectFeatured(project.id, nextFeatured);
       const nextVisibility = draftVisibility[project.id] ?? project.visibility;
       if (nextVisibility !== project.visibility) setProjectPublicMetaOverride(project.id, { visibility: nextVisibility });
+      const nextTrack = draftTrack[project.id] ?? project.portfolioTrack ?? null;
+      if (nextTrack !== (project.portfolioTrack ?? null)) setProjectPublicMetaOverride(project.id, { portfolioTrack: nextTrack });
     });
     setProjectArchiveOrder(normalizedCanonicalOrder);
     setIsEditingOrder(false);
     setDraftOrder([]);
     setDraftFeatured({});
     setDraftVisibility({});
+    setDraftTrack({});
     setDraggedProjectId(null);
   };
 
@@ -192,6 +201,7 @@ export function WorkPage() {
     setDraftOrder((current) => current.filter((id) => id !== deleteTargetId));
     setDraftFeatured((current) => { const { [deleteTargetId]: _removed, ...rest } = current; return rest; });
     setDraftVisibility((current) => { const { [deleteTargetId]: _removed, ...rest } = current; return rest; });
+    setDraftTrack((current) => { const { [deleteTargetId]: _removed, ...rest } = current; return rest; });
     if (editingProjectId === deleteTargetId) setEditingProjectId(null);
     setDeleteTargetId(null);
   };
@@ -246,6 +256,7 @@ export function WorkPage() {
             <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-acidGreen">{copy.eyebrow}</p>
             <h1 className="project-archive-title mt-4 font-display font-semibold text-softWhite">{copy.title}</h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-softWhite/64">{copy.description}</p>
+            <PortfolioTrackTabs className="mt-10 justify-start" />
           </div>
         </section>
 
@@ -309,6 +320,17 @@ export function WorkPage() {
                       <p className="mt-1 truncate font-mono text-[9px] uppercase tracking-[0.12em] text-softWhite/34">{project.id} · {project.templateId ? `${project.templateId}@${project.templateVersionUsed ?? 1}` : "Custom Legacy"} · {project.publicationState}</p>
                       </div>
                       <div className="flex items-center gap-1.5">
+                        <select
+                          className="editor-input h-9 w-auto py-0 text-[10px]"
+                          value={draftTrack[project.id] ?? ""}
+                          onChange={(event) => setDraftTrack((current) => ({ ...current, [project.id]: (event.target.value || null) as PortfolioTrack | null }))}
+                          aria-label={`Portfolio track: ${project.title}`}
+                        >
+                          <option value="">{getPortfolioTrackLabel(null)}</option>
+                          {PORTFOLIO_TRACK_OPTIONS.map((track) => (
+                            <option key={track} value={track}>{getPortfolioTrackLabel(track)}</option>
+                          ))}
+                        </select>
                         <button type="button" className="editor-action" onClick={() => setEditingProjectId(project.id)}><Pencil className="h-4 w-4" />EDIT PROJECT INFO</button>
                         {project.isDynamic ? <button type="button" className="editor-icon" onClick={() => duplicateManagedProject(project, managedProjects)} aria-label={`Duplicate ${project.title}`}><Copy className="h-4 w-4" /></button> : null}
                         {project.isDynamic ? <button type="button" className="editor-icon text-peach" onClick={() => setDeleteTargetId(project.id)} aria-label={`${copy.deleteProject}: ${project.title}`}><Trash2 className="h-4 w-4" /></button> : null}
@@ -363,6 +385,11 @@ export function WorkPage() {
 
         <section className="pb-28 pt-8 md:pb-36 md:pt-12">
           <div className="site-container border-b border-softWhite/10">
+            {orderedProjects.length === 0 ? (
+              <p className="border-t border-softWhite/10 py-10 text-sm leading-6 text-softWhite/48">
+                {locale === "zh" ? "该方向暂无项目" : "No projects in this track yet"}
+              </p>
+            ) : null}
             {orderedProjects.map((project, index) => {
               const row = <ArchiveRow project={project} index={index} comingSoonLabel={copy.comingSoon} />;
               return <div key={project.id} className="relative">

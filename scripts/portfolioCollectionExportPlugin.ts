@@ -7,7 +7,7 @@ import { chromium, type Browser } from "playwright-core";
 import type { Plugin } from "vite";
 import { findChrome, renderExactWebPdf } from "./exactWebExportPlugin";
 import { renderCollectionCoverPages } from "./collectionCoverRenderer";
-import { COVER_GEOMETRY, computeIndexNavRects, type CoverTocEntry, type IndexNavRect } from "../src/lib/collectionCoverGeometry";
+import { COVER_GEOMETRY, type CoverTocEntry, type IndexNavRect } from "../src/lib/collectionCoverGeometry";
 import { extractTemplateImageReferences, extractProjectDocumentImageReferences, type MinimalTemplateInstance, type MinimalProjectDocument } from "../src/lib/templateImageReferences";
 import { resizeOversizedExportImages } from "./exportImageResize";
 import { optimizeCollectionPdfStreams } from "./pdfStreamEncodingOptimizer";
@@ -45,22 +45,36 @@ const projectCaptureTimeouts = { navigate: 6_000, ready: 20_000, render: 60_000 
 // have no such ceiling) — guards against a genuinely runaway-height page
 // rather than describing any rendering behavior.
 const maximumContinuousProjectHeight = 30_000;
+// Fixed section-page width for the fixed-layout Collection pages (cover,
+// UI Works, Game Experience, Contact) — NOT used for project capture,
+// which reproduces whatever CSS viewport width the exporting browser was
+// actually showing (see fallbackProjectCaptureViewportWidth below).
+const canonicalCollectionPageWidthPx = 1440;
 // Fallback capture viewport width, used only if the client somehow didn't
 // send its own window.innerWidth (see the "project" stage handler below).
 // The real, intended width always comes from the browser that initiated
 // the Collection export — captureProjectPage's viewport must match it, or
 // the responsive layout captured won't be the layout that browser was
-// actually showing (see the layout-fidelity investigation this replaces
-// the old hardcoded-1440 behavior for).
+// actually showing.
 const fallbackProjectCaptureViewportWidth = 1440;
 const minimumProjectCaptureViewportWidth = 320;
 const maximumProjectCaptureViewportWidth = 4096;
 // pdf-lib pages are sized in points (72pt = 1in); captures are measured in
 // CSS px at the 96dpi the capture viewport renders at.
 const cssPxToPdfPt = 72 / 96;
-const collectionPageChromeHeightPx = 96;
+// Bottom safe area kept BELOW the chrome (applyCollectionPageChrome adds
+// this separately, after the chrome's own measured height) — the one
+// value in this geometry still allowed to be a stable small constant,
+// per the explicit target structure: content -> 32px separation -> real
+// footer content -> this small safe area -> page end. Never combined with
+// the chrome's own height into one number.
 const collectionPageFinalMarginPx = 24;
 const collectionPageSafeMarginPx = 80;
+// Generous, non-clipping measurement viewport — far taller than any
+// realistic label+summary(+wrap)+back-link stack. Only used to give the
+// first measurement pass room to lay out naturally; it is not itself a
+// height limit or a fallback value anywhere below.
+const collectionPageChromeMeasurementViewportHeightPx = 400;
 
 type CollectionPageChrome = {
   label: string;
@@ -80,36 +94,69 @@ function escapePageChromeHtml(value: string) {
   })[character] ?? character);
 }
 
-async function renderCollectionPageChrome(browser: Browser, widthPx: number, chrome: CollectionPageChrome) {
-  const page = await browser.newPage({ viewport: { width: widthPx, height: collectionPageChromeHeightPx }, deviceScaleFactor: 1 });
+// height "auto" is the measurement pass (no @page rule, no fixed
+// html/body height, no overflow:hidden — a wrapping summary is free to
+// grow); a numeric height is the final print pass, sized to exactly what
+// the measurement pass found. Never a fixed magic number in either case.
+function buildCollectionPageChromeHtml(widthPx: number, heightPx: number | "auto", chrome: CollectionPageChrome) {
   const pageIndicator = `${String(chrome.projectNumber).padStart(2, "0")} / ${String(chrome.projectCount).padStart(2, "0")}`;
-  try {
-    await page.setContent(`<!doctype html><html><head><meta charset="utf-8"><style>
-      @page { size: ${widthPx}px ${collectionPageChromeHeightPx}px; margin: 0; }
-      html, body { width: ${widthPx}px; height: ${collectionPageChromeHeightPx}px; margin: 0; overflow: hidden; background: #181743; }
+  const pageSizeRule = heightPx === "auto" ? "" : `@page { size: ${widthPx}px ${heightPx}px; margin: 0; }`;
+  const bodyHeight = heightPx === "auto" ? "auto" : `${heightPx}px`;
+  return `<!doctype html><html><head><meta charset="utf-8"><style>
+      ${pageSizeRule}
+      html, body { width: ${widthPx}px; height: ${bodyHeight}; margin: 0; background: #181743; }
       * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .chrome { width: calc(100% - ${collectionPageSafeMarginPx * 2}px); height: 100%; margin: 0 ${collectionPageSafeMarginPx}px; padding-top: 15px; border-top: 1px solid rgba(244,245,250,.14); display: grid; grid-template-columns: minmax(0, 1fr) 240px; column-gap: 40px; color: #f4f5fa; }
+      .chrome { width: calc(100% - ${collectionPageSafeMarginPx * 2}px); margin: 0 ${collectionPageSafeMarginPx}px; padding-top: 15px; border-top: 1px solid rgba(244,245,250,.14); display: grid; grid-template-columns: minmax(0, 1fr) 240px; column-gap: 40px; color: #f4f5fa; }
       .label, .number { margin: 0; font: 700 11px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; }
       .label { color: rgba(52,240,37,.72); }
       .summary { max-width: 820px; margin: 9px 0 0; font: 400 14px/1.45 system-ui, sans-serif; color: rgba(244,245,250,.62); }
       .right { text-align: right; }
       .number { color: rgba(244,245,250,.42); }
       .back { display: inline-block; margin-top: 17px; font: 600 12px/1.35 system-ui, sans-serif; color: rgba(52,240,37,.78); }
-    </style></head><body><footer class="chrome"><div><p class="label">${escapePageChromeHtml(chrome.label)}</p><p class="summary">${escapePageChromeHtml(chrome.sentence)}</p></div><div class="right"><p class="number">${pageIndicator}</p><span class="back">${escapePageChromeHtml(chrome.backToIndexLabel)}</span></div></footer></body></html>`, { waitUntil: "load" });
+    </style></head><body><footer class="chrome"><div><p class="label">${escapePageChromeHtml(chrome.label)}</p><p class="summary">${escapePageChromeHtml(chrome.sentence)}</p></div><div class="right"><p class="number">${pageIndicator}</p><span class="back">${escapePageChromeHtml(chrome.backToIndexLabel)}</span></div></footer></body></html>`;
+}
+
+async function renderCollectionPageChrome(browser: Browser, widthPx: number, chrome: CollectionPageChrome) {
+  const page = await browser.newPage({ viewport: { width: widthPx, height: collectionPageChromeMeasurementViewportHeightPx }, deviceScaleFactor: 1 });
+  try {
+    // Pass 1: measure the chrome's real content height (label + summary,
+    // however many lines it wraps to, + back-link). height:auto, no
+    // overflow:hidden — nothing here can be clipped.
+    await page.setContent(buildCollectionPageChromeHtml(widthPx, "auto", chrome), { waitUntil: "load" });
     await page.evaluate(() => document.fonts?.ready);
+    const measuredHeightPx = await page.evaluate(
+      () => Math.ceil(document.querySelector(".chrome")!.getBoundingClientRect().bottom),
+    );
+
+    // Pass 2: print at exactly that measured height. The bottom safe area
+    // is NOT added here — applyCollectionPageChrome adds
+    // collectionPageFinalMarginPx separately, after this chrome, so this
+    // function's output is the footer's own content height only.
+    await page.setContent(buildCollectionPageChromeHtml(widthPx, measuredHeightPx, chrome), { waitUntil: "load" });
+    await page.evaluate(() => document.fonts?.ready);
+    // Honest re-check at the exact final canvas size, not an assumption
+    // carried over from pass 1 — confirms nothing overflows what was
+    // actually printed.
+    const overflowPx = await page.evaluate(
+      (limitPx) => Math.max(0, Math.ceil(document.querySelector(".chrome")!.getBoundingClientRect().bottom) - limitPx),
+      measuredHeightPx,
+    );
     const bytes = await page.pdf({
       width: `${widthPx}px`,
-      height: `${collectionPageChromeHeightPx}px`,
+      height: `${measuredHeightPx}px`,
       margin: { top: "0", right: "0", bottom: "0", left: "0" },
       printBackground: true,
       displayHeaderFooter: false,
       preferCSSPageSize: true,
     });
-    return new Uint8Array(bytes);
+    return { bytes: new Uint8Array(bytes), heightPx: measuredHeightPx, overflowPx };
   } finally {
     await page.close();
   }
 }
+
+type FullBleedRegionPx = { top: number; bottom: number; color: string; safe: boolean; templateInstanceId: string | null; templateId: string | null };
+type FullBleedRegionPt = { top: number; bottom: number; color: string; safe: boolean; templateInstanceId: string | null; templateId: string | null };
 
 async function applyCollectionPageChrome(
   contentBytes: Uint8Array,
@@ -117,13 +164,16 @@ async function applyCollectionPageChrome(
   widthPx: number,
   contentPageHeightPx: number,
   chrome: CollectionPageChrome,
+  fullBleedRegionsPx: FullBleedRegionPx[] = [],
 ) {
   const document = await PDFDocument.load(contentBytes);
   if (document.getPageCount() !== 1) throw new Error("Collection project chrome requires one continuous project page.");
   const page = document.getPage(0);
   const pageWidth = page.getWidth();
   const pxToPageUnit = pageWidth / widthPx;
-  const chromeHeight = collectionPageChromeHeightPx * pxToPageUnit;
+  const renderedChrome = await renderCollectionPageChrome(browser, widthPx, chrome);
+  const chromeHeightPx = renderedChrome.heightPx;
+  const chromeHeight = chromeHeightPx * pxToPageUnit;
   const finalMargin = collectionPageFinalMarginPx * pxToPageUnit;
   const addedHeight = chromeHeight + finalMargin;
   const originalHeight = page.getHeight();
@@ -134,7 +184,7 @@ async function applyCollectionPageChrome(
   // project content moves up, while these negative coordinates land in the
   // newly-added bottom region instead of leaving a white tail.
   page.drawRectangle({ x: 0, y: -addedHeight, width: pageWidth, height: addedHeight, color: rgb(24 / 255, 23 / 255, 67 / 255) });
-  const chromePdf = await PDFDocument.load(await renderCollectionPageChrome(browser, widthPx, chrome));
+  const chromePdf = await PDFDocument.load(renderedChrome.bytes);
   const [embeddedChrome] = await document.embedPdf(chromePdf, [0]);
   page.drawPage(embeddedChrome, { x: 0, y: finalMargin - addedHeight, width: pageWidth, height: chromeHeight });
   page.translateContent(0, addedHeight);
@@ -157,15 +207,33 @@ async function applyCollectionPageChrome(
   }
   const linkWidthPx = 240;
   const linkTopWithinChromePx = 43;
+  // Convert each full-bleed region's px, root-top-relative Y-range (as
+  // measured by measureFullBleedRegions, before any of this function's own
+  // vertical extension) into this page's own final PDF-point, bottom-
+  // origin space — the same transform already applied above to
+  // annotations/backLinkRect. This is the ONLY place that coordinate
+  // transform happens; mergeCollection's later horizontal-padding pass
+  // reads these values verbatim, no further math.
+  const fullBleedRegions: FullBleedRegionPt[] = fullBleedRegionsPx.map((region) => ({
+    top: (originalHeight - region.top * pxToPageUnit) + addedHeight,
+    bottom: (originalHeight - region.bottom * pxToPageUnit) + addedHeight,
+    color: region.color,
+    safe: region.safe,
+    templateInstanceId: region.templateInstanceId,
+    templateId: region.templateId,
+  }));
   return {
     bytes: await document.save({ useObjectStreams: false }),
-    finalPageHeightPx: contentPageHeightPx + collectionPageChromeHeightPx + collectionPageFinalMarginPx,
+    finalPageHeightPx: contentPageHeightPx + chromeHeightPx + collectionPageFinalMarginPx,
+    chromeHeightPx,
+    chromeOverflowPx: renderedChrome.overflowPx,
     backLinkRect: {
       x: widthPx - collectionPageSafeMarginPx - linkWidthPx,
       y: contentPageHeightPx + linkTopWithinChromePx,
       width: linkWidthPx,
       height: 28,
     },
+    fullBleedRegions,
   };
 }
 
@@ -534,6 +602,7 @@ async function captureProjectPage(
         snapshot.captureWidth,
         exported.report.finalPageHeight,
         pageChrome,
+        exported.report.fullBleedRegions,
       );
       const captureHeight = composed.finalPageHeightPx;
 
@@ -567,7 +636,8 @@ async function captureProjectPage(
           trailingBlankHeight: collectionPageFinalMarginPx,
           intendedBottomPadding: collectionPageFinalMarginPx,
           projectContentSeparation: exported.report.intendedBottomPadding,
-          collectionPageChromeHeight: collectionPageChromeHeightPx,
+          collectionPageChromeHeight: composed.chromeHeightPx,
+          collectionPageChromeOverflow: composed.chromeOverflowPx,
           projectNumber: pageChrome.projectNumber,
           projectCount: pageChrome.projectCount,
           finalVisibleTemplateInstanceId: layoutAudit.finalVisibleTemplateInstanceId,
@@ -578,6 +648,8 @@ async function captureProjectPage(
           exactWebPdfPages: exported.report.pdfAudit.pages,
           viewportWidth: exported.report.viewportWidth,
           collectionBackLinkRect: composed.backLinkRect,
+          fullBleedRegions: composed.fullBleedRegions,
+          exportRailNormalizations: exported.report.exportRailNormalizations,
           figmaAudit,
         },
         pdfHeight: captureHeight,
@@ -617,13 +689,12 @@ function isSafeTocEntry(value: unknown): value is CoverTocEntry {
 async function captureCoverPage(entries: CoverTocEntry[], brandLine: string, footerLabel: string, outputRoot: string, targetWidthPx: number) {
   const browser = await getCollectionBrowser();
   const debugDir = path.join(outputRoot, "output", "pdf", "collection", "debug");
-  const result = await renderCollectionCoverPages(browser, entries, brandLine, footerLabel, debugDir);
+  const result = await renderCollectionCoverPages(browser, entries, brandLine, footerLabel, debugDir, targetWidthPx);
 
   const document = await PDFDocument.create();
-  const scale = targetWidthPx / COVER_GEOMETRY.width;
   const pageWidth = targetWidthPx * cssPxToPdfPt;
-  const coverHeight = result.coverHeightPx * scale * cssPxToPdfPt;
-  const indexHeight = result.indexHeightPx * scale * cssPxToPdfPt;
+  const coverHeight = result.coverHeightPx * cssPxToPdfPt;
+  const indexHeight = result.indexHeightPx * cssPxToPdfPt;
   const embeddedCover = await document.embedPng(result.coverPng);
   const coverPage = document.addPage([pageWidth, coverHeight]);
   coverPage.drawImage(embeddedCover, { x: 0, y: 0, width: pageWidth, height: coverHeight });
@@ -632,13 +703,17 @@ async function captureCoverPage(entries: CoverTocEntry[], brandLine: string, foo
   indexPage.drawImage(embeddedIndex, { x: 0, y: 0, width: pageWidth, height: indexHeight });
   const bytes = await document.save();
 
-  const navRects: IndexNavRect[] = computeIndexNavRects(entries);
+  const navRects: IndexNavRect[] = result.navRects;
   return {
     bytes,
     navRects,
+    navRectsSourceWidthPx: result.targetWidthPx,
     navRectsSourceHeightPx: result.indexHeightPx,
     diagnostics: {
       entryCount: entries.length,
+      rendererBaseWidthPx: result.baseWidthPx,
+      rendererTargetWidthPx: result.targetWidthPx,
+      rendererScaleRatio: result.scale,
       coverHeightPx: result.coverHeightPx,
       indexHeightPx: result.indexHeightPx,
       fits: result.fits.map(({ title, slot, fontSize, lineCount, truncated }) => ({ title, slot, fontSize, lineCount, truncated })),
@@ -663,7 +738,7 @@ type NavigationRect = { sectionId: string; x: number; y: number; width: number; 
 // uses), so link-rect scaling needs to know which canvas a given record's
 // rects came from. Defaults to 900 (addLinkAnnotations) when absent, which
 // keeps the "section" kind's still-900-tall HTML captures unaffected.
-type StageRecord = { bytes: Uint8Array; sectionId: string; label: string; navRects: NavigationRect[]; navRectsSourceHeightPx?: number; diagnostics?: Record<string, unknown>; createdAt: number };
+type StageRecord = { bytes: Uint8Array; sectionId: string; label: string; navRects: NavigationRect[]; navRectsSourceWidthPx?: number; navRectsSourceHeightPx?: number; diagnostics?: Record<string, unknown>; createdAt: number };
 
 function localRequest(req: IncomingMessage) {
   const address = req.socket.remoteAddress ?? "";
@@ -712,7 +787,7 @@ function json(res: ServerResponse, status: number, value: object) {
   res.end(JSON.stringify(value));
 }
 
-// Section HTML is expected to already describe exactly one 1440x900 page,
+// Section HTML normally describes one 1440x900 page,
 // safe-margin padding included as real CSS padding on its own content (see
 // buildCoverSectionsHtml in src/lib/portfolioCollectionExport.ts) — multi-
 // page cover content is pre-split client-side into one stage() call per
@@ -746,6 +821,13 @@ async function renderSectionPdf(html: string, snapshots: Map<string, string>) {
       const rect = node.getBoundingClientRect();
       return { sectionId: node.dataset.collectionNavTarget ?? "", x: rect.x, y: rect.y, width: rect.width, height: rect.height };
     }).filter((rect) => rect.sectionId));
+    const contentDrivenHeight = await page.evaluate(() => {
+      const root = document.querySelector<HTMLElement>('[data-collection-export-section][data-collection-height="content"]');
+      if (!root) return null;
+      const rect = root.getBoundingClientRect();
+      return Math.max(1, Math.ceil(rect.height));
+    });
+    const pageHeightPx = contentDrivenHeight ?? 900;
     // preferCSSPageSize must be explicit false: the site's own global
     // stylesheet (loaded here via absoluteStylesheetMarkup(), since this
     // snapshot page needs the site's real CSS) declares an unrelated
@@ -757,7 +839,7 @@ async function renderSectionPdf(html: string, snapshots: Map<string, string>) {
     // this explicit false the page came out swapped to that stylesheet's
     // portrait orientation (900x1440) instead of the requested 1440x900 —
     // confirmed by reading the actual generated PDF's page boxes.
-    const bytes = await page.pdf({ width: "1440px", height: "900px", margin: { top: "0", right: "0", bottom: "0", left: "0" }, printBackground: true, preferCSSPageSize: false });
+    const bytes = await page.pdf({ width: `${canonicalCollectionPageWidthPx}px`, height: `${pageHeightPx}px`, margin: { top: "0", right: "0", bottom: "0", left: "0" }, printBackground: true, preferCSSPageSize: false });
     return { bytes: new Uint8Array(bytes), navRects };
   } finally {
     snapshots.delete(token);
@@ -771,7 +853,7 @@ async function renderSectionPdf(html: string, snapshots: Map<string, string>) {
 // section's index page now has its own compact, selection-dependent
 // height (see captureCoverPage/navRectsSourceHeightPx), so it must be
 // passed through rather than assumed.
-function addLinkAnnotations(document: PDFDocument, coverPageIndex: number, navRects: NavigationRect[], starts: Map<string, number>, sourceHeightPx: number) {
+function addLinkAnnotations(document: PDFDocument, coverPageIndex: number, navRects: NavigationRect[], starts: Map<string, number>, sourceWidthPx: number, sourceHeightPx: number) {
   const page = document.getPage(coverPageIndex);
   const { width, height } = page.getSize();
   let annots = page.node.lookupMaybe(PDFName.of("Annots"), PDFArray);
@@ -786,7 +868,7 @@ function addLinkAnnotations(document: PDFDocument, coverPageIndex: number, navRe
     const annotation = document.context.register(document.context.obj({
       Type: PDFName.of("Annot"),
       Subtype: PDFName.of("Link"),
-      Rect: [PDFNumber.of((rect.x / 1440) * width), PDFNumber.of(height - ((rect.y + rect.height) / sourceHeightPx) * height), PDFNumber.of(((rect.x + rect.width) / 1440) * width), PDFNumber.of(height - (rect.y / sourceHeightPx) * height)],
+      Rect: [PDFNumber.of((rect.x / sourceWidthPx) * width), PDFNumber.of(height - ((rect.y + rect.height) / sourceHeightPx) * height), PDFNumber.of(((rect.x + rect.width) / sourceWidthPx) * width), PDFNumber.of(height - (rect.y / sourceHeightPx) * height)],
       Border: [0, 0, 0],
       A: { S: PDFName.of("GoTo"), D: [targetPage.ref, PDFName.of("Fit")] },
     }));
@@ -852,41 +934,181 @@ function addOutlines(document: PDFDocument, entries: Array<{ label: string; page
   document.catalog.set(PDFName.of("PageMode"), PDFName.of("UseOutlines"));
 }
 
+// Same page base color used everywhere else in this file's compositing
+// (buildCollectionPageChromeHtml's body background, applyCollectionPageChrome's
+// added-height fill) — confirmed to match src/styles.css's real body
+// background (#181743), so canvas padding added here is indistinguishable
+// from the page's own real background.
+const collectionPageBaseColor = rgb(24 / 255, 23 / 255, 67 / 255);
+
+// getComputedStyle always resolves to "rgb(r, g, b)" or "rgba(r, g, b, a)"
+// with 0-255 integer channels — parsed here, once, and alpha-composited
+// against the known page base color so the extended canvas paints a flat
+// opaque color that matches what the original semi-transparent overlay
+// actually looked like against that same base, rather than relying on a
+// PDF viewer to redo alpha compositing consistently.
+function parseCssColorToRgb01(css: string): [number, number, number] | null {
+  const match = css.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*(?:,\s*([\d.]+)\s*)?\)/i);
+  if (!match) return null;
+  const r = Number(match[1]);
+  const g = Number(match[2]);
+  const b = Number(match[3]);
+  const alpha = match[4] !== undefined ? Number(match[4]) : 1;
+  if (![r, g, b, alpha].every((value) => Number.isFinite(value))) return null;
+  const [baseR, baseG, baseB] = [24, 23, 67];
+  return [
+    (r * alpha + baseR * (1 - alpha)) / 255,
+    (g * alpha + baseG * (1 - alpha)) / 255,
+    (b * alpha + baseB * (1 - alpha)) / 255,
+  ];
+}
+
+type PageWidthUnificationReport = {
+  targetWidthPt: number;
+  pages: Array<{
+    pageIndex: number;
+    originalWidthPt: number;
+    finalWidthPt: number;
+    translatedByPt: number;
+    fullBleedExtended: number;
+    fullBleedUnsafeSkipped: Array<{ templateId: string | null; templateInstanceId: string | null; reason: string }>;
+  }>;
+};
+
+// Collection page geometry HARD INVARIANT: every physical page in the
+// final merged PDF must share one MediaBox width, so continuous viewing
+// has aligned left/right edges. Runs once, after every section's pages
+// are already in `merged` at their own native size (and after
+// addLinkAnnotations/addBackToIndexAnnotations have added their
+// annotations at those native coordinates) — so this is the only place
+// that shifts annotation X coordinates, uniformly, regardless of which
+// earlier step added them. Never scales: narrower pages get their canvas
+// widened (page.setSize) and their existing content stream translated to
+// sit centered in it (page.translateContent); a page that's already the
+// widest in this export is left completely untouched. Full-bleed regions
+// (see markFullBleedRegions/measureFullBleedRegions/applyCollectionPageChrome)
+// get their own flat color extended into the new canvas strips instead of
+// the plain page background, so a template like phase-milestones keeps
+// touching both new edges instead of gaining a visible inset. An unsafe
+// full-bleed region (background-image/gradient/backdrop-filter — can't be
+// losslessly extended) is deliberately left with the plain page
+// background and recorded in fullBleedUnsafeSkipped for postflight to
+// surface, never silently approximated.
+function unifyCollectionPageWidths(merged: PDFDocument, fullBleedByPageIndex: Map<number, FullBleedRegionPt[]>): PageWidthUnificationReport {
+  const pages = merged.getPages();
+  const targetWidth = Math.max(...pages.map((page) => page.getWidth()));
+  const report: PageWidthUnificationReport["pages"] = [];
+  pages.forEach((page, pageIndex) => {
+    const originalWidth = page.getWidth();
+    const deltaX = targetWidth - originalWidth;
+    if (deltaX <= 0.01) {
+      report.push({ pageIndex, originalWidthPt: originalWidth, finalWidthPt: originalWidth, translatedByPt: 0, fullBleedExtended: 0, fullBleedUnsafeSkipped: [] });
+      return;
+    }
+    const halfDelta = deltaX / 2;
+    const originalHeight = page.getHeight();
+    page.setSize(targetWidth, originalHeight);
+    // translateContent(halfDelta, 0) below applies to EVERY drawing
+    // operator already on this page's content stream, including the ones
+    // drawn right here — the same "draw at the pre-shift coordinate, then
+    // translate once" pattern applyCollectionPageChrome already uses for
+    // its own added-height fill. Drawing at post-shift coordinates (x: 0
+    // for the left strip, x: targetWidth - halfDelta for the right strip)
+    // would double-shift them, leaving the true left edge unpainted white
+    // and pushing the right strip off-page — confirmed as a real bug via
+    // a real generated PDF before this comment was written.
+    page.drawRectangle({ x: -halfDelta, y: 0, width: halfDelta, height: originalHeight, color: collectionPageBaseColor });
+    page.drawRectangle({ x: originalWidth, y: 0, width: halfDelta, height: originalHeight, color: collectionPageBaseColor });
+    const regions = fullBleedByPageIndex.get(pageIndex) ?? [];
+    let extended = 0;
+    const unsafeSkipped: PageWidthUnificationReport["pages"][number]["fullBleedUnsafeSkipped"] = [];
+    for (const region of regions) {
+      if (!region.safe) {
+        unsafeSkipped.push({ templateId: region.templateId, templateInstanceId: region.templateInstanceId, reason: "background-image/gradient/backdrop-filter — cannot be losslessly extended" });
+        continue;
+      }
+      const parsed = parseCssColorToRgb01(region.color);
+      if (!parsed) {
+        unsafeSkipped.push({ templateId: region.templateId, templateInstanceId: region.templateInstanceId, reason: `unparseable computed color "${region.color}"` });
+        continue;
+      }
+      const bottom = Math.max(0, Math.min(region.top, region.bottom));
+      const top = Math.min(originalHeight, Math.max(region.top, region.bottom));
+      const height = top - bottom;
+      if (height <= 0) continue;
+      const [r, g, b] = parsed;
+      page.drawRectangle({ x: -halfDelta, y: bottom, width: halfDelta, height, color: rgb(r, g, b) });
+      page.drawRectangle({ x: originalWidth, y: bottom, width: halfDelta, height, color: rgb(r, g, b) });
+      extended += 1;
+    }
+    page.translateContent(halfDelta, 0);
+    const annotations = page.node.lookupMaybe(PDFName.of("Annots"), PDFArray);
+    if (annotations) {
+      for (let index = 0; index < annotations.size(); index += 1) {
+        const annotation = annotations.lookup(index, PDFDict);
+        const rectArray = annotation.lookupMaybe(PDFName.of("Rect"), PDFArray);
+        if (!rectArray || rectArray.size() !== 4) continue;
+        const left = rectArray.lookup(0, PDFNumber).asNumber();
+        const right = rectArray.lookup(2, PDFNumber).asNumber();
+        rectArray.set(0, PDFNumber.of(left + halfDelta));
+        rectArray.set(2, PDFNumber.of(right + halfDelta));
+      }
+    }
+    report.push({ pageIndex, originalWidthPt: originalWidth, finalWidthPt: targetWidth, translatedByPt: halfDelta, fullBleedExtended: extended, fullBleedUnsafeSkipped: unsafeSkipped });
+  });
+  return { targetWidthPt: targetWidth, pages: report };
+}
+
 async function mergeCollection(records: StageRecord[], filename: string, outputRoot: string) {
   const merged = await PDFDocument.create();
   const starts = new Map<string, number>();
   const outlineEntries: Array<{ label: string; pageIndex: number }> = [];
   let coverPageIndex = -1;
   let navRects: NavigationRect[] = [];
+  let navRectsSourceWidthPx: number = COVER_GEOMETRY.width;
   let navRectsSourceHeightPx = 900;
+  // Sections are still allowed to differ in CAPTURE width — a project page
+  // reproduces whatever CSS viewport width the exporting browser was
+  // showing (see fallbackProjectCaptureViewportWidth above); this is never
+  // reverted to a hardcoded capture width. What changed (Collection page
+  // geometry HARD INVARIANT, superseding the older "different physical
+  // widths are expected" rule) is the FINAL merged PDF: every physical
+  // page's MediaBox width must end up identical so continuous viewing has
+  // aligned left/right edges. That normalization happens once, below,
+  // after every source page has been copied through untouched at its own
+  // native size — see unifyCollectionPageWidths. It never scales content;
+  // narrower pages get their canvas extended and centered instead.
   const sources = await Promise.all(records.map((record) => PDFDocument.load(record.bytes)));
-  const finalPageWidth = Math.max(...sources.flatMap((source) => source.getPages().map((page) => page.getWidth())));
   for (const [recordIndex, record] of records.entries()) {
     const source = sources[recordIndex];
     const start = merged.getPageCount();
     starts.set(record.sectionId, start);
     outlineEntries.push({ label: record.label, pageIndex: start });
     const pages = await merged.copyPages(source, source.getPageIndices());
-    pages.forEach((page) => {
-      const { width, height } = page.getSize();
-      if (Math.abs(width - finalPageWidth) > 0.01) {
-        const scale = finalPageWidth / width;
-        page.scaleContent(scale, scale);
-        page.setSize(finalPageWidth, height * scale);
-      }
-      merged.addPage(page);
-    });
+    pages.forEach((page) => { merged.addPage(page); });
     // navRects always belong to the LAST page of whichever section produced
     // them — for the cover section that's the index page (page 2 of its
     // 2-page cover+index sub-document), not the cover page itself.
     if (record.navRects.length) {
       coverPageIndex = start + pages.length - 1;
       navRects = record.navRects;
+      navRectsSourceWidthPx = record.navRectsSourceWidthPx ?? COVER_GEOMETRY.width;
       navRectsSourceHeightPx = record.navRectsSourceHeightPx ?? 900;
     }
   }
-  if (coverPageIndex >= 0) addLinkAnnotations(merged, coverPageIndex, navRects, starts, navRectsSourceHeightPx);
+  if (coverPageIndex >= 0) addLinkAnnotations(merged, coverPageIndex, navRects, starts, navRectsSourceWidthPx, navRectsSourceHeightPx);
   const backLinkCount = coverPageIndex >= 0 ? addBackToIndexAnnotations(merged, records, starts, coverPageIndex) : 0;
+  // Built and applied only now, after every annotation above has been
+  // added at each page's native (pre-unification) coordinates — the width
+  // pass below shifts every annotation on a page uniformly regardless of
+  // which step added it, so ordering here matters.
+  const fullBleedByPageIndex = new Map<number, FullBleedRegionPt[]>();
+  for (const record of records) {
+    const start = starts.get(record.sectionId);
+    const regions = (record.diagnostics as { fullBleedRegions?: FullBleedRegionPt[] } | undefined)?.fullBleedRegions;
+    if (start !== undefined && regions && regions.length > 0) fullBleedByPageIndex.set(start, regions);
+  }
+  const pageWidthUnification = unifyCollectionPageWidths(merged, fullBleedByPageIndex);
   addOutlines(merged, outlineEntries);
   merged.setTitle(filename.replace(/\.pdf$/i, ""));
   merged.setProducer("Dilida Portfolio Collection Builder");
@@ -909,7 +1131,7 @@ async function mergeCollection(records: StageRecord[], filename: string, outputR
   await fs.writeFile(outputPath, bytes);
   const diagnostics = records.flatMap((record) => record.diagnostics ? [{ sectionId: record.sectionId, label: record.label, ...record.diagnostics }] : []);
   const diagnosticPath = path.join(directory, filename.replace(/\.pdf$/i, "-diagnostics.json"));
-  await fs.writeFile(diagnosticPath, `${JSON.stringify({ generatedAt: new Date().toISOString(), totalBytes: bytes.byteLength, canonicalBytes: canonicalBytes.byteLength, streamOptimizationReport, pages: merged.getPageCount(), projects: diagnostics }, null, 2)}\n`, "utf8");
+  await fs.writeFile(diagnosticPath, `${JSON.stringify({ generatedAt: new Date().toISOString(), totalBytes: bytes.byteLength, canonicalBytes: canonicalBytes.byteLength, streamOptimizationReport, pages: merged.getPageCount(), pageWidthUnification, projects: diagnostics }, null, 2)}\n`, "utf8");
   return { bytes, outputPath, diagnosticPath, starts: Object.fromEntries(starts), pages: merged.getPageCount(), outlineCount: outlineEntries.length, linkCount: navRects.filter((rect) => starts.has(rect.sectionId)).length + backLinkCount, totalBytes: bytes.byteLength };
 }
 
@@ -1080,7 +1302,7 @@ export function portfolioCollectionExportPlugin(): Plugin {
         try {
           const value = await body(req) as Record<string, unknown>;
           if (!safeId(value.sectionId) || typeof value.label !== "string") throw new Error("Invalid collection section metadata.");
-          let bytes: Uint8Array; let navRects: NavigationRect[] = []; let navRectsSourceHeightPx: number | undefined; let diagnostics: Record<string, unknown> | undefined;
+          let bytes: Uint8Array; let navRects: NavigationRect[] = []; let navRectsSourceWidthPx: number | undefined; let navRectsSourceHeightPx: number | undefined; let diagnostics: Record<string, unknown> | undefined;
           if (value.kind === "project") {
             const url = value.url; const projectId = value.projectId; const slug = value.slug; const locale = value.locale;
             if (typeof url !== "string" || !safeId(projectId)) throw new Error("Invalid project capture request.");
@@ -1117,11 +1339,10 @@ export function portfolioCollectionExportPlugin(): Plugin {
               throw new Error("Invalid cover capture request.");
             }
             const requestedWidth = value.captureWidthPx;
-            const targetWidthPx = Number.isInteger(requestedWidth) && (requestedWidth as number) >= minimumProjectCaptureViewportWidth && (requestedWidth as number) <= maximumProjectCaptureViewportWidth
-              ? (requestedWidth as number)
-              : fallbackProjectCaptureViewportWidth;
+            if (!Number.isInteger(requestedWidth) || (requestedWidth as number) < canonicalCollectionPageWidthPx || (requestedWidth as number) > maximumProjectCaptureViewportWidth) throw new Error(`Collection cover target width must be between ${canonicalCollectionPageWidthPx}px and ${maximumProjectCaptureViewportWidth}px.`);
+            const targetWidthPx = requestedWidth as number;
             const result = await captureCoverPage(entries, value.brandLine, value.footerLabel, server.config.root, targetWidthPx);
-            bytes = result.bytes; navRects = result.navRects; navRectsSourceHeightPx = result.navRectsSourceHeightPx;
+            bytes = result.bytes; navRects = result.navRects; navRectsSourceWidthPx = result.navRectsSourceWidthPx; navRectsSourceHeightPx = result.navRectsSourceHeightPx;
             diagnostics = result.diagnostics;
             console.info("[Collection export] captured cover", diagnostics);
           } else if (value.kind === "section" && typeof value.html === "string") {
@@ -1129,7 +1350,7 @@ export function portfolioCollectionExportPlugin(): Plugin {
           } else throw new Error("Unknown collection stage type.");
           if (aborted.value) throw new Error("Collection export was cancelled.");
           const token = crypto.randomUUID();
-          stages.set(token, { bytes, sectionId: value.sectionId, label: value.label.slice(0, 160), navRects, navRectsSourceHeightPx, diagnostics, createdAt: Date.now() });
+          stages.set(token, { bytes, sectionId: value.sectionId, label: value.label.slice(0, 160), navRects, navRectsSourceWidthPx, navRectsSourceHeightPx, diagnostics, createdAt: Date.now() });
           json(res, 200, { token, pageCount: (await PDFDocument.load(bytes)).getPageCount() });
         } catch (error) { console.error("[collection export] stage failed", error); json(res, 500, { error: error instanceof Error ? error.message : "Unable to stage collection section." }); }
       });

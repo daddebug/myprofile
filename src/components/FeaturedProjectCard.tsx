@@ -156,7 +156,7 @@ export function FeaturedProjectCard({
           onImageError={() => setFailedImageSource(resolvedCoverImage)}
         />
 
-        <div className="flex flex-col px-4 pb-4 pt-3.5 md:min-h-[160px] md:flex-1 md:px-6 md:pb-4 md:pt-4">
+        <div className="relative flex flex-col px-4 pb-4 pt-3.5 md:min-h-[160px] md:flex-1 md:px-6 md:pb-4 md:pt-4">
           <h3
             className="line-clamp-3 font-display text-[clamp(1.35rem,5.8vw,1.7rem)] font-semibold leading-[1.08] text-softWhite md:text-[clamp(1.45rem,1.7vw,2.15rem)] md:leading-[1.02]"
             data-featured-work-title
@@ -164,15 +164,22 @@ export function FeaturedProjectCard({
             {project.title}
           </h3>
 
+          {/* Absolutely positioned (not height-animated in flow): the card's
+              md:min-h-[520px] already reserves this exact space at rest, so
+              hover only fades/slides this panel in as a paint-only overlay --
+              it can never change the article's own box height, which would
+              otherwise ripple into the flex rail's default align-items:stretch
+              (shifting sibling cards and the title above it) and can also
+              interrupt an in-flight Track-tab smooth scroll. */}
           <AnimatePresence initial={false}>
             {desktopActive ? (
               <motion.div
                 key="details"
-                className="overflow-hidden"
+                className="absolute inset-x-0 bottom-0 overflow-hidden"
                 data-featured-work-details
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 6 }}
                 transition={{ duration: 0.28, ease: "easeOut" }}
               >
                 <div className="pt-3">

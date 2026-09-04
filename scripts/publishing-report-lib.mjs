@@ -91,6 +91,38 @@ async function writeReport(root, report) {
   return report;
 }
 
+export async function writeFileReviewBlockedReport({ root, productionUrl, fileReview, error = "" }) {
+  const items = fileReview.blocked.map((file) => ({
+    id: `file-review:${file}`,
+    projectId: "",
+    title: file,
+    category: "File Review",
+    status: "BLOCKED",
+    description: "This file is outside the canonical automatic publishing scope.",
+    sourceAdapterIds: [],
+    sourcePath: file,
+    action: "Review this file separately before publishing.",
+  }));
+  return writeReport(root, {
+    version: 2,
+    generatedAt: new Date().toISOString(),
+    phase: "preflight",
+    outcome: "blocked",
+    diffStatus: "not-run",
+    productionUrl,
+    counts: counts(items),
+    items,
+    fileReview,
+    ...(error ? { error } : {}),
+  });
+}
+
+export async function attachFileReviewToPublishReport({ root, fileReview }) {
+  const report = await readJson(path.join(root, LAUNCHER_REPORT_PATH), null);
+  if (!report) return null;
+  return writeReport(root, { ...report, fileReview });
+}
+
 // RETIRED from the live publish path (Publishing Architecture V2, Cutover).
 // Kept only for parity/rollback reference -- no longer reachable from
 // import-production-bundle.mjs. It independently re-read `currentPublished`

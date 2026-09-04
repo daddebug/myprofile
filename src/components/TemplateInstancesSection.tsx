@@ -53,6 +53,7 @@ import {
   type TemplateInstanceLayoutSettings,
 } from "../lib/projectTemplateInstances";
 import { useTemplateHorizontalInset } from "../lib/templateLayoutDefaults";
+import type { ImageAnnotation } from "./template-tools/ImageAnnotation";
 import { isCollectionExportCapture } from "../lib/collectionExportStaging";
 import { recordTemplateFit } from "../lib/collectionMediaDiagnostics";
 import { optimizeUploadedImage } from "../lib/imageOptimization";
@@ -633,6 +634,11 @@ function ResolvedInstancePreview({
   const horizontalInset = instance.layoutSettings?.horizontalInset ?? templateDefaultInset;
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [activeUploadId, setActiveUploadId] = useState("");
+  const [annotationUploadTarget, setAnnotationUploadTarget] = useState<{
+    owner: string;
+    annotationId: string;
+    evidenceId: string;
+  } | null>(null);
   const [uploadError, setUploadError] = useState("");
   const [uploadStatus, setUploadStatus] = useState("");
   const gameInputRef = useRef<HTMLInputElement | null>(null);
@@ -783,7 +789,17 @@ function ResolvedInstancePreview({
   const chooseImage = (itemId: string) => {
     setUploadError("");
     setUploadStatus("");
+    setAnnotationUploadTarget(null);
     setActiveUploadId(itemId);
+    fileInputRef.current?.click();
+  };
+
+  const chooseAnnotationEvidence = (owner: string, annotationId: string) => {
+    const evidenceId = createInstanceId("annotation-evidence");
+    setUploadError("");
+    setUploadStatus("");
+    setAnnotationUploadTarget({ owner, annotationId, evidenceId });
+    setActiveUploadId(evidenceId);
     fileInputRef.current?.click();
   };
 
@@ -811,7 +827,46 @@ function ResolvedInstancePreview({
       await decodeDynamicProjectImage(staged.publicUrl);
       uploadStage = "committing";
       let nextContent: Record<string, TemplateContentValue>;
-      if (instance.templateId === "direction-compare") {
+      if (annotationUploadTarget) {
+        const evidenceImage = { id: annotationUploadTarget.evidenceId, imageId: staged.imageId, publicPath: staged.publicUrl };
+        if (instance.templateId === "image-row") {
+          const items = Array.isArray(instance.content.items) ? instance.content.items : [];
+          nextContent = {
+            ...instance.content,
+            items: items.map((value) => {
+              if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+              const item = value as Record<string, unknown>;
+              if (item.id !== annotationUploadTarget.owner) return item;
+              const annotations = Array.isArray(item.annotations) ? item.annotations as ImageAnnotation[] : [];
+              return {
+                ...item,
+                annotations: annotations.map((annotation) => annotation.id === annotationUploadTarget.annotationId
+                  ? { ...annotation, evidenceImages: [...annotation.evidenceImages, evidenceImage] }
+                  : annotation),
+              };
+            }),
+          };
+        } else if (instance.templateId === "direction-compare") {
+          const field = annotationUploadTarget.owner;
+          if (field !== "leftImage" && field !== "rightImage") throw new Error("Invalid annotation image owner.");
+          const image = instance.content[field];
+          if (!image || typeof image !== "object" || Array.isArray(image)) throw new Error("Annotation image owner is missing.");
+          const annotations = Array.isArray((image as Record<string, unknown>).annotations)
+            ? (image as Record<string, unknown>).annotations as ImageAnnotation[]
+            : [];
+          nextContent = {
+            ...instance.content,
+            [field]: {
+              ...image,
+              annotations: annotations.map((annotation) => annotation.id === annotationUploadTarget.annotationId
+                ? { ...annotation, evidenceImages: [...annotation.evidenceImages, evidenceImage] }
+                : annotation),
+            },
+          };
+        } else {
+          throw new Error("This template does not support image annotations.");
+        }
+      } else if (instance.templateId === "direction-compare") {
         if (persistedItemId !== "leftImage" && persistedItemId !== "rightImage") {
           throw new Error(`Invalid Direction Compare image slot: ${persistedItemId}`);
         }
@@ -864,6 +919,7 @@ function ResolvedInstancePreview({
       onContentChange(committed.mapping.instances[instance.instanceId]?.content ?? nextContent);
       onDiskImagesChanged?.();
       stagedImage = null;
+      setAnnotationUploadTarget(null);
       setUploadStatus(locale === "zh" ? "已保存到本地项目目录" : "Saved to the local project directory");
     } catch (error) {
       if (stagedImage) await abortDynamicProjectImageStage(projectId, stagedImage.commitToken).catch(() => undefined);
@@ -876,6 +932,46 @@ function ResolvedInstancePreview({
       setUploadError(locale === "zh"
         ? `${fileDescription}（${dimensions}）在${stageLabel}失败：${detail}${stagedImage ? "；已暂存的文件已回滚，原有图片未被修改。" : "；原有图片未被修改。"}`
         : `${fileDescription} (${dimensions}) failed at ${stageLabel}: ${detail}${stagedImage ? "; the staged file was rolled back and your existing image was not changed." : "; your existing image was not changed."}`);
+    }
+  };
+
+  const removeAnnotationEvidence = async (owner: string, annotationId: string, evidenceId: string) => {
+    let imageId = "";
+    let nextContent: Record<string, TemplateContentValue>;
+    const removeFromAnnotations = (annotations: ImageAnnotation[]) => annotations.map((annotation) => {
+      if (annotation.id !== annotationId) return annotation;
+      const target = annotation.evidenceImages.find((image) => image.id === evidenceId);
+      imageId = target?.imageId ?? "";
+      return { ...annotation, evidenceImages: annotation.evidenceImages.filter((image) => image.id !== evidenceId) };
+    });
+    if (instance.templateId === "image-row") {
+      const items = Array.isArray(instance.content.items) ? instance.content.items : [];
+      nextContent = {
+        ...instance.content,
+        items: items.map((value) => {
+          if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+          const item = value as Record<string, unknown>;
+          if (item.id !== owner) return item;
+          return { ...item, annotations: removeFromAnnotations(Array.isArray(item.annotations) ? item.annotations as ImageAnnotation[] : []) };
+        }),
+      };
+    } else {
+      if (owner !== "leftImage" && owner !== "rightImage") return;
+      const image = instance.content[owner];
+      if (!image || typeof image !== "object" || Array.isArray(image)) return;
+      nextContent = {
+        ...instance.content,
+        [owner]: { ...image, annotations: removeFromAnnotations(Array.isArray((image as Record<string, unknown>).annotations) ? (image as Record<string, unknown>).annotations as ImageAnnotation[] : []) },
+      };
+    }
+    try {
+      if (imageId) {
+        await unbindDynamicProjectImages({ projectId, instanceId: instance.instanceId, imageIds: [imageId], instance: { ...instance, content: nextContent, order: instanceOrder } });
+        onDiskImagesChanged?.();
+      }
+      onContentChange(nextContent);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "The evidence image could not be removed.");
     }
   };
 
@@ -902,7 +998,7 @@ function ResolvedInstancePreview({
     }
   };
 
-  const updateDirectionCompareImageSetting = (side: "left" | "right", updates: { hoverPreviewMode: "none" | "floating" }) => {
+  const updateDirectionCompareImageSetting = (side: "left" | "right", updates: Record<string, unknown>) => {
     const field = side === "left" ? "leftImage" : "rightImage";
     const image = instance.content[field];
     if (!image || typeof image !== "object" || Array.isArray(image)) return;
@@ -1026,6 +1122,8 @@ function ResolvedInstancePreview({
         onRemoveItem: removeImageRowItem,
         onCancelPlaceholder: removeImageRowItem,
         onItemChange: updateImageRowItem,
+        onUploadAnnotationEvidence: (itemId: string, annotationId: string) => chooseAnnotationEvidence(itemId, annotationId),
+        onRemoveAnnotationEvidence: (itemId: string, annotationId: string, evidenceId: string) => void removeAnnotationEvidence(itemId, annotationId, evidenceId),
         error: uploadError,
       },
     } : {}),
@@ -1057,6 +1155,8 @@ function ResolvedInstancePreview({
         onUploadImage: (side: "left" | "right") => chooseImage(side === "left" ? "leftImage" : "rightImage"),
         onRemoveImage: removeDirectionCompareImage,
         onImageSettingChange: updateDirectionCompareImageSetting,
+        onUploadAnnotationEvidence: (side: "left" | "right", annotationId: string) => chooseAnnotationEvidence(side === "left" ? "leftImage" : "rightImage", annotationId),
+        onRemoveAnnotationEvidence: (side: "left" | "right", annotationId: string, evidenceId: string) => void removeAnnotationEvidence(side === "left" ? "leftImage" : "rightImage", annotationId, evidenceId),
         onDirectionChange: (direction: "left-to-right" | "right-to-left" | "none") => onContentChange({ ...instance.content, direction }),
         status: uploadStatus,
         error: uploadError,

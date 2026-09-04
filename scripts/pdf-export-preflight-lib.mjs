@@ -73,10 +73,10 @@ export async function buildPdfExportPreflight({ root, selection, stagedProjects,
   };
 
   if (selection?.includeUiWorks && Array.isArray(selection.selectedUiWorkIds) && selection.selectedUiWorkIds.length) {
-    manifest.includedFixedSections.push({ sourceId: "ui-works", expectedPageType: "fixed", expectedWidth: 1440, expectedHeightBehavior: "fixed", itemCount: selection.selectedUiWorkIds.length });
+    manifest.includedFixedSections.push({ sourceId: "ui-works", expectedPageType: "content-driven", expectedWidth: 1440, expectedHeightBehavior: "content-driven", itemCount: selection.selectedUiWorkIds.length });
   }
   if (selection?.includeGameExperience && Array.isArray(selection.selectedGameIds) && selection.selectedGameIds.length) {
-    manifest.includedFixedSections.push({ sourceId: "game-experience", expectedPageType: "fixed", expectedWidth: 1440, expectedHeightBehavior: "fixed", itemCount: selection.selectedGameIds.length });
+    manifest.includedFixedSections.push({ sourceId: "game-experience", expectedPageType: "content-driven", expectedWidth: 1440, expectedHeightBehavior: "content-driven", itemCount: selection.selectedGameIds.length });
   }
   if (selection?.includeContact) {
     manifest.includedFixedSections.push({ sourceId: "contact", expectedPageType: "fixed", expectedWidth: 1440, expectedHeightBehavior: "fixed", itemCount: 1 });

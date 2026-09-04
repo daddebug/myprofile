@@ -125,9 +125,29 @@ export async function buildPdfExportPostflight({ root, pdfPath, diagnosticsDir }
     figmaArtifactMode: [],
     tocSafeArea: null,
     fixedPageDimensions: [],
+    coverRendererGeometry: null,
+    pageWidthUnification: null,
     issues: [],
     ok: false,
   };
+
+  // Collection page geometry HARD INVARIANT: every physical page's real
+  // MediaBox width, read straight off the actual merged PDF above (not
+  // trusted from diagnostics bookkeeping alone), must be identical — this
+  // is the ground-truth check for "left/right page edges align in
+  // continuous viewing" (skills/portfolio-collection/SKILL.md). Superseded
+  // rule: "different physical widths are expected" no longer applies to
+  // the FINAL merged PDF (project CAPTURE width still varies, per
+  // window.innerWidth — that is unchanged and is not what this checks).
+  const distinctPageWidths = [...new Set(report.pages.map((page) => page.widthPt))];
+  if (distinctPageWidths.length > 1) {
+    report.issues.push({
+      severity: "error",
+      code: "COLLECTION_PAGE_WIDTH_NOT_UNIFORM",
+      sourcePath: pdfPath,
+      message: `Merged Collection PDF has ${distinctPageWidths.length} distinct physical page widths (${distinctPageWidths.join(", ")}pt) — every page must share one MediaBox width per the Collection page geometry invariant.`,
+    });
+  }
 
   // Project blank-tail rule: reuse each project's own already-computed
   // trailingBlankHeight/intendedBottomPadding rather than remeasuring —
@@ -170,13 +190,54 @@ export async function buildPdfExportPostflight({ root, pdfPath, diagnosticsDir }
       projectNumber: entry.projectNumber ?? null,
       projectCount: entry.projectCount ?? null,
       contentSeparation: entry.projectContentSeparation ?? null,
+      // Measured from the chrome's own real rendered content
+      // (label + summary + back-link) — never a fixed constant. See
+      // scripts/portfolioCollectionExportPlugin.ts's
+      // renderCollectionPageChrome.
       chromeHeight: entry.collectionPageChromeHeight ?? null,
+      chromeOverflow: entry.collectionPageChromeOverflow ?? 0,
+      finalPageHeight: entry.finalPageHeight ?? null,
+      measuredContentBottom: entry.measuredContentBottom ?? null,
+      finalMargin: entry.intendedBottomPadding ?? null,
       backLinkRect: entry.collectionBackLinkRect ?? null,
       exactWebPdfPages: entry.exactWebPdfPages ?? null,
     };
     report.collectionPageChrome.push(chrome);
-    if (chrome.width !== 1440 || chrome.contentSeparation !== 32 || chrome.chromeHeight !== 96 || chrome.exactWebPdfPages !== 1 || !chrome.backLinkRect) {
-      report.issues.push({ severity: "error", code: "COLLECTION_PAGE_CHROME_INVALID", sourcePath: entry.file, message: `Project ${chrome.projectId ?? "unknown"} does not use the canonical 1440px / 32px separation / 96px chrome / one-page structure with a Back to Index link rectangle.` });
+    // chrome.width (exportRootWidth) is the exporting browser's own
+    // window.innerWidth at capture time, not a fixed constant — a project
+    // page reproduces whatever CSS viewport the browser that initiated the
+    // Collection export was actually showing, so it is recorded for
+    // diagnostics but is never itself a pass/fail condition here.
+    //
+    // chrome.chromeHeight is likewise no longer checked against a fixed
+    // constant (there is no longer one to check against — it is measured
+    // per-project from real content). Instead:
+    //   1. arithmetic consistency: the reported finalPageHeight must equal
+    //      measuredContentBottom + contentSeparation + the measured chrome
+    //      height + the final margin — proving the measured chrome height
+    //      is genuinely what was composited into the page, not just a
+    //      number reported alongside a differently-sized real result.
+    //   2. chromeOverflow must be 0 — the chrome's own re-check (done at
+    //      the exact final canvas size, not assumed) found no content
+    //      extending past what was actually printed; a non-zero value
+    //      means the footer was truncated.
+    //   3. the page's own trailing-blank-tail check (above, using
+    //      collectionPageFinalMarginPx) already enforces that the bottom
+    //      safe area stays a small, exact, expected amount — not
+    //      duplicated here.
+    if (chrome.contentSeparation !== 32 || chrome.exactWebPdfPages !== 1 || !chrome.backLinkRect) {
+      report.issues.push({ severity: "error", code: "COLLECTION_PAGE_CHROME_INVALID", sourcePath: entry.file, message: `Project ${chrome.projectId ?? "unknown"} does not use the canonical 32px separation / one-page structure with a Back to Index link rectangle.` });
+    }
+    if (typeof chrome.chromeHeight === "number" && typeof chrome.finalPageHeight === "number" && typeof chrome.measuredContentBottom === "number" && typeof chrome.finalMargin === "number") {
+      const expectedFinalPageHeight = chrome.measuredContentBottom + chrome.contentSeparation + chrome.chromeHeight + chrome.finalMargin;
+      if (Math.abs(expectedFinalPageHeight - chrome.finalPageHeight) > 0.5) {
+        report.issues.push({ severity: "error", code: "COLLECTION_PAGE_CHROME_HEIGHT_INCONSISTENT", sourcePath: entry.file, message: `Project ${chrome.projectId ?? "unknown"}: reported finalPageHeight (${chrome.finalPageHeight}px) does not equal measuredContentBottom + contentSeparation + chromeHeight + finalMargin (${expectedFinalPageHeight}px).` });
+      }
+    } else {
+      report.issues.push({ severity: "error", code: "COLLECTION_PAGE_CHROME_HEIGHT_MISSING", sourcePath: entry.file, message: `Project ${chrome.projectId ?? "unknown"} is missing chromeHeight/finalPageHeight/measuredContentBottom/finalMargin diagnostics needed to verify the measured footer height.` });
+    }
+    if (chrome.chromeOverflow > 0) {
+      report.issues.push({ severity: "error", code: "COLLECTION_PAGE_CHROME_TRUNCATED", sourcePath: entry.file, message: `Project ${chrome.projectId ?? "unknown"}: footer content overflowed its own measured canvas by ${chrome.chromeOverflow}px (truncated).` });
     }
 
     const figma = entry.figmaAudit;
@@ -219,6 +280,57 @@ export async function buildPdfExportPostflight({ root, pdfPath, diagnosticsDir }
   const expectedFixedHeightPt = toPt(900);
   const fixedSourceIds = new Set(registry.sources.filter((source) => source.sizing === "fixed").map((source) => source.id));
   report.fixedPageDimensions = { expectedWidthPt: expectedFixedWidthPt, expectedHeightPt: expectedFixedHeightPt, fixedSourceIds: [...fixedSourceIds] };
+
+  // Cross-check mergeCollection's own bookkeeping (per-page target/original
+  // width, translation, full-bleed handling) against the ground-truth check
+  // above — and surface any full-bleed region that could not be losslessly
+  // extended (background-image/gradient/backdrop-filter) as a WARNING, not
+  // an error: per the invariant, this must never be silently approximated,
+  // but it also must not silently block the export — a human decides.
+  const unificationEntry = activeDiagnostics.find((entry) => entry.pageWidthUnification && !entry.parseError);
+  if (unificationEntry) {
+    report.pageWidthUnification = unificationEntry.pageWidthUnification;
+    const { targetWidthPt, pages: unificationPages } = unificationEntry.pageWidthUnification;
+    for (const page of unificationPages ?? []) {
+      const actual = report.pages[page.pageIndex]?.widthPt;
+      if (typeof actual === "number" && Math.abs(actual - page.finalWidthPt) > 0.5) {
+        report.issues.push({ severity: "error", code: "COLLECTION_PAGE_WIDTH_BOOKKEEPING_MISMATCH", sourcePath: expectedDiagnosticsFile, message: `Page ${page.pageIndex}: mergeCollection recorded finalWidthPt=${page.finalWidthPt}pt but the real PDF page is ${actual}pt.` });
+      }
+      for (const unsafe of page.fullBleedUnsafeSkipped ?? []) {
+        report.issues.push({
+          severity: "warning",
+          code: "FULL_BLEED_REGION_NOT_LOSSLESSLY_EXTENDED",
+          sourcePath: expectedDiagnosticsFile,
+          message: `Page ${page.pageIndex}, template "${unsafe.templateId ?? "unknown"}" (instance ${unsafe.templateInstanceId ?? "unknown"}): full-bleed region could not be losslessly extended (${unsafe.reason}) — it falls back to the plain page background instead of staying full-bleed. Needs a human decision.`,
+        });
+      }
+    }
+  } else if (distinctPageWidths.length > 1) {
+    report.issues.push({ severity: "error", code: "COLLECTION_PAGE_WIDTH_UNIFICATION_DIAGNOSTICS_MISSING", sourcePath: expectedDiagnosticsFile, message: "Physical page widths differ but no pageWidthUnification diagnostics were found to explain why." });
+  }
+
+  const coverDiagnostics = activeDiagnostics
+    .flatMap((entry) => Array.isArray(entry.projects) ? entry.projects : [])
+    .find((entry) => entry?.sectionId === "cover");
+  if (coverDiagnostics) {
+    const expectedScale = coverDiagnostics.rendererTargetWidthPx / coverDiagnostics.rendererBaseWidthPx;
+    const targetWidthPt = coverDiagnostics.rendererTargetWidthPx * PT_PER_PX;
+    const coverPages = report.pageWidthUnification?.pages?.slice(0, 2) ?? [];
+    const nativeAtTarget = coverPages.length === 2 && coverPages.every((page) => Math.abs(page.originalWidthPt - targetWidthPt) <= 0.5 && page.translatedByPt === 0);
+    report.coverRendererGeometry = {
+      baseWidthPx: coverDiagnostics.rendererBaseWidthPx,
+      targetWidthPx: coverDiagnostics.rendererTargetWidthPx,
+      scaleRatio: coverDiagnostics.rendererScaleRatio,
+      expectedScaleRatio: expectedScale,
+      targetWidthPt,
+      nativeAtTarget,
+    };
+    if (!Number.isFinite(expectedScale) || Math.abs(coverDiagnostics.rendererScaleRatio - expectedScale) > 0.0001 || !nativeAtTarget) {
+      report.issues.push({ severity: "error", code: "COVER_RENDERER_TARGET_GEOMETRY_MISMATCH", sourcePath: expectedDiagnosticsFile, message: "Cover/TOC were not generated natively at the final target width with one shared renderer scale." });
+    }
+  } else {
+    report.issues.push({ severity: "error", code: "COVER_RENDERER_GEOMETRY_DIAGNOSTICS_MISSING", sourcePath: expectedDiagnosticsFile, message: "Cover/TOC renderer width and scale diagnostics are missing." });
+  }
 
   report.ok = !report.issues.some((issue) => issue.severity === "error");
   return report;
