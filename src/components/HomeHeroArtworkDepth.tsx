@@ -1,10 +1,52 @@
-import { useEffect, useRef, type RefObject } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  type RefObject,
+} from "react";
 
 type HomeHeroArtworkDepthProps = {
   heroRef: RefObject<HTMLElement | null>;
   imageSrc: string;
   depthSrc: string;
   disabled?: boolean;
+  onOrientationPermissionChange?: (state: HomeHeroOrientationPermissionState) => void;
+};
+
+export type HomeHeroOrientationPermissionState = "hidden" | "prompt" | "granted" | "denied";
+
+export type HomeHeroArtworkDepthHandle = {
+  requestOrientationPermission: () => void;
+};
+
+type DeviceOrientationEventConstructorWithPermission = typeof DeviceOrientationEvent & {
+  requestPermission?: () => Promise<"granted" | "denied">;
+};
+
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+
+const normalizeTilt = (degrees: number) => {
+  const deadZone = 1.5;
+  const limit = 15;
+  const magnitude = Math.abs(degrees);
+  if (magnitude <= deadZone) return 0;
+  return Math.sign(degrees) * clamp((magnitude - deadZone) / (limit - deadZone), 0, 1);
+};
+
+const getScreenAngle = () => {
+  const legacyWindow = window as Window & { orientation?: number };
+  return screen.orientation?.angle ?? legacyWindow.orientation ?? 0;
+};
+
+const orientToScreen = (beta: number, gamma: number) => {
+  const radians = (getScreenAngle() * Math.PI) / 180;
+  const cosine = Math.cos(radians);
+  const sine = Math.sin(radians);
+  return {
+    x: gamma * cosine + beta * sine,
+    y: -gamma * sine + beta * cosine,
+  };
 };
 
 const vertexShaderSource = `
@@ -108,21 +150,29 @@ function createTexture(gl: WebGLRenderingContext, image: HTMLImageElement, unit:
   return texture;
 }
 
-export function HomeHeroArtworkDepth({
+export const HomeHeroArtworkDepth = forwardRef<HomeHeroArtworkDepthHandle, HomeHeroArtworkDepthProps>(function HomeHeroArtworkDepth({
   heroRef,
   imageSrc,
   depthSrc,
   disabled = false,
-}: HomeHeroArtworkDepthProps) {
+  onOrientationPermissionChange,
+}, ref) {
   const layerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const permissionRequestRef = useRef<() => void>(() => undefined);
+
+  useImperativeHandle(ref, () => ({
+    requestOrientationPermission: () => permissionRequestRef.current(),
+  }), []);
 
   useEffect(() => {
     const layer = layerRef.current;
     const canvas = canvasRef.current;
     const hero = heroRef.current;
     const finePointer = window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 768px)");
-    if (!layer || !canvas || !hero || disabled || !finePointer.matches) return;
+    if (!layer || !canvas || !hero || disabled) return;
+
+    const desktopInput = finePointer.matches;
 
     const gl = canvas.getContext("webgl", {
       alpha: true,
@@ -183,6 +233,14 @@ export function HomeHeroArtworkDepth({
     const target = { x: 0, y: 0 };
     const current = { x: 0, y: 0 };
     const surface = { x: 0, y: 0 };
+    const mobileDepthX = 8;
+    const mobileDepthY = 6;
+    const surfaceRangeX = desktopInput ? 3 : 2;
+    const surfaceRangeY = desktopInput ? 2 : 1.5;
+    let orientationBaseline: { x: number; y: number } | null = null;
+    let orientationActive = false;
+    let orientationListening = false;
+    let touchActive = false;
 
     const updateGeometry = () => {
       const cssWidth = Math.max(1, canvas.clientWidth);
@@ -216,8 +274,8 @@ export function HomeHeroArtworkDepth({
       gl.uniform2f(uvOffsetLocation, offsetX, offsetY);
       gl.uniform2f(
         displacementLocation,
-        (14 * scaleX) / cssWidth,
-        (10 * scaleY) / cssHeight,
+        ((desktopInput ? 14 : mobileDepthX) * scaleX) / cssWidth,
+        ((desktopInput ? 10 : mobileDepthY) * scaleY) / cssHeight,
       );
     };
 
@@ -230,8 +288,8 @@ export function HomeHeroArtworkDepth({
     const animate = () => {
       const deltaX = target.x - current.x;
       const deltaY = target.y - current.y;
-      const surfaceTargetX = target.x * -3;
-      const surfaceTargetY = target.y * -2;
+      const surfaceTargetX = target.x * -surfaceRangeX;
+      const surfaceTargetY = target.y * -surfaceRangeY;
       const surfaceDeltaX = surfaceTargetX - surface.x;
       const surfaceDeltaY = surfaceTargetY - surface.y;
       current.x += deltaX * 0.08;
@@ -262,20 +320,64 @@ export function HomeHeroArtworkDepth({
     const requestMotion = () => {
       if (!frame) frame = window.requestAnimationFrame(animate);
     };
-    const handleEnter = () => {
+    const handleDesktopEnter = () => {
       bounds = hero.getBoundingClientRect();
     };
-    const handleMove = (event: PointerEvent) => {
+    const handleDesktopMove = (event: PointerEvent) => {
       if (!bounds) bounds = hero.getBoundingClientRect();
       target.x = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / bounds.width - 0.5) * 2));
       target.y = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / bounds.height - 0.5) * 2));
       requestMotion();
     };
-    const handleLeave = () => {
+    const resetMotion = () => {
       bounds = null;
       target.x = 0;
       target.y = 0;
       requestMotion();
+    };
+    const handleTouchStart = (event: PointerEvent) => {
+      if (event.pointerType !== "touch" || orientationActive) return;
+      touchActive = true;
+      bounds = hero.getBoundingClientRect();
+    };
+    const handleTouchMove = (event: PointerEvent) => {
+      if (event.pointerType !== "touch" || !touchActive || orientationActive) return;
+      if (!bounds) bounds = hero.getBoundingClientRect();
+      target.x = clamp(((event.clientX - bounds.left) / bounds.width - 0.5) * 2, -1, 1);
+      target.y = clamp(((event.clientY - bounds.top) / bounds.height - 0.5) * 2, -1, 1);
+      requestMotion();
+    };
+    const handleTouchEnd = (event: PointerEvent) => {
+      if (event.pointerType !== "touch") return;
+      touchActive = false;
+      if (!orientationActive) resetMotion();
+    };
+    const handleOrientation = (event: DeviceOrientationEvent) => {
+      if (event.beta == null || event.gamma == null) return;
+      const oriented = orientToScreen(event.beta, event.gamma);
+      if (!orientationBaseline) {
+        orientationBaseline = oriented;
+        orientationActive = true;
+        touchActive = false;
+        resetMotion();
+        return;
+      }
+      target.x = normalizeTilt(oriented.x - orientationBaseline.x);
+      target.y = normalizeTilt(oriented.y - orientationBaseline.y);
+      requestMotion();
+    };
+    const startOrientation = () => {
+      if (orientationListening) return;
+      window.addEventListener("deviceorientation", handleOrientation);
+      orientationListening = true;
+    };
+    const handleScreenOrientationChange = () => {
+      orientationBaseline = null;
+      orientationActive = false;
+      resetMotion();
+    };
+    const handleVisibilityChange = () => {
+      if (document.hidden) resetMotion();
     };
     const handleContextLost = () => {
       layer.classList.remove("is-depth-ready");
@@ -287,9 +389,44 @@ export function HomeHeroArtworkDepth({
       bounds = null;
     });
 
-    hero.addEventListener("pointerenter", handleEnter);
-    hero.addEventListener("pointermove", handleMove);
-    hero.addEventListener("pointerleave", handleLeave);
+    if (desktopInput) {
+      hero.addEventListener("pointerenter", handleDesktopEnter);
+      hero.addEventListener("pointermove", handleDesktopMove);
+      hero.addEventListener("pointerleave", resetMotion);
+      onOrientationPermissionChange?.("hidden");
+    } else {
+      hero.addEventListener("pointerdown", handleTouchStart);
+      hero.addEventListener("pointermove", handleTouchMove);
+      hero.addEventListener("pointerup", handleTouchEnd);
+      hero.addEventListener("pointercancel", handleTouchEnd);
+      screen.orientation?.addEventListener("change", handleScreenOrientationChange);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+
+      const orientationConstructor = window.DeviceOrientationEvent as DeviceOrientationEventConstructorWithPermission | undefined;
+      if (orientationConstructor?.requestPermission) {
+        onOrientationPermissionChange?.("prompt");
+        permissionRequestRef.current = () => {
+          void orientationConstructor.requestPermission?.()
+            .then((permission) => {
+              if (!active) return;
+              if (permission === "granted") {
+                onOrientationPermissionChange?.("granted");
+                startOrientation();
+              } else {
+                onOrientationPermissionChange?.("denied");
+              }
+            })
+            .catch(() => {
+              if (active) onOrientationPermissionChange?.("denied");
+            });
+        };
+      } else if (orientationConstructor) {
+        onOrientationPermissionChange?.("hidden");
+        startOrientation();
+      } else {
+        onOrientationPermissionChange?.("hidden");
+      }
+    }
     canvas.addEventListener("webglcontextlost", handleContextLost);
     resizeObserver.observe(canvas);
 
@@ -313,10 +450,18 @@ export function HomeHeroArtworkDepth({
 
     return () => {
       active = false;
+      permissionRequestRef.current = () => undefined;
       layer.classList.remove("is-depth-ready");
-      hero.removeEventListener("pointerenter", handleEnter);
-      hero.removeEventListener("pointermove", handleMove);
-      hero.removeEventListener("pointerleave", handleLeave);
+      hero.removeEventListener("pointerenter", handleDesktopEnter);
+      hero.removeEventListener("pointermove", handleDesktopMove);
+      hero.removeEventListener("pointerleave", resetMotion);
+      hero.removeEventListener("pointerdown", handleTouchStart);
+      hero.removeEventListener("pointermove", handleTouchMove);
+      hero.removeEventListener("pointerup", handleTouchEnd);
+      hero.removeEventListener("pointercancel", handleTouchEnd);
+      if (orientationListening) window.removeEventListener("deviceorientation", handleOrientation);
+      screen.orientation?.removeEventListener("change", handleScreenOrientationChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       canvas.removeEventListener("webglcontextlost", handleContextLost);
       resizeObserver.disconnect();
       if (frame) window.cancelAnimationFrame(frame);
@@ -326,7 +471,7 @@ export function HomeHeroArtworkDepth({
       gl.deleteBuffer(positionBuffer);
       gl.deleteProgram(program);
     };
-  }, [depthSrc, disabled, heroRef, imageSrc]);
+  }, [depthSrc, disabled, heroRef, imageSrc, onOrientationPermissionChange]);
 
   return (
     <div ref={layerRef} className="home-hero-artwork-layer" aria-hidden="true">
@@ -334,4 +479,4 @@ export function HomeHeroArtworkDepth({
       <canvas ref={canvasRef} className="home-hero-depth-canvas" data-exact-export="hide" />
     </div>
   );
-}
+});

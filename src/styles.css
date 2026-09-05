@@ -563,6 +563,29 @@ a {
     will-change: transform;
   }
 
+  .home-hero-depth-permission {
+    position: absolute;
+    right: 1rem;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    z-index: 5;
+    border: 0;
+    padding: 0.45rem 0;
+    background: transparent;
+    color: rgb(224 232 248 / 0.78);
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-decoration: underline;
+    text-decoration-color: rgb(224 232 248 / 0.28);
+    text-underline-offset: 0.25rem;
+  }
+
+  .home-hero-depth-permission:focus-visible {
+    outline: 1px solid rgb(224 232 248 / 0.52);
+    outline-offset: 4px;
+  }
+
   .home-hero-artwork-layer.is-depth-ready .home-hero-artwork {
     opacity: 0;
   }
@@ -853,9 +876,11 @@ a {
   }
 
   @media (max-width: 767px) {
-    .home-hero-artwork-layer { inset: 0; width: 100%; height: 100%; }
+    .home-hero-artwork-layer { inset: -2%; width: 104%; height: 104%; }
     .home-hero-artwork { object-position: 36% center; opacity: .7 !important; }
-    .home-hero-depth-canvas { display: none; transform: none !important; will-change: auto; }
+    .home-hero-artwork-layer.is-depth-ready .home-hero-artwork { opacity: 0 !important; }
+    .home-hero-artwork-layer.is-depth-ready .home-hero-depth-canvas { opacity: .7; }
+    .home-hero-depth-canvas { display: block; will-change: transform; }
     .home-hero-visual::after { background: linear-gradient(180deg, rgba(24,23,67,.06) 0%, rgba(24,23,67,.32) 52%, #181743 100%), linear-gradient(90deg, transparent, rgba(24,23,67,.38)); }
     .home-hero-composition { padding-top: 7rem; padding-bottom: 1.75rem; }
     .home-hero-copy { width: 100%; margin-right: 0; margin-left: 0; }
@@ -871,6 +896,7 @@ a {
     .animated-logo-scene svg { animation: none; }
     .home-hero-artwork { opacity: .88 !important; }
     .home-hero-depth-canvas { display: none; transform: none !important; will-change: auto; }
+    .home-hero-depth-permission { display: none; }
   }
 }
 
