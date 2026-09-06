@@ -25,6 +25,7 @@ const INITIAL_HORIZONTAL_INSETS: Record<string, number> = {
   "image-row": 40,
   "figma-prototype": 180,
   "process-flow": 80,
+  "dual-viewpoint-analysis": 80,
 };
 
 type StoredDefaults = Record<string, { horizontalInset: number }>;

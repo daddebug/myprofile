@@ -35,6 +35,8 @@
 
 ## Resolved
 
+- **Dual Viewpoint Analysis reusable template (resolved 2026-09-07).** Added a registered, editable text-only template with centered title/subtitle, aligned opportunity/challenge columns, restrained gradient guide, responsive stacking, Gallery sample, project-instance editor, and code-generation contract. Existing `direction-compare` instances remain unchanged. `pnpm typecheck` and `pnpm build` pass; real Template Gallery desktop rendering verified.
+
 - **Game Experience concise evidence guidance and card elevation (resolved 2026-08-11).** AI import keeps future strengths/limitations to the 1-2 strongest observations near 50-80 Chinese characters and moves supporting reasoning into detail without inventing or destructively truncating content. Existing records remain untouched. The main card now uses a softly translucent dark-blue surface; the blue-green takeaway and cover form the raised second plane. Evidence is unboxed 15px/400 support text and detail recedes to 14px. Real Hogwarts Legacy verification confirmed all three planes, natural masonry height, and zero horizontal overflow. `pnpm typecheck` and `pnpm build` pass.
 
 - **Game Experience card information hierarchy (resolved 2026-08-11).** Preserved the two-column masonry and every full text field while giving the card a cohesive editorial flow: 30px identity title, muted 15px context, one primary 19px/600 takeaway surface, unboxed 16px/500 analytical evidence, and secondary 15px detailed reading. Strengths/limitations become two text columns with only a subtle divider at wide desktop cards; the takeaway is the only differentiated inner surface. Real Stardew Valley verification confirmed natural height and no overflow. `pnpm typecheck` and `pnpm build` pass.

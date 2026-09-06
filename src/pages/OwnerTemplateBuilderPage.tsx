@@ -50,6 +50,10 @@ import {
 } from "../lib/xmindImport";
 import { optimizeUploadedImage } from "../lib/imageOptimization";
 import {
+  GeneratedSvgIconEditor,
+  type ModuleIconReference,
+} from "../components/template-tools/GeneratedSvgIconEditor";
+import {
   getTemplateHorizontalInset,
   setTemplateHorizontalInset,
 } from "../lib/templateLayoutDefaults";
@@ -457,6 +461,40 @@ export function sampleContentFor(
   schema: TemplateFieldDefinition[],
   templateId?: string,
 ) {
+  if (templateId === "dual-viewpoint-analysis") {
+    return {
+      title: { zh: "轻竞技游戏公会社交共性", en: "Social Dynamics in Light Competitive Games" },
+      subtitle: { zh: "SLG、卡牌与养成游戏中，公会社交共同面对的机遇与挑战", en: "Shared opportunities and challenges across guild-based progression systems" },
+      leftLabel: { zh: "机遇", en: "Opportunity" },
+      leftItems: [
+        {
+          id: "opportunity-play",
+          title: { zh: "延展游戏玩法", en: "Extend the play loop" },
+          body: { zh: "团队协作可以发展出更清晰的策略定位，\n并让玩家获得合作共赢的依赖感与代入感。", en: "Team play can create clearer strategic roles and a stronger sense of shared progress." },
+        },
+        {
+          id: "opportunity-growth",
+          title: { zh: "养成差异带来社交机会", en: "Progression differences create social opportunity" },
+          body: { zh: "合理利用玩家成长差异，\n可以为不同熟悉程度的用户提供互补的社交方式。", en: "Differences in progression can support complementary roles for players with different levels of familiarity." },
+        },
+      ],
+      rightLabel: { zh: "挑战", en: "Challenge" },
+      rightItems: [
+        {
+          id: "challenge-belonging",
+          title: { zh: "公会代入感不足，维护困难", en: "Weak belonging makes guilds hard to sustain" },
+          body: { zh: "成员短期内难以获得认同感，\n核心成员与普通成员之间的体验差距持续扩大。", en: "Members struggle to build belonging while the experience gap between core and casual members grows." },
+        },
+        {
+          id: "challenge-fragmentation",
+          title: { zh: "养成中社交割裂", en: "Progression fragments social play" },
+          body: { zh: "个人核心玩法与公会系统关系不够紧密，\n额外奖励难以形成长期吸引力。", en: "Core progression and guild systems remain disconnected, limiting long-term motivation." },
+        },
+      ],
+      summary: { zh: "公会社交需要同时连接个人成长、群体目标与持续的成员认同。", en: "Guild social design must connect personal progression, shared goals, and lasting member belonging." },
+    };
+  }
+
   if (templateId === "direction-compare") {
     return {
       heading: { zh: "方案对比", en: "" },
@@ -800,6 +838,153 @@ export function sampleContentFor(
     }
   }
   return content;
+}
+
+type DualViewpointEditorItem = {
+  id: string;
+  title: { zh: string; en: string };
+  body: { zh: string; en: string };
+  icon?: ModuleIconReference;
+};
+
+function dualViewpointLocalized(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return { zh: "", en: "" };
+  const localized = value as { zh?: unknown; en?: unknown };
+  return {
+    zh: typeof localized.zh === "string" ? localized.zh : "",
+    en: typeof localized.en === "string" ? localized.en : "",
+  };
+}
+
+function dualViewpointItems(value: unknown): DualViewpointEditorItem[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item, index) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const candidate = item as { id?: unknown; title?: unknown; body?: unknown; icon?: unknown };
+    const icon = candidate.icon && typeof candidate.icon === "object" && !Array.isArray(candidate.icon)
+      ? candidate.icon as Partial<ModuleIconReference>
+      : undefined;
+    return [{
+      id: typeof candidate.id === "string" && candidate.id ? candidate.id : `viewpoint-${index + 1}`,
+      title: dualViewpointLocalized(candidate.title),
+      body: dualViewpointLocalized(candidate.body),
+      icon: icon && typeof icon.id === "string" && typeof icon.svgPath === "string"
+        ? { id: icon.id, name: icon.name ?? "generated-icon", title: icon.title ?? "", svgPath: icon.svgPath }
+        : undefined,
+    }];
+  });
+}
+
+export function DualViewpointAnalysisContentEditor({
+  content,
+  language,
+  onChange,
+  projectId = "template-library",
+  moduleId = "dual-viewpoint-analysis",
+}: {
+  content: Record<string, TemplateContentValue>;
+  language: "zh" | "en";
+  onChange: (content: Record<string, TemplateContentValue>) => void;
+  projectId?: string;
+  moduleId?: string;
+}) {
+  const textFields = ["title", "subtitle", "leftLabel", "rightLabel", "summary"] as const;
+  const labels = {
+    title: { zh: "主标题", en: "Title" },
+    subtitle: { zh: "副标题", en: "Subtitle" },
+    leftLabel: { zh: "左列标签", en: "Left label" },
+    rightLabel: { zh: "右列标签", en: "Right label" },
+    summary: { zh: "底部总结", en: "Closing summary" },
+  };
+
+  const updateItems = (field: "leftItems" | "rightItems", items: DualViewpointEditorItem[]) => {
+    onChange({ ...content, [field]: items });
+  };
+
+  return (
+    <div className="mt-5 grid gap-5">
+      {textFields.map((field) => {
+        const value = dualViewpointLocalized(content[field]);
+        return (
+          <label className="block" key={field}>
+            <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">{labels[field][language]}</span>
+            <textarea
+              className="min-h-16 w-full resize-y border border-softWhite/14 bg-deepIndigo/28 px-3 py-2 text-sm leading-6 text-softWhite outline-none focus:border-acidGreen"
+              value={value[language]}
+              onChange={(event) => onChange({ ...content, [field]: { ...value, [language]: event.target.value } })}
+            />
+          </label>
+        );
+      })}
+
+      {(["leftItems", "rightItems"] as const).map((field) => {
+        const items = dualViewpointItems(content[field]);
+        const sideName = field === "leftItems"
+          ? (language === "zh" ? "左列观点" : "Left viewpoints")
+          : (language === "zh" ? "右列观点" : "Right viewpoints");
+        return (
+          <section className="border-t border-softWhite/12 pt-4" key={field}>
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold text-softWhite/76">{sideName}</h3>
+              <button
+                type="button"
+                className="editor-action"
+                disabled={items.length >= 4}
+                onClick={() => updateItems(field, [...items, {
+                  id: `${field}-${Date.now()}`,
+                  title: { zh: "", en: "" },
+                  body: { zh: "", en: "" },
+                }])}
+              >
+                {language === "zh" ? "添加观点" : "Add viewpoint"}
+              </button>
+            </div>
+            <div className="mt-3 grid gap-3">
+              {items.map((item, index) => (
+                <div className="grid gap-2 border border-softWhite/10 bg-deepIndigo/24 p-3" key={item.id}>
+                  <input
+                    className="w-full border-b border-softWhite/14 bg-transparent py-2 text-sm font-semibold text-softWhite outline-none focus:border-acidGreen"
+                    placeholder={language === "zh" ? "小节标题" : "Section title"}
+                    value={item.title[language]}
+                    onChange={(event) => updateItems(field, items.map((candidate, itemIndex) => itemIndex === index
+                      ? { ...candidate, title: { ...candidate.title, [language]: event.target.value } }
+                      : candidate))}
+                  />
+                  <textarea
+                    className="min-h-20 w-full resize-y bg-transparent py-2 text-sm leading-6 text-softWhite/72 outline-none"
+                    placeholder={language === "zh" ? "2–4 行简短说明" : "A short 2–4 line explanation"}
+                    value={item.body[language]}
+                    onChange={(event) => updateItems(field, items.map((candidate, itemIndex) => itemIndex === index
+                      ? { ...candidate, body: { ...candidate.body, [language]: event.target.value } }
+                      : candidate))}
+                  />
+                  <GeneratedSvgIconEditor
+                    language={language}
+                    title={item.title[language]}
+                    description={item.body[language]}
+                    projectId={projectId}
+                    moduleId={`${moduleId}:${field}:${item.id}`}
+                    currentIcon={item.icon}
+                    onInsert={(icon) => updateItems(field, items.map((candidate, itemIndex) => itemIndex === index
+                      ? { ...candidate, icon }
+                      : candidate))}
+                  />
+                  <button
+                    type="button"
+                    className="editor-action justify-self-end text-peach"
+                    disabled={items.length <= 1}
+                    onClick={() => updateItems(field, items.filter((_, itemIndex) => itemIndex !== index))}
+                  >
+                    {language === "zh" ? "删除" : "Delete"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })}
+    </div>
+  );
 }
 
 export function XMindContentEditor({
@@ -2750,6 +2935,14 @@ export function OwnerTemplateBuilderPage() {
 
           {selectedTemplate.meta.id === "decision-table" ? (
             <DecisionTableContentEditor
+              content={templateContent}
+              language={language}
+              onChange={setTemplateContent}
+            />
+          ) : null}
+
+          {selectedTemplate.meta.id === "dual-viewpoint-analysis" ? (
+            <DualViewpointAnalysisContentEditor
               content={templateContent}
               language={language}
               onChange={setTemplateContent}

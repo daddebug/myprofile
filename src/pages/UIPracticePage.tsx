@@ -3,6 +3,7 @@ import { AlertCircle, Check, Edit3, GripVertical, Plus, Save, Trash2 } from "luc
 import { PageTransition } from "../components/PageTransition";
 import { ProjectHeroTitleSummary } from "../components/ProjectHeroTitleSummary";
 import { projectHeroTextWidth } from "../lib/caseStudyLayout";
+import { REGION_END_ANCHOR } from "../lib/projectTemplateInstances";
 import metadata from "../data/uiPracticeMetadata.json";
 import {
   abortDynamicProjectImageStage,
@@ -324,7 +325,7 @@ export function UIPracticePage() {
         instanceId: UI_PRACTICE_GALLERY_INSTANCE_ID,
         templateId: "image-row",
         regionId: UI_PRACTICE_GALLERY_REGION_ID,
-        anchorId: "__end__",
+        anchorId: REGION_END_ANCHOR,
         content: { heading: { zh: "", en: "" }, items: createDiskGalleryItems(nextItems) },
         order: 0,
       };

@@ -131,6 +131,7 @@ const modules = import.meta.glob<TemplateModule>(
     "../templates/ProcessFlowTemplate.tsx",
     "../templates/PlayableGameTemplate.tsx",
     "../templates/DirectionCompareTemplate.tsx",
+    "../templates/DualViewpointAnalysisTemplate.tsx",
   ],
   { eager: true },
 );

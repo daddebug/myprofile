@@ -82,6 +82,7 @@ import {
 import {
   CircleSummaryContentEditor,
   DecisionTableContentEditor,
+  DualViewpointAnalysisContentEditor,
   PhaseMilestonesContentEditor,
   sampleContentFor,
   XMindContentEditor,
@@ -100,6 +101,7 @@ const TEMPLATE_PICKER_ICONS: Record<string, typeof LayoutTemplate> = {
   "process-flow": Workflow,
   "playable-game": Gamepad2,
   "direction-compare": ArrowLeftRight,
+  "dual-viewpoint-analysis": ArrowLeftRight,
 };
 
 const ACCEPTED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/avif", "image/gif"];
@@ -590,6 +592,8 @@ function InstanceEditor({
   onChange,
   db,
   jumpTargets,
+  projectId,
+  moduleId,
 }: {
   templateId: string;
   schema: TemplateFieldDefinition[];
@@ -598,11 +602,14 @@ function InstanceEditor({
   onChange: (content: Record<string, TemplateContentValue>) => void;
   db: ProjectImageDb;
   jumpTargets: Array<{ instanceId: string; label: string }>;
+  projectId: string;
+  moduleId: string;
 }) {
   if (templateId === "xmind-breakdown") return <XMindContentEditor mode="double" content={content} language={language} onChange={onChange} />;
   if (templateId === "phase-milestones") return <PhaseMilestonesContentEditor emphasisMode="custom" content={content} language={language} onChange={onChange} jumpTargets={jumpTargets} />;
   if (templateId === "circle-summary") return <CircleSummaryContentEditor content={content} language={language} onChange={onChange} />;
   if (templateId === "decision-table") return <DecisionTableContentEditor content={content} language={language} onChange={onChange} />;
+  if (templateId === "dual-viewpoint-analysis") return <DualViewpointAnalysisContentEditor content={content} language={language} onChange={onChange} projectId={projectId} moduleId={moduleId} />;
   if (templateId === "image-row") return <ProjectImageRowContentEditor content={content} language={language} onChange={onChange} db={db} />;
   if (templateId === "figma-prototype") return <ProjectFigmaPrototypeContentEditor content={content} language={language} onChange={onChange} db={db} />;
   if (templateId === "process-flow") return <ProcessFlowContentEditor content={content} language={language} onChange={onChange} />;
@@ -1862,6 +1869,8 @@ function InstanceBlock({
           onChange={onContentChange}
           db={db}
           jumpTargets={jumpTargets}
+          projectId={projectId}
+          moduleId={instance.instanceId}
         />
       ) : null}
       {isEditing && registered && codeFillOpen ? (

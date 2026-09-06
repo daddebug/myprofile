@@ -11,6 +11,7 @@ export const projectCodeAllowedNewTemplateIds = [
   "figma-prototype",
   "playable-game",
   "direction-compare",
+  "dual-viewpoint-analysis",
 ] as const;
 
 export type ProjectCodeTemplateId = typeof projectCodeAllowedNewTemplateIds[number];
@@ -71,6 +72,10 @@ const templateContracts: Record<ProjectCodeTemplateId, ProjectCodeTemplateContra
   "direction-compare": {
     semantic: "A two-sided before/after, direction A/B, platform, or design trade-off comparison with one image and concise copy per side.",
     unsupported: "No extra columns, arbitrary layout fields, third comparison side, or invented image resources.",
+  },
+  "dual-viewpoint-analysis": {
+    semantic: "A centered high-level analysis with two aligned text columns for opportunities/challenges, strengths/problems, or current state/direction.",
+    unsupported: "No images, arbitrary columns, cards, table cells, coordinates, or free layout fields.",
   },
 };
 
@@ -152,6 +157,10 @@ export function normalizeProjectCodeTemplateContent(
     normalizeLocalizedItems(content.controls, ["key", "action"]);
   } else if (templateId === "direction-compare") {
     normalizeLocalizedFields(content, ["heading", "leftLabel", "rightLabel", "leftTitle", "rightTitle", "leftDescription", "rightDescription"]);
+  } else if (templateId === "dual-viewpoint-analysis") {
+    normalizeLocalizedFields(content, ["title", "subtitle", "leftLabel", "rightLabel", "summary"]);
+    normalizeLocalizedItems(content.leftItems, ["title", "body"]);
+    normalizeLocalizedItems(content.rightItems, ["title", "body"]);
   }
 
   return content;
@@ -402,6 +411,21 @@ export function validateProjectCodeTemplateContent(
         }
       }
     }
+  } else if (templateId === "dual-viewpoint-analysis") {
+    for (const field of ["title", "subtitle", "leftLabel", "rightLabel", "summary"]) addLocalizedIssue(issues, content[field], field);
+    for (const field of ["leftItems", "rightItems"] as const) {
+      validateLocalizedArrayItems(issues, content[field], field, ["title", "body"]);
+      if (Array.isArray(content[field])) content[field].forEach((item, index) => {
+        if (isNew && isRecord(item)) addUnknownFieldIssues(issues, item, `${field}[${index}]`, ["id", "title", "body", "icon"], "Use only a stable id, localized title/body, and an editor-managed icon for each viewpoint.");
+        if (!isRecord(item) || item.icon === undefined) return;
+        if (!isRecord(item.icon)) {
+          issues.push({ path: `${field}[${index}].icon`, problem: "must be an object", expected: "editor-managed icon reference", actual: describe(item.icon) });
+          return;
+        }
+        addUnknownFieldIssues(issues, item.icon, `${field}[${index}].icon`, ["id", "name", "title", "svgPath"], "Preserve only the generated icon library reference.");
+        if (isNew) issues.push({ path: `${field}[${index}].icon`, problem: "new AI-created template content cannot invent a saved icon reference", expected: "field omitted", actual: "icon supplied" });
+      });
+    }
   }
 
   return issues;
@@ -427,6 +451,7 @@ const specificRules: Record<ProjectCodeTemplateId, string[]> = {
   "figma-prototype": ["New instances must use an empty figmaUrl and no fallbackImage; real resources are added later in the editor.", "heading and caption are localized.", "captionTitle is not a supported field — it has been removed from this template. Use caption instead."],
   "playable-game": ["New instances must use game:null and cover:null.", "Never invent gameId, entryPublicPath, coverId, publicUrl, or file paths.", "status: prototype|in-development|complete|archived; aspectRatio: 16:9|4:3|auto.", "heading, description, versionLabel and control key/action are localized."],
   "direction-compare": ["Native fields only: heading, leftLabel, rightLabel, leftTitle, rightTitle, leftDescription, rightDescription, leftImage, rightImage, direction.", "All seven text fields use localized {zh,en} objects.", "New instances must use leftImage:null and rightImage:null (or omit them).", "Existing leftImage/rightImage may preserve editor-managed hoverPreviewMode, annotationEnabled, and annotations; never create or change their real imageId, publicPath, or annotation evidence resources.", "direction: left-to-right|right-to-left|none.", "Never invent imageId, assetId, localImageId, publicPath, publicUrl, file paths, CSS, className, style, coordinates, columns, or spans."],
+  "dual-viewpoint-analysis": ["Native fields only: title, subtitle, leftLabel, leftItems, rightLabel, rightItems, summary.", "Text fields and item title/body use localized {zh,en} objects.", "Each column contains 1-4 items with id, title, body, and an optional editor-managed icon.", "New AI-created instances must omit icon; saved SVG icons are inserted through the owner editor.", "Use for high-level paired analysis, not image comparison or a data table."],
 };
 
 export function projectCodeTemplateRulesForPrompt(
@@ -444,6 +469,7 @@ export function projectCodeTemplateRulesForPrompt(
     "- Figma prototype: figma-prototype.",
     "- Playable build: playable-game.",
     "- Before/after, direction A/B, platform, or two-proposal comparison: direction-compare.",
+    "- Opportunity/challenge, strength/problem, or current-state/direction analysis: dual-viewpoint-analysis.",
     "- A piece of content having a title does not permit adding heading/title to an arbitrary template.",
     "- If no existing template natively fits, rewrite the content or omit that module. Never extend template fields.",
     "- Return project JSON only. Never suggest, request, or assume changes to template components, styles, registry, validators, schemas, or underlying code.",

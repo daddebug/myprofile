@@ -1,742 +1,7 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-04T11:43:14.273Z",
+  "generatedAt": "2026-09-06T15:17:29.642Z",
   "drafts": {
-    "ai-agent-6vaadf": {
-      "version": 1,
-      "templateInstances": [
-        {
-          "instanceId": "statement-longform-9ba81b60-9caa-4e9c-9527-13f2e05e75cb",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "01",
-              "en": "01"
-            },
-            "leftTitle": {
-              "zh": "核心 命题",
-              "en": "Core Premise"
-            },
-            "statement": {
-              "zh": "AI 能不能减少求职中的重复劳动，却不替用户做最终决定？",
-              "en": "Can AI cut repetitive labor in job hunting without making the final decision for the user?"
-            },
-            "body": {
-              "zh": "我最初在 DILIDA DESK 中设计 Job Search，是为了集中保存公司、岗位和求职信息。但真正开始使用后，我发现维护工具本身也变成了一项额外工作：浏览招聘网站、阅读 JD、重复填写姓名和教育经历、上传简历、完成投递以后，还要重新回到 Desk 手动创建记录，并反向确认当时投了什么岗位、使用了哪份简历。于是我开始重新设计这套流程，希望把浏览器中的真实投递行为直接连接到个人求职数据库，让系统承担重复识别、填写和记录，而把岗位判断、重要问题确认和最终提交留给用户。",
-              "en": "I originally designed Job Search in DILIDA DESK to keep company, role, and application information in one place. But once I actually started using it, I realized maintaining the tool had become its own extra chore: browsing job boards, reading JDs, filling in my name and education history over and over, uploading a resume, finishing the application, then going back to Desk to manually create a record and figure out after the fact which role I'd applied to and which resume I'd used. So I started redesigning the flow, aiming to connect real application activity in the browser directly to my personal job-search database — letting the system handle the repetitive recognition, filling, and record-keeping, while leaving role judgment, confirming important questions, and the final submission to me."
-            }
-          }
-        },
-        {
-          "instanceId": "supporting-note-419d1ce3-b535-41de-909a-bbe2c8d82ee6",
-          "templateId": "supporting-note",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "body": {
-              "zh": "现有流程最大的成本并不只来自填写表单，而是信息不断在招聘网站、简历文件、作品集和个人记录之间断开。单个公司的资料可以保存，但真正投递时仍然需要重新寻找、复制和确认；完成申请后，JD 和当时使用的材料也容易失去对应关系。",
-              "en": "The biggest cost in the old flow wasn't just filling out forms — it was that information kept breaking apart across job boards, resume files, portfolios, and personal records. A company's details could be saved, but when it came time to actually apply, I'd still have to go find, copy, and confirm everything again; and after submitting, the JD and the materials I'd used for it easily lost their connection to each other."
-            }
-          }
-        },
-        {
-          "instanceId": "direction-compare-58ec5653-43ef-4bf9-8eb0-e790c1d3aeab",
-          "templateId": "direction-compare",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "投递流程重新组织",
-              "en": "Reorganizing the Application Flow"
-            },
-            "leftLabel": {
-              "zh": "原有流程",
-              "en": "Old Flow"
-            },
-            "rightLabel": {
-              "zh": "目标流程",
-              "en": "Target Flow"
-            },
-            "leftTitle": {
-              "zh": "用户维护工具",
-              "en": "User Maintains the Tool"
-            },
-            "rightTitle": {
-              "zh": "投递行为自动形成记录",
-              "en": "Application Activity Automatically Becomes a Record"
-            },
-            "leftDescription": {
-              "zh": "浏览 JD、手动寻找资料、逐项填写、完成申请，再回到 Desk 创建公司和岗位记录。真实投递和个人数据库之间存在重复录入。",
-              "en": "Browse the JD, manually dig up the needed information, fill in each field, complete the application, then go back to Desk to create the company and role record. Real applications and the personal database end up duplicating data entry."
-            },
-            "rightDescription": {
-              "zh": "浏览器插件读取当前 JD 和表单，从 Desk 调用已有资料辅助填写；用户确认并提交后，岗位信息和投递材料自动形成一条 Application 记录。",
-              "en": "The browser extension reads the current JD and form, pulls existing data from Desk to help fill it in; once the user confirms and submits, the role information and application materials automatically become a single Application record."
-            },
-            "leftImage": null,
-            "rightImage": null,
-            "direction": "left-to-right"
-          }
-        },
-        {
-          "instanceId": "process-flow-d45f525d-6ca2-48ab-9fc0-f16c7fb32306",
-          "templateId": "process-flow",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "一次投递如何自然形成完整记录",
-              "en": "How One Application Naturally Becomes a Complete Record"
-            },
-            "items": [
-              {
-                "id": "job-flow-01",
-                "number": {
-                  "zh": "01",
-                  "en": "01"
-                },
-                "title": {
-                  "zh": "打开招聘页面",
-                  "en": "Open a Job Listing"
-                },
-                "description": {
-                  "zh": "用户按照原本的求职习惯浏览招聘网站，不需要先在 Desk 中建立公司或岗位。",
-                  "en": "The user browses job boards the way they normally would, with no need to create a company or role in Desk first."
-                }
-              },
-              {
-                "id": "job-flow-02",
-                "number": {
-                  "zh": "02",
-                  "en": "02"
-                },
-                "title": {
-                  "zh": "识别 JD",
-                  "en": "Recognize the JD"
-                },
-                "description": {
-                  "zh": "插件读取用户当前可见页面中的公司、岗位名称、JD、URL、地点等信息，并形成当前岗位上下文。",
-                  "en": "The extension reads the company, role title, JD, URL, location, and other information visible on the current page, and builds the current role's context."
-                }
-              },
-              {
-                "id": "job-flow-03",
-                "number": {
-                  "zh": "03",
-                  "en": "03"
-                },
-                "title": {
-                  "zh": "匹配表单字段",
-                  "en": "Match Form Fields"
-                },
-                "description": {
-                  "zh": "系统根据字段语义、标签、占位文字和周边提示，将网页输入项映射到 Desk 中已有的个人资料。",
-                  "en": "The system maps the page's input fields to the existing personal profile in Desk, based on field semantics, labels, placeholder text, and surrounding hints."
-                }
-              },
-              {
-                "id": "job-flow-04",
-                "number": {
-                  "zh": "04",
-                  "en": "04"
-                },
-                "title": {
-                  "zh": "辅助填写",
-                  "en": "Assist with Filling"
-                },
-                "description": {
-                  "zh": "基础信息可以一键填入；无法确定、未识别或涉及重要选择的字段保持待确认，不进行猜测。",
-                  "en": "Basic information can be filled in with one click; fields that can't be determined, aren't recognized, or involve an important choice are left pending for confirmation rather than guessed at."
-                }
-              },
-              {
-                "id": "job-flow-05",
-                "number": {
-                  "zh": "05",
-                  "en": "05"
-                },
-                "title": {
-                  "zh": "用户确认提交",
-                  "en": "User Confirms and Submits"
-                },
-                "description": {
-                  "zh": "用户检查实际填写内容，并亲自完成最终投递。系统不自动点击最终提交，也不绕过验证码和网站安全控制。",
-                  "en": "The user reviews what's actually been filled in and completes the final submission themselves. The system never auto-clicks the final submit button and never bypasses CAPTCHAs or a site's security controls."
-                }
-              },
-              {
-                "id": "job-flow-06",
-                "number": {
-                  "zh": "06",
-                  "en": "06"
-                },
-                "title": {
-                  "zh": "生成投递档案",
-                  "en": "Generate an Application Record"
-                },
-                "description": {
-                  "zh": "申请完成后保存 JD 快照、投递时间、使用的简历和作品集以及关键填写信息，直接进入 Job Search 的后续跟踪。",
-                  "en": "Once the application is done, a JD snapshot, the submission time, the resume and portfolio used, and key filled-in information are all saved, and it moves straight into Job Search's follow-up tracking."
-                }
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-4d9bcd59-0ccf-4a9c-b315-47ca0adc1675",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "02",
-              "en": "02"
-            },
-            "leftTitle": {
-              "zh": "系统 分工",
-              "en": "System Division of Labor"
-            },
-            "statement": {
-              "zh": "浏览器负责观察与操作，Desk 负责长期记忆",
-              "en": "The browser handles observation and action, Desk handles long-term memory"
-            },
-            "body": {
-              "zh": "我不希望浏览器插件再维护一套独立的求职资料，因此系统采用一个明确的数据边界：DILIDA DESK 是个人资料、字段映射、简历版本、作品集和投递记录的唯一数据源；浏览器插件只负责读取当前招聘页面、请求需要的资料、执行辅助填写，并把新的岗位和投递行为传回 Desk。这样更换电脑或重新安装插件时，不需要重新配置全部信息，也能避免浏览器和桌面端出现两套相互冲突的数据。",
-              "en": "I didn't want the browser extension to maintain a separate copy of my job-search data, so the system draws a clear data boundary: DILIDA DESK is the single source of truth for personal profile data, field mappings, resume versions, portfolios, and application records; the browser extension only reads the current job page, requests the data it needs, assists with filling in the form, and sends new role and application activity back to Desk. That way, switching computers or reinstalling the extension doesn't mean reconfiguring everything from scratch, and it avoids ending up with two conflicting sets of data between the browser and the desktop app."
-            }
-          }
-        },
-        {
-          "instanceId": "decision-table-f4de7693-b478-4bf3-a60f-84d0fca150be",
-          "templateId": "decision-table",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "插件、Desk 与用户的职责边界",
-              "en": "Division of Responsibility: Extension, Desk, and User"
-            },
-            "columns": [
-              {
-                "id": "task",
-                "title": {
-                  "zh": "任务",
-                  "en": "Task"
-                }
-              },
-              {
-                "id": "extension",
-                "title": {
-                  "zh": "浏览器插件",
-                  "en": "Browser Extension"
-                }
-              },
-              {
-                "id": "desk",
-                "title": {
-                  "zh": "DILIDA DESK",
-                  "en": "DILIDA DESK"
-                }
-              },
-              {
-                "id": "user",
-                "title": {
-                  "zh": "用户",
-                  "en": "User"
-                }
-              }
-            ],
-            "rows": [
-              {
-                "id": "jd",
-                "cells": {
-                  "task": {
-                    "zh": "岗位信息",
-                    "en": "Role Information"
-                  },
-                  "extension": {
-                    "zh": "读取当前页面中用户可见的岗位和 JD。",
-                    "en": "Reads the role and JD visible on the current page."
-                  },
-                  "desk": {
-                    "zh": "保存 JD 快照和岗位记录。",
-                    "en": "Saves the JD snapshot and role record."
-                  },
-                  "user": {
-                    "zh": "判断岗位是否值得投递。",
-                    "en": "Judges whether the role is worth applying to."
-                  }
-                }
-              },
-              {
-                "id": "autofill",
-                "cells": {
-                  "task": {
-                    "zh": "表单填写",
-                    "en": "Form Filling"
-                  },
-                  "extension": {
-                    "zh": "识别字段并填入可确认的基础资料。",
-                    "en": "Recognizes fields and fills in the basic data that can be confirmed."
-                  },
-                  "desk": {
-                    "zh": "提供个人资料和字段映射。",
-                    "en": "Provides the personal profile and field mappings."
-                  },
-                  "user": {
-                    "zh": "处理不确定字段并检查结果。",
-                    "en": "Handles uncertain fields and reviews the result."
-                  }
-                }
-              },
-              {
-                "id": "submit",
-                "cells": {
-                  "task": {
-                    "zh": "最终提交",
-                    "en": "Final Submission"
-                  },
-                  "extension": {
-                    "zh": "不自动提交。",
-                    "en": "Never auto-submits."
-                  },
-                  "desk": {
-                    "zh": "不控制招聘网站提交动作。",
-                    "en": "Doesn't control the job site's submit action."
-                  },
-                  "user": {
-                    "zh": "确认内容并亲自提交申请。",
-                    "en": "Confirms the content and submits the application personally."
-                  }
-                }
-              },
-              {
-                "id": "application",
-                "cells": {
-                  "task": {
-                    "zh": "投递记录",
-                    "en": "Application Record"
-                  },
-                  "extension": {
-                    "zh": "识别可能的成功状态并发送当前上下文。",
-                    "en": "Detects a likely success state and sends the current context."
-                  },
-                  "desk": {
-                    "zh": "生成 Application 并持续管理进度。",
-                    "en": "Generates the Application and keeps managing its progress."
-                  },
-                  "user": {
-                    "zh": "补充面试、拒绝、Offer 等后续状态。",
-                    "en": "Adds follow-up status like interviews, rejections, and offers."
-                  }
-                }
-              },
-              {
-                "id": "learning",
-                "cells": {
-                  "task": {
-                    "zh": "系统学习",
-                    "en": "System Learning"
-                  },
-                  "extension": {
-                    "zh": "暴露未识别或歧义字段。",
-                    "en": "Surfaces unrecognized or ambiguous fields."
-                  },
-                  "desk": {
-                    "zh": "保存新的全局或站点字段别名。",
-                    "en": "Saves new global or site-specific field aliases."
-                  },
-                  "user": {
-                    "zh": "只需完成一次正确映射。",
-                    "en": "Only needs to map it correctly once."
-                  }
-                }
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-d1c34365-09e2-4f60-80d9-6fbc3eb59bd9",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "03",
-              "en": "03"
-            },
-            "leftTitle": {
-              "zh": "语义 识别",
-              "en": "Semantic Recognition"
-            },
-            "statement": {
-              "zh": "网页叫它什么，不应该决定系统能不能认识它",
-              "en": "What a webpage calls something shouldn't determine whether the system can recognize it"
-            },
-            "body": {
-              "zh": "不同招聘网站对同一信息的命名并不统一。例如“姓名”也可能被写成“名字”“应聘人姓名”“Full Name”或“Candidate Name”。因此我没有把网页上的可见文案直接当成字段 ID，而是设计了一层稳定的语义字段。系统内部只保存 fullName、phone、email、preferredCity、portfolioUrl 等标准字段，每个字段可以拥有多个可编辑别名。匹配时同时参考 label、placeholder、name、aria-label、周边提示文字和输入控件类型。当系统遇到无法识别的字段时，用户可以将它映射到已有字段、新建字段或忽略；这个结果会被保存下来，让系统随着真实使用逐渐适应更多网站。",
-              "en": "Different job sites don't name the same information consistently. \"Name\" might also appear as \"Full Name,\" \"Applicant Name,\" or \"Candidate Name.\" So instead of treating the visible label on a page as the field ID directly, I designed a stable semantic-field layer underneath. Internally, the system only stores standard fields like fullName, phone, email, preferredCity, and portfolioUrl, and each one can have multiple editable aliases. Matching draws on the label, placeholder, name, aria-label, surrounding hint text, and the input control's type all at once. When the system hits a field it can't recognize, the user can map it to an existing field, create a new one, or ignore it — and that choice gets saved, so the system gradually adapts to more sites as it's actually used."
-            }
-          }
-        },
-        {
-          "instanceId": "circle-summary-14d5824b-ca92-4655-b52f-b94156c16ee5",
-          "templateId": "circle-summary",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "字段识别的三个原则",
-              "en": "Three Principles for Field Recognition"
-            },
-            "items": [
-              {
-                "id": "semantic",
-                "text": {
-                  "zh": "稳定语义字段作为唯一数据源",
-                  "en": "Stable semantic fields as the single source of truth"
-                }
-              },
-              {
-                "id": "aliases",
-                "text": {
-                  "zh": "全局别名与站点别名持续学习",
-                  "en": "Global and site-specific aliases that keep learning"
-                }
-              },
-              {
-                "id": "uncertainty",
-                "text": {
-                  "zh": "不确定的信息必须交还用户确认",
-                  "en": "Uncertain information always goes back to the user to confirm"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "image-row-006ee24e-d79d-4ad2-92ed-67971123374a",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "字段识别与自动填写界面",
-              "en": "Field Recognition and Autofill Interface"
-            },
-            "columns": 3,
-            "rowAlignment": "center",
-            "items": [
-              {
-                "id": "image-row-item-893f90b0-e641-493f-9f16-34e374b2be17",
-                "alt": {
-                  "zh": "招聘网页字段识别结果",
-                  "en": "Job Listing Field Recognition Results"
-                },
-                "caption": {
-                  "zh": "插件识别当前页面中的岗位信息和可填写字段。",
-                  "en": "The extension recognizes the role information and fillable fields on the current page."
-                },
-                "placeholder": {
-                  "zh": "上传招聘网页中字段识别状态截图",
-                  "en": "Upload a screenshot of field-recognition status on a job listing page"
-                },
-                "suggestedAspectRatio": "16:9",
-                "suggestedImageCount": 1,
-                "imageDisplayMode": "cover",
-                "imageCropRatio": "16:9",
-                "imageWidthMode": "card",
-                "hoverPreviewMode": "none"
-              },
-              {
-                "id": "image-row-item-805b498b-a9f9-4f3c-a17a-8a43dfa9982c",
-                "alt": {
-                  "zh": "未识别字段映射界面",
-                  "en": "Unrecognized Field Mapping Interface"
-                },
-                "caption": {
-                  "zh": "用户可以把陌生网页文案映射到已有语义字段。",
-                  "en": "The user can map an unfamiliar page label to an existing semantic field."
-                },
-                "placeholder": {
-                  "zh": "上传字段映射或别名管理截图",
-                  "en": "Upload a screenshot of field mapping or alias management"
-                },
-                "suggestedAspectRatio": "16:9",
-                "suggestedImageCount": 1,
-                "imageDisplayMode": "cover",
-                "imageCropRatio": "16:9",
-                "imageWidthMode": "card",
-                "hoverPreviewMode": "none"
-              },
-              {
-                "id": "image-row-item-f786e06c-4f6c-4f7f-adba-f6aa412fbc5f",
-                "alt": {
-                  "zh": "自动填写后的确认状态",
-                  "en": "Confirmation State After Autofill"
-                },
-                "caption": {
-                  "zh": "系统区分已填写、待确认和未识别字段，减少逐项检查成本。",
-                  "en": "The system distinguishes between filled, pending, and unrecognized fields, cutting down the cost of checking each one by hand."
-                },
-                "placeholder": {
-                  "zh": "上传一键填写后的字段状态截图",
-                  "en": "Upload a screenshot of field status after one-click fill"
-                },
-                "suggestedAspectRatio": "16:9",
-                "suggestedImageCount": 1,
-                "imageDisplayMode": "cover",
-                "imageCropRatio": "16:9",
-                "imageWidthMode": "card",
-                "hoverPreviewMode": "none"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-936e8553-64d5-4ea5-bc90-77e705055286",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "04",
-              "en": "04"
-            },
-            "leftTitle": {
-              "zh": "投递 记忆",
-              "en": "Application Memory"
-            },
-            "statement": {
-              "zh": "真正需要保存的不是一个网址，而是当时发生过什么",
-              "en": "What actually needs saving isn't a URL — it's what happened at the time"
-            },
-            "body": {
-              "zh": "招聘页面可能下线、JD 可能修改，单独保存 URL 并不能还原一次真实投递。因此每条 Application 需要保存当时的 JD 快照，并和投递时间、使用的简历版本、作品集版本、内推码以及关键填写信息建立关系。这样 Job Search 不再是一张需要手工维护的公司列表，而更像一份由真实求职行为自然形成的时间记录。之后准备面试时，可以直接回到当时的岗位要求和投递材料，而不需要重新寻找已经失效的招聘页面。",
-              "en": "A job listing can go offline, and a JD can be edited — saving just the URL can't reconstruct what an application actually looked like at the time. So every Application needs to save a snapshot of the JD as it was then, linked to the submission time, the resume version used, the portfolio version, any referral code, and the key filled-in information. That way Job Search stops being a company list that has to be maintained by hand, and becomes more like a timeline that forms naturally out of real application activity. Later, when preparing for an interview, I can go straight back to the role requirements and materials as they were at the time, instead of hunting for a job listing that's already gone offline."
-            }
-          }
-        },
-        {
-          "instanceId": "image-row-6ac02295-19c6-41d6-908c-e1e6fecbeedb",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "从招聘页面到投递档案",
-              "en": "From Job Listing to Application Record"
-            },
-            "columns": 2,
-            "rowAlignment": "center",
-            "items": [
-              {
-                "id": "image-row-item-98dfeed9-a7f7-4c3f-aead-903d937669c4",
-                "alt": {
-                  "zh": "浏览器插件读取招聘岗位",
-                  "en": "Browser Extension Reading a Job Listing"
-                },
-                "caption": {
-                  "zh": "打开招聘页面后，系统自动获得公司、岗位、JD 和当前申请上下文。",
-                  "en": "Once a job page is open, the system automatically captures the company, the role, the JD, and the current application context."
-                },
-                "placeholder": {
-                  "zh": "上传浏览器助手读取 JD 的实际截图",
-                  "en": "Upload an actual screenshot of the browser assistant reading a JD"
-                },
-                "suggestedAspectRatio": "16:9",
-                "suggestedImageCount": 1,
-                "imageDisplayMode": "cover",
-                "imageCropRatio": "16:9",
-                "imageWidthMode": "wide",
-                "hoverPreviewMode": "none"
-              },
-              {
-                "id": "image-row-item-5320526a-88a8-4f6c-a564-0782db59aa4a",
-                "alt": {
-                  "zh": "DILIDA DESK 投递记录",
-                  "en": "DILIDA DESK Application Record"
-                },
-                "caption": {
-                  "zh": "申请完成后，同一份上下文转化为可继续跟踪的 Application。",
-                  "en": "Once the application is complete, that same context turns into an Application that can keep being tracked."
-                },
-                "placeholder": {
-                  "zh": "上传 Job Search 中自动生成的投递记录截图",
-                  "en": "Upload a screenshot of an automatically generated application record in Job Search"
-                },
-                "suggestedAspectRatio": "16:9",
-                "suggestedImageCount": 1,
-                "imageDisplayMode": "cover",
-                "imageCropRatio": "16:9",
-                "imageWidthMode": "wide",
-                "hoverPreviewMode": "none"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "phase-milestones-4569b0b7-148a-4800-858e-361ba1e824c3",
-          "templateId": "phase-milestones",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "验证路径",
-              "en": "Validation Path"
-            },
-            "items": [
-              {
-                "id": "milestone-01",
-                "state": "active",
-                "number": {
-                  "zh": "01",
-                  "en": "01"
-                },
-                "title": {
-                  "zh": "真实招聘页识别",
-                  "en": "Real Job Listing Recognition"
-                },
-                "hoverTitle": {
-                  "zh": "先验证通用 DOM 读取",
-                  "en": "Validate General-Purpose DOM Reading First"
-                },
-                "hoverText": {
-                  "zh": "使用真实招聘页面验证公司、岗位、JD 和基础字段是否能够被稳定识别，不先针对单一公司制作专用逻辑。",
-                  "en": "Use real job listings to verify that the company, role, JD, and basic fields can be recognized reliably, without building site-specific logic for a single company first."
-                },
-                "targetId": "real-page-detection"
-              },
-              {
-                "id": "milestone-02",
-                "state": "outline",
-                "number": {
-                  "zh": "02",
-                  "en": "02"
-                },
-                "title": {
-                  "zh": "字段映射与填写",
-                  "en": "Field Mapping and Filling"
-                },
-                "hoverTitle": {
-                  "zh": "建立可学习的语义字段系统",
-                  "en": "Build a Semantic Field System That Learns"
-                },
-                "hoverText": {
-                  "zh": "验证常见表单可以从 Desk 调用资料，并让用户修正未识别字段后持续复用。",
-                  "en": "Verify that common forms can pull data from Desk, and that once a user corrects an unrecognized field, that correction keeps getting reused."
-                },
-                "targetId": "semantic-autofill"
-              },
-              {
-                "id": "milestone-03",
-                "state": "outline",
-                "number": {
-                  "zh": "03",
-                  "en": "03"
-                },
-                "title": {
-                  "zh": "投递自动归档",
-                  "en": "Automatic Application Archiving"
-                },
-                "hoverTitle": {
-                  "zh": "让真实投递形成 Application",
-                  "en": "Turn Real Applications into Application Records"
-                },
-                "hoverText": {
-                  "zh": "保存 JD 快照、材料版本和投递时间，并进入后续面试与结果管理。",
-                  "en": "Saves the JD snapshot, material versions, and submission time, then moves into follow-up interview and outcome management."
-                },
-                "targetId": "application-capture"
-              },
-              {
-                "id": "milestone-04",
-                "state": "outline",
-                "number": {
-                  "zh": "04",
-                  "en": "04"
-                },
-                "title": {
-                  "zh": "跨设备安装",
-                  "en": "Cross-Device Installation"
-                },
-                "hoverTitle": {
-                  "zh": "插件保持轻量可替换",
-                  "en": "Keep the Extension Lightweight and Replaceable"
-                },
-                "hoverText": {
-                  "zh": "让用户能够从 Desk 随时重新安装浏览器助手，并继续使用已有字段和投递数据。",
-                  "en": "Lets the user reinstall the browser assistant from Desk at any time and keep using their existing fields and application data."
-                },
-                "targetId": "portable-extension"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-7d90dd60-19b4-4fd3-b54d-b5585e20a431",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "05",
-              "en": "05"
-            },
-            "leftTitle": {
-              "zh": "Agent 边界",
-              "en": "Agent Boundaries"
-            },
-            "statement": {
-              "zh": "高效不等于把所有决定都交给自动化",
-              "en": "Being efficient doesn't mean handing every decision to automation"
-            },
-            "body": {
-              "zh": "这个项目并不把“自动投更多岗位”作为目标。招聘网站包含很多需要真实判断的信息，例如工作地点、到岗时间、调剂意愿、身份问题和额外问答。如果 Agent 为了追求全自动而替用户猜测这些内容，效率反而会带来新的风险。因此我更关注自动化边界：让系统处理重复、结构明确、能够验证的信息，让不确定的字段明确暴露出来，并把最终提交保留给用户。Agent 的价值不在于替用户完成所有操作，而在于减少低价值重复劳动，同时保持用户对求职决策和个人信息的控制。",
-              "en": "This project doesn't treat \"submit more applications automatically\" as the goal. Job listings contain a lot of information that genuinely needs a human judgment call — work location, start date, willingness to relocate, eligibility questions, extra open-ended questions. If an agent guesses at these just to chase full automation, that efficiency ends up introducing new risk instead. So I focused more on where automation should stop: let the system handle information that's repetitive, well-structured, and verifiable, surface uncertain fields explicitly, and leave the final submission to the user. The value of an agent here isn't doing every step for the user — it's cutting low-value repetitive work while keeping the user in control of their job-search decisions and personal information."
-            }
-          }
-        },
-        {
-          "instanceId": "circle-summary-3df257a2-2a80-4377-9d7e-ea8a9bd4efdf",
-          "templateId": "circle-summary",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "我希望保留的三条产品原则",
-              "en": "Three Product Principles I Wanted to Keep"
-            },
-            "items": [
-              {
-                "id": "principle-01",
-                "text": {
-                  "zh": "真实投递自然产生数据，不要求用户重复维护数据库",
-                  "en": "Real applications generate data naturally — users shouldn't have to maintain a database by hand"
-                }
-              },
-              {
-                "id": "principle-02",
-                "text": {
-                  "zh": "Agent 自动处理确定性任务，把歧义主动暴露给用户",
-                  "en": "The agent automatically handles deterministic tasks and actively surfaces ambiguity to the user"
-                }
-              },
-              {
-                "id": "principle-03",
-                "text": {
-                  "zh": "插件可以替换，个人资料与长期记忆必须留在自己的系统中",
-                  "en": "The extension is replaceable, but personal data and long-term memory must stay in the user's own system"
-                }
-              }
-            ]
-          }
-        }
-      ],
-      "updatedAt": "2026-08-09T04:20:46.026Z"
-    },
     "interaction-intelligence-system": {
       "version": 1,
       "templateInstances": [
@@ -5352,255 +4617,9 @@
             },
             "direction": "left-to-right"
           }
-        },
-        {
-          "instanceId": "supporting-note-962886eb-9ed8-4b8c-8b2e-e2403b7e4148",
-          "templateId": "supporting-note",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "body": {
-              "zh": "这几个系统的迭代让我逐渐把关注点从“页面怎么排”转向“玩家进入这个系统时究竟在完成什么体验”。在接近200页UI铺量的公会系统中，我继续沿用这种方法：先区分不同公会玩法承担的体验目标，再决定任务、进度、荣誉感和养成回馈应该如何被界面表达。",
-              "en": "These iterations gradually shifted my attention from how a page should be arranged to what experience the player is actually completing when entering a system. I carried the same approach into a guild system spanning nearly 200 UI pages: first distinguishing the experience goal of each guild feature, then deciding how tasks, progress, recognition, and progression rewards should be expressed through interaction."
-            }
-          }
-        },
-        {
-          "instanceId": "image-row-d7ddc470-6b4c-4fc7-a497-7dd4d60b3abc",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "公会体验参考拆解",
-              "en": "Guild Experience Reference Breakdown"
-            },
-            "items": [
-              {
-                "id": "image-row-item-4566d166-91d0-49c4-9cc3-09b9f5442127",
-                "image": {
-                  "imageId": "image-9dd922b4-cf29-4657-9e62-5298249cce68",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-9dd922b4-cf29-4657-9e62-5298249cce68.png"
-                },
-                "imageDisplayMode": "cover",
-                "hoverPreviewMode": "floating",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                }
-              },
-              {
-                "id": "image-row-item-18f7b580-e618-45fe-ba02-c2970fcaaa97",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-349eba40-bb5f-4a44-87f1-d65c4dc69070",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-349eba40-bb5f-4a44-87f1-d65c4dc69070.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-a44d4b02-b91c-44bf-8f89-c2be0928bea9",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-9525cb26-54fc-469b-9482-3e6b75727d69",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-9525cb26-54fc-469b-9482-3e6b75727d69.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-fc342290-ee40-486b-a6da-c12e910b5945",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-bebf04da-6b18-4181-a3c7-bb0fc80ca398",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-bebf04da-6b18-4181-a3c7-bb0fc80ca398.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-976ad1d1-bd2d-42b0-9471-ee67f205b4af",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "startNewRow": true,
-                "image": {
-                  "imageId": "image-c0434cbf-c8e4-4444-b76b-d9bf6fe46fbf",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-c0434cbf-c8e4-4444-b76b-d9bf6fe46fbf.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-d8c9f8f0-7329-4b24-8943-d87c9ffd3dfb",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-15f0bb99-c1c0-4b77-a5a8-e1a266629d88",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-15f0bb99-c1c0-4b77-a5a8-e1a266629d88.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-4e276aa7-a5a1-45d8-8eaf-3bceec5a2e4d",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-90fbb4b6-acd5-4c07-b27c-44a83f523784",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-90fbb4b6-acd5-4c07-b27c-44a83f523784.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-e0c94e1d-87cf-4d0e-b7e2-ea84123fc5f8",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "",
-                  "en": ""
-                },
-                "hoverPreviewMode": "floating",
-                "image": {
-                  "imageId": "image-75c6ad2f-c9fa-47b6-95e4-1998213a59e2",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-75c6ad2f-c9fa-47b6-95e4-1998213a59e2.png"
-                },
-                "imageDisplayMode": "cover"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "image-row-decf5f89-c020-4347-82c9-e0e970d226f0",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "将体验目标落实到不同公会系统",
-              "en": "Applying Experience Goals Across Guild Systems"
-            },
-            "items": [
-              {
-                "id": "image-row-item-e4522e9a-e528-40f5-b392-7c27471d7f60",
-                "image": {
-                  "imageId": "image-bccae830-475e-486d-ad25-cedf55e8caae",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-bccae830-475e-486d-ad25-cedf55e8caae.png"
-                },
-                "imageDisplayMode": "cover",
-                "hoverPreviewMode": "none",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "每日公会任务面向高活跃玩家，重点保留连续进度与阶段目标，让重复进入仍能明确看到当前推进状态。",
-                  "en": "Daily guild quests target highly active players, emphasizing continuous progress and staged goals so repeated visits still communicate the player's current state clearly."
-                }
-              },
-              {
-                "id": "image-row-item-e2e6ec60-ea09-46a4-94b7-4c7c0960f932",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "公会红包承载付费后的集体反馈，因此设计重点放在共享奖励、荣誉感与进度感，而不只是一次领取操作。",
-                  "en": "Guild red envelopes provide collective feedback after purchases, so the design emphasizes shared rewards, recognition, and progress rather than treating the feature as a simple claim action."
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-bb088f9f-b663-4be3-b8b4-462a6c2667b5",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-bb088f9f-b663-4be3-b8b4-462a6c2667b5.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-f686eb56-1d14-44bb-be6b-12fb5de431ff",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "公会 Boss 需要同时表达属性克制、单次挑战结果与总进度，因此优先确保战斗判断和整体推进状态能够被快速读取。",
-                  "en": "The guild boss system needs to communicate elemental weakness, individual battle results, and overall progress at the same time, so the design prioritizes fast reading of combat decisions and collective progression."
-                },
-                "hoverPreviewMode": "none",
-                "startNewRow": true,
-                "image": {
-                  "imageId": "image-3179a673-28c8-436c-b2da-3ffc84739a88",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-3179a673-28c8-436c-b2da-3ffc84739a88.png"
-                },
-                "imageDisplayMode": "cover"
-              },
-              {
-                "id": "image-row-item-0479b994-73c2-4d3c-bf0e-6db9df7551d0",
-                "alt": {
-                  "zh": "",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "公会产出的养成资源最终回到英雄体系，因此保持与英雄界面一致的交互逻辑，减少玩家在不同系统间重新学习。",
-                  "en": "Progression resources earned through guild features ultimately feed back into the hero system, so the interaction remains consistent with the hero interface to reduce relearning across systems."
-                },
-                "hoverPreviewMode": "none",
-                "image": {
-                  "imageId": "image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4",
-                  "publicPath": "/images/published/template-images/project-1ua2677/image-94cf7b65-2d68-414c-a4c6-b2edc81a70c4.png"
-                },
-                "imageDisplayMode": "cover"
-              }
-            ]
-          }
         }
       ],
-      "updatedAt": "2026-08-26T06:15:18.552Z"
+      "updatedAt": "2026-09-06T13:59:42.115Z"
     },
     "game-jam-8lzejf": {
       "version": 1,
@@ -6659,6 +5678,741 @@
       ],
       "updatedAt": "2026-08-10T01:30:39.701Z"
     },
+    "ai-agent-6vaadf": {
+      "version": 1,
+      "templateInstances": [
+        {
+          "instanceId": "statement-longform-9ba81b60-9caa-4e9c-9527-13f2e05e75cb",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "01",
+              "en": "01"
+            },
+            "leftTitle": {
+              "zh": "核心 命题",
+              "en": "Core Premise"
+            },
+            "statement": {
+              "zh": "AI 能不能减少求职中的重复劳动，却不替用户做最终决定？",
+              "en": "Can AI cut repetitive labor in job hunting without making the final decision for the user?"
+            },
+            "body": {
+              "zh": "我最初在 DILIDA DESK 中设计 Job Search，是为了集中保存公司、岗位和求职信息。但真正开始使用后，我发现维护工具本身也变成了一项额外工作：浏览招聘网站、阅读 JD、重复填写姓名和教育经历、上传简历、完成投递以后，还要重新回到 Desk 手动创建记录，并反向确认当时投了什么岗位、使用了哪份简历。于是我开始重新设计这套流程，希望把浏览器中的真实投递行为直接连接到个人求职数据库，让系统承担重复识别、填写和记录，而把岗位判断、重要问题确认和最终提交留给用户。",
+              "en": "I originally designed Job Search in DILIDA DESK to keep company, role, and application information in one place. But once I actually started using it, I realized maintaining the tool had become its own extra chore: browsing job boards, reading JDs, filling in my name and education history over and over, uploading a resume, finishing the application, then going back to Desk to manually create a record and figure out after the fact which role I'd applied to and which resume I'd used. So I started redesigning the flow, aiming to connect real application activity in the browser directly to my personal job-search database — letting the system handle the repetitive recognition, filling, and record-keeping, while leaving role judgment, confirming important questions, and the final submission to me."
+            }
+          }
+        },
+        {
+          "instanceId": "supporting-note-419d1ce3-b535-41de-909a-bbe2c8d82ee6",
+          "templateId": "supporting-note",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "body": {
+              "zh": "现有流程最大的成本并不只来自填写表单，而是信息不断在招聘网站、简历文件、作品集和个人记录之间断开。单个公司的资料可以保存，但真正投递时仍然需要重新寻找、复制和确认；完成申请后，JD 和当时使用的材料也容易失去对应关系。",
+              "en": "The biggest cost in the old flow wasn't just filling out forms — it was that information kept breaking apart across job boards, resume files, portfolios, and personal records. A company's details could be saved, but when it came time to actually apply, I'd still have to go find, copy, and confirm everything again; and after submitting, the JD and the materials I'd used for it easily lost their connection to each other."
+            }
+          }
+        },
+        {
+          "instanceId": "direction-compare-58ec5653-43ef-4bf9-8eb0-e790c1d3aeab",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "投递流程重新组织",
+              "en": "Reorganizing the Application Flow"
+            },
+            "leftLabel": {
+              "zh": "原有流程",
+              "en": "Old Flow"
+            },
+            "rightLabel": {
+              "zh": "目标流程",
+              "en": "Target Flow"
+            },
+            "leftTitle": {
+              "zh": "用户维护工具",
+              "en": "User Maintains the Tool"
+            },
+            "rightTitle": {
+              "zh": "投递行为自动形成记录",
+              "en": "Application Activity Automatically Becomes a Record"
+            },
+            "leftDescription": {
+              "zh": "浏览 JD、手动寻找资料、逐项填写、完成申请，再回到 Desk 创建公司和岗位记录。真实投递和个人数据库之间存在重复录入。",
+              "en": "Browse the JD, manually dig up the needed information, fill in each field, complete the application, then go back to Desk to create the company and role record. Real applications and the personal database end up duplicating data entry."
+            },
+            "rightDescription": {
+              "zh": "浏览器插件读取当前 JD 和表单，从 Desk 调用已有资料辅助填写；用户确认并提交后，岗位信息和投递材料自动形成一条 Application 记录。",
+              "en": "The browser extension reads the current JD and form, pulls existing data from Desk to help fill it in; once the user confirms and submits, the role information and application materials automatically become a single Application record."
+            },
+            "leftImage": null,
+            "rightImage": null,
+            "direction": "left-to-right"
+          }
+        },
+        {
+          "instanceId": "process-flow-d45f525d-6ca2-48ab-9fc0-f16c7fb32306",
+          "templateId": "process-flow",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "一次投递如何自然形成完整记录",
+              "en": "How One Application Naturally Becomes a Complete Record"
+            },
+            "items": [
+              {
+                "id": "job-flow-01",
+                "number": {
+                  "zh": "01",
+                  "en": "01"
+                },
+                "title": {
+                  "zh": "打开招聘页面",
+                  "en": "Open a Job Listing"
+                },
+                "description": {
+                  "zh": "用户按照原本的求职习惯浏览招聘网站，不需要先在 Desk 中建立公司或岗位。",
+                  "en": "The user browses job boards the way they normally would, with no need to create a company or role in Desk first."
+                }
+              },
+              {
+                "id": "job-flow-02",
+                "number": {
+                  "zh": "02",
+                  "en": "02"
+                },
+                "title": {
+                  "zh": "识别 JD",
+                  "en": "Recognize the JD"
+                },
+                "description": {
+                  "zh": "插件读取用户当前可见页面中的公司、岗位名称、JD、URL、地点等信息，并形成当前岗位上下文。",
+                  "en": "The extension reads the company, role title, JD, URL, location, and other information visible on the current page, and builds the current role's context."
+                }
+              },
+              {
+                "id": "job-flow-03",
+                "number": {
+                  "zh": "03",
+                  "en": "03"
+                },
+                "title": {
+                  "zh": "匹配表单字段",
+                  "en": "Match Form Fields"
+                },
+                "description": {
+                  "zh": "系统根据字段语义、标签、占位文字和周边提示，将网页输入项映射到 Desk 中已有的个人资料。",
+                  "en": "The system maps the page's input fields to the existing personal profile in Desk, based on field semantics, labels, placeholder text, and surrounding hints."
+                }
+              },
+              {
+                "id": "job-flow-04",
+                "number": {
+                  "zh": "04",
+                  "en": "04"
+                },
+                "title": {
+                  "zh": "辅助填写",
+                  "en": "Assist with Filling"
+                },
+                "description": {
+                  "zh": "基础信息可以一键填入；无法确定、未识别或涉及重要选择的字段保持待确认，不进行猜测。",
+                  "en": "Basic information can be filled in with one click; fields that can't be determined, aren't recognized, or involve an important choice are left pending for confirmation rather than guessed at."
+                }
+              },
+              {
+                "id": "job-flow-05",
+                "number": {
+                  "zh": "05",
+                  "en": "05"
+                },
+                "title": {
+                  "zh": "用户确认提交",
+                  "en": "User Confirms and Submits"
+                },
+                "description": {
+                  "zh": "用户检查实际填写内容，并亲自完成最终投递。系统不自动点击最终提交，也不绕过验证码和网站安全控制。",
+                  "en": "The user reviews what's actually been filled in and completes the final submission themselves. The system never auto-clicks the final submit button and never bypasses CAPTCHAs or a site's security controls."
+                }
+              },
+              {
+                "id": "job-flow-06",
+                "number": {
+                  "zh": "06",
+                  "en": "06"
+                },
+                "title": {
+                  "zh": "生成投递档案",
+                  "en": "Generate an Application Record"
+                },
+                "description": {
+                  "zh": "申请完成后保存 JD 快照、投递时间、使用的简历和作品集以及关键填写信息，直接进入 Job Search 的后续跟踪。",
+                  "en": "Once the application is done, a JD snapshot, the submission time, the resume and portfolio used, and key filled-in information are all saved, and it moves straight into Job Search's follow-up tracking."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-4d9bcd59-0ccf-4a9c-b315-47ca0adc1675",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "02",
+              "en": "02"
+            },
+            "leftTitle": {
+              "zh": "系统 分工",
+              "en": "System Division of Labor"
+            },
+            "statement": {
+              "zh": "浏览器负责观察与操作，Desk 负责长期记忆",
+              "en": "The browser handles observation and action, Desk handles long-term memory"
+            },
+            "body": {
+              "zh": "我不希望浏览器插件再维护一套独立的求职资料，因此系统采用一个明确的数据边界：DILIDA DESK 是个人资料、字段映射、简历版本、作品集和投递记录的唯一数据源；浏览器插件只负责读取当前招聘页面、请求需要的资料、执行辅助填写，并把新的岗位和投递行为传回 Desk。这样更换电脑或重新安装插件时，不需要重新配置全部信息，也能避免浏览器和桌面端出现两套相互冲突的数据。",
+              "en": "I didn't want the browser extension to maintain a separate copy of my job-search data, so the system draws a clear data boundary: DILIDA DESK is the single source of truth for personal profile data, field mappings, resume versions, portfolios, and application records; the browser extension only reads the current job page, requests the data it needs, assists with filling in the form, and sends new role and application activity back to Desk. That way, switching computers or reinstalling the extension doesn't mean reconfiguring everything from scratch, and it avoids ending up with two conflicting sets of data between the browser and the desktop app."
+            }
+          }
+        },
+        {
+          "instanceId": "decision-table-f4de7693-b478-4bf3-a60f-84d0fca150be",
+          "templateId": "decision-table",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "插件、Desk 与用户的职责边界",
+              "en": "Division of Responsibility: Extension, Desk, and User"
+            },
+            "columns": [
+              {
+                "id": "task",
+                "title": {
+                  "zh": "任务",
+                  "en": "Task"
+                }
+              },
+              {
+                "id": "extension",
+                "title": {
+                  "zh": "浏览器插件",
+                  "en": "Browser Extension"
+                }
+              },
+              {
+                "id": "desk",
+                "title": {
+                  "zh": "DILIDA DESK",
+                  "en": "DILIDA DESK"
+                }
+              },
+              {
+                "id": "user",
+                "title": {
+                  "zh": "用户",
+                  "en": "User"
+                }
+              }
+            ],
+            "rows": [
+              {
+                "id": "jd",
+                "cells": {
+                  "task": {
+                    "zh": "岗位信息",
+                    "en": "Role Information"
+                  },
+                  "extension": {
+                    "zh": "读取当前页面中用户可见的岗位和 JD。",
+                    "en": "Reads the role and JD visible on the current page."
+                  },
+                  "desk": {
+                    "zh": "保存 JD 快照和岗位记录。",
+                    "en": "Saves the JD snapshot and role record."
+                  },
+                  "user": {
+                    "zh": "判断岗位是否值得投递。",
+                    "en": "Judges whether the role is worth applying to."
+                  }
+                }
+              },
+              {
+                "id": "autofill",
+                "cells": {
+                  "task": {
+                    "zh": "表单填写",
+                    "en": "Form Filling"
+                  },
+                  "extension": {
+                    "zh": "识别字段并填入可确认的基础资料。",
+                    "en": "Recognizes fields and fills in the basic data that can be confirmed."
+                  },
+                  "desk": {
+                    "zh": "提供个人资料和字段映射。",
+                    "en": "Provides the personal profile and field mappings."
+                  },
+                  "user": {
+                    "zh": "处理不确定字段并检查结果。",
+                    "en": "Handles uncertain fields and reviews the result."
+                  }
+                }
+              },
+              {
+                "id": "submit",
+                "cells": {
+                  "task": {
+                    "zh": "最终提交",
+                    "en": "Final Submission"
+                  },
+                  "extension": {
+                    "zh": "不自动提交。",
+                    "en": "Never auto-submits."
+                  },
+                  "desk": {
+                    "zh": "不控制招聘网站提交动作。",
+                    "en": "Doesn't control the job site's submit action."
+                  },
+                  "user": {
+                    "zh": "确认内容并亲自提交申请。",
+                    "en": "Confirms the content and submits the application personally."
+                  }
+                }
+              },
+              {
+                "id": "application",
+                "cells": {
+                  "task": {
+                    "zh": "投递记录",
+                    "en": "Application Record"
+                  },
+                  "extension": {
+                    "zh": "识别可能的成功状态并发送当前上下文。",
+                    "en": "Detects a likely success state and sends the current context."
+                  },
+                  "desk": {
+                    "zh": "生成 Application 并持续管理进度。",
+                    "en": "Generates the Application and keeps managing its progress."
+                  },
+                  "user": {
+                    "zh": "补充面试、拒绝、Offer 等后续状态。",
+                    "en": "Adds follow-up status like interviews, rejections, and offers."
+                  }
+                }
+              },
+              {
+                "id": "learning",
+                "cells": {
+                  "task": {
+                    "zh": "系统学习",
+                    "en": "System Learning"
+                  },
+                  "extension": {
+                    "zh": "暴露未识别或歧义字段。",
+                    "en": "Surfaces unrecognized or ambiguous fields."
+                  },
+                  "desk": {
+                    "zh": "保存新的全局或站点字段别名。",
+                    "en": "Saves new global or site-specific field aliases."
+                  },
+                  "user": {
+                    "zh": "只需完成一次正确映射。",
+                    "en": "Only needs to map it correctly once."
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-d1c34365-09e2-4f60-80d9-6fbc3eb59bd9",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "03",
+              "en": "03"
+            },
+            "leftTitle": {
+              "zh": "语义 识别",
+              "en": "Semantic Recognition"
+            },
+            "statement": {
+              "zh": "网页叫它什么，不应该决定系统能不能认识它",
+              "en": "What a webpage calls something shouldn't determine whether the system can recognize it"
+            },
+            "body": {
+              "zh": "不同招聘网站对同一信息的命名并不统一。例如“姓名”也可能被写成“名字”“应聘人姓名”“Full Name”或“Candidate Name”。因此我没有把网页上的可见文案直接当成字段 ID，而是设计了一层稳定的语义字段。系统内部只保存 fullName、phone、email、preferredCity、portfolioUrl 等标准字段，每个字段可以拥有多个可编辑别名。匹配时同时参考 label、placeholder、name、aria-label、周边提示文字和输入控件类型。当系统遇到无法识别的字段时，用户可以将它映射到已有字段、新建字段或忽略；这个结果会被保存下来，让系统随着真实使用逐渐适应更多网站。",
+              "en": "Different job sites don't name the same information consistently. \"Name\" might also appear as \"Full Name,\" \"Applicant Name,\" or \"Candidate Name.\" So instead of treating the visible label on a page as the field ID directly, I designed a stable semantic-field layer underneath. Internally, the system only stores standard fields like fullName, phone, email, preferredCity, and portfolioUrl, and each one can have multiple editable aliases. Matching draws on the label, placeholder, name, aria-label, surrounding hint text, and the input control's type all at once. When the system hits a field it can't recognize, the user can map it to an existing field, create a new one, or ignore it — and that choice gets saved, so the system gradually adapts to more sites as it's actually used."
+            }
+          }
+        },
+        {
+          "instanceId": "circle-summary-14d5824b-ca92-4655-b52f-b94156c16ee5",
+          "templateId": "circle-summary",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "字段识别的三个原则",
+              "en": "Three Principles for Field Recognition"
+            },
+            "items": [
+              {
+                "id": "semantic",
+                "text": {
+                  "zh": "稳定语义字段作为唯一数据源",
+                  "en": "Stable semantic fields as the single source of truth"
+                }
+              },
+              {
+                "id": "aliases",
+                "text": {
+                  "zh": "全局别名与站点别名持续学习",
+                  "en": "Global and site-specific aliases that keep learning"
+                }
+              },
+              {
+                "id": "uncertainty",
+                "text": {
+                  "zh": "不确定的信息必须交还用户确认",
+                  "en": "Uncertain information always goes back to the user to confirm"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "image-row-006ee24e-d79d-4ad2-92ed-67971123374a",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "字段识别与自动填写界面",
+              "en": "Field Recognition and Autofill Interface"
+            },
+            "columns": 3,
+            "rowAlignment": "center",
+            "items": [
+              {
+                "id": "image-row-item-893f90b0-e641-493f-9f16-34e374b2be17",
+                "alt": {
+                  "zh": "招聘网页字段识别结果",
+                  "en": "Job Listing Field Recognition Results"
+                },
+                "caption": {
+                  "zh": "插件识别当前页面中的岗位信息和可填写字段。",
+                  "en": "The extension recognizes the role information and fillable fields on the current page."
+                },
+                "placeholder": {
+                  "zh": "上传招聘网页中字段识别状态截图",
+                  "en": "Upload a screenshot of field-recognition status on a job listing page"
+                },
+                "suggestedAspectRatio": "16:9",
+                "suggestedImageCount": 1,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "card",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-805b498b-a9f9-4f3c-a17a-8a43dfa9982c",
+                "alt": {
+                  "zh": "未识别字段映射界面",
+                  "en": "Unrecognized Field Mapping Interface"
+                },
+                "caption": {
+                  "zh": "用户可以把陌生网页文案映射到已有语义字段。",
+                  "en": "The user can map an unfamiliar page label to an existing semantic field."
+                },
+                "placeholder": {
+                  "zh": "上传字段映射或别名管理截图",
+                  "en": "Upload a screenshot of field mapping or alias management"
+                },
+                "suggestedAspectRatio": "16:9",
+                "suggestedImageCount": 1,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "card",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-f786e06c-4f6c-4f7f-adba-f6aa412fbc5f",
+                "alt": {
+                  "zh": "自动填写后的确认状态",
+                  "en": "Confirmation State After Autofill"
+                },
+                "caption": {
+                  "zh": "系统区分已填写、待确认和未识别字段，减少逐项检查成本。",
+                  "en": "The system distinguishes between filled, pending, and unrecognized fields, cutting down the cost of checking each one by hand."
+                },
+                "placeholder": {
+                  "zh": "上传一键填写后的字段状态截图",
+                  "en": "Upload a screenshot of field status after one-click fill"
+                },
+                "suggestedAspectRatio": "16:9",
+                "suggestedImageCount": 1,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "card",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-936e8553-64d5-4ea5-bc90-77e705055286",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "04",
+              "en": "04"
+            },
+            "leftTitle": {
+              "zh": "投递 记忆",
+              "en": "Application Memory"
+            },
+            "statement": {
+              "zh": "真正需要保存的不是一个网址，而是当时发生过什么",
+              "en": "What actually needs saving isn't a URL — it's what happened at the time"
+            },
+            "body": {
+              "zh": "招聘页面可能下线、JD 可能修改，单独保存 URL 并不能还原一次真实投递。因此每条 Application 需要保存当时的 JD 快照，并和投递时间、使用的简历版本、作品集版本、内推码以及关键填写信息建立关系。这样 Job Search 不再是一张需要手工维护的公司列表，而更像一份由真实求职行为自然形成的时间记录。之后准备面试时，可以直接回到当时的岗位要求和投递材料，而不需要重新寻找已经失效的招聘页面。",
+              "en": "A job listing can go offline, and a JD can be edited — saving just the URL can't reconstruct what an application actually looked like at the time. So every Application needs to save a snapshot of the JD as it was then, linked to the submission time, the resume version used, the portfolio version, any referral code, and the key filled-in information. That way Job Search stops being a company list that has to be maintained by hand, and becomes more like a timeline that forms naturally out of real application activity. Later, when preparing for an interview, I can go straight back to the role requirements and materials as they were at the time, instead of hunting for a job listing that's already gone offline."
+            }
+          }
+        },
+        {
+          "instanceId": "image-row-6ac02295-19c6-41d6-908c-e1e6fecbeedb",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "从招聘页面到投递档案",
+              "en": "From Job Listing to Application Record"
+            },
+            "columns": 2,
+            "rowAlignment": "center",
+            "items": [
+              {
+                "id": "image-row-item-98dfeed9-a7f7-4c3f-aead-903d937669c4",
+                "alt": {
+                  "zh": "浏览器插件读取招聘岗位",
+                  "en": "Browser Extension Reading a Job Listing"
+                },
+                "caption": {
+                  "zh": "打开招聘页面后，系统自动获得公司、岗位、JD 和当前申请上下文。",
+                  "en": "Once a job page is open, the system automatically captures the company, the role, the JD, and the current application context."
+                },
+                "placeholder": {
+                  "zh": "上传浏览器助手读取 JD 的实际截图",
+                  "en": "Upload an actual screenshot of the browser assistant reading a JD"
+                },
+                "suggestedAspectRatio": "16:9",
+                "suggestedImageCount": 1,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-5320526a-88a8-4f6c-a564-0782db59aa4a",
+                "alt": {
+                  "zh": "DILIDA DESK 投递记录",
+                  "en": "DILIDA DESK Application Record"
+                },
+                "caption": {
+                  "zh": "申请完成后，同一份上下文转化为可继续跟踪的 Application。",
+                  "en": "Once the application is complete, that same context turns into an Application that can keep being tracked."
+                },
+                "placeholder": {
+                  "zh": "上传 Job Search 中自动生成的投递记录截图",
+                  "en": "Upload a screenshot of an automatically generated application record in Job Search"
+                },
+                "suggestedAspectRatio": "16:9",
+                "suggestedImageCount": 1,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "phase-milestones-4569b0b7-148a-4800-858e-361ba1e824c3",
+          "templateId": "phase-milestones",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "验证路径",
+              "en": "Validation Path"
+            },
+            "items": [
+              {
+                "id": "milestone-01",
+                "state": "active",
+                "number": {
+                  "zh": "01",
+                  "en": "01"
+                },
+                "title": {
+                  "zh": "真实招聘页识别",
+                  "en": "Real Job Listing Recognition"
+                },
+                "hoverTitle": {
+                  "zh": "先验证通用 DOM 读取",
+                  "en": "Validate General-Purpose DOM Reading First"
+                },
+                "hoverText": {
+                  "zh": "使用真实招聘页面验证公司、岗位、JD 和基础字段是否能够被稳定识别，不先针对单一公司制作专用逻辑。",
+                  "en": "Use real job listings to verify that the company, role, JD, and basic fields can be recognized reliably, without building site-specific logic for a single company first."
+                },
+                "targetId": "real-page-detection"
+              },
+              {
+                "id": "milestone-02",
+                "state": "outline",
+                "number": {
+                  "zh": "02",
+                  "en": "02"
+                },
+                "title": {
+                  "zh": "字段映射与填写",
+                  "en": "Field Mapping and Filling"
+                },
+                "hoverTitle": {
+                  "zh": "建立可学习的语义字段系统",
+                  "en": "Build a Semantic Field System That Learns"
+                },
+                "hoverText": {
+                  "zh": "验证常见表单可以从 Desk 调用资料，并让用户修正未识别字段后持续复用。",
+                  "en": "Verify that common forms can pull data from Desk, and that once a user corrects an unrecognized field, that correction keeps getting reused."
+                },
+                "targetId": "semantic-autofill"
+              },
+              {
+                "id": "milestone-03",
+                "state": "outline",
+                "number": {
+                  "zh": "03",
+                  "en": "03"
+                },
+                "title": {
+                  "zh": "投递自动归档",
+                  "en": "Automatic Application Archiving"
+                },
+                "hoverTitle": {
+                  "zh": "让真实投递形成 Application",
+                  "en": "Turn Real Applications into Application Records"
+                },
+                "hoverText": {
+                  "zh": "保存 JD 快照、材料版本和投递时间，并进入后续面试与结果管理。",
+                  "en": "Saves the JD snapshot, material versions, and submission time, then moves into follow-up interview and outcome management."
+                },
+                "targetId": "application-capture"
+              },
+              {
+                "id": "milestone-04",
+                "state": "outline",
+                "number": {
+                  "zh": "04",
+                  "en": "04"
+                },
+                "title": {
+                  "zh": "跨设备安装",
+                  "en": "Cross-Device Installation"
+                },
+                "hoverTitle": {
+                  "zh": "插件保持轻量可替换",
+                  "en": "Keep the Extension Lightweight and Replaceable"
+                },
+                "hoverText": {
+                  "zh": "让用户能够从 Desk 随时重新安装浏览器助手，并继续使用已有字段和投递数据。",
+                  "en": "Lets the user reinstall the browser assistant from Desk at any time and keep using their existing fields and application data."
+                },
+                "targetId": "portable-extension"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-7d90dd60-19b4-4fd3-b54d-b5585e20a431",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "05",
+              "en": "05"
+            },
+            "leftTitle": {
+              "zh": "Agent 边界",
+              "en": "Agent Boundaries"
+            },
+            "statement": {
+              "zh": "高效不等于把所有决定都交给自动化",
+              "en": "Being efficient doesn't mean handing every decision to automation"
+            },
+            "body": {
+              "zh": "这个项目并不把“自动投更多岗位”作为目标。招聘网站包含很多需要真实判断的信息，例如工作地点、到岗时间、调剂意愿、身份问题和额外问答。如果 Agent 为了追求全自动而替用户猜测这些内容，效率反而会带来新的风险。因此我更关注自动化边界：让系统处理重复、结构明确、能够验证的信息，让不确定的字段明确暴露出来，并把最终提交保留给用户。Agent 的价值不在于替用户完成所有操作，而在于减少低价值重复劳动，同时保持用户对求职决策和个人信息的控制。",
+              "en": "This project doesn't treat \"submit more applications automatically\" as the goal. Job listings contain a lot of information that genuinely needs a human judgment call — work location, start date, willingness to relocate, eligibility questions, extra open-ended questions. If an agent guesses at these just to chase full automation, that efficiency ends up introducing new risk instead. So I focused more on where automation should stop: let the system handle information that's repetitive, well-structured, and verifiable, surface uncertain fields explicitly, and leave the final submission to the user. The value of an agent here isn't doing every step for the user — it's cutting low-value repetitive work while keeping the user in control of their job-search decisions and personal information."
+            }
+          }
+        },
+        {
+          "instanceId": "circle-summary-3df257a2-2a80-4377-9d7e-ea8a9bd4efdf",
+          "templateId": "circle-summary",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "我希望保留的三条产品原则",
+              "en": "Three Product Principles I Wanted to Keep"
+            },
+            "items": [
+              {
+                "id": "principle-01",
+                "text": {
+                  "zh": "真实投递自然产生数据，不要求用户重复维护数据库",
+                  "en": "Real applications generate data naturally — users shouldn't have to maintain a database by hand"
+                }
+              },
+              {
+                "id": "principle-02",
+                "text": {
+                  "zh": "Agent 自动处理确定性任务，把歧义主动暴露给用户",
+                  "en": "The agent automatically handles deterministic tasks and actively surfaces ambiguity to the user"
+                }
+              },
+              {
+                "id": "principle-03",
+                "text": {
+                  "zh": "插件可以替换，个人资料与长期记忆必须留在自己的系统中",
+                  "en": "The extension is replaceable, but personal data and long-term memory must stay in the user's own system"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "updatedAt": "2026-08-09T04:20:46.026Z"
+    },
     "project-1hp5k4t": {
       "version": 1,
       "templateInstances": [
@@ -7228,13 +6982,1728 @@
         }
       ],
       "updatedAt": "2026-09-02T02:39:33.782Z"
+    },
+    "project-1ied3i": {
+      "version": 1,
+      "templateInstances": [
+        {
+          "instanceId": "statement-longform-36d2c97e-4ae0-4fac-9035-472c02ab3b0e",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "01",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "问题与目标",
+              "en": ""
+            },
+            "statement": {
+              "zh": "原个人信息页同时承担功能入口与角色展示，但大量功能被压缩为同级图标，角色本身反而退居次要位置。",
+              "en": ""
+            },
+            "body": {
+              "zh": "玩家进入页面时首先面对的是功能查找，而不是一个属于自己角色的个人空间。此次重构不增加新的系统功能，而是重新划分信息优先级：让高频操作更容易抵达，让角色与当前状态成为视觉中心，并将收藏、剧情与成就等进度转化为可快速扫视的个人状态。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "decision-table-f19ae002-4b1f-46e8-a367-6932a4c5ee59",
+          "templateId": "decision-table",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "02 交互重构逻辑",
+              "en": ""
+            },
+            "columns": [
+              {
+                "id": "task",
+                "title": {
+                  "zh": "玩家需要",
+                  "en": ""
+                }
+              },
+              {
+                "id": "problem",
+                "title": {
+                  "zh": "原界面问题",
+                  "en": ""
+                }
+              },
+              {
+                "id": "decision",
+                "title": {
+                  "zh": "重构判断",
+                  "en": ""
+                }
+              }
+            ],
+            "rows": [
+              {
+                "id": "entry-hierarchy",
+                "cells": {
+                  "task": {
+                    "zh": "快速找到常用功能",
+                    "en": ""
+                  },
+                  "problem": {
+                    "zh": "大量入口以相近图标平铺，高频与低频功能缺少优先级。",
+                    "en": ""
+                  },
+                  "decision": {
+                    "zh": "依据使用频率和行为目的重新分层：高频入口前置，邮件、公告、调研、设置等低频功能集中收纳。",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "identity-focus",
+                "cells": {
+                  "task": {
+                    "zh": "确认角色与当前状态",
+                    "en": ""
+                  },
+                  "problem": {
+                    "zh": "角色展示与功能入口竞争注意力，个人搭配与角色状态缺少明确视觉层级。",
+                    "en": ""
+                  },
+                  "decision": {
+                    "zh": "将角色近景设为页面视觉锚点，让当前搭配、身份与个人内容围绕角色展开。",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "personal-state",
+                "cells": {
+                  "task": {
+                    "zh": "查看进度并表达个人状态",
+                    "en": ""
+                  },
+                  "problem": {
+                    "zh": "剧情、收藏与成就信息分散，个人信息页更接近静态资料页。",
+                    "en": ""
+                  },
+                  "decision": {
+                    "zh": "将剧情、收藏、成就等转化为持续变化的状态信息，同时保留可编辑内容，使页面成为玩家反复返回的个人空间。",
+                    "en": ""
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "direction-compare-26aa0deb-f666-414e-add9-6bad3c693099",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "03 从功能索引到个人空间",
+              "en": ""
+            },
+            "leftLabel": {
+              "zh": "BEFORE",
+              "en": ""
+            },
+            "rightLabel": {
+              "zh": "AFTER",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "以功能入口为中心",
+              "en": ""
+            },
+            "rightTitle": {
+              "zh": "以角色与状态为中心",
+              "en": ""
+            },
+            "leftDescription": {
+              "zh": "原界面将大量系统功能压缩为近似权重的图标入口，玩家需要先识别功能，再寻找与自己角色有关的信息。",
+              "en": ""
+            },
+            "rightDescription": {
+              "zh": "重构后由角色近景建立视觉中心，高频操作、个人状态与低频系统功能形成清晰层级。页面既承担功能访问，也保留玩家暂停、查看进度与表达个人状态的空间。",
+              "en": ""
+            },
+            "leftImage": {
+              "imageId": "image-352eda30-cafe-4d97-86ed-96c3edce94ea",
+              "publicPath": "/images/published/template-images/project-1ied3i/image-352eda30-cafe-4d97-86ed-96c3edce94ea.png",
+              "hoverPreviewMode": "none"
+            },
+            "rightImage": {
+              "imageId": "image-07e14d50-bb0a-4dc2-b850-db17bb7847a1",
+              "publicPath": "/images/published/template-images/project-1ied3i/image-07e14d50-bb0a-4dc2-b850-db17bb7847a1.png",
+              "hoverPreviewMode": "none"
+            },
+            "direction": "left-to-right"
+          }
+        }
+      ],
+      "updatedAt": "2026-09-06T13:36:58.849Z"
+    },
+    "project-wlu6qq": {
+      "version": 1,
+      "templateInstances": [
+        {
+          "instanceId": "statement-longform-5afad305-8cea-498c-88d0-9b4cf3490005",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "01",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "项目定位",
+              "en": ""
+            },
+            "statement": {
+              "zh": "用少量输入建立清晰的属性切换、数量聚合与行为反馈，让玩家在短单局中快速理解规则并持续做出选择。",
+              "en": ""
+            },
+            "body": {
+              "zh": "这是一次轻量小游戏的交互与机制设计。核心对象被抽象为火、冰、电三类功能单位，玩家通过生成、切换属性、聚合数量与执行搬运、解谜或战斗行为推进关卡。设计重点放在规则如何被理解、状态如何变化以及反馈如何帮助玩家建立下一步判断，而不是依赖角色或世界观包装建立体验。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "circle-summary-425f7aff-f532-422c-957c-e58074479f2b",
+          "templateId": "circle-summary",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "设计目标",
+              "en": ""
+            },
+            "items": [
+              {
+                "text": {
+                  "zh": "低学习成本：核心输入保持简单，让玩家在首次接触时快速理解生成、切换与聚合关系。",
+                  "en": ""
+                }
+              },
+              {
+                "text": {
+                  "zh": "状态可感知：单位数量、属性与合体结果都需要通过持续反馈帮助玩家判断当前能力。",
+                  "en": ""
+                }
+              },
+              {
+                "text": {
+                  "zh": "短局内循环：让生成、组合、执行和奖励形成连续节奏，支持轻量重复游玩。",
+                  "en": ""
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "process-flow-f3aa1b4c-dd6d-4c4b-8095-48c247ac6f5b",
+          "templateId": "process-flow",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "核心玩法循环",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "step-01",
+                "number": {
+                  "zh": "01",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "进入关卡",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "观察地形、目标与当前可执行任务，建立本局行动预期。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "step-02",
+                "number": {
+                  "zh": "02",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "生成单位",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "通过吹出或补充单位建立基础数量，为后续属性组合与行动做准备。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "step-03",
+                "number": {
+                  "zh": "03",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "切换属性",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "根据场景机关、敌人与任务需求，在火、冰、电三类属性之间切换。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "step-04",
+                "number": {
+                  "zh": "04",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "聚合与合体",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "同属性单位达到条件后形成更大个体，提高搬运、解谜或战斗能力。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "step-05",
+                "number": {
+                  "zh": "05",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "执行行为",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "使用当前单位状态完成搬运、破障、激活机关或战斗等局内目标。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "step-06",
+                "number": {
+                  "zh": "06",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "结算与复玩",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "根据任务完成情况获得素材、货币或阶段奖励，并进入下一轮挑战。",
+                  "en": ""
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "decision-table-dcd9371d-a042-4460-9f4b-766d91714d8f",
+          "templateId": "decision-table",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "核心交互逻辑",
+              "en": ""
+            },
+            "columns": [
+              {
+                "id": "mechanic",
+                "title": {
+                  "zh": "机制",
+                  "en": ""
+                }
+              },
+              {
+                "id": "input",
+                "title": {
+                  "zh": "玩家输入",
+                  "en": ""
+                }
+              },
+              {
+                "id": "state",
+                "title": {
+                  "zh": "状态变化",
+                  "en": ""
+                }
+              },
+              {
+                "id": "feedback",
+                "title": {
+                  "zh": "交互反馈",
+                  "en": ""
+                }
+              }
+            ],
+            "rows": [
+              {
+                "id": "row-generate",
+                "cells": {
+                  "mechanic": {
+                    "zh": "生成与补充",
+                    "en": ""
+                  },
+                  "input": {
+                    "zh": "短按快速补充，长按持续生成同类单位",
+                    "en": ""
+                  },
+                  "state": {
+                    "zh": "单位数量增加，当前可执行能力同步变化",
+                    "en": ""
+                  },
+                  "feedback": {
+                    "zh": "数量与体型变化持续可见，让玩家判断是否达到下一阶段条件",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "row-switch",
+                "cells": {
+                  "mechanic": {
+                    "zh": "属性切换",
+                    "en": ""
+                  },
+                  "input": {
+                    "zh": "通过按键、技能键或滚轮切换火 / 冰 / 电属性",
+                    "en": ""
+                  },
+                  "state": {
+                    "zh": "当前单位属性与可作用目标发生变化",
+                    "en": ""
+                  },
+                  "feedback": {
+                    "zh": "颜色、状态标识与场景响应同步变化，明确当前属性有效范围",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "row-merge",
+                "cells": {
+                  "mechanic": {
+                    "zh": "聚合与合体",
+                    "en": ""
+                  },
+                  "input": {
+                    "zh": "持续聚合同属性单位并达到数量条件",
+                    "en": ""
+                  },
+                  "state": {
+                    "zh": "多个小单位转化为更大个体，能力与移动特性发生变化",
+                    "en": ""
+                  },
+                  "feedback": {
+                    "zh": "体型、数量与能力变化同时反馈，形成明确的成长节点",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "row-action",
+                "cells": {
+                  "mechanic": {
+                    "zh": "人数 / 体型判定",
+                    "en": ""
+                  },
+                  "input": {
+                    "zh": "靠近重物、机关或敌人并尝试交互",
+                    "en": ""
+                  },
+                  "state": {
+                    "zh": "系统根据单位数量、属性与体型判断是否满足条件",
+                    "en": ""
+                  },
+                  "feedback": {
+                    "zh": "成功时直接执行行为，失败时明确提示缺少的数量或属性条件",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "row-failure",
+                "cells": {
+                  "mechanic": {
+                    "zh": "失败与恢复",
+                    "en": ""
+                  },
+                  "input": {
+                    "zh": "受到攻击、错误操作或未满足场景条件",
+                    "en": ""
+                  },
+                  "state": {
+                    "zh": "单位生命、数量或当前组合被削弱",
+                    "en": ""
+                  },
+                  "feedback": {
+                    "zh": "通过掉落、减少与临时补充机会建立可恢复的轻失败反馈",
+                    "en": ""
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "circle-summary-1534deea-5d72-4246-bb56-802e3cf8105b",
+          "templateId": "circle-summary",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "属性单位职责",
+              "en": ""
+            },
+            "items": [
+              {
+                "text": {
+                  "zh": "火属性：负责点燃、持续伤害与处理冰系障碍，强调直接输出与环境破坏。",
+                  "en": ""
+                }
+              },
+              {
+                "text": {
+                  "zh": "冰属性：负责冻结水面、形成稳定平台与限制火焰区域，强调路径与空间控制。",
+                  "en": ""
+                }
+              },
+              {
+                "text": {
+                  "zh": "电属性：负责激活机关、连锁导电与处理机械目标，强调机关解谜与目标联动。",
+                  "en": ""
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "phase-milestones-1cf14581-f54b-4826-a0a6-26870b53146f",
+          "templateId": "phase-milestones",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "玩家流程主线",
+              "en": ""
+            },
+            "items": [
+              {
+                "number": {
+                  "zh": "01",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "教学引导",
+                  "en": ""
+                },
+                "hoverTitle": {
+                  "zh": "理解生成与跟随",
+                  "en": ""
+                },
+                "hoverText": {
+                  "zh": "先通过最低复杂度目标建立“生成单位—单位跟随—执行交互”的基础认知。",
+                  "en": ""
+                },
+                "state": "active",
+                "targetId": "phase-01"
+              },
+              {
+                "number": {
+                  "zh": "02",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "属性挑战",
+                  "en": ""
+                },
+                "hoverTitle": {
+                  "zh": "理解属性与场景关系",
+                  "en": ""
+                },
+                "hoverText": {
+                  "zh": "通过火、冰、电与机关、障碍之间的反馈，让玩家建立属性选择意识。",
+                  "en": ""
+                },
+                "state": "outline",
+                "targetId": "phase-02"
+              },
+              {
+                "number": {
+                  "zh": "03",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "合体与搬运",
+                  "en": ""
+                },
+                "hoverTitle": {
+                  "zh": "理解数量与体型",
+                  "en": ""
+                },
+                "hoverText": {
+                  "zh": "引入人数和体型判定，让玩家意识到聚合不仅改变外观，也改变可执行能力。",
+                  "en": ""
+                },
+                "state": "outline",
+                "targetId": "phase-03"
+              },
+              {
+                "number": {
+                  "zh": "04",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "综合对抗",
+                  "en": ""
+                },
+                "hoverTitle": {
+                  "zh": "组合使用已学习规则",
+                  "en": ""
+                },
+                "hoverText": {
+                  "zh": "同时加入机关、敌人与多目标任务，让属性、数量与行动选择形成组合判断。",
+                  "en": ""
+                },
+                "state": "outline",
+                "targetId": "phase-04"
+              },
+              {
+                "number": {
+                  "zh": "05",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "结算反馈",
+                  "en": ""
+                },
+                "hoverTitle": {
+                  "zh": "完成单局闭环",
+                  "en": ""
+                },
+                "hoverText": {
+                  "zh": "通过奖励与进度反馈确认本局结果，并为下一轮进入提供继续参与的理由。",
+                  "en": ""
+                },
+                "state": "outline",
+                "targetId": "phase-05"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "image-row-cb71224a-ce01-4d68-a766-caa33705132d",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "核心界面交互",
+              "en": ""
+            },
+            "columns": 3,
+            "rowAlignment": "center",
+            "items": [
+              {
+                "id": "image-row-item-c1b530ad-1382-4860-a45b-4244f9cc35a4",
+                "alt": {
+                  "zh": "局内生成与召唤反馈",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "局内生成：展示单位出现、数量变化与当前属性状态。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加局内生成与召唤界面截图",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 3,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-b9149035-7a6a-4a93-bf67-86aceb3875dc",
+                "alt": {
+                  "zh": "数量体积与合体反馈",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "聚合与合体：展示数量阈值、体型变化以及能力升级反馈。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加数量 / 体型 / 合体反馈截图",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 3,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-9d20fff9-3cbf-4ba8-907e-3337ec04c040",
+                "alt": {
+                  "zh": "关卡结算反馈",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "结算反馈：展示奖励、阶段结果与再次挑战入口。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加关卡结算界面截图",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 3,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "supporting-note-04ee2c0c-b6c8-4bb6-8a71-063b76091730",
+          "templateId": "supporting-note",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "body": {
+              "zh": "本项目以小游戏交互规则与原型表达为重点，因此视觉设定只承担属性识别和状态区分功能，不依赖完整角色 IP 或世界观包装。作品集展示重点放在核心循环、输入规则、状态变化、系统反馈与单局体验结构。",
+              "en": ""
+            }
+          }
+        }
+      ],
+      "updatedAt": "2026-09-06T13:55:58.609Z"
+    },
+    "project-y4coub": {
+      "version": 1,
+      "templateInstances": [
+        {
+          "instanceId": "statement-longform-10b8d893-4402-463c-8dbe-17da47f3efe6",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "01",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "方向选择",
+              "en": ""
+            },
+            "statement": {
+              "zh": "我希望讨论的并不是如何给公会增加更多功能，而是公会为什么很难真正成为玩家关系的一部分。",
+              "en": ""
+            },
+            "body": {
+              "zh": "轻竞技卡牌游戏通常以长期养成、高频日常和周期竞争维持玩家投入，公会同时承担资源、任务、竞争与社交入口。但在实际体验中，玩家往往只是持续完成公会相关任务，并没有因此形成稳定的成员关系。本项目从公会与个人成长之间的关系入手，分析不同产品如何组织公会参与，并进一步寻找适合轻竞技卡牌游戏的低压力社交方式。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "image-row-913d0577-3cb9-4e6d-8c6b-25e937817319",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "竞品公会系统分析",
+              "en": ""
+            },
+            "columns": 3,
+            "rowAlignment": "center",
+            "items": [
+              {
+                "id": "image-row-item-a1f85561-b5a5-4807-86e7-c81218cbdf89",
+                "alt": {
+                  "zh": "忘川风华录公会系统分析",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "忘川风华录：个人任务与周期奖励较完整，但公会核心互动仍偏向资源交换。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加忘川风华录竞品分析页",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 6,
+                "imageDisplayMode": "natural",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-dc0e8f5c-b464-4969-a8eb-0ae122eda382",
+                "alt": {
+                  "zh": "RAID公会系统分析",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "RAID：任务驱动和成长奖励明确，但普通成员可参与的社交内容较弱。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加 RAID 竞品分析页",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 6,
+                "imageDisplayMode": "natural",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-c34cf11a-9002-4519-95c9-123efc37500b",
+                "alt": {
+                  "zh": "刀塔传奇公会系统分析",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "刀塔传奇：公会战和团队成长强化集体目标，但养成差异也会扩大成员间距离。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加刀塔传奇竞品分析页",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 6,
+                "imageDisplayMode": "natural",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-7967ded5-6804-42a8-af30-51788b52f3e0",
+                "alt": {
+                  "zh": "Hero Wars公会系统分析",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "Hero Wars：公会与英雄成长联系紧密，但成员之间的直接互动仍然有限。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加 Hero Wars 竞品分析页",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 6,
+                "imageDisplayMode": "natural",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none",
+                "startNewRow": true
+              },
+              {
+                "id": "image-row-item-13d81658-438b-4312-9189-a9d39a3615ba",
+                "alt": {
+                  "zh": "花亦山心之月与闪耀暖暖公会分析",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "养成向产品：社交压力较低，但公会与核心玩法联系偏弱，长期存在感有限。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加花亦山心之月 / 闪耀暖暖竞品分析页",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 6,
+                "imageDisplayMode": "natural",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-9ba852fb-ec7a-419f-81cd-b6e436539cf9",
+                "alt": {
+                  "zh": "AFK公会系统分析",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "AFK：放置玩法与奖励绑定紧密，参与感稳定，但成员关系依然偏弱连接。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加 AFK 竞品分析页",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 6,
+                "imageDisplayMode": "natural",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "dual-viewpoint-analysis-380358f9-0e58-44f2-b8d6-940c117f4f6a",
+          "templateId": "dual-viewpoint-analysis",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "title": {
+              "zh": "轻竞技游戏公会社交共性",
+              "en": ""
+            },
+            "subtitle": {
+              "zh": "SLG、卡牌、养成与经营类游戏中，公会社交共同面对的机会和挑战",
+              "en": ""
+            },
+            "leftLabel": {
+              "zh": "机遇",
+              "en": ""
+            },
+            "leftItems": [
+              {
+                "id": "opportunity-play",
+                "title": {
+                  "zh": "延展游戏玩法",
+                  "en": ""
+                },
+                "body": {
+                  "zh": "团队合作可以发展出更清晰的策略定位，并让玩家获得合作共赢的依赖感与代入感。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "opportunity-growth",
+                "title": {
+                  "zh": "养成差异带来社交机会",
+                  "en": ""
+                },
+                "body": {
+                  "zh": "合理利用玩家成长差异，为不同熟悉程度和投入程度的用户提供互补的社交方式。",
+                  "en": ""
+                }
+              }
+            ],
+            "rightLabel": {
+              "zh": "挑战",
+              "en": ""
+            },
+            "rightItems": [
+              {
+                "id": "challenge-belonging",
+                "title": {
+                  "zh": "公会代入感不足，维护困难",
+                  "en": ""
+                },
+                "body": {
+                  "zh": "成员很难在短期内获得认同感，核心成员与普通成员之间的体验差距也会持续扩大。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "challenge-gap",
+                "title": {
+                  "zh": "养成中社交割裂",
+                  "en": ""
+                },
+                "body": {
+                  "zh": "个人核心玩法与公会关系不够紧密，额外奖励难以长期维持参与，养成差异还会进一步放大成员距离。",
+                  "en": ""
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "decision-table-04a5be04-8f7c-4c68-aada-49395931bfa4",
+          "templateId": "decision-table",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "产品独特需求",
+              "en": ""
+            },
+            "columns": [
+              {
+                "id": "dimension",
+                "title": {
+                  "zh": "观察维度",
+                  "en": ""
+                }
+              },
+              {
+                "id": "characteristic",
+                "title": {
+                  "zh": "产品特征",
+                  "en": ""
+                }
+              },
+              {
+                "id": "implication",
+                "title": {
+                  "zh": "对公会体验的影响",
+                  "en": ""
+                }
+              }
+            ],
+            "rows": [
+              {
+                "id": "interaction-frequency",
+                "cells": {
+                  "dimension": {
+                    "zh": "交互频次",
+                    "en": ""
+                  },
+                  "characteristic": {
+                    "zh": "日常操作较多，玩家已经承担较高的重复交互成本。",
+                    "en": ""
+                  },
+                  "implication": {
+                    "zh": "公会互动需要高效，不适合依赖大量额外操作建立社交。",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "growth-resource",
+                "cells": {
+                  "dimension": {
+                    "zh": "成长资源",
+                    "en": ""
+                  },
+                  "characteristic": {
+                    "zh": "英雄养成强依赖资源，长期目标明确。",
+                    "en": ""
+                  },
+                  "implication": {
+                    "zh": "公会可以承接成长价值，但不能只成为额外资源入口。",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "social-frequency",
+                "cells": {
+                  "dimension": {
+                    "zh": "社交需求",
+                    "en": ""
+                  },
+                  "characteristic": {
+                    "zh": "玩家存在协作与竞争需求，但并不一定愿意主动聊天。",
+                    "en": ""
+                  },
+                  "implication": {
+                    "zh": "优先设计基于共同任务、支援和状态反馈的低压力互动。",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "update-frequency",
+                "cells": {
+                  "dimension": {
+                    "zh": "更新频次",
+                    "en": ""
+                  },
+                  "characteristic": {
+                    "zh": "大版本更新频率相对较低，长期内容重复度较高。",
+                    "en": ""
+                  },
+                  "implication": {
+                    "zh": "公会关系需要依靠玩家之间持续变化的行为，而不是只依赖新内容。",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "audience",
+                "cells": {
+                  "dimension": {
+                    "zh": "用户定位",
+                    "en": ""
+                  },
+                  "characteristic": {
+                    "zh": "核心用户以成熟男性玩家为主，对效率和长期成长较敏感。",
+                    "en": ""
+                  },
+                  "implication": {
+                    "zh": "社交设计需要明确、直接，并降低强制情绪表达和复杂社交负担。",
+                    "en": ""
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "image-row-bacfbd76-e349-400c-b007-4ecae6e07175",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "公会系统使用习惯与信息需求",
+              "en": ""
+            },
+            "columns": 3,
+            "rowAlignment": "center",
+            "items": [
+              {
+                "id": "image-row-item-f098e5c7-43ae-4cd3-a76d-ce3e8ca48df4",
+                "alt": {
+                  "zh": "公会功能拆解分析",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "功能拆解：分析公会信息、英雄升级、周期活动、商店、公会战与聊天等入口的权重。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加公会系统交互功能拆解图",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 3,
+                "imageDisplayMode": "natural",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-4a43c8ed-43cb-4737-bed1-3d7ba28e7614",
+                "alt": {
+                  "zh": "公会使用频次分析",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "使用频次：区分每日操作、周期性参与以及个人与社交行为的使用位置。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加公会系统使用习惯分析图",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 3,
+                "imageDisplayMode": "natural",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-4ca4efb1-aed5-4c09-98cc-131fe247aa2c",
+                "alt": {
+                  "zh": "公会信息需求关系分析",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "信息需求：梳理个人成长、公会战与养成系统之间的反馈关系。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加公会信息需求关系图",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 3,
+                "imageDisplayMode": "natural",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "circle-summary-d9717f75-d53c-404a-a1e4-52ba98617789",
+          "templateId": "circle-summary",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "公会社交问题定位",
+              "en": ""
+            },
+            "items": [
+              {
+                "text": {
+                  "zh": "贡献反馈断裂：玩家完成任务后能获得奖励，却难以理解自己的行为如何推动公会整体变化。",
+                  "en": ""
+                }
+              },
+              {
+                "text": {
+                  "zh": "社交关系隐性：公会界面能够展示成员、排名和活跃度，但很少呈现成员之间正在发生的协作关系。",
+                  "en": ""
+                }
+              },
+              {
+                "text": {
+                  "zh": "新人缺少身份位置：新人需要保护和引导，但现有系统很少帮助他们理解自己可以如何参与。",
+                  "en": ""
+                }
+              },
+              {
+                "text": {
+                  "zh": "高活跃玩家缺少展示：核心玩家承担更多贡献，却缺少持续、明确且不会打扰其他成员的荣誉反馈。",
+                  "en": ""
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "circle-summary-93eede23-b520-4d69-b3fb-987a8402a19b",
+          "templateId": "circle-summary",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "交互策略",
+              "en": ""
+            },
+            "items": [
+              {
+                "text": {
+                  "zh": "强化公会进度：把当前活动、阶段目标和需要支援的内容持续放在玩家容易感知的位置。",
+                  "en": ""
+                }
+              },
+              {
+                "text": {
+                  "zh": "新人获得真实但不过度的鼓励：通过新人状态、保护期和低门槛参与逐渐进入群体。",
+                  "en": ""
+                }
+              },
+              {
+                "text": {
+                  "zh": "打破固定小圈子：利用随机匹配、求助和共同目标，让成员在核心玩法周围自然发生新的互动。",
+                  "en": ""
+                }
+              },
+              {
+                "text": {
+                  "zh": "提高交互效率：优先使用状态、反馈和快速操作，而不是要求玩家通过高频聊天维持关系。",
+                  "en": ""
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "decision-table-e3756a28-dacb-457a-9baf-80be6c6a838c",
+          "templateId": "decision-table",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "体验结构重组",
+              "en": ""
+            },
+            "columns": [
+              {
+                "id": "area",
+                "title": {
+                  "zh": "系统层",
+                  "en": ""
+                }
+              },
+              {
+                "id": "problem",
+                "title": {
+                  "zh": "当前问题",
+                  "en": ""
+                }
+              },
+              {
+                "id": "direction",
+                "title": {
+                  "zh": "设计方向",
+                  "en": ""
+                }
+              }
+            ],
+            "rows": [
+              {
+                "id": "personal",
+                "cells": {
+                  "area": {
+                    "zh": "个人成长",
+                    "en": ""
+                  },
+                  "problem": {
+                    "zh": "公会相关养成信息分散，个人成长和集体参与缺少联系。",
+                    "en": ""
+                  },
+                  "direction": {
+                    "zh": "把个人养成状态与公会贡献共同呈现，使成长行为同时拥有集体意义。",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "collective",
+                "cells": {
+                  "area": {
+                    "zh": "集体目标",
+                    "en": ""
+                  },
+                  "problem": {
+                    "zh": "公会战和周期活动通常需要进入对应页面才能感知。",
+                    "en": ""
+                  },
+                  "direction": {
+                    "zh": "将进行中的集体目标适度外显，让玩家在日常路径中持续感知公会状态。",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "newcomer",
+                "cells": {
+                  "area": {
+                    "zh": "新人参与",
+                    "en": ""
+                  },
+                  "problem": {
+                    "zh": "新人不清楚自己应该做什么，也缺少安全的首次参与方式。",
+                    "en": ""
+                  },
+                  "direction": {
+                    "zh": "加入新人状态、周期保护与简单贡献入口，降低进入集体活动的门槛。",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "core-player",
+                "cells": {
+                  "area": {
+                    "zh": "核心玩家",
+                    "en": ""
+                  },
+                  "problem": {
+                    "zh": "高贡献成员承担更多责任，但荣誉和作用缺少持续反馈。",
+                    "en": ""
+                  },
+                  "direction": {
+                    "zh": "通过高活跃标识、贡献展示和支援角色，让核心玩家获得可感知的身份价值。",
+                    "en": ""
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "process-flow-73739d13-8a0c-45a3-866e-e6fcd7b1396e",
+          "templateId": "process-flow",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "日常公会体验流程",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "flow-01",
+                "number": {
+                  "zh": "01",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "感知状态",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "玩家进入游戏时即可看到当前公会活动、目标或成员需求。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "flow-02",
+                "number": {
+                  "zh": "02",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "判断行动",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "根据自身成长目标、公会进度和成员需求决定是否参与。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "flow-03",
+                "number": {
+                  "zh": "03",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "进入玩法",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "通过清晰入口直接进入公会战、地下城、支援或其他周期活动。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "flow-04",
+                "number": {
+                  "zh": "04",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "完成行为",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "玩家继续使用熟悉的战斗和养成玩法，而不增加额外复杂操作。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "flow-05",
+                "number": {
+                  "zh": "05",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "反馈贡献",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "完成后同时反馈个人收益、公会进度变化与其他成员参与状态。",
+                  "en": ""
+                }
+              },
+              {
+                "id": "flow-06",
+                "number": {
+                  "zh": "06",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "形成连接",
+                  "en": ""
+                },
+                "description": {
+                  "zh": "通过持续共同参与、支援和状态感知逐步建立低压力的成员关系。",
+                  "en": ""
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "phase-milestones-78009228-7aa2-44a1-a87a-00202ee5c88d",
+          "templateId": "phase-milestones",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "符合游戏设定的解决方式",
+              "en": ""
+            },
+            "items": [
+              {
+                "number": {
+                  "zh": "01",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "状态外显",
+                  "en": ""
+                },
+                "hoverTitle": {
+                  "zh": "让重要公会信息进入主界面",
+                  "en": ""
+                },
+                "hoverText": {
+                  "zh": "将地下城、活跃度、公会战等有行动价值的信息适度展示在外部，减少反复进入公会页面确认状态。",
+                  "en": ""
+                },
+                "state": "active",
+                "targetId": "solution-status"
+              },
+              {
+                "number": {
+                  "zh": "02",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "进行中反馈",
+                  "en": ""
+                },
+                "hoverTitle": {
+                  "zh": "明确集体活动正在发生",
+                  "en": ""
+                },
+                "hoverText": {
+                  "zh": "当公会战或集体活动进行时展示明确状态，让非参战成员也能感知公会当前发生的事情。",
+                  "en": ""
+                },
+                "state": "outline",
+                "targetId": "solution-battle"
+              },
+              {
+                "number": {
+                  "zh": "03",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "新人保护",
+                  "en": ""
+                },
+                "hoverTitle": {
+                  "zh": "降低第一次参与门槛",
+                  "en": ""
+                },
+                "hoverText": {
+                  "zh": "新人拥有阶段性身份提示和保护机制，高活跃成员则获得适度展示，让不同投入程度的玩家都能找到位置。",
+                  "en": ""
+                },
+                "state": "outline",
+                "targetId": "solution-newcomer"
+              },
+              {
+                "number": {
+                  "zh": "04",
+                  "en": ""
+                },
+                "title": {
+                  "zh": "贡献可见",
+                  "en": ""
+                },
+                "hoverTitle": {
+                  "zh": "连接个人行为与集体变化",
+                  "en": ""
+                },
+                "hoverText": {
+                  "zh": "让个人任务、养成投入和公会活动结果都能对应到明确的个人贡献与公会进度反馈。",
+                  "en": ""
+                },
+                "state": "outline",
+                "targetId": "solution-contribution"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "image-row-35b2ab5d-3a59-4f18-ade8-1fd59ba2f8d6",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "方案展示",
+              "en": ""
+            },
+            "columns": 2,
+            "rowAlignment": "center",
+            "items": [
+              {
+                "id": "image-row-item-00deb9c5-c501-42a6-91b4-e12b3da5a9dd",
+                "alt": {
+                  "zh": "公会状态外显方案",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "主界面状态外显：只将当前具有行动价值的公会内容展示在玩家日常路径中。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加主界面状态外显方案图",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 4,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-f36dea89-cf9d-488f-a721-18bda2ef52a6",
+                "alt": {
+                  "zh": "公会战状态方案",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "进行中反馈：明确显示公会战状态和参与情况，让集体行为被更多成员感知。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加公会战进行中方案图",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 4,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-8576b5d0-705b-4da3-b93d-71b21773841a",
+                "alt": {
+                  "zh": "新人保护与高活跃成员方案",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "成员状态：新人获得识别和保护，高贡献成员获得适度荣誉展示。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加新人保护与核心玩家展示方案图",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 4,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none",
+                "startNewRow": true
+              },
+              {
+                "id": "image-row-item-a63e2289-4326-4da9-a764-2ad0b7e79dd3",
+                "alt": {
+                  "zh": "个人贡献与公会进度反馈方案",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "贡献反馈：将个人行为、个人收益和公会整体进度放在同一反馈链路中。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "添加贡献与公会进度反馈方案图",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 4,
+                "imageDisplayMode": "cover",
+                "imageCropRatio": "16:9",
+                "imageWidthMode": "wide",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "decision-table-4a33f63d-1961-4f8e-92c7-9d4589dd50c8",
+          "templateId": "decision-table",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "后续验证计划",
+              "en": ""
+            },
+            "columns": [
+              {
+                "id": "question",
+                "title": {
+                  "zh": "验证问题",
+                  "en": ""
+                }
+              },
+              {
+                "id": "focus",
+                "title": {
+                  "zh": "观察重点",
+                  "en": ""
+                }
+              }
+            ],
+            "rows": [
+              {
+                "id": "validation-01",
+                "cells": {
+                  "question": {
+                    "zh": "玩家是否能够快速感知当前公会正在发生什么？",
+                    "en": ""
+                  },
+                  "focus": {
+                    "zh": "观察主界面状态信息是否能够被理解，以及玩家能否快速找到对应入口。",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "validation-02",
+                "cells": {
+                  "question": {
+                    "zh": "玩家是否理解个人行为和公会整体进度之间的关系？",
+                    "en": ""
+                  },
+                  "focus": {
+                    "zh": "观察任务或活动完成后，玩家对个人贡献、集体变化和奖励来源的理解。",
+                    "en": ""
+                  }
+                }
+              },
+              {
+                "id": "validation-03",
+                "cells": {
+                  "question": {
+                    "zh": "新人是否能在低社交压力下完成第一次有效参与？",
+                    "en": ""
+                  },
+                  "focus": {
+                    "zh": "观察新人状态、保护机制和低门槛贡献入口是否能帮助玩家理解自己的角色。",
+                    "en": ""
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "supporting-note-920051f6-935d-45b5-9742-f57e512107f4",
+          "templateId": "supporting-note",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "body": {
+              "zh": "当前项目以既有产品分析、竞品观察、系统结构梳理和体验方案设计为主要依据，尚未进行真实用户测试，因此不对方案效果做未经验证的量化结论。后续可通过高保真原型继续验证信息优先级、贡献反馈理解度以及新人参与时的社交压力。",
+              "en": ""
+            }
+          }
+        }
+      ],
+      "updatedAt": "2026-09-06T15:03:17.006Z"
     }
   },
   "projectCatalog": {
     "ui-personal-practice": {
       "featured": true,
-      "updatedAt": "2026-08-31T09:59:17.654Z",
-      "archiveOrder": 7,
+      "updatedAt": "2026-09-06T15:16:54.125Z",
+      "archiveOrder": 8,
       "slug": "ui-personal-practice",
       "route": "/work/ui-personal-practice",
       "titleZh": "个人练习",
@@ -7297,7 +8766,7 @@
         "AI Prototyping"
       ],
       "coverImage": "",
-      "updatedAt": "2026-08-31T09:58:30.270Z",
+      "updatedAt": "2026-09-06T15:16:54.125Z",
       "portfolioTrack": "ai-product"
     },
     "ai-assisted-ui-environment-design": {
@@ -7342,7 +8811,7 @@
         "Figma"
       ],
       "coverImage": "",
-      "updatedAt": "2026-08-31T09:59:03.299Z",
+      "updatedAt": "2026-09-06T15:16:54.125Z",
       "portfolioTrack": "ai-product"
     },
     "ui-16ienxj": {
@@ -7368,7 +8837,7 @@
       "collaborators": [],
       "tools": [],
       "coverImage": "",
-      "updatedAt": "2026-08-31T09:57:43.657Z",
+      "updatedAt": "2026-09-06T15:16:54.125Z",
       "portfolioTrack": "ux-ui"
     },
     "project-1ua2677": {
@@ -7394,7 +8863,7 @@
       "collaborators": [],
       "tools": [],
       "coverImage": "",
-      "updatedAt": "2026-08-31T09:57:33.808Z",
+      "updatedAt": "2026-09-06T15:16:54.125Z",
       "portfolioTrack": "ux-ui"
     },
     "game-jam-8lzejf": {
@@ -7436,7 +8905,7 @@
         "Codex / AI-assisted development"
       ],
       "coverImage": "",
-      "updatedAt": "2026-09-01T07:38:23.850Z",
+      "updatedAt": "2026-09-06T15:16:54.125Z",
       "portfolioTrack": "game-design"
     },
     "3d-vdr4qg": {
@@ -7474,7 +8943,7 @@
         "Blender"
       ],
       "coverImage": "",
-      "updatedAt": "2026-08-31T09:58:04.703Z",
+      "updatedAt": "2026-09-06T15:16:54.125Z",
       "portfolioTrack": "game-design"
     },
     "ai-agent-6vaadf": {
@@ -7498,8 +8967,8 @@
       "categoryZh": "AI Agent / 产品交互",
       "categoryEn": "AI Agent / Product Interaction",
       "duration": "2026.7-2026.8",
-      "archiveOrder": 8,
-      "featured": false,
+      "archiveOrder": 9,
+      "featured": true,
       "group": "work",
       "visibility": "public",
       "publicationState": "draft",
@@ -7512,7 +8981,8 @@
         "AI"
       ],
       "coverImage": "",
-      "updatedAt": "2026-08-26T03:20:48.868Z"
+      "updatedAt": "2026-09-06T15:16:54.125Z",
+      "portfolioTrack": "ai-product"
     },
     "project-1hp5k4t": {
       "isDynamic": true,
@@ -7543,8 +9013,102 @@
         "Figma"
       ],
       "coverImage": "",
-      "updatedAt": "2026-08-31T09:57:52.642Z",
+      "updatedAt": "2026-09-06T15:16:54.125Z",
       "portfolioTrack": "ue"
+    },
+    "project-1ied3i": {
+      "isDynamic": true,
+      "slug": "project-1ied3i",
+      "route": "/work/project-1ied3i",
+      "titleZh": "《无限暖暖》个人信息页交互重构",
+      "titleEn": "",
+      "summaryZh": "围绕个人信息页中功能入口密集、信息层级平均与角色表达不足的问题，重新组织角色、状态与功能入口之间的关系。",
+      "summaryEn": "",
+      "tagsZh": [
+        "交互重构",
+        "信息架构",
+        "游戏UX"
+      ],
+      "tagsEn": [],
+      "categoryZh": "游戏交互 / 体验设计",
+      "categoryEn": "",
+      "duration": "2025.06",
+      "archiveOrder": 10,
+      "featured": true,
+      "group": "work",
+      "visibility": "public",
+      "publicationState": "draft",
+      "year": "2025.06",
+      "role": "交互设计",
+      "collaborators": [],
+      "tools": [],
+      "coverImage": "",
+      "updatedAt": "2026-09-06T15:16:54.125Z",
+      "portfolioTrack": "ue"
+    },
+    "project-wlu6qq": {
+      "isDynamic": true,
+      "slug": "project-wlu6qq",
+      "route": "/work/project-wlu6qq",
+      "titleZh": "轻量合成玩法交互设计",
+      "titleEn": "",
+      "summaryZh": "围绕属性单位的生成、切换、聚合与执行行为，设计一套轻量小游戏交互流程，并梳理输入、状态变化、反馈与单局节奏之间的关系。",
+      "summaryEn": "",
+      "tagsZh": [
+        "Game UX",
+        "小游戏交互",
+        "玩法原型",
+        "状态与反馈",
+        "核心循环"
+      ],
+      "tagsEn": [],
+      "categoryZh": "Game UX / 交互设计 / 玩法原型",
+      "categoryEn": "",
+      "duration": "2026",
+      "archiveOrder": 11,
+      "featured": false,
+      "group": "work",
+      "visibility": "public",
+      "publicationState": "draft",
+      "year": "2026",
+      "role": "",
+      "collaborators": [],
+      "tools": [],
+      "coverImage": "",
+      "updatedAt": "2026-09-06T15:16:54.125Z",
+      "portfolioTrack": "ux-ui"
+    },
+    "project-y4coub": {
+      "isDynamic": true,
+      "slug": "project-y4coub",
+      "route": "/work/project-y4coub",
+      "titleZh": "轻竞技卡牌公会社交体验重构",
+      "titleEn": "",
+      "summaryZh": "围绕轻竞技卡牌游戏的长期养成与公会社交矛盾，通过竞品分析、使用习惯与信息需求梳理，重新组织个人成长、集体目标和成员关系之间的体验结构，并提出低压力社交与贡献反馈方案。",
+      "summaryEn": "",
+      "tagsZh": [
+        "Game UX",
+        "公会系统",
+        "社交体验",
+        "系统交互",
+        "体验重构"
+      ],
+      "tagsEn": [],
+      "categoryZh": "Game UX / 体验设计 / 系统交互",
+      "categoryEn": "",
+      "duration": "2026",
+      "archiveOrder": 7,
+      "featured": true,
+      "group": "work",
+      "visibility": "public",
+      "publicationState": "draft",
+      "year": "2026",
+      "role": "",
+      "collaborators": [],
+      "tools": [],
+      "coverImage": "",
+      "updatedAt": "2026-09-06T15:16:54.125Z",
+      "portfolioTrack": "ux-ui"
     }
   },
   "projectDocuments": {
@@ -9370,7 +10934,9 @@
     "game-jam-8lzejf": "/images/published/covers/game-jam-8lzejf.png",
     "3d-vdr4qg": "/images/published/covers/3d-vdr4qg.png",
     "ai-agent-6vaadf": "/images/published/covers/ai-agent-6vaadf.png",
-    "project-1hp5k4t": "/images/published/covers/project-1hp5k4t.png"
+    "project-1hp5k4t": "/images/published/covers/project-1hp5k4t.png",
+    "project-1ied3i": "/images/published/covers/project-1ied3i.png",
+    "project-y4coub": "/images/published/covers/project-y4coub.png"
   },
   "assets": [
     {
@@ -10128,6 +11694,34 @@
       "sourceStore": "",
       "sourceId": "public/images/published/game-covers/game-cover-3fff00dd-c7d9-4309-a5f4-b369a303c14e.jpg",
       "publicPath": "/images/published/game-covers/game-cover-3fff00dd-c7d9-4309-a5f4-b369a303c14e.jpg"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1ied3i/image-352eda30-cafe-4d97-86ed-96c3edce94ea.png",
+      "publicPath": "/images/published/template-images/project-1ied3i/image-352eda30-cafe-4d97-86ed-96c3edce94ea.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1ied3i/image-07e14d50-bb0a-4dc2-b850-db17bb7847a1.png",
+      "publicPath": "/images/published/template-images/project-1ied3i/image-07e14d50-bb0a-4dc2-b850-db17bb7847a1.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/covers/project-1ied3i.png",
+      "publicPath": "/images/published/covers/project-1ied3i.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/covers/project-y4coub.png",
+      "publicPath": "/images/published/covers/project-y4coub.png"
     }
   ]
 }

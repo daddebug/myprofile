@@ -4,7 +4,14 @@ import { Braces, Copy, X } from "lucide-react";
 import { validateContentAgainstSchema, validateContentAgainstSchemaIssues, validateImageRowOptions } from "./TemplateInstancesSection";
 import { backupDynamicProjectCode } from "../lib/portfolioContentClient";
 import type { ProjectPublicMetaOverride, ResolvedProjectMetadata } from "../lib/projectMetadata";
-import { createInstanceId, type TemplateInstance, type TemplateInstanceLayoutSettings } from "../lib/projectTemplateInstances";
+import {
+  createInstanceId,
+  REGION_END_ANCHOR,
+  resolveExistingInstanceAnchorId,
+  resolveNewInstanceAnchorId,
+  type TemplateInstance,
+  type TemplateInstanceLayoutSettings,
+} from "../lib/projectTemplateInstances";
 import {
   normalizeProjectCodeTemplateContent,
   projectCodeAllowedNewTemplateIds,
@@ -557,9 +564,16 @@ function preflightProjectCode(
         issues.push(`[${templateId}] [${identity}] templateId: existing instance uses ${existing.templateId} and cannot be changed`);
       }
       const expectedRegion = "content";
-      const expectedAnchor = "__end__";
       if (candidate.regionId !== expectedRegion) issues.push(`[${templateId}] [${identity}] regionId: expected ${expectedRegion}; received ${JSON.stringify(candidate.regionId)}`);
-      if (candidate.anchorId !== expectedAnchor) issues.push(`[${templateId}] [${identity}] anchorId: expected ${expectedAnchor}; received ${JSON.stringify(candidate.anchorId)}`);
+      const anchorResolution = existing ? resolveExistingInstanceAnchorId(candidate.anchorId) : resolveNewInstanceAnchorId(candidate.anchorId);
+      if (!anchorResolution.ok) {
+        // Backtick-wrapped so any Markdown renderer this text later passes
+        // through (an external AI chat surface, a terminal, this issue list
+        // itself if copied elsewhere) shows it as an inline code span and
+        // never eats the double underscores - see resolveNewInstanceAnchorId.
+        const expectedDescription = existing ? `\`${REGION_END_ANCHOR}\` or \`legacy:<blockId>\` (unchanged)` : `\`${REGION_END_ANCHOR}\``;
+        issues.push(`[${templateId}] [${identity}] anchorId: expected ${expectedDescription}; received \`${JSON.stringify(candidate.anchorId)}\``);
+      }
       if (candidate.layoutSettings !== undefined && candidate.layoutSettings !== null) {
         if (!isRecord(candidate.layoutSettings)) {
           issues.push(`[${templateId}] [${identity}] layoutSettings: expected { horizontalInset?: number } or null`);
@@ -628,8 +642,10 @@ function validateProjectCode(
     if (!template) throw new Error(`Unknown templateId: ${templateId}`);
     if (!existing && !allowedNewTemplateIds.has(templateId)) throw new Error(`不允许新增模板：${templateId}`);
     const regionId = existing ? stringField(value.regionId, `templateInstances[${index}].regionId`) : "content";
-    const anchorId = existing ? stringField(value.anchorId, `templateInstances[${index}].anchorId`) : "__end__";
-    if (regionId !== "content" || anchorId !== "__end__") throw new Error(`${instanceId} has an invalid regionId or anchorId.`);
+    if (regionId !== "content") throw new Error(`${instanceId} has an invalid regionId.`);
+    const anchorResolution = existing ? resolveExistingInstanceAnchorId(value.anchorId) : resolveNewInstanceAnchorId(value.anchorId);
+    if (!anchorResolution.ok) throw new Error(`${instanceId} has an invalid anchorId.`);
+    const anchorId = anchorResolution.anchorId;
     if (!isRecord(value.content)) throw new Error(`${instanceId}.content must be an object.`);
     let content = clone(value.content) as Record<string, TemplateContentValue>;
     if (!existing && templateId === "image-row") {
@@ -716,7 +732,7 @@ function aiRequestFor(code: ProjectCodeDocument) {
     "All localized text uses {\"zh\":\"...\",\"en\":\"\"}. English may be an empty string. Do not replace localized objects with plain strings in the returned JSON.",
     ...templateRules,
     "These contracts override any abbreviated examples below.",
-    "direction-compare is the native two-sided before/after or proposal comparison template. New instances must use a unique newInstanceKey, regionId content, anchorId __end__, leftImage/rightImage null or omitted, and direction left-to-right, right-to-left, or none.",
+    `direction-compare is the native two-sided before/after or proposal comparison template. New instances must use a unique newInstanceKey, regionId content, anchorId set to the exact JSON string "${REGION_END_ANCHOR}", leftImage/rightImage null or omitted, and direction left-to-right, right-to-left, or none.`,
     "For image-row slots, hoverPreviewMode is optional and only accepts none or floating; new empty slots default to none.",
     "",
     "请基于下面的作品集项目 JSON，帮助我讨论并优化项目叙事、模块顺序、排版逻辑和文字内容。",
@@ -725,9 +741,9 @@ function aiRequestFor(code: ProjectCodeDocument) {
     "- 优化项目叙事、标题、说明和正文。",
     "- 调整 templateInstances 顺序。",
     "- 修改合法的 layoutSettings。",
-    "- 按内容类型新增已有模板：statement-longform、supporting-note、process-flow、decision-table、phase-milestones、circle-summary、image-row、figma-prototype、playable-game。",
-    "- 新实例不要提供最终 instanceId；请提供唯一的 newInstanceKey，regionId 使用 content，anchorId 使用 __end__。",
-    "- 工作步骤使用 process-flow；比较和验证计划使用 decision-table；阶段成果使用 phase-milestones；补充限制使用 supporting-note；并列关系使用 circle-summary；成果图使用 image-row；原型使用 figma-prototype；章节叙事使用 statement-longform。",
+    "- 按内容类型新增已有模板：statement-longform、supporting-note、process-flow、decision-table、dual-viewpoint-analysis、phase-milestones、circle-summary、image-row、figma-prototype、playable-game。",
+    `- 新实例不要提供最终 instanceId；请提供唯一的 newInstanceKey，regionId 使用 content，anchorId 必须是精确的 JSON 字符串 "${REGION_END_ANCHOR}"（两侧各两个下划线）。如果你所在的界面把它渲染显示成了 "end"（下划线被当成了 Markdown 加粗语法吃掉），返回的 JSON 源码里仍然必须写完整的 "${REGION_END_ANCHOR}"，不要写成 "end"。`,
+    "- 工作步骤使用 process-flow；表格型比较和验证计划使用 decision-table；机遇/挑战、优点/问题、现状/方向等双列洞察使用 dual-viewpoint-analysis；阶段成果使用 phase-milestones；补充限制使用 supporting-note；并列关系使用 circle-summary；成果图使用 image-row；原型使用 figma-prototype；章节叙事使用 statement-longform。",
     "- image-row 只能创建 1–12 个空图片槽。content 可使用 columns（1/2/3/4）与 rowAlignment（start/center）；每个 item 可包含 alt、caption、placeholder、suggestedAspectRatio、suggestedImageCount、imageDisplayMode（cover/natural）、imageCropRatio（16:9/1:1，仅在 imageDisplayMode 为 cover 时生效，省略或旧数据默认按 16:9 处理）、imageWidthMode（card/wide/full）、startNewRow（boolean），image 必须为 null 或省略。",
     "- playable-game 只能新增 game: null、cover: null 的空模板；真实 ZIP 必须稍后通过页面上传。status 仅允许 prototype、in-development、complete、archived，aspectRatio 仅允许 16:9、4:3、auto。",
     "",

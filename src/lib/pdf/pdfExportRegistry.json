@@ -255,6 +255,7 @@
     { "id": "process-flow", "file": "src/templates/ProcessFlowTemplate.tsx", "pdfBehavior": "wide-content template with a scoped fit-scale applied only in collection-export capture mode to avoid horizontal clipping" },
     { "id": "image-row", "file": "src/templates/ImageRowTemplate.tsx", "pdfBehavior": "standard — image slots resolved via the dynamic-template-images source row above" },
     { "id": "direction-compare", "file": "src/templates/DirectionCompareTemplate.tsx", "pdfBehavior": "standard — image slots resolved via the dynamic-template-images source row above" },
+    { "id": "dual-viewpoint-analysis", "file": "src/templates/DualViewpointAnalysisTemplate.tsx", "pdfBehavior": "standard — text-only template captured with the project page" },
     { "id": "decision-table", "file": "src/templates/DecisionTableTemplate.tsx", "pdfBehavior": "standard" },
     { "id": "circle-summary", "file": "src/templates/CircleSummaryTemplate.tsx", "pdfBehavior": "standard" },
     { "id": "supporting-note", "file": "src/templates/SupportingNoteTemplate.tsx", "pdfBehavior": "standard" },

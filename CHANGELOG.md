@@ -206,6 +206,8 @@ Only work that was actually completed and verified (passed the required check, o
 
 ### Added
 
+- Added the reusable `dual-viewpoint-analysis` project template for opportunity/challenge and other paired high-level analysis. It includes centered hierarchy, two aligned text columns, responsive stacking, project/editor integration, Template Gallery coverage, and a provider-safe structured content contract; no existing project content or template was changed.
+
 - Reusable project instruction files: `skills/safe-project-editing/SKILL.md`, `skills/portfolio-collection/SKILL.md`, `skills/project-deletion/SKILL.md`, `skills/publish-portfolio/SKILL.md`, referenced from `CLAUDE.md`'s "Task skills" section.
 
 ### Verified — publish pipeline mechanics only

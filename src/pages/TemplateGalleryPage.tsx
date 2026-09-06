@@ -321,6 +321,40 @@ const galleryTemplates: GalleryTemplate[] = [
     },
   },
   {
+    loader: () => import("../templates/DualViewpointAnalysisTemplate"),
+    sample: {
+      title: { zh: "轻竞技游戏公会社交共性", en: "Social Dynamics in Light Competitive Games" },
+      subtitle: { zh: "SLG、卡牌、养成与经营游戏中，公会社交共同面对的机遇和挑战", en: "Shared opportunities and challenges across guild-based progression systems" },
+      leftLabel: { zh: "机遇", en: "Opportunity" },
+      leftItems: [
+        {
+          id: "opportunity-play",
+          title: { zh: "延展游戏玩法", en: "Extend the play loop" },
+          body: { zh: "团队合作可以发展出更清晰的策略定位\n并让玩家获得合作共赢的依赖感与代入感", en: "Team play can create clearer strategic roles and a stronger sense of shared progress." },
+        },
+        {
+          id: "opportunity-growth",
+          title: { zh: "养成差异带来社交机会", en: "Progression differences create social opportunity" },
+          body: { zh: "合理利用玩家成长差异\n为不同熟悉程度的用户提供互补的社交方式", en: "Progression differences can support complementary roles for players with different levels of familiarity." },
+        },
+      ],
+      rightLabel: { zh: "挑战", en: "Challenge" },
+      rightItems: [
+        {
+          id: "challenge-belonging",
+          title: { zh: "公会代入感不足，维护困难", en: "Weak belonging makes guilds hard to sustain" },
+          body: { zh: "成员短期内难以获得认同感\n核心成员与普通成员的体验差距持续扩大", en: "Members struggle to build belonging while the experience gap between core and casual members grows." },
+        },
+        {
+          id: "challenge-fragmentation",
+          title: { zh: "养成中社交割裂", en: "Progression fragments social play" },
+          body: { zh: "个人核心玩法与公会系统关系不够紧密\n额外奖励难以形成长期吸引力", en: "Core progression and guild systems remain disconnected, limiting long-term motivation." },
+        },
+      ],
+      summary: { zh: "公会社交需要同时连接个人成长、群体目标与持续的成员认同。", en: "Guild social design must connect personal progression, shared goals, and lasting member belonging." },
+    },
+  },
+  {
     loader: () => import("../templates/ImageRowTemplate"),
     sample: {
       heading: {

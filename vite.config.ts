@@ -4,6 +4,7 @@ import { exactWebExportPlugin } from "./scripts/exactWebExportPlugin";
 import { portfolioContentPlugin } from "./scripts/portfolioContentPlugin";
 import { portfolioCollectionExportPlugin } from "./scripts/portfolioCollectionExportPlugin";
 import { templateBuilderPlugin } from "./scripts/templateBuilderPlugin";
+import { generatedIconLibraryPlugin } from "./scripts/generatedIconLibraryPlugin";
 
 const uiPracticeImageExtensions = new Set([".png", ".jpg", ".jpeg", ".webp", ".avif"]);
 const unityPayloadBuildCopies = [
@@ -193,7 +194,7 @@ function uiPracticeMetadataWriter() {
 }
 
 export default defineConfig({
-  plugins: [react(), uiPracticeMetadataWriter(), portfolioContentPlugin(), exactWebExportPlugin(), portfolioCollectionExportPlugin(), templateBuilderPlugin(), excludeUnityPayloadsFromBuild()],
+  plugins: [react(), uiPracticeMetadataWriter(), generatedIconLibraryPlugin(), portfolioContentPlugin(), exactWebExportPlugin(), portfolioCollectionExportPlugin(), templateBuilderPlugin(), excludeUnityPayloadsFromBuild()],
   server: {
     host: "localhost",
     port: 5173,

@@ -41,7 +41,7 @@ const canonicalWebsiteRootFiles = new Set([
   "vercel.json",
   "vite.config.ts",
 ]);
-const canonicalWebsitePrefixes = ["docs/", "scripts/", "skills/", "src/", "public/images/profile/"];
+const canonicalWebsitePrefixes = ["docs/", "scripts/", "skills/", "src/", "public/images/profile/", "public/assets/generated-icons/"];
 
 function fail(message) {
   console.error(`\nERROR: ${message}\n`);

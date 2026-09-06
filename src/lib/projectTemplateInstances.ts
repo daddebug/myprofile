@@ -42,6 +42,32 @@ export function legacyAnchor(blockId: string): string {
   return `legacy:${blockId}`;
 }
 
+export type AnchorIdResolution = { ok: true; anchorId: string } | { ok: false };
+
+// New template instances are only ever anchored at the region's end (see
+// REGION_END_ANCHOR above). Some external AI chat surfaces render raw JSON
+// as Markdown before a user copies it back in, and "__end__" happens to be
+// valid CommonMark bold syntax - those tools can silently swallow both
+// underscores and hand back the bare string "end" instead. That corrupted
+// form is accepted here as a one-way compatibility alias and canonicalized
+// back to REGION_END_ANCHOR; anything else is rejected exactly as before.
+export function resolveNewInstanceAnchorId(candidate: unknown): AnchorIdResolution {
+  if (candidate === REGION_END_ANCHOR || candidate === "end") return { ok: true, anchorId: REGION_END_ANCHOR };
+  return { ok: false };
+}
+
+// Existing instances keep whichever anchor they already have: the
+// region-end sentinel, or a legacy:<blockId> anchor from legacyAnchor()
+// above. This does not accept the Markdown-damage alias above - an
+// existing instance's anchor should never legitimately need it, so an
+// unexpected value here stays a genuine error instead of being silently
+// patched.
+export function resolveExistingInstanceAnchorId(candidate: unknown): AnchorIdResolution {
+  if (candidate === REGION_END_ANCHOR) return { ok: true, anchorId: REGION_END_ANCHOR };
+  if (typeof candidate === "string" && candidate.startsWith("legacy:")) return { ok: true, anchorId: candidate };
+  return { ok: false };
+}
+
 export function createInstanceId(templateId: string): string {
   const random =
     typeof crypto !== "undefined" && "randomUUID" in crypto

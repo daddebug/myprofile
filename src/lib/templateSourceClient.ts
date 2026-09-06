@@ -17,6 +17,7 @@ export const templateFilesById: Record<string, string> = {
   "image-row": "ImageRowTemplate",
   "figma-prototype": "FigmaPrototypeTemplate",
   "process-flow": "ProcessFlowTemplate",
+  "dual-viewpoint-analysis": "DualViewpointAnalysisTemplate",
 };
 
 async function readJson<T>(response: Response): Promise<T> {

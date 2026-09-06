@@ -81,6 +81,8 @@ The old one-off bespoke draft pages (own hardcoded storage key + own dedicated I
 
 ## Reusable instructions
 
+- **Dual Viewpoint Analysis template (2026-09-07).** `dual-viewpoint-analysis` is the canonical text-only analysis module for paired opportunity/challenge, strength/problem, and current-state/direction conclusions. It uses a centered title/subtitle composition and aligned two-column content without card or table styling; each column supports one to four localized viewpoint items.
+
 - `CLAUDE.md` — permanent project-wide rules, pointer to task skills, and the "Continuous rule updates" policy.
 - `skills/safe-project-editing/SKILL.md`, `skills/portfolio-collection/SKILL.md`, `skills/project-deletion/SKILL.md`, `skills/publish-portfolio/SKILL.md`.
 
