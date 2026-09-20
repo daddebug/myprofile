@@ -16,11 +16,11 @@
 // Two real acquisition sources exist in this codebase today:
 //   - IndexedDB (project-body-indexeddb-assets, game-experience-covers):
 //     read directly via their own db modules.
-//   - dev-server fetch (dynamic-template-images, ui-practice-images,
-//     playable-game-covers, project-covers-disk): these adapters' content
-//     is staged to an already-serving dev-server URL at EDIT time (not
-//     export time -- see DynamicProjectPage.tsx / ProjectCoverEditor.tsx),
-//     so acquisition is just re-fetching that URL, exactly like V1's own
+//   - dev-server fetch (dynamic-template-images, playable-game-covers,
+//     project-covers-disk): these adapters' content is staged to an
+//     already-serving dev-server URL at EDIT time (not export time -- see
+//     DynamicProjectPage.tsx / ProjectCoverEditor.tsx), so acquisition is
+//     just re-fetching that URL, exactly like V1's own
 //     fetchTemplateImage/fetchDiskProjectCover/fetchDiskPlayableGameCover
 //     (productionBundleExport.ts).
 import { getGameCoverRecord } from "./gameCoverDb";
@@ -29,7 +29,7 @@ import { getDiskProjectCover } from "./portfolioContentClient";
 
 export type AcquiredAsset = { fileName: string; mimeType: string; bytes: ArrayBuffer };
 
-const DEV_SERVER_FETCH_ADAPTERS = new Set(["dynamic-template-images", "ui-practice-images", "playable-game-covers"]);
+const DEV_SERVER_FETCH_ADAPTERS = new Set(["dynamic-template-images", "playable-game-covers"]);
 const INDEXED_DB_ADAPTERS = new Set(["project-body-indexeddb-assets", "game-experience-covers"]);
 
 async function acquireFromIndexedDb(sourceAdapterId: string, assetId: string): Promise<AcquiredAsset | null> {

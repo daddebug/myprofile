@@ -35,7 +35,9 @@ export function readPreferredLocale(): Locale {
 
 export function LocaleProvider({ locale, children }: PropsWithChildren<{ locale: Locale }>) {
   useEffect(() => {
-    window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+    if (window.localStorage.getItem(LOCALE_STORAGE_KEY) !== locale) {
+      window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+    }
     document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
   }, [locale]);
 

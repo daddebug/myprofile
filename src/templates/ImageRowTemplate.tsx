@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import {
-  TemplateContent,
   TemplateSurface,
 } from "../components/template-tools/TemplateResponsiveFoundation";
 import type {
@@ -14,27 +13,25 @@ import { ImageAnnotationLayer, normalizeImageAnnotations, type ImageAnnotation }
 import { ImageAnnotationEditor } from "../components/template-tools/ImageAnnotationEditor";
 import { isCollectionExportCapture } from "../lib/collectionExportStaging";
 import { recordEmptySlotCollapsed, recordEmptySlotFound, recordModuleOmitted } from "../lib/collectionMediaDiagnostics";
+import {
+  DOUBLE_IMAGE_ROW_FRAME_HEIGHT,
+  DOUBLE_IMAGE_ROW_FRAME_WIDTH,
+  DOUBLE_IMAGE_ROW_SLOTS,
+  type ImageRowSlotGeometry,
+  toFramePercent,
+} from "./imageRowLayout";
+import "./image-row-template.css";
 
-export const layoutControls = {
-  imageGap: "standard",
-  imageSize: "standard",
-  sectionSpacing: "standard",
-  headingGap: "standard",
-} as const;
+export const layoutControls = {} as const;
 
-export const layoutControlSchema: TemplateLayoutControlDefinition[] = [
-  { key: "imageGap", label: "Image spacing" },
-  { key: "imageSize", label: "Image size" },
-  { key: "sectionSpacing", label: "Vertical padding" },
-  { key: "headingGap", label: "Heading distance" },
-];
+export const layoutControlSchema: TemplateLayoutControlDefinition[] = [];
 
 export const templateMeta: TemplateMeta = {
   id: "image-row",
-  nameZh: "图片横排",
-  nameEn: "Image Row",
-  descriptionZh: "连续展示 1–12 张图片，每行最多 4 张，每张图片下方可附独立说明。",
-  descriptionEn: "A continuous group of 1–12 images, up to four per row, each with an optional caption.",
+  nameZh: "双图",
+  nameEn: "Double Image",
+  descriptionZh: "严格两张图的并排展示。数据不是恰好两张时，仅在编辑器中标记为 legacy/incompatible，线上不渲染，也不自动重排。",
+  descriptionEn: "Strictly two images side by side. An instance with any other item count is marked legacy/incompatible in the editor only -- it renders nothing on the live site and is never auto-repaginated.",
   schema: [
     {
       id: "heading",
@@ -47,8 +44,8 @@ export const templateMeta: TemplateMeta = {
       labelZh: "图片",
       labelEn: "Images",
       type: "images",
-      min: 1,
-      max: 12,
+      min: 2,
+      max: 2,
     },
   ],
   createdAt: "2026-07-27T00:00:07.000Z",
@@ -75,51 +72,30 @@ type ImageRowItem = {
   suggestedImageCount?: number;
 };
 
-const gapSizes = {
-  compact: "1rem",
-  standard: "1.25rem",
-  wide: "1.75rem",
-} as const;
+type VisualImageRowItem = {
+  item?: ImageRowItem;
+  isVirtualFirstSlot?: boolean;
+};
 
-// A single image is given its own reasonable cap so a lone photo doesn't
-// stretch edge-to-edge across the full page-width content container. Rows
-// of 2-4 images intentionally have no extra cap here — they fill the same
-// global content container every other template uses (--template-library-
-// content-max), and column count alone is what makes each image larger or
-// smaller as items are added or removed.
-const singleImageMaxWidths = { standard: "64rem", large: "72rem" } as const;
+// Legacy data (authored before Portfolio 2.0 locked Double Image to exactly
+// two slots) may carry far more items than that -- read defensively, but
+// this is only ever a display cap for the legacy-marker list in the
+// editor, never a target the renderer repaginates into.
+const LEGACY_ITEM_DISPLAY_CAP = 12;
 
-// alt is no longer user-edited (see ProjectImageRowContentEditor /
-// ImageRowContentEditor) — it is derived at render time so decorative
-// captions never end up duplicated verbatim into both the caption text and
-// the alt attribute. Existing item.alt data is left untouched in storage.
 const neutralImageAlt = {
   zh: "项目界面截图",
   en: "Project interface screenshot",
 } as const;
 
-// Internal top/bottom padding only — the gap *between* stacked template
-// instances is owned entirely by TemplateInstancesSection's InstanceBlock
-// wrapper (--template-library-instance-gap), so this only needs to cover
-// this template's own breathing room, not a whole section's worth twice.
-const sectionPaddings = {
-  compact: "1.5rem",
-  standard: "2rem",
-  wide: "3rem",
-} as const;
-
-const headingGaps = {
-  near: "1.25rem",
-  standard: "1.75rem",
-  far: "2.5rem",
-} as const;
-
-function localizedValue(
-  value: string | LocalizedText | undefined,
-  locale: "zh" | "en",
-) {
+function localizedValue(value: string | LocalizedText | undefined, locale: "zh" | "en") {
   if (typeof value === "string") return value.trim();
   return value?.[locale]?.trim() ?? "";
+}
+
+function localizedObject(value: string | LocalizedText | undefined): LocalizedText {
+  if (typeof value === "string") return { zh: value, en: value };
+  return value ?? { zh: "", en: "" };
 }
 
 function isImageRowItem(value: unknown): value is ImageRowItem {
@@ -130,84 +106,310 @@ function hasImage(item: ImageRowItem) {
   return Boolean(item.image?.publicPath);
 }
 
-function hasPlaceholder(item: ImageRowItem) {
-  return Boolean(localizedValue(item.placeholder, "zh") || localizedValue(item.placeholder, "en") || item.suggestedAspectRatio);
-}
+const slotStyle = (slot: ImageRowSlotGeometry, frameWidth: number, frameHeight: number): CSSProperties => ({
+  left: toFramePercent(slot.x, frameWidth),
+  top: toFramePercent(slot.y, frameHeight),
+  width: toFramePercent(slot.width, frameWidth),
+  height: toFramePercent(slot.height, frameHeight),
+});
 
-function RowImage({ image, imageDisplayMode, imageCropRatio, hoverPreviewMode, annotationEnabled, annotations = [], alt, placeholder, ratio, purpose, locale, editing, slotId }: { image?: ImageRowImage; imageDisplayMode?: "cover" | "natural"; imageCropRatio?: "16:9" | "1:1"; hoverPreviewMode?: "none" | "floating"; annotationEnabled?: boolean; annotations?: ImageAnnotation[]; alt: string; placeholder: string; ratio: string; purpose: string; locale: "zh" | "en"; editing: boolean; slotId: string }) {
-  const src = image?.publicPath || "";
+const captionStyle = (
+  slot: ImageRowSlotGeometry,
+  frameWidth: number,
+  frameHeight: number,
+): CSSProperties => {
+  const top = slot.y + slot.height + 9;
+  const maxHeight = Math.max(0, frameHeight - top - 8);
+
+  return {
+    left: toFramePercent(slot.x, frameWidth),
+    top: toFramePercent(top, frameHeight),
+    width: toFramePercent(slot.width, frameWidth),
+    "--template-image-row-caption-max-height": `${maxHeight}px`,
+  } as CSSProperties;
+};
+
+function ImageFrame({
+  item,
+  locale,
+  editing,
+  slotId,
+}: {
+  item: ImageRowItem;
+  locale: "zh" | "en";
+  editing: boolean;
+  slotId: string;
+}) {
+  const src = item.image?.publicPath || "";
   const [loadFailed, setLoadFailed] = useState(false);
-  // "empty" (nothing was ever supposed to be here — no publicPath assigned)
-  // vs "failed" (a publicPath was assigned but the browser couldn't load
-  // it, e.g. a 404) are different situations for the collection export to
-  // report: captureProjectPage in portfolioCollectionExportPlugin.ts reads
-  // this attribute and fails loudly on "failed" instead of silently
-  // shipping a missing image.
   const mediaSlotState = !src ? "empty" : loadFailed ? "failed" : "filled";
-  // An intentionally empty slot must never show up as a visible "To add: …"
-  // placeholder in the exported collection PDF — but only in capture mode
-  // (the normal owner/editor view is unchanged), and only for "empty",
-  // never "failed": a real load failure still needs to stay visible (and
-  // still aborts the export server-side regardless of what renders here).
-  const suppressPlaceholder = mediaSlotState === "empty" && isCollectionExportCapture();
-  // Legacy items saved before imageCropRatio existed have no ratio field at
-  // all — they fall back to the original 16:9 frame so old visuals never
-  // shift on their own.
-  const frameClassName = imageCropRatio === "1:1"
-    ? "case-study-media-frame case-study-media-frame--square"
-    : "case-study-media-frame";
-  const annotationActive = !editing && annotationEnabled === true && hoverPreviewMode !== "floating";
+  // Outside the editor, an empty slot must render nothing -- no default
+  // "Image pending" copy or suggested-ratio hint on the live site.
+  const suppressPlaceholder = mediaSlotState === "empty" && (!editing || isCollectionExportCapture());
+  const placeholder = localizedValue(item.placeholder, locale);
+  const caption = localizedValue(item.caption, locale);
+  const alt = caption || neutralImageAlt[locale];
+  const displayMode = item.imageDisplayMode === "natural" ? "natural" : "cover";
+  const annotationActive = !editing && item.annotationEnabled === true && item.hoverPreviewMode !== "floating";
+  const annotations = normalizeImageAnnotations(item.annotations);
 
-  const previewImage = (className: string) => (
-    <FloatingImagePreview src={src} alt={alt} enabled={hoverPreviewMode === "floating"} resetKey={editing} imageDisplayMode={imageDisplayMode ?? "cover"} imageCropRatio={imageCropRatio ?? "16:9"}>
-      {({ onMouseEnter, onMouseLeave, previewActive }) => (
-        <img
-          src={src}
-          alt={alt}
-          className={`${className} transition-[transform,filter] duration-200 ease-out ${previewActive ? "floating-preview-trigger--active" : ""}`}
-          loading="lazy"
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
-          onError={() => setLoadFailed(true)}
-        />
-      )}
-    </FloatingImagePreview>
-  );
-
-  if (src && imageDisplayMode === "natural") {
+  if (!src) {
     return (
-      <div className="relative flex w-full justify-center overflow-hidden rounded-[18px] bg-[rgba(21,27,77,0.52)] shadow-[inset_0_1px_0_rgba(244,245,250,0.06)]" data-media-slot-state={mediaSlotState} data-media-slot-id={slotId}>
-        {previewImage("block h-auto max-w-full object-contain")}
-        <ImageAnnotationLayer annotations={annotations} locale={locale} enabled={annotationActive} />
+      <div className="image-row-media-frame" data-media-slot-state={mediaSlotState} data-media-slot-id={slotId}>
+        {suppressPlaceholder ? null : (
+          <div className="image-row-placeholder">
+            <span>{placeholder || (locale === "zh" ? "待补图片" : "Image pending")}</span>
+            {item.suggestedAspectRatio ? (
+              <span>{locale === "zh" ? `建议比例：${item.suggestedAspectRatio}` : `Suggested ratio: ${item.suggestedAspectRatio}`}</span>
+            ) : null}
+          </div>
+        )}
       </div>
     );
   }
 
+  const imageClassName = `image-row-media ${displayMode === "natural" ? "image-row-media--contain" : "image-row-media--cover"}`;
+
   return (
-    <div className={`relative ${frameClassName}`} data-media-slot-state={mediaSlotState} data-media-slot-id={slotId}>
-      {src ? (
-        previewImage("case-study-media-image")
-      ) : suppressPlaceholder ? null : (
-        <div className="flex h-full w-full flex-col items-start justify-center gap-2 px-6 py-8 text-left">
-          <span className="font-display text-lg font-semibold text-softWhite/88">{locale === "zh" ? `待补：${placeholder || "项目成果图"}` : `To add: ${placeholder || "project visual"}`}</span>
-          {ratio ? <span className="text-xs text-acidGreen/76">{locale === "zh" ? `建议比例：${ratio}` : `Suggested ratio: ${ratio}`}</span> : null}
-          {purpose ? <span className="text-sm leading-6 text-softWhite/54">{locale === "zh" ? `用途：${purpose}` : `Purpose: ${purpose}`}</span> : null}
-          <span className="mt-1 text-xs font-semibold text-softWhite/42">{locale === "zh" ? "上传图片" : "Upload image"}</span>
-        </div>
+    <div className="image-row-media-frame" data-media-slot-state={mediaSlotState} data-media-slot-id={slotId}>
+      {item.hoverPreviewMode === "floating" ? (
+        <FloatingImagePreview
+          src={src}
+          alt={alt}
+          enabled={!editing}
+          resetKey={editing}
+          imageDisplayMode={displayMode}
+          imageCropRatio={item.imageCropRatio ?? "16:9"}
+        >
+          {({ onMouseEnter, onMouseLeave, previewActive }) => (
+            <img
+              src={src}
+              alt={alt}
+              className={`${imageClassName} ${previewActive ? "floating-preview-trigger--active" : ""}`}
+              loading="lazy"
+              onMouseEnter={onMouseEnter}
+              onMouseLeave={onMouseLeave}
+              onError={() => setLoadFailed(true)}
+            />
+          )}
+        </FloatingImagePreview>
+      ) : (
+        <img
+          src={src}
+          alt={alt}
+          className={imageClassName}
+          loading="lazy"
+          onError={() => setLoadFailed(true)}
+        />
       )}
       <ImageAnnotationLayer annotations={annotations} locale={locale} enabled={annotationActive} />
     </div>
   );
 }
 
-export default function ImageRowTemplate({ content, locale, horizontalInset, inlineEditor }: TemplateProps) {
+function ImageSlot({
+  visualItem,
+  slot,
+  frameWidth,
+  frameHeight,
+  locale,
+  inlineEditor,
+  canAddItem,
+}: {
+  visualItem: VisualImageRowItem;
+  slot: ImageRowSlotGeometry;
+  frameWidth: number;
+  frameHeight: number;
+  locale: "zh" | "en";
+  inlineEditor: TemplateProps["inlineEditor"];
+  canAddItem: boolean;
+}) {
+  const editor = inlineEditor?.imageRow;
+  const [annotationPanelOpen, setAnnotationPanelOpen] = useState(false);
+  const item = visualItem.item;
+  const slotId = item?.id ?? "virtual-first-image";
+  const caption = item ? localizedValue(item.caption, locale) : "";
+  const captionObject = localizedObject(item?.caption);
+  const hasRealImage = item ? hasImage(item) : false;
+
+  return (
+    <>
+      <div className="image-row-slot" style={slotStyle(slot, frameWidth, frameHeight)}>
+        {visualItem.isVirtualFirstSlot ? (
+          <button
+            type="button"
+            className="image-row-media-frame image-row-virtual-button"
+            onClick={() => editor?.onUploadFirstImage()}
+          >
+            <span>{locale === "zh" ? "+ 上传图片" : "+ Upload image"}</span>
+          </button>
+        ) : item ? (
+          <>
+            <ImageFrame item={item} locale={locale} editing={Boolean(inlineEditor)} slotId={slotId} />
+            {editor && item.id ? (
+              <>
+                <div className="image-row-editor-controls" data-exact-export="hide">
+                  <button
+                    type="button"
+                    className="inline-template-chip"
+                    onClick={() => editor.onReplaceImage(item.id!)}
+                  >
+                    {hasRealImage ? (locale === "zh" ? "替换" : "Replace") : (locale === "zh" ? "上传" : "Upload")}
+                  </button>
+                  {hasRealImage ? (
+                    <button
+                      type="button"
+                      className="inline-template-chip inline-template-chip--danger"
+                      onClick={() => editor.onRemoveImage(item.id!)}
+                    >
+                      {locale === "zh" ? "移除图片" : "Remove image"}
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="inline-template-chip inline-template-chip--danger"
+                    onClick={() => editor.onRemoveItem(item.id!)}
+                  >
+                    {locale === "zh" ? "删除槽位" : "Delete slot"}
+                  </button>
+                </div>
+                <div className="image-row-editor-secondary-controls" data-exact-export="hide">
+                  {hasRealImage ? (
+                    <>
+                      <button
+                        type="button"
+                        className={`inline-template-chip ${(item.imageDisplayMode ?? "cover") === "cover" ? "inline-template-chip--active" : ""}`}
+                        onClick={() => editor.onItemChange(item.id!, { imageDisplayMode: "cover", imageCropRatio: "16:9" })}
+                      >
+                        {locale === "zh" ? "裁切" : "Crop"}
+                      </button>
+                      <button
+                        type="button"
+                        className={`inline-template-chip ${item.imageDisplayMode === "natural" ? "inline-template-chip--active" : ""}`}
+                        onClick={() => editor.onItemChange(item.id!, { imageDisplayMode: "natural" })}
+                      >
+                        {locale === "zh" ? "完整" : "Full"}
+                      </button>
+                      <button
+                        type="button"
+                        className={`inline-template-chip ${item.hoverPreviewMode === "floating" ? "inline-template-chip--active" : ""}`}
+                        onClick={() => editor.onItemChange(item.id!, { hoverPreviewMode: item.hoverPreviewMode === "floating" ? "none" : "floating" })}
+                      >
+                        {locale === "zh" ? "悬停预览" : "Preview"}
+                      </button>
+                      <button
+                        type="button"
+                        className={`inline-template-chip ${annotationPanelOpen ? "inline-template-chip--active" : ""}`}
+                        onClick={() => setAnnotationPanelOpen((open) => !open)}
+                      >
+                        {locale === "zh" ? "标注" : "Annotate"}
+                      </button>
+                    </>
+                  ) : null}
+                  {canAddItem ? (
+                    <button
+                      type="button"
+                      className="inline-template-chip"
+                      onClick={() => editor.onAddItemAfter(item.id!)}
+                    >
+                      {locale === "zh" ? "后面添加" : "Add after"}
+                    </button>
+                  ) : null}
+                </div>
+                {annotationPanelOpen && hasRealImage ? (
+                  <div className="image-row-annotation-editor-popover" data-exact-export="hide">
+                    <ImageAnnotationEditor
+                      locale={locale}
+                      enabled={item.annotationEnabled === true}
+                      disabled={item.hoverPreviewMode === "floating"}
+                      annotations={normalizeImageAnnotations(item.annotations)}
+                      onEnabledChange={(annotationEnabled) => editor.onItemChange(item.id!, { annotationEnabled })}
+                      onAnnotationsChange={(annotations) => editor.onItemChange(item.id!, { annotations })}
+                      onUploadEvidence={(annotationId) => editor.onUploadAnnotationEvidence(item.id!, annotationId)}
+                      onRemoveEvidence={(annotationId, evidenceId) => editor.onRemoveAnnotationEvidence(item.id!, annotationId, evidenceId)}
+                    />
+                  </div>
+                ) : null}
+              </>
+            ) : null}
+          </>
+        ) : null}
+      </div>
+
+      {item && (caption || editor?.onItemChange) ? (
+        <div className="image-row-caption-region" style={captionStyle(slot, frameWidth, frameHeight)}>
+          {editor && item.id ? (
+            <InlineTemplateField
+              value={captionObject[locale] ?? ""}
+              onChange={(value) => editor.onItemChange(item.id!, { caption: { ...captionObject, [locale]: value } })}
+              ariaLabel={locale === "zh" ? "图片说明" : "Image caption"}
+              placeholder={locale === "zh" ? "图片说明" : "Caption"}
+              className="image-row-editor-caption"
+            />
+          ) : caption ? (
+            <p>{caption}</p>
+          ) : null}
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+// Legacy data authored before Double Image was locked to exactly two
+// slots (or an in-progress edit that has drifted away from 2) is never
+// auto-repaginated. In the editor it shows as a plain, clearly-labeled
+// list so the owner can trim it back down to two; on the live site the
+// whole instance renders nothing.
+function LegacyIncompatibleNotice({
+  rawItems,
+  locale,
+  inlineEditor,
+}: {
+  rawItems: ImageRowItem[];
+  locale: "zh" | "en";
+  inlineEditor: TemplateProps["inlineEditor"];
+}) {
+  const editor = inlineEditor?.imageRow;
+  return (
+    <div className="image-row-legacy-notice" data-exact-export="hide">
+      <p className="image-row-legacy-notice__label">
+        {locale === "zh"
+          ? `旧数据不兼容：Double Image 现在只支持严格两张图，当前有 ${rawItems.length} 张，需要手动整理`
+          : `Legacy/incompatible: Double Image now requires exactly two images, this instance has ${rawItems.length} -- edit it down manually`}
+      </p>
+      <div className="image-row-legacy-notice__list">
+        {rawItems.map((item, index) => (
+          <div className="image-row-legacy-notice__item" key={item.id ?? index}>
+            <div className="image-row-media-frame image-row-legacy-notice__thumb" data-media-slot-state={hasImage(item) ? "filled" : "empty"}>
+              {hasImage(item) ? <img className="image-row-media image-row-media--cover" src={item.image!.publicPath} alt="" loading="lazy" /> : null}
+            </div>
+            {editor && item.id ? (
+              <button type="button" className="inline-template-chip inline-template-chip--danger" onClick={() => editor.onRemoveItem(item.id!)}>
+                {locale === "zh" ? "删除" : "Remove"}
+              </button>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function ImageRowTemplate({ content, locale, inlineEditor }: TemplateProps) {
   const heading = localizedValue(
     content.heading as LocalizedText | undefined,
     locale,
   );
-  const rawItems = Array.isArray(content.items) ? content.items.filter(isImageRowItem) : [];
+  const rawItems = Array.isArray(content.items) ? content.items.filter(isImageRowItem).slice(0, LEGACY_ITEM_DISPLAY_CAP) : [];
   const captureMode = isCollectionExportCapture();
   const instanceLabel = `image-row:${heading || "untitled"}`;
+  const isStrict2 = rawItems.length === 2;
+  // 0 or 1 items is a normal in-progress authoring state on the way to 2,
+  // not incompatible legacy data -- only >2 is unambiguously legacy
+  // (old single/triple variants never stored fewer than 1, so this is
+  // the only count that can't just be "still adding the second image").
+  const isLegacyIncompatible = rawItems.length > 2;
+
   if (captureMode) {
     rawItems.forEach((item, index) => {
       if (!hasImage(item)) {
@@ -217,298 +419,77 @@ export default function ImageRowTemplate({ content, locale, horizontalInset, inl
       }
     });
   }
-  // A placeholder-only item ("待补：…") is intentional authoring content in
-  // the normal owner/public view, but in the exported collection PDF it's
-  // still an unfilled slot — never shown there, same as a fully empty item.
-  const items = rawItems.filter((item) => inlineEditor || hasImage(item) || (hasPlaceholder(item) && !captureMode)).slice(0, 12);
-  // With no items and no inline editor, there is nothing to show — render no
-  // container at all rather than an empty card with a "please add an image"
-  // message. In capture mode this also covers "every item in this instance
-  // is empty" — the whole template instance is omitted, not left as an
-  // empty row.
-  if (items.length === 0 && !inlineEditor) {
-    if (captureMode && rawItems.length > 0) recordModuleOmitted(instanceLabel);
-    return null;
-  }
-  const showVirtualFirstSlot = Boolean(inlineEditor?.imageRow && items.length === 0);
-  const renderedGridItems = items.length + Number(showVirtualFirstSlot);
-  const storedColumns = content.columns;
-  const requiresWideGrid = items.some((item) => item.imageWidthMode === "wide");
-  const columns = storedColumns === 1 || storedColumns === 2 || storedColumns === 3 || storedColumns === 4
-    ? storedColumns
-    : Math.min(4, Math.max(1, renderedGridItems, requiresWideGrid ? 2 : 1));
-  const rowAlignment = content.rowAlignment === "center" ? "center" : "start";
 
-  const imageGap =
-    gapSizes[layoutControls.imageGap as keyof typeof gapSizes]
-    ?? gapSizes.standard;
-  const sizeKey =
-    (layoutControls.imageSize as string) === "large" ? "large" : "standard";
-  const sectionPadding =
-    sectionPaddings[layoutControls.sectionSpacing as keyof typeof sectionPaddings]
-    ?? sectionPaddings.standard;
-  const headingGap =
-    headingGaps[layoutControls.headingGap as keyof typeof headingGaps]
-    ?? headingGaps.standard;
-  const visualSpans = [
-    ...(showVirtualFirstSlot ? [1] : []),
-    ...items.map((item) => item.imageWidthMode === "full" ? columns : item.imageWidthMode === "wide" ? Math.min(2, columns) : 1),
-  ];
-  const visualRowStarts = [
-    ...(showVirtualFirstSlot ? [false] : []),
-    ...items.map((item) => item.startNewRow === true || item.imageWidthMode === "full"),
-  ];
-  const rows: Array<Array<{ index: number; span: number }>> = [];
-  let pendingRow: Array<{ index: number; span: number }> = [];
-  let pendingUnits = 0;
-  const commitPendingRow = () => {
-    if (pendingRow.length > 0) rows.push(pendingRow);
-    pendingRow = [];
-    pendingUnits = 0;
-  };
-  visualSpans.forEach((span, index) => {
-    if (visualRowStarts[index]) commitPendingRow();
-    if (span === columns) {
-      commitPendingRow();
-      rows.push([{ index, span }]);
-      return;
+  if (!inlineEditor) {
+    // Live site: only a fully-filled, exactly-2 instance ever renders.
+    // Anything else (legacy item counts, or a still-empty in-progress
+    // instance) renders nothing -- never repaginated, never partially
+    // shown.
+    const readyForProduction = isStrict2 && rawItems.every(hasImage);
+    if (!readyForProduction) {
+      if (captureMode && rawItems.length > 0) recordModuleOmitted(instanceLabel);
+      return null;
     }
-    if (pendingUnits + span > columns) commitPendingRow();
-    pendingRow.push({ index, span });
-    pendingUnits += span;
-  });
-  commitPendingRow();
-  const rowMaxWidth = (row: Array<{ index: number; span: number }>) => {
-    if (row.length !== 1) return undefined;
-    const visualIndex = row[0].index;
-    const item = showVirtualFirstSlot ? undefined : items[visualIndex];
-    if (item?.imageWidthMode === "full") return undefined;
-    if (item?.imageWidthMode === "wide") return singleImageMaxWidths.large;
-    return singleImageMaxWidths[sizeKey];
-  };
 
-  const renderItem = (item: ImageRowItem, index: number, isLastInRow: boolean) => {
-    const caption = localizedValue(item.caption, locale);
-    const placeholder = localizedValue(item.placeholder, locale);
-    const alt = caption || neutralImageAlt[locale];
+    const visualItems: VisualImageRowItem[] = rawItems.map((item) => ({ item }));
 
     return (
-      <article
-        key={item.id ?? index}
-        className={`min-w-0 rounded-[20px] bg-[#151B4D]/52 p-3 pb-4 shadow-[0_16px_38px_rgba(3,5,26,0.2),inset_0_1px_0_rgba(244,245,250,0.06)] ${inlineEditor?.imageRow ? "relative" : ""}`}
-      >
-        {inlineEditor?.imageRow && item.id && index > 0 && item.imageWidthMode !== "full" ? (
-          <button
-            type="button"
-            className={`absolute left-5 top-5 z-30 rounded-[5px] px-2.5 py-1.5 text-[11px] font-semibold shadow-sm backdrop-blur ${item.startNewRow ? "bg-acidGreen text-deepIndigo" : "bg-deepIndigo/88 text-softWhite/72"}`}
-            onClick={() => inlineEditor.imageRow?.onItemChange(item.id!, { startNewRow: item.startNewRow ? false : true })}
-          >
-            {item.startNewRow
-              ? (locale === "zh" ? "取消另起一行" : "Continue previous row")
-              : (locale === "zh" ? "从这里另起一行" : "Start new row here")}
-          </button>
-        ) : null}
-        {inlineEditor?.imageRow && item.id ? (
-          <div className="relative">
-            <RowImage image={item.image} imageDisplayMode={item.imageDisplayMode} imageCropRatio={item.imageCropRatio} hoverPreviewMode={item.hoverPreviewMode} annotationEnabled={item.annotationEnabled} annotations={normalizeImageAnnotations(item.annotations)} alt={alt} placeholder={placeholder} ratio={item.suggestedAspectRatio ?? ""} purpose={caption} locale={locale} editing={Boolean(inlineEditor)} slotId={item.id ?? String(index)} />
-            <>
-              <div className="absolute right-2 top-2 z-20 flex flex-wrap justify-end gap-1.5">
-                <button type="button" className="rounded-[5px] bg-deepIndigo/88 px-2.5 py-1.5 text-xs font-semibold text-softWhite shadow-sm backdrop-blur" onClick={() => inlineEditor.imageRow?.onReplaceImage(item.id!)}>
-                  {hasImage(item) ? (locale === "zh" ? "替换图片" : "Replace") : (locale === "zh" ? "上传图片" : "Upload")}
-                </button>
-                {hasImage(item) ? (
-                  <button type="button" className="rounded-[5px] bg-deepIndigo/88 px-2.5 py-1.5 text-xs font-semibold text-peach shadow-sm backdrop-blur" onClick={() => inlineEditor.imageRow?.onRemoveImage(item.id!)}>
-                    {locale === "zh" ? "删除图片" : "Delete"}
-                  </button>
-                ) : null}
-                <button
-                  type="button"
-                  title={locale === "zh" ? "删除整个条目（图片、说明、卡片一并移除）" : "Delete this whole item (image, caption, and card)"}
-                  className="rounded-[5px] bg-deepIndigo/88 px-2.5 py-1.5 text-xs font-semibold text-peach shadow-sm backdrop-blur"
-                  onClick={() => inlineEditor.imageRow?.onRemoveItem(item.id!)}
-                >
-                  {locale === "zh" ? "删除整项" : "Delete item"}
-                </button>
-              </div>
-              {hasImage(item) ? (
-                <div className="absolute bottom-2 left-2 z-20 flex max-w-[calc(100%_-_1rem)] flex-col gap-1 rounded-[5px] bg-deepIndigo/88 p-1 text-[11px] font-semibold shadow-sm backdrop-blur">
-                  <div className="flex flex-wrap gap-1">
-                    <button
-                      type="button"
-                      title={locale === "zh" ? "界面截图用，按 16:9 裁切填满" : "For UI screenshots, cropped to fill 16:9"}
-                      className={`rounded-[3px] px-2 py-1 ${(item.imageDisplayMode ?? "cover") === "cover" && (item.imageCropRatio ?? "16:9") === "16:9" ? "bg-acidGreen text-deepIndigo" : "text-softWhite/72"}`}
-                      onClick={() => inlineEditor.imageRow?.onItemChange(item.id!, { imageDisplayMode: "cover", imageCropRatio: "16:9" })}
-                    >
-                      {locale === "zh" ? "界面裁切" : "UI 16:9"}
-                    </button>
-                    <button
-                      type="button"
-                      title={locale === "zh" ? "图标/物品素材用，按 1:1 裁切填满" : "For icon/item assets, cropped to fill 1:1"}
-                      className={`rounded-[3px] px-2 py-1 ${item.imageDisplayMode === "cover" && item.imageCropRatio === "1:1" ? "bg-acidGreen text-deepIndigo" : "text-softWhite/72"}`}
-                      onClick={() => inlineEditor.imageRow?.onItemChange(item.id!, { imageDisplayMode: "cover", imageCropRatio: "1:1" })}
-                    >
-                      {locale === "zh" ? "图标裁切" : "Icon 1:1"}
-                    </button>
-                    <button
-                      type="button"
-                      title={locale === "zh" ? "不裁切，按原图完整显示" : "No cropping, show the full original image"}
-                      className={`rounded-[3px] px-2 py-1 ${item.imageDisplayMode === "natural" ? "bg-acidGreen text-deepIndigo" : "text-softWhite/72"}`}
-                      onClick={() => inlineEditor.imageRow?.onItemChange(item.id!, { imageDisplayMode: "natural" })}
-                    >
-                      {locale === "zh" ? "完整显示" : "Full"}
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-1 border-t border-softWhite/10 pt-1">
-                    <span className="px-1 text-softWhite/48">{locale === "zh" ? "图片宽度" : "Width"}</span>
-                    {(["card", "wide", "full"] as const).map((mode) => (
-                      <button
-                        key={mode}
-                        type="button"
-                        className={`rounded-[3px] px-2 py-1 ${(item.imageWidthMode ?? "card") === mode ? "bg-acidGreen text-deepIndigo" : "text-softWhite/72"}`}
-                        onClick={() => inlineEditor.imageRow?.onItemChange(item.id!, { imageWidthMode: mode })}
-                      >
-                        {locale === "zh" ? ({ card: "标准", wide: "加宽", full: "整行" } as const)[mode] : ({ card: "Standard", wide: "Wide", full: "Full row" } as const)[mode]}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-1 border-t border-softWhite/10 pt-1">
-                    <span className="px-1 text-softWhite/48">{locale === "zh" ? "悬停预览" : "Hover preview"}</span>
-                    {(["none", "floating"] as const).map((mode) => (
-                      <button
-                        key={mode}
-                        type="button"
-                        className={`rounded-[3px] px-2 py-1 ${(item.hoverPreviewMode ?? "none") === mode ? "bg-acidGreen text-deepIndigo" : "text-softWhite/72"}`}
-                        onClick={() => inlineEditor.imageRow?.onItemChange(item.id!, { hoverPreviewMode: mode })}
-                      >
-                        {locale === "zh" ? ({ none: "关闭", floating: "漂浮放大" } as const)[mode] : ({ none: "Off", floating: "Floating" } as const)[mode]}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-            </>
-          </div>
-        ) : (
-          <RowImage image={item.image} imageDisplayMode={item.imageDisplayMode} imageCropRatio={item.imageCropRatio} hoverPreviewMode={item.hoverPreviewMode} annotationEnabled={item.annotationEnabled} annotations={normalizeImageAnnotations(item.annotations)} alt={alt} placeholder={placeholder} ratio={item.suggestedAspectRatio ?? ""} purpose={caption} locale={locale} editing={Boolean(inlineEditor)} slotId={item.id ?? String(index)} />
-        )}
-        {inlineEditor?.imageRow && item.id && hasImage(item) ? (
-          <ImageAnnotationEditor
-            locale={locale}
-            enabled={item.annotationEnabled === true}
-            disabled={item.hoverPreviewMode === "floating"}
-            annotations={normalizeImageAnnotations(item.annotations)}
-            onEnabledChange={(annotationEnabled) => inlineEditor.imageRow?.onItemChange(item.id!, { annotationEnabled })}
-            onAnnotationsChange={(annotations) => inlineEditor.imageRow?.onItemChange(item.id!, { annotations })}
-            onUploadEvidence={(annotationId) => inlineEditor.imageRow?.onUploadAnnotationEvidence(item.id!, annotationId)}
-            onRemoveEvidence={(annotationId, evidenceId) => inlineEditor.imageRow?.onRemoveAnnotationEvidence(item.id!, annotationId, evidenceId)}
-          />
-        ) : null}
-        {inlineEditor?.imageRow && item.id && hasImage(item) ? (
-          <InlineTemplateField
-            value={(item.caption as LocalizedText | undefined)?.[locale] ?? ""}
-            onChange={(value) => inlineEditor.imageRow?.onItemChange(item.id!, { caption: { ...((item.caption as LocalizedText | undefined) ?? { zh: "", en: "" }), [locale]: value } })}
-            ariaLabel={locale === "zh" ? "图片说明" : "Image caption"}
-            placeholder={locale === "zh" ? "图片说明" : "Caption"}
-            className="mt-4 w-full px-2 text-sm leading-6 text-softWhite/66"
-          />
-        ) : caption && hasImage(item) ? (
-          <p className="px-2 pt-4 text-sm leading-6 text-softWhite/66">
-            {caption}
-          </p>
-        ) : null}
-        {inlineEditor?.imageRow && item.id && items.length < 12 && (columns > 1 || storedColumns === undefined) && item.imageWidthMode !== "full" && isLastInRow ? (
-          <button type="button" className="ml-auto mt-3 block rounded-[5px] border border-dashed border-softWhite/20 px-2.5 py-1.5 text-xs font-semibold text-softWhite/48 transition hover:border-acidGreen/45 hover:text-acidGreen" onClick={() => inlineEditor.imageRow?.onAddItemAfter(item.id!)}>
-            {locale === "zh" ? "＋ 向右" : "+ Right"}
-          </button>
-        ) : null}
-      </article>
+      <TemplateSurface className="image-row-template p2-page-rail">
+        <div
+          className="image-row-frame"
+          aria-label={heading || (locale === "zh" ? "图片组" : "Image group")}
+        >
+          {visualItems.map((visualItem, index) => (
+            <ImageSlot
+              key={visualItem.item?.id ?? `image-row-${index}`}
+              visualItem={visualItem}
+              slot={DOUBLE_IMAGE_ROW_SLOTS[index]}
+              frameWidth={DOUBLE_IMAGE_ROW_FRAME_WIDTH}
+              frameHeight={DOUBLE_IMAGE_ROW_FRAME_HEIGHT}
+              locale={locale}
+              inlineEditor={inlineEditor}
+              canAddItem={false}
+            />
+          ))}
+        </div>
+      </TemplateSurface>
     );
-  };
+  }
+
+  // Editor / local preview: an over-2-count instance is marked
+  // legacy/incompatible and shown as a plain editable list instead of
+  // being forced into the Figma double-image geometry. 0 or 1 items
+  // still uses the normal slot UI below (in-progress authoring).
+  if (isLegacyIncompatible) {
+    return <LegacyIncompatibleNotice rawItems={rawItems} locale={locale} inlineEditor={inlineEditor} />;
+  }
+
+  const visualItems: VisualImageRowItem[] = rawItems.length > 0
+    ? rawItems.map((item) => ({ item }))
+    : [{ isVirtualFirstSlot: true }];
 
   return (
-    <TemplateSurface>
-      <TemplateContent horizontalInset={horizontalInset} style={{ paddingTop: sectionPadding, paddingBottom: sectionPadding }}>
-        {inlineEditor ? (
-          <InlineTemplateField
-            value={(content.heading as LocalizedText | undefined)?.[locale] ?? ""}
-            onChange={(value) => inlineEditor.onLocalizedTextChange("heading", value)}
-            ariaLabel={locale === "zh" ? "顶部标题" : "Heading"}
-            placeholder={locale === "zh" ? "顶部标题" : "Heading"}
-            className="mx-auto w-full text-center font-display text-[clamp(1.25rem,2vw,1.5rem)] font-semibold leading-[1.3] text-softWhite"
-          />
-        ) : heading ? (
-          <h2 className="text-center font-display text-[clamp(1.25rem,2vw,1.5rem)] font-semibold leading-[1.3] text-softWhite">
-            {heading}
-          </h2>
-        ) : null}
-
+    <>
+      <TemplateSurface className="image-row-template p2-page-rail">
         <div
-          className="mx-auto flex min-w-0 flex-col"
-          style={{
-            marginTop: inlineEditor || heading ? headingGap : 0,
-            rowGap: `calc(${imageGap} * 1.15)`,
-          }}
+          className="image-row-frame"
+          aria-label={heading || (locale === "zh" ? "图片组" : "Image group")}
         >
-          {rows.map((row, rowIndex) => {
-            const usedUnits = row.reduce((total, entry) => total + entry.span, 0);
-            const singleItemRow = row.length === 1;
-            const maxWidth = rowMaxWidth(row);
-
-            return (
-              <div
-                key={`image-row-${rowIndex}`}
-                className="grid min-w-0 items-start"
-                style={{
-                  width: "100%",
-                  maxWidth,
-                  marginInline: singleItemRow || rowAlignment === "center" ? "auto" : undefined,
-                  marginRight: !singleItemRow && rowAlignment === "start" ? "auto" : undefined,
-                  columnGap: imageGap,
-                  gridTemplateColumns: `repeat(${usedUnits * 2}, minmax(0, 1fr))`,
-                }}
-              >
-                {row.map((entry, entryIndex) => {
-                  if (showVirtualFirstSlot && entry.index === 0) {
-                    return (
-                      <button
-                        key="virtual-first-image"
-                        type="button"
-                        className="min-w-0 rounded-[20px] bg-[#151B4D]/52 p-3 pb-4 text-left shadow-[0_16px_38px_rgba(3,5,26,0.2),inset_0_1px_0_rgba(244,245,250,0.06)]"
-                        style={{ gridColumn: `span ${entry.span * 2}` }}
-                        onClick={() => inlineEditor?.imageRow?.onUploadFirstImage()}
-                      >
-                        <span className="case-study-media-frame flex h-full min-h-[11rem] w-full flex-col items-start justify-center gap-2 px-6 py-8">
-                          <span className="font-display text-lg font-semibold text-softWhite/88">{locale === "zh" ? "待补图片" : "Image to add"}</span>
-                          <span className="text-xs text-acidGreen/76">{locale === "zh" ? "建议比例：未设置" : "Suggested ratio: Not set"}</span>
-                          <span className="mt-1 text-xs font-semibold text-softWhite/64">{locale === "zh" ? "+ 上传图片" : "+ Upload image"}</span>
-                        </span>
-                      </button>
-                    );
-                  }
-
-                  const itemIndex = entry.index - Number(showVirtualFirstSlot);
-                  const item = items[itemIndex];
-                  return (
-                    <div key={item.id ?? itemIndex} className="min-w-0" style={{ gridColumn: `span ${entry.span * 2}` }}>
-                      {renderItem(item, itemIndex, entryIndex === row.length - 1)}
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
+          {visualItems.map((visualItem, index) => (
+            <ImageSlot
+              key={visualItem.item?.id ?? `image-row-${index}`}
+              visualItem={visualItem}
+              slot={DOUBLE_IMAGE_ROW_SLOTS[index]}
+              frameWidth={DOUBLE_IMAGE_ROW_FRAME_WIDTH}
+              frameHeight={DOUBLE_IMAGE_ROW_FRAME_HEIGHT}
+              locale={locale}
+              inlineEditor={inlineEditor}
+              canAddItem={rawItems.length < 2}
+            />
+          ))}
         </div>
-
-        {inlineEditor?.imageRow && items.length > 0 && items.length < 12 ? (
-          <div className="flex justify-center" style={{ marginTop: imageGap }}>
-            <button type="button" className="rounded-[6px] border border-dashed border-softWhite/20 px-4 py-2 text-xs font-semibold text-softWhite/52 transition hover:border-acidGreen/45 hover:text-acidGreen" onClick={() => inlineEditor.imageRow?.onAddNewRow()}>
-              {locale === "zh" ? "＋ 向下新建一行" : "+ Start a new row below"}
-            </button>
-          </div>
-        ) : null}
-
-        {inlineEditor?.imageRow?.error ? <p className="mt-3 text-center text-sm text-peach">{inlineEditor.imageRow.error}</p> : null}
-      </TemplateContent>
-    </TemplateSurface>
+      </TemplateSurface>
+      {inlineEditor?.imageRow?.error ? <p className="image-row-error" data-exact-export="hide">{inlineEditor.imageRow.error}</p> : null}
+    </>
   );
 }

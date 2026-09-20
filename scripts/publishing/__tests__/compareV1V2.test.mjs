@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { bundleV1ToV2AllIntents, compareV1V2 } from "../compareV1V2.mjs";
+import { compareV1V2 } from "../compareV1V2.mjs";
+import { bundleV1ToV2AllIntents } from "../bundleCompat.mjs";
 import { withFixtureRepo } from "./fixtureRepo.mjs";
 
 // The V1-bundle-to-V2-intents translator: a project present in the bundle
@@ -10,15 +11,32 @@ import { withFixtureRepo } from "./fixtureRepo.mjs";
 // at all, matching V1's real inherit behavior exactly.
 {
   const bundle = { drafts: { "project-a": { title: "edited" } }, gameExperience: { records: [] } };
-  const currentPublished = { drafts: { "project-a": { title: "old" }, "project-b": { title: "untouched" } } };
+  const currentPublished = {
+    drafts: { "project-a": { title: "old" }, "project-b": { title: "untouched" } },
+    projectCatalog: { "project-a": {}, "project-b": {} },
+  };
   const { projectIntents, projectCurrentEntities } = bundleV1ToV2AllIntents(bundle, currentPublished);
   assert.equal(projectIntents.size, 1, "only the project present in the bundle should produce an intent");
   assert(projectIntents.has("project-a"));
   assert(!projectIntents.has("project-b"), "a project absent from the bundle (V1's own inherit case) must produce no V2 intent");
   assert.equal(projectIntents.get("project-a").kind, "UPSERT");
-  assert.deepEqual(projectCurrentEntities.get("project-b"), { title: "untouched" });
+  assert.deepEqual(projectCurrentEntities.get("project-b"), {
+    meta: {},
+    body: { title: "untouched" },
+    cover: undefined,
+  });
 }
 console.log("bundleV1ToV2AllIntents: project bundle-present -> UPSERT, bundle-absent -> no intent (inherited), passed");
+
+assert.throws(
+  () => bundleV1ToV2AllIntents({ drafts: { "project-retired": { version: 1, templateInstances: [{ instanceId: "old", templateId: "figma-prototype", content: {} }] } } }, { drafts: {} }),
+  /retired template IDs/,
+);
+assert.throws(
+  () => bundleV1ToV2AllIntents({ projectDocuments: { version: 1, documents: { "project-legacy": { version: 1 } } } }, { drafts: {} }),
+  /legacy ProjectDocument/,
+);
+console.log("bundleV1ToV2AllIntents: retired template drafts and legacy ProjectDocuments are rejected, passed");
 
 // Game Experience: V1's real whole-store-overwrite semantics -- a record
 // present in the bundle always becomes an UPSERT intent; a record present in

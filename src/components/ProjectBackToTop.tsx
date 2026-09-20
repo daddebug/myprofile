@@ -41,7 +41,7 @@ export function ProjectBackToTop() {
   return (
     <button
       type="button"
-      className={`fixed right-4 z-[70] grid h-11 w-11 place-items-center rounded-full border border-[#9FAAD2]/45 bg-deepIndigo/94 text-[#B9C4EA] shadow-[0_8px_22px_rgba(3,5,26,0.18)] transition-[opacity,transform,border-color,color,background-color] duration-300 ease-out hover:border-acidGreen/70 hover:bg-archiveBlue hover:text-acidGreen focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acidGreen motion-reduce:transition-none md:right-7 ${
+      className={`fixed right-4 z-[70] grid h-11 w-11 place-items-center rounded-full border border-[#495d47]/30 bg-[#f7f6ed] text-[#495d47] shadow-[0_8px_22px_rgba(3,5,26,0.12)] transition-[opacity,transform,border-color,color,background-color] duration-300 ease-out hover:border-[#495d47] hover:bg-[#495d47] hover:text-[#f7f6ed] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#495d47] motion-reduce:transition-none md:right-7 ${
         visible ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"
       }`}
       style={{

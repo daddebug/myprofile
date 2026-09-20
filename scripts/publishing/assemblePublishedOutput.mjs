@@ -16,8 +16,19 @@
 //   gameExperiencePlan: import("./buildPublishPlan.mjs").PublishPlan,
 //   projectBodyTarget: Map<string, "drafts"|"documents">,
 //   generatedAt: string,
+//   siteSettings?: object,
 // }} options
-export function assemblePublishedOutput({ currentPublished, projectPlan, gameExperiencePlan, projectBodyTarget, generatedAt }) {
+//   siteSettings is NOT a buildPublishPlan-managed entity -- Let's Connect's
+//   config and the selected CV are a single-owner, non-versioned settings
+//   blob (see import-production-bundle.mjs's own site-settings block for why
+//   this deliberately bypasses the Dirty Intent Model / conflict detection
+//   that project/gameExperienceRecord entities need and this doesn't).
+//   Already-fully-resolved by the caller (CV public path included) when this
+//   run actually changed it; omitted (undefined) otherwise, in which case
+//   currentPublished.siteSettings is carried forward completely unchanged --
+//   the same "untouched things are never touched" rule as every other field
+//   in this file.
+export function assemblePublishedOutput({ currentPublished, projectPlan, gameExperiencePlan, projectBodyTarget, generatedAt, siteSettings }) {
   const projectCatalog = { ...(currentPublished.projectCatalog || {}) };
   const drafts = { ...(currentPublished.drafts || {}) };
   const documents = { ...(currentPublished.projectDocuments?.documents || {}) };
@@ -35,7 +46,20 @@ export function assemblePublishedOutput({ currentPublished, projectPlan, gameExp
     if (item.status !== "NEW" && item.status !== "UPDATED") continue; // UNCHANGED/BLOCKED/UNPUBLISHED -> no rewrite for this entity
 
     const value = item.value;
-    if (value.meta !== undefined) projectCatalog[id] = value.meta;
+    // lastPublishedAt: stamped here, and only here, because this is the
+    // one place that already knows two things simultaneously -- (a) this
+    // project's catalog entry is genuinely NEW or UPDATED in THIS publish
+    // run (the surrounding loop already filtered to that), and (b) what
+    // the real, project-specific "meta" shape is (this function is the
+    // only stage in the pipeline with that knowledge; buildPublishPlan.mjs
+    // is generic across entity types and never unpacks .meta). A project
+    // whose plan item is UNCHANGED/BLOCKED/UNPUBLISHED never reaches this
+    // line (see the `continue` above), so its existing projectCatalog[id]
+    // -- lastPublishedAt included -- is carried forward completely
+    // untouched via this function's own top-of-loop spread. Never derived
+    // from draft.updatedAt, metadata-edit updatedAt, or displayed directly
+    // as generatedAt -- see ProjectEndSections.tsx for the display side.
+    if (value.meta !== undefined) projectCatalog[id] = { ...value.meta, lastPublishedAt: generatedAt };
     else delete projectCatalog[id];
 
     const target = projectBodyTarget.get(id) ?? "drafts";
@@ -89,6 +113,8 @@ export function assemblePublishedOutput({ currentPublished, projectPlan, gameExp
       publicPath: entry.path.replace(/^public/, ""),
     }));
 
+  const resolvedSiteSettings = siteSettings !== undefined ? siteSettings : currentPublished.siteSettings;
+
   return {
     version: 1,
     generatedAt,
@@ -96,6 +122,7 @@ export function assemblePublishedOutput({ currentPublished, projectPlan, gameExp
     projectCatalog,
     projectDocuments: { version: 1, documents },
     ...(gameExperience ? { gameExperience } : {}),
+    ...(resolvedSiteSettings ? { siteSettings: resolvedSiteSettings } : {}),
     covers,
     assets: [...(currentPublished.assets || []), ...newAssetEntries],
   };

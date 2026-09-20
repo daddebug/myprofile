@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Braces, Copy, X } from "lucide-react";
 import { validateContentAgainstSchema, validateContentAgainstSchemaIssues, validateImageRowOptions } from "./TemplateInstancesSection";
 import { backupDynamicProjectCode } from "../lib/portfolioContentClient";
-import type { ProjectPublicMetaOverride, ResolvedProjectMetadata } from "../lib/projectMetadata";
+import { COVER_SHORT_DESCRIPTION_MAX, coverShortDescriptionOverLimit, type ProjectPublicMetaOverride, type ResolvedProjectMetadata } from "../lib/projectMetadata";
 import {
   createInstanceId,
   REGION_END_ANCHOR,
@@ -364,13 +364,24 @@ function localizedField(value: unknown, field: string) {
 }
 
 function normalizeNewImageRowContent(content: Record<string, unknown>) {
+  for (const key of ["columns", "rowAlignment", "className", "style", "css", "grid", "gridColumn", "grid-column"]) {
+    if (content[key] !== undefined) throw new Error(`image-row.${key} is not supported; layout is selected automatically by image count.`);
+  }
   const rawItems = content.items;
-  if (!Array.isArray(rawItems) || rawItems.length < 1 || rawItems.length > 12) {
-    throw new Error("A new image-row requires 1 to 12 empty image slots.");
+  // Matches image-row's own registered schema (ImageRowTemplate.tsx:
+  // items min:2, max:2) and the renderer's real behaviour -- any other
+  // count is marked legacy/incompatible in the editor and renders nothing
+  // on the live site. This bound used to be looser (1-12, matching an old
+  // multi-image chunking layout that was retired); tightened here so an
+  // AI-generated non-2 image-row is rejected immediately with a clear
+  // message instead of passing this check and only failing later, less
+  // clearly, at the schema min/max validator.
+  if (!Array.isArray(rawItems) || rawItems.length !== 2) {
+    throw new Error("A new image-row requires exactly 2 empty image slots. Use universal-media for a single image.");
   }
   const items = rawItems.map((value, index) => {
     if (!isRecord(value)) throw new Error(`image-row slot ${index + 1} is invalid.`);
-    const allowedKeys = new Set(["id", "alt", "caption", "placeholder", "suggestedAspectRatio", "suggestedImageCount", "imageDisplayMode", "imageCropRatio", "imageWidthMode", "hoverPreviewMode", "startNewRow", "image"]);
+    const allowedKeys = new Set(["id", "alt", "caption", "placeholder", "suggestedAspectRatio", "suggestedImageCount", "imageDisplayMode", "hoverPreviewMode", "image"]);
     const unsupportedKey = Object.keys(value).find((key) => !allowedKeys.has(key));
     if (unsupportedKey) throw new Error(`image-row slot ${index + 1}.${unsupportedKey} is not supported.`);
     if (value.image !== undefined && value.image !== null) {
@@ -392,21 +403,9 @@ function normalizeNewImageRowContent(content: Record<string, unknown>) {
     if (imageDisplayMode !== undefined && imageDisplayMode !== "cover" && imageDisplayMode !== "natural") {
       throw new Error(`image-row slot ${index + 1}.imageDisplayMode must be cover or natural.`);
     }
-    const imageCropRatio = value.imageCropRatio;
-    if (imageCropRatio !== undefined && imageCropRatio !== "16:9" && imageCropRatio !== "1:1") {
-      throw new Error(`image-row slot ${index + 1}.imageCropRatio must be 16:9 or 1:1.`);
-    }
-    const imageWidthMode = value.imageWidthMode;
-    if (imageWidthMode !== undefined && imageWidthMode !== "card" && imageWidthMode !== "wide" && imageWidthMode !== "full") {
-      throw new Error(`image-row slot ${index + 1}.imageWidthMode must be card, wide, or full.`);
-    }
     const hoverPreviewMode = value.hoverPreviewMode ?? "none";
     if (hoverPreviewMode !== "none" && hoverPreviewMode !== "floating") {
       throw new Error(`image-row slot ${index + 1}.hoverPreviewMode must be none or floating.`);
-    }
-    const startNewRow = value.startNewRow;
-    if (startNewRow !== undefined && typeof startNewRow !== "boolean") {
-      throw new Error(`image-row slot ${index + 1}.startNewRow must be boolean.`);
     }
     return {
       id: createInstanceId("image-row-item"),
@@ -416,10 +415,7 @@ function normalizeNewImageRowContent(content: Record<string, unknown>) {
       suggestedAspectRatio,
       suggestedImageCount,
       ...(imageDisplayMode ? { imageDisplayMode } : {}),
-      ...(imageCropRatio ? { imageCropRatio } : {}),
-      ...(imageWidthMode ? { imageWidthMode } : {}),
       hoverPreviewMode,
-      ...(startNewRow === true ? { startNewRow: true } : {}),
     };
   });
   return {
@@ -478,6 +474,46 @@ function normalizeNewPlayableGameContent(content: Record<string, unknown>) {
     versionLabel: localizedField(content.versionLabel ?? { zh: "", en: "" }, "playable-game.versionLabel"),
     status,
     aspectRatio,
+  };
+}
+
+function normalizeNewUniversalMediaContent(content: Record<string, unknown>) {
+  const allowedKeys = new Set(["heading", "media", "caption"]);
+  const unsupportedKey = Object.keys(content).find((key) => !allowedKeys.has(key));
+  if (unsupportedKey) throw new Error(`universal-media.${unsupportedKey} is not supported.`);
+  if (!isRecord(content.media)) throw new Error("universal-media.media must be an object.");
+  const requestedType = content.media.type ?? "image";
+  if (requestedType !== "image" && requestedType !== "video" && requestedType !== "figma" && requestedType !== "playable-game") {
+    throw new Error("universal-media.media.type is invalid.");
+  }
+  if (requestedType === "image") {
+    if (content.media.image !== undefined && (!isRecord(content.media.image) || Object.keys(content.media.image).length > 0)) {
+      throw new Error("A new universal-media image must not contain a real image reference.");
+    }
+    content.media = { type: "image", image: {} };
+  } else if (requestedType === "video") {
+    const video = content.media.video;
+    if (video !== undefined && (!isRecord(video) || video.src || video.poster)) {
+      throw new Error("A new universal-media video must not contain a real video reference.");
+    }
+    content.media = { type: "video", video: { src: "" } };
+  } else if (requestedType === "figma") {
+    if (content.media.figmaUrl || content.media.fallbackImage) {
+      throw new Error("A new universal-media Figma item must not contain a real URL or fallback image.");
+    }
+    content.media = { type: "figma", figmaUrl: "" };
+  } else {
+    if (content.media.game || content.media.cover) {
+      throw new Error("A new universal-media playable game must not contain a real game reference.");
+    }
+    // Resource-empty shells use image until a game is successfully selected;
+    // the persisted discriminated union never contains a fake game object.
+    content.media = { type: "image", image: {} };
+  }
+  return {
+    heading: localizedField(content.heading ?? { zh: "", en: "" }, "universal-media.heading"),
+    media: content.media,
+    caption: localizedField(content.caption ?? { zh: "", en: "" }, "universal-media.caption"),
   };
 }
 
@@ -591,6 +627,35 @@ function preflightProjectCode(
         return;
       }
 
+      // For a genuinely new image-row/playable-game/universal-media
+      // instance, mirror validateProjectCode's own apply-time path exactly:
+      // it shapes new content for these three templates with their
+      // dedicated New*Content normalizer instead of the generic
+      // normalizeProjectCodeTemplateContent, and validates that result.
+      // Previously this preflight ran only the generic normalizer here, so
+      // a raw AI-submitted shape a New*Content normalizer is designed to
+      // accept and reshape (e.g. a resource-empty
+      // `{type:"playable-game", game: null}` universal-media request,
+      // silently downgraded to an empty image placeholder on apply) could
+      // fail preflight first with a confusing schema error the real apply
+      // step would never actually produce.
+      if (!existing && (templateId === "image-row" || templateId === "playable-game" || templateId === "universal-media")) {
+        try {
+          const newContent = templateId === "image-row"
+            ? normalizeNewImageRowContent(candidate.content)
+            : templateId === "playable-game"
+              ? normalizeNewPlayableGameContent(candidate.content)
+              : normalizeNewUniversalMediaContent(candidate.content);
+          candidate.content = newContent;
+          for (const issue of validateContentAgainstSchemaIssues(newContent as Record<string, TemplateContentValue>, template.meta.schema)) {
+            issues.push(formatTemplateIssue(templateId, identity, issue));
+          }
+        } catch (error) {
+          issues.push(`[${templateId}] [${identity}] content: ${error instanceof Error ? error.message : String(error)}`);
+        }
+        return;
+      }
+
       const content = normalizeProjectCodeTemplateContent(templateId, candidate.content);
       candidate.content = content;
       for (const issue of validateContentAgainstSchemaIssues(content as Record<string, TemplateContentValue>, template.meta.schema)) {
@@ -654,6 +719,9 @@ function validateProjectCode(
     if (!existing && templateId === "playable-game") {
       content = normalizeNewPlayableGameContent(value.content) as Record<string, TemplateContentValue>;
     }
+    if (!existing && templateId === "universal-media") {
+      content = normalizeNewUniversalMediaContent(value.content) as Record<string, TemplateContentValue>;
+    }
     if (!existing && templateId === "figma-prototype") {
       const figmaUrl = content.figmaUrl;
       if ((typeof figmaUrl === "string" && figmaUrl.trim()) || content.fallbackImage) {
@@ -676,6 +744,9 @@ function validateProjectCode(
         throw new Error(`${instanceId}: project code cannot create a real playable game reference.`);
       }
     }
+    if (existing && templateId === "universal-media" && JSON.stringify(existing.content.media) !== JSON.stringify(content.media)) {
+      throw new Error(`${instanceId}: existing Universal Media resource must be preserved; change media through the content editor.`);
+    }
     const layoutSettings = validateLayoutSettings(value.layoutSettings);
     return { instanceId, templateId, regionId, anchorId, content: clone(content), ...(layoutSettings ? { layoutSettings } : {}) };
   });
@@ -691,14 +762,40 @@ function validateProjectCode(
   const addedPath = firstMultisetDifference(afterImages.publicReferences, beforeImages.publicReferences);
   if (addedPath) throw new Error(`真实图片路径不得新增或修改：${addedPath.split("\u0000")[1]}`);
 
-  const projectTitle = {
+  const rawProjectTitle = {
     zh: stringField(parsed.projectTitle.zh, "projectTitle.zh"),
     en: stringField(parsed.projectTitle.en, "projectTitle.en"),
   };
+  // A missing projectTitle field already throws above (stringField requires
+  // a string) -- this closes the remaining "present but blank" gap. AI
+  // returning "" for a locale that already has a real title is never a real
+  // edit (it cannot know less about the title than what's already there);
+  // treat it exactly like a missing field and preserve the current value
+  // instead of writing an empty title through to the Cover. A project that
+  // genuinely has no title yet for a locale (current is itself blank) stays
+  // blank -- this never invents content, only prevents a real one from
+  // being erased.
+  const projectTitle = {
+    zh: rawProjectTitle.zh.trim() ? rawProjectTitle.zh : (current.projectTitle.zh.trim() || rawProjectTitle.zh),
+    en: rawProjectTitle.en.trim() ? rawProjectTitle.en : (current.projectTitle.en.trim() || rawProjectTitle.en),
+  };
   const metadata = parsed.metadata;
+  const rawSummaryZh = stringField(metadata.summaryZh, "metadata.summaryZh");
+  const rawSummaryEn = stringField(metadata.summaryEn, "metadata.summaryEn");
+  // shortDescription is a concise Cover summary, not body copy -- AI Apply
+  // must fail closed on an oversized return, never silently truncate what
+  // the AI wrote (see COVER_SHORT_DESCRIPTION_MAX's own comment in
+  // projectMetadata.ts; same limit and same rule as EDIT PROJECT INFO's
+  // own save validation).
+  if (coverShortDescriptionOverLimit("zh", rawSummaryZh)) {
+    throw new Error(`metadata.summaryZh exceeds ${COVER_SHORT_DESCRIPTION_MAX.zh} characters (${rawSummaryZh.trim().length}). shortDescription is a concise Cover summary, not body copy -- shorten it instead of returning body text here.`);
+  }
+  if (coverShortDescriptionOverLimit("en", rawSummaryEn)) {
+    throw new Error(`metadata.summaryEn exceeds ${COVER_SHORT_DESCRIPTION_MAX.en} characters (${rawSummaryEn.trim().length}). shortDescription is a concise Cover summary, not body copy -- shorten it instead of returning body text here.`);
+  }
   const nextMetadata: ProjectCodeDocument["metadata"] = {
-    summaryZh: stringField(metadata.summaryZh, "metadata.summaryZh"),
-    summaryEn: stringField(metadata.summaryEn, "metadata.summaryEn"),
+    summaryZh: rawSummaryZh,
+    summaryEn: rawSummaryEn,
     categoryZh: stringField(metadata.categoryZh, "metadata.categoryZh"),
     categoryEn: stringField(metadata.categoryEn, "metadata.categoryEn"),
     tagsZh: stringArray(metadata.tagsZh, "metadata.tagsZh"),
@@ -717,10 +814,22 @@ function validateProjectCode(
     templateInstances: nextInstances,
     imageReferences: collectImageReferences(nextInstances),
   };
+  // Project Code only ever knows the WHOLE title (projectTitle.zh/en) --
+  // it has no concept of Hero's independent titleLine1/titleLine2 split
+  // (EDIT PROJECT INFO's own fields, projectMetadata.ts). If this apply
+  // actually changes a locale's whole title, any existing line1/line2
+  // override for that locale is now stale (it would still take priority
+  // over the new title per resolveProjectCatalog's compat rule, showing
+  // mismatched old content) -- cleared here so that locale cleanly falls
+  // back to "whole title -> line 1, line 2 empty" instead. An unchanged
+  // title leaves a previously-set line split untouched.
+  const metadataPatch: Partial<ProjectPublicMetaOverride> = { ...nextMetadata, titleZh: projectTitle.zh, titleEn: projectTitle.en };
+  if (projectTitle.zh !== current.projectTitle.zh) { metadataPatch.titleLine1Zh = ""; metadataPatch.titleLine2Zh = ""; }
+  if (projectTitle.en !== current.projectTitle.en) { metadataPatch.titleLine1En = ""; metadataPatch.titleLine2En = ""; }
   return {
     code,
     diff: buildDiff(current, code),
-    metadataPatch: { ...nextMetadata, titleZh: projectTitle.zh, titleEn: projectTitle.en },
+    metadataPatch,
   };
 }
 
@@ -733,7 +842,7 @@ function aiRequestFor(code: ProjectCodeDocument) {
     ...templateRules,
     "These contracts override any abbreviated examples below.",
     `direction-compare is the native two-sided before/after or proposal comparison template. New instances must use a unique newInstanceKey, regionId content, anchorId set to the exact JSON string "${REGION_END_ANCHOR}", leftImage/rightImage null or omitted, and direction left-to-right, right-to-left, or none.`,
-    "For image-row slots, hoverPreviewMode is optional and only accepts none or floating; new empty slots default to none.",
+    "For image-row slots, hoverPreviewMode is optional and only accepts none or floating; new empty slots default to none. Do not provide columns, rowAlignment, imageWidthMode, startNewRow, CSS, grid coordinates, or spans; image-row is always exactly 2 slots side by side -- use universal-media for a single image instead.",
     "",
     "请基于下面的作品集项目 JSON，帮助我讨论并优化项目叙事、模块顺序、排版逻辑和文字内容。",
     "",
@@ -741,11 +850,14 @@ function aiRequestFor(code: ProjectCodeDocument) {
     "- 优化项目叙事、标题、说明和正文。",
     "- 调整 templateInstances 顺序。",
     "- 修改合法的 layoutSettings。",
-    "- 按内容类型新增已有模板：statement-longform、supporting-note、process-flow、decision-table、dual-viewpoint-analysis、phase-milestones、circle-summary、image-row、figma-prototype、playable-game。",
+    "- 按内容类型新增已有模板，仅限以下五种（Portfolio 2.0 当前唯一的 AI 内容体系）：statement-longform（正文/Body）、supporting-note（影响/Impact）、universal-media（万能单媒体）、image-row（双图）、direction-compare（通知/前后对比）。process-flow、decision-table、phase-milestones、circle-summary、figma-prototype、playable-game（独立模板）、dual-viewpoint-analysis 仅用于渲染/编辑旧项目里已经存在的实例，不允许新建；如果旧内容里已有这些模板的实例，可以按原样保留或修改其现有文字字段，但不要新增同类型的新实例。",
     `- 新实例不要提供最终 instanceId；请提供唯一的 newInstanceKey，regionId 使用 content，anchorId 必须是精确的 JSON 字符串 "${REGION_END_ANCHOR}"（两侧各两个下划线）。如果你所在的界面把它渲染显示成了 "end"（下划线被当成了 Markdown 加粗语法吃掉），返回的 JSON 源码里仍然必须写完整的 "${REGION_END_ANCHOR}"，不要写成 "end"。`,
-    "- 工作步骤使用 process-flow；表格型比较和验证计划使用 decision-table；机遇/挑战、优点/问题、现状/方向等双列洞察使用 dual-viewpoint-analysis；阶段成果使用 phase-milestones；补充限制使用 supporting-note；并列关系使用 circle-summary；成果图使用 image-row；原型使用 figma-prototype；章节叙事使用 statement-longform。",
-    "- image-row 只能创建 1–12 个空图片槽。content 可使用 columns（1/2/3/4）与 rowAlignment（start/center）；每个 item 可包含 alt、caption、placeholder、suggestedAspectRatio、suggestedImageCount、imageDisplayMode（cover/natural）、imageCropRatio（16:9/1:1，仅在 imageDisplayMode 为 cover 时生效，省略或旧数据默认按 16:9 处理）、imageWidthMode（card/wide/full）、startNewRow（boolean），image 必须为 null 或省略。",
-    "- playable-game 只能新增 game: null、cover: null 的空模板；真实 ZIP 必须稍后通过页面上传。status 仅允许 prototype、in-development、complete、archived，aspectRatio 仅允许 16:9、4:3、auto。",
+    "- 新的单张图片、视频、Figma 原型或可玩游戏统一使用 universal-media（不要新建 figma-prototype 或 playable-game 独立模板）。背景、问题陈述、设计目标、设计理由、假设、预期效果、未来计划、局限性，以及一般性总结/结论，一律使用 statement-longform（正文/Body）——这是默认模板，不是 supporting-note。",
+    "- supporting-note（Impact）是受限的『最终结果』模板，不是默认模板，也不是补充说明/过渡/背景用途。只有当原始内容已经明确给出已发生且有依据的结果时才能使用：量化结果、KPI/指标变化、转化率/留存率/复购率提升、可用性测试结果、已验证的效果、生产/业务影响、效率提升、用户行为改善，或其他已确认的定性结果。位置默认只出现在项目叙事的后段（solution/validation 之后、项目结尾附近），不允许出现在 Cover 之后、Context/Problem 阶段、Research 前半段或 Exploration 中段，除非原始内容明确描述的是该阶段已经验证完成的真实结果。禁止为了使用 supporting-note 而自行编造百分比、用户测试结果、商业提升、KPI 或成功结论——如果原始内容没有结果证据，即使项目『看起来应该有结果』，也不要创建 supporting-note，一律改用 statement-longform（Body）或其他语义匹配的模板。不确定时，默认不要使用 supporting-note。",
+    "- universal-media 只允许 heading、media、caption。media.type 只能是 image、video、figma、playable-game（这里是媒体类型，不是独立模板）；新实例不得包含真实 URL、图片 ID、游戏 ID、文件路径或二进制内容，真实资源必须稍后通过页面编辑器添加。",
+    "- image-row（双图）只能创建恰好 2 个空图片槽，不多不少；单张图片、视频、Figma 原型或可玩游戏一律使用 universal-media。content 不允许 columns、rowAlignment、CSS、grid 或 span；每个 item 可包含 alt、caption、placeholder、suggestedAspectRatio、suggestedImageCount、imageDisplayMode（cover/natural）、hoverPreviewMode（none/floating），image 必须为 null 或省略。",
+    "",
+    `- metadata.summaryZh（Cover 的 shortDescription/副标题）最多 ${COVER_SHORT_DESCRIPTION_MAX.zh} 个中文字符，metadata.summaryEn 最多 ${COVER_SHORT_DESCRIPTION_MAX.en} 个英文字符。shortDescription is a concise Cover summary, not body copy -- 它只出现在 Cover 上，是一句话摘要，不是正文；更完整的叙述请放进 templateInstances 里的 statement-longform（正文/Body）。超过字数限制会导致这次 apply 直接校验失败。`,
     "",
     "你不可以：",
     "- 修改 projectId。",
@@ -754,7 +866,7 @@ function aiRequestFor(code: ProjectCodeDocument) {
     "- 删除任何真实图片引用或图片文件。",
     "- 修改磁盘存储字段，或返回 D 盘、backups、AppData、Temp 路径。",
     "- 返回 Blob、Base64、SHA-256 或 commit token。",
-    "- 为新增 image-row 或 figma-prototype 伪造 localImageId、assetId、publicPath、publicUrl、真实文件或外部资源链接。",
+    "- 为新增 universal-media 或 image-row 伪造 localImageId、assetId、publicPath、publicUrl、真实文件或外部资源链接。",
     "",
     "请返回完整 JSON，不要使用 Markdown 代码块。",
     "",
@@ -870,3 +982,4 @@ export function DynamicProjectCodePanel({
     document.body,
   );
 }
+

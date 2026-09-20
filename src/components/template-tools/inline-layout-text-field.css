@@ -1,0 +1,23 @@
+/* Generic, layout-neutral styling for InlineLayoutTextField -- only an
+   empty-state placeholder. Never sets width/min-height/padding/border/
+   background/outline here: every consuming page owns its own
+   [data-editable="true"] hover/focus outline (see home-v2.css), scoped to
+   its own class, since outline color/offset is a per-composition visual
+   choice, not a shared default. */
+[data-editable="true"]:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* An authored Enter is a real "\n" in the stored/rendered value (see
+   InlineLayoutTextField's commit/onKeyDown) -- pre-line renders that break
+   while still collapsing/wrapping ordinary runs of whitespace normally, so
+   a multiline field never needs "white-space: normal" (which would
+   silently swallow the break again) or "pre"/"pre-wrap" (which would also
+   stop wrapping or start preserving incidental double-spaces, a layout
+   change this primitive never opts into on its own). Scoped to
+   data-multiline so a single-line field's wrapping is never touched. */
+[data-multiline="true"] {
+  white-space: pre-line;
+}

@@ -22,7 +22,18 @@ import { buildPublishPlan } from "./publishing/buildPublishPlan.mjs";
 import { assemblePublishedOutput } from "./publishing/assemblePublishedOutput.mjs";
 import { hashContent } from "./publishing/contentHash.mjs";
 import { executePublishPlan } from "./publishing/executePublishPlan.mjs";
-import { readPublishSourceRegistry } from "./publishing/registry.mjs";
+import { readPublishSourceRegistry, getPublishedAssetLocation } from "./publishing/registry.mjs";
+
+// This live CLI's own source text must never name any per-reference
+// resolution module (see cutoverStructuralAssertions.test.mjs's structural
+// check -- only buildPublishPlan.mjs may reach those). The bundle-asset
+// lookup key format is a one-line, side-effect-free format detail shared
+// with that module, re-derived locally here rather than imported, same
+// pattern already used elsewhere in this codebase for small shared key
+// formats (e.g. the dynamic-project draft storage key).
+function bundleAssetKey(sourceAdapterId, assetId) {
+  return JSON.stringify([sourceAdapterId, assetId]);
+}
 import { LAUNCHER_REPORT_PATH, renderPublishPlanReportV2 } from "./publishing-report-lib.mjs";
 
 const OFFICIAL_ROOT = path.resolve("D:/myprofilegit/myprofile");
@@ -180,6 +191,65 @@ if (!confirm) {
   process.exit(0);
 }
 
+// ---- Site settings (Let's Connect items + selected CV) -- deliberately
+// NOT a buildPublishPlan entity. This is a single-owner, non-versioned
+// config blob (no per-visitor conflict semantics apply, unlike
+// project/gameExperienceRecord), so it bypasses the Dirty Intent Model
+// entirely -- same reasoning V1's bundle.uiPractice already used (see the
+// block below this one) applied to a second field. The selected CV's bytes
+// still flow through the SAME generic byte-transport (bundle.images[] ->
+// bundleAssets, keyed by the registered "cv-library" source adapter) every
+// other asset above uses -- not a parallel mechanism, just a simpler
+// resolution path around it.
+let resolvedSiteSettings;
+const cvWriteset = [];
+if (bundle.siteSettings) {
+  const currentSiteSettings = currentPublished.siteSettings ?? null;
+  if (hashContent(bundle.siteSettings) !== hashContent(currentSiteSettings)) {
+    const connectItems = Array.isArray(bundle.siteSettings.connectItems) ? bundle.siteSettings.connectItems : [];
+    const selectedCvId = typeof bundle.siteSettings.cv?.selectedCvId === "string" ? bundle.siteSettings.cv.selectedCvId : null;
+    let cvAssets = Array.isArray(currentPublished.siteSettings?.cv?.assets) ? currentPublished.siteSettings.cv.assets : [];
+    if (selectedCvId) {
+      const cvBundleAsset = bundleAssets.get(bundleAssetKey("cv-library", selectedCvId));
+      if (cvBundleAsset) {
+        const location = getPublishedAssetLocation("cv-library", null, selectedCvId, cvBundleAsset.fileName);
+        const onDiskHash = await currentFileHashOrNull(cwd, location.relativePath);
+        const nextHash = hashBytes(cvBundleAsset.bytes);
+        if (onDiskHash !== nextHash) {
+          cvWriteset.push({ path: location.relativePath, expectedPreviousHash: onDiskHash, nextHash, content: cvBundleAsset.bytes });
+        }
+        const label = connectItems.find((item) => item?.type === "cv")?.label || selectedCvId;
+        cvAssets = [{ id: selectedCvId, label, publicPath: location.publicPath }];
+      } else {
+        // Bytes missing from this export (e.g. the CV was deleted locally
+        // between selecting it and exporting) -- never block the rest of
+        // the publish over an optional, low-stakes field; just leave the
+        // previously-published CV state untouched and say why.
+        console.warn(`[portfolio:import] Selected CV "${selectedCvId}" has no asset bytes in this export -- leaving the previously-published CV unchanged. Re-export from a browser where that CV is still in the local library.`);
+      }
+    } else {
+      cvAssets = [];
+    }
+    // homeContent is still live Homepage text content. homeProjectSlots/
+    // homeExplorationSlots are legacy/inert as of Homepage 3.0 Modular
+    // Interaction Redesign Phase B.1 -- the live Homepage no longer reads
+    // them and `/work` no longer edits them; still passed through here
+    // (migration/compatibility only) so the old stored data doesn't go
+    // stale or orphaned across a publish, not because it affects what
+    // appears on the Homepage. Plain JSON passthrough either way, no asset
+    // bytes to resolve (slots only ever reference an existing project's
+    // own id, never a new upload).
+    const homeContent = bundle.siteSettings.homeContent ?? currentPublished.siteSettings?.homeContent;
+    const homeProjectSlots = Array.isArray(bundle.siteSettings.homeProjectSlots)
+      ? bundle.siteSettings.homeProjectSlots
+      : currentPublished.siteSettings?.homeProjectSlots;
+    const homeExplorationSlots = Array.isArray(bundle.siteSettings.homeExplorationSlots)
+      ? bundle.siteSettings.homeExplorationSlots
+      : currentPublished.siteSettings?.homeExplorationSlots;
+    resolvedSiteSettings = { connectItems, cv: { assets: cvAssets, selectedCvId }, homeContent, homeProjectSlots, homeExplorationSlots };
+  }
+}
+
 // ---- Final assembly: pure structural merge of already-decided values into
 // the whole-file output shape (see assemblePublishedOutput.mjs). No judgment
 // happens here -- every status was already decided by buildPublishPlan.mjs.
@@ -203,9 +273,10 @@ const outputWithStableTimestamp = assemblePublishedOutput({
   gameExperiencePlan,
   projectBodyTarget,
   generatedAt: currentPublished.generatedAt || "",
+  siteSettings: resolvedSiteSettings,
 });
 
-const combinedWriteset = [...projectPlan.writeset, ...gameExperiencePlan.writeset];
+const combinedWriteset = [...projectPlan.writeset, ...gameExperiencePlan.writeset, ...cvWriteset];
 
 // Whole-file writes (publishedPortfolio.json / uiPracticeMetadata.json)
 // follow the identical Writeset Rule as every asset above: only enter the

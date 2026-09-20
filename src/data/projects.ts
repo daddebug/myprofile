@@ -9,37 +9,14 @@ export const categories: ProjectCategory[] = [
   "Experiments",
 ];
 
-export const projects: Project[] = [
-  {
-    slug: "ui-personal-practice",
-    title: "UI Personal Practice",
-    subtitle: "A running visual archive of personal UI exercises, interface studies, and game UI explorations.",
-    category: "Visual / UI Art",
-    type: "UI Art",
-    year: "2026",
-    cover: "",
-    images: [],
-    summary:
-      "A growing collection of personal UI practice pieces managed by dropping images into the project and arranging them locally.",
-    background:
-      "This archive is designed as a visual shelf for interface practice rather than a formal case study.",
-    role: "UI designer, visual designer",
-    timeline: "Ongoing",
-    tools: ["Figma", "Photoshop", "Illustrator"],
-    designGoals: [
-      "Keep UI screenshots large and readable.",
-      "Preserve original image proportions.",
-      "Make future image additions easy to manage.",
-    ],
-    process: [
-      "Drop image files into the UI practice folder.",
-      "Open the local edit mode to adjust order and optional text.",
-      "Save metadata back into the project source.",
-    ],
-    highlights: ["UI art practice", "Visual archive", "Local metadata workflow"],
-    blocks: [],
-  },
-];
+// ui-personal-practice (the sole entry here) was retired from the
+// portfolio entirely -- its 23 UI images will resurface later as separate,
+// individually-scoped projects/content instead of one "UI Practice"
+// collection. Kept as an empty array (not deleted outright) since
+// projectMetadata.ts's projectDefaults/archiveOrder machinery maps over
+// this array generically for any future source-controlled project added
+// the same way.
+export const projects: Project[] = [];
 
 export const playableProjects = projects.filter((project) => project.playable);
 

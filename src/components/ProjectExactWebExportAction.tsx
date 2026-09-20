@@ -562,7 +562,7 @@ function downloadBlob(blob: Blob, filename: string) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
 }
 
-export function ProjectExactWebExportAction({ onBeforeExport }: { onBeforeExport?: () => void }) {
+export function ProjectExactWebExportAction({ onBeforeExport, onAfterExport }: { onBeforeExport?: () => void; onAfterExport?: () => void }) {
   const { locale } = useLocale();
   const { slug = "project" } = useParams();
   const [state, setState] = useState<ExportState>("idle");
@@ -600,6 +600,12 @@ export function ProjectExactWebExportAction({ onBeforeExport }: { onBeforeExport
     } catch (error) {
       setState("error");
       setMessage(error instanceof Error ? error.message : "Exact Web PDF export failed.");
+    } finally {
+      // Content editing is automatic now (CaseStudyEditorProvider), so the
+      // owner has no manual "EDIT CONTENT" button left to click to resume
+      // editing after onBeforeExport suppressed it for the capture -- this
+      // restores it unconditionally once the export settles, success or not.
+      onAfterExport?.();
     }
   };
 

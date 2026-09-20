@@ -1,0 +1,19 @@
+/* Homepage 3.0, Haoqi-track Phase 2 -- matches the reference's own
+   fixed/right-center/fade treatment (see HomeScrollIndicator.tsx's own
+   comment for the confirmed DOM structure this reproduces). */
+.home-scroll-indicator {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: 56px;
+  padding-inline: 12px;
+  z-index: 30;
+  color: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease-cut, ease);
+}
+.home-scroll-indicator--visible {
+  opacity: 1;
+}

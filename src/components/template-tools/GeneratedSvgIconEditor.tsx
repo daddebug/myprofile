@@ -41,6 +41,10 @@ export function GeneratedSvgIconEditor({
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const prompt = useMemo(() => [title, description, keywords].filter(Boolean).join("\n"), [title, description, keywords]);
+  const generatedPreviewSrc = useMemo(
+    () => generated ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(generated.svg)}` : "",
+    [generated],
+  );
 
   useEffect(() => {
     let active = true;
@@ -95,7 +99,7 @@ export function GeneratedSvgIconEditor({
       <div className="mt-3 grid gap-3 sm:grid-cols-[7rem_minmax(0,1fr)]">
         <div className="grid aspect-square place-items-center bg-softWhite/[0.04] text-softWhite">
           {generated ? (
-            <div className="h-16 w-16" aria-label={generated.title} dangerouslySetInnerHTML={{ __html: generated.svg }} />
+            <img className="h-16 w-16 object-contain" src={generatedPreviewSrc} alt={generated.title} />
           ) : currentIcon ? (
             <img className="h-16 w-16 object-contain" src={currentIcon.svgPath} alt="" />
           ) : (

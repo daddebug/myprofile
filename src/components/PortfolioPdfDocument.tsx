@@ -10,22 +10,20 @@ import type { PdfProjectBlock, PdfProjectContent, PdfProjectMedia, PdfProjectSec
 import { projectPdfThemes, type ProjectPdfCompositionConfig, type ProjectPdfPage, type ProjectPdfThemeId } from "../lib/projectPdfCompositions";
 import type { ResolvedProjectMetadata } from "../lib/projectMetadata";
 import type { Locale } from "../locales/types";
-import type { UiPracticeCatalogItem } from "../lib/uiPracticeCatalog";
 
 type Props = {
   config: PortfolioPdfConfig;
   projects: ResolvedProjectMetadata[];
   projectContents: Record<string, PdfProjectContent>;
   compositionConfig: ProjectPdfCompositionConfig;
-  uiWorks: UiPracticeCatalogItem[];
   games: GameExperienceRecord[];
 };
 
 type PageDescriptor = { key: string; node: ReactNode; className?: string; style?: CSSProperties; compositionPageId?: string; projectId?: string };
 
 const labels = {
-  zh: { profile: "个人简介与经历", projects: "项目案例", ui: "UI 作品", games: "游戏经历", contact: "联系方式", skills: "核心技能", experience: "工作经历", education: "教育经历", challenge: "问题与过程", outcome: "关键判断与结果", playtime: "游玩", achievement: "成就", why: "为什么游玩", strengths: "优点", learned: "对我的帮助" },
-  en: { profile: "Profile & Experience", projects: "Selected Projects", ui: "Selected UI Works", games: "Game Experience", contact: "Contact", skills: "Core Skills", experience: "Experience", education: "Education", challenge: "Challenge & Process", outcome: "Key Decisions & Outcome", playtime: "Playtime", achievement: "Achievement", why: "Why I played", strengths: "Strengths", learned: "What I learned" },
+  zh: { profile: "个人简介与经历", projects: "项目案例", games: "游戏经历", contact: "联系方式", skills: "核心技能", experience: "工作经历", education: "教育经历", challenge: "问题与过程", outcome: "关键判断与结果", playtime: "游玩", achievement: "成就", why: "为什么游玩", strengths: "优点", learned: "对我的帮助" },
+  en: { profile: "Profile & Experience", projects: "Selected Projects", games: "Game Experience", contact: "Contact", skills: "Core Skills", experience: "Experience", education: "Education", challenge: "Challenge & Process", outcome: "Key Decisions & Outcome", playtime: "Playtime", achievement: "Achievement", why: "Why I played", strengths: "Strengths", learned: "What I learned" },
 } as const;
 
 function chunk<T>(items: T[], size: number) {
@@ -89,11 +87,10 @@ function compactProjectPages(sections: PdfProjectSection[]) {
   return pages;
 }
 
-export function PortfolioPdfDocument({ config, projects, projectContents, compositionConfig, uiWorks, games }: Props) {
+export function PortfolioPdfDocument({ config, projects, projectContents, compositionConfig, games }: Props) {
   const locale = config.locale;
   const copy = labels[locale];
   const projectById = new Map(projects.map((item) => [item.id, item]));
-  const uiById = new Map(uiWorks.map((item) => [item.id, item]));
   const gameById = new Map(games.map((item) => [item.id, item]));
   const enabledSections = [...config.sections].filter((item) => item.enabled).sort((a, b) => a.order - b.order);
   const pages: PageDescriptor[] = [];
@@ -132,11 +129,6 @@ export function PortfolioPdfDocument({ config, projects, projectContents, compos
           contentPages.forEach((group, index) => add(`project-${item.id}-content-${index}`, <PdfProjectContentPage project={project} item={item} content={content} sections={group} pageIndex={index} />));
         }
       });
-    }
-
-    if (section.id === "ui-works") {
-      const selected = [...config.uiWorks].filter((item) => item.enabled).sort((a, b) => a.order - b.order).flatMap((item) => uiById.get(item.id) ?? []);
-      chunk(selected, config.uiOptions.density).forEach((group, index) => add(`ui-${index}`, <PdfUiPage locale={locale} items={group} config={config} />));
     }
 
     if (section.id === "games") {
@@ -353,9 +345,6 @@ function paragraphs(value: string) {
   return value.split(/\n{2,}/).map((item) => item.trim()).filter(Boolean);
 }
 
-function PdfUiPage({ locale, items, config }: { locale: Locale; items: UiPracticeCatalogItem[]; config: PortfolioPdfConfig }) {
-  return <div><PdfSectionHeading eyebrow="UI WORKS" title={labels[locale].ui} /><div className={`pdf-ui-grid pdf-ui-grid-${config.uiOptions.density}`}>{items.map((item) => <figure key={item.id}><PdfImage src={item.src} alt={item.title || item.filename} contain={config.uiOptions.cropMode === "contain"} />{config.uiOptions.showCaptions && (item.title || item.description) ? <figcaption><strong>{item.title}</strong>{item.description ? <span>{item.description}</span> : null}</figcaption> : null}</figure>)}</div></div>;
-}
 
 function PdfGamesPage({ locale, records, config }: { locale: Locale; records: Array<{ game: GameExperienceRecord; item: PortfolioPdfConfig["games"][number] }>; config: PortfolioPdfConfig }) {
   return <div><PdfSectionHeading eyebrow="GAME EXPERIENCE" title={labels[locale].games} /><div className="pdf-game-list">{records.map(({ game, item }) => <PdfGameRecord key={game.id} locale={locale} game={game} detailLevel={item.detailLevel} config={config} />)}</div></div>;

@@ -7,6 +7,7 @@
 // themselves; that override lives on the instance's own layoutSettings
 // (see projectTemplateInstances.ts), never here.
 import { useEffect, useState } from "react";
+import { isActiveP2TemplateId } from "./projectTemplateInstances";
 
 const STORAGE_KEY = "dilida-portfolio:template-layout-defaults:v1";
 const CHANGE_EVENT = "dilida-portfolio:template-layout-defaults-changed";
@@ -15,17 +16,10 @@ const CHANGE_EVENT = "dilida-portfolio:template-layout-defaults-changed";
 // ever been saved. Once saved, the persisted value always wins — reopening
 // the Builder never silently reverts to these.
 const INITIAL_HORIZONTAL_INSETS: Record<string, number> = {
-  "project-header": 120,
   "statement-longform": 80,
-  "xmind-breakdown": 180,
   "supporting-note": 100,
-  "phase-milestones": 40,
-  "circle-summary": 40,
-  "decision-table": 160,
   "image-row": 40,
-  "figma-prototype": 180,
-  "process-flow": 80,
-  "dual-viewpoint-analysis": 80,
+  "universal-media": 0,
 };
 
 type StoredDefaults = Record<string, { horizontalInset: number }>;
@@ -38,6 +32,7 @@ function readStore(): StoredDefaults {
     if (!parsed || typeof parsed !== "object") return {};
     const result: StoredDefaults = {};
     for (const [templateId, value] of Object.entries(parsed as Record<string, unknown>)) {
+      if (!isActiveP2TemplateId(templateId)) continue;
       if (
         value
         && typeof value === "object"

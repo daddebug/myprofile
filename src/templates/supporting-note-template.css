@@ -1,0 +1,24 @@
+.portfolio2-impact {
+  width: 100%;
+  padding-block: var(--p2-impact-padding-block, 18px);
+  background: transparent;
+}
+
+.portfolio2-impact__panel {
+  display: flex;
+  align-items: center;
+  min-height: var(--p2-impact-panel-min-height, 153px);
+  padding: var(--p2-impact-panel-padding-y, 26px) var(--p2-impact-panel-padding-x, 50px);
+  border: 1px solid #b5d298;
+  background: transparent;
+  box-shadow: 0 4px 4px rgb(181 210 152 / 0.7);
+}
+
+.portfolio2-impact__body {
+  display: block;
+  width: 100%;
+  margin: 0;
+  color: #495d47;
+  font: 300 17px/1.42 Inter, "Noto Sans SC", sans-serif;
+  white-space: pre-wrap;
+}

@@ -1,18 +1,8 @@
 import type { TemplateFieldDefinition } from "./templateLibrary";
+import { ACTIVE_P2_TEMPLATE_IDS } from "./projectTemplateInstances";
 
-export const projectCodeAllowedNewTemplateIds = [
-  "statement-longform",
-  "supporting-note",
-  "process-flow",
-  "decision-table",
-  "phase-milestones",
-  "circle-summary",
-  "image-row",
-  "figma-prototype",
-  "playable-game",
-  "direction-compare",
-  "dual-viewpoint-analysis",
-] as const;
+// One source of truth shared by renderer hydration and AI authoring.
+export const projectCodeAllowedNewTemplateIds = ACTIVE_P2_TEMPLATE_IDS;
 
 export type ProjectCodeTemplateId = typeof projectCodeAllowedNewTemplateIds[number];
 
@@ -36,46 +26,20 @@ const templateContracts: Record<ProjectCodeTemplateId, ProjectCodeTemplateContra
     unsupported: "No generic heading or title. Put the chapter label into leftTitle and the core claim into statement.",
   },
   "supporting-note": {
-    semantic: "Untitled supporting context, constraint, caveat, or transition. The only native content field is body.",
-    unsupported: "No heading or title. If a title is essential, choose a template that natively supports one or rewrite this as an untitled note.",
-  },
-  "process-flow": {
-    semantic: "A fixed six-step working process using items in the designed path composition.",
-    unsupported: "No steps field and no variable step count.",
-  },
-  "decision-table": {
-    semantic: "Structured comparison, trade-off, responsibility split, or validation plan.",
-    unsupported: "No arbitrary table layout, CSS, or cells outside the declared column IDs.",
-  },
-  "phase-milestones": {
-    semantic: "Three to twelve ordered milestones or phase outcomes.",
-    unsupported: "Not a free-position timeline and not a general process-flow replacement.",
-  },
-  "circle-summary": {
-    semantic: "Three to five parallel judgments or summary conclusions.",
-    unsupported: "No arbitrary nodes, coordinates, icons, or extra item fields.",
+    semantic: "IMPACT -- a restricted final-result statement, not a general-purpose note. Use ONLY when the source content already states an evidenced, already-happened outcome: a quantitative result, a KPI/metric change, conversion/retention/repurchase uplift, a usability-test result, a validated outcome, confirmed production/business impact, an efficiency or user-behaviour improvement, or another confirmed qualitative result. Belongs near the narrative's final phase -- after the solution/validation, at or near the project ending -- never before it, unless the source explicitly describes a result already validated at that earlier point. The only native content field is body.",
+    unsupported: "Never for project background, a problem statement, a design goal or rationale, a hypothesis, an expected/anticipated benefit, a future plan, a limitation, an ordinary summary paragraph, or a generic conclusion. Never for an unverified or hoped-for effect (\"I hope...\", \"expected to...\", \"should in theory...\"). If the source content contains no real outcome evidence, do not create this template at all -- even if the project superficially 'should' have a result, never invent or infer one. Use statement-longform (Body) or another semantically matching template instead. No heading or title either way.",
   },
   "image-row": {
-    rendererFields: ["columns", "rowAlignment"],
-    semantic: "One to twelve empty result-image slots; real images are added later through the editor.",
-    unsupported: "No real image references, free layout CSS, coordinates, spans, or invented asset fields.",
+    semantic: "Exactly two empty result-image slots shown side by side; real images are added later through the editor. For a single image, video, Figma prototype, or playable build, use universal-media instead.",
+    unsupported: "No real image references, manual columns, row alignment, width modes, free layout CSS, coordinates, spans, or invented asset fields.",
   },
-  "figma-prototype": {
-    semantic: "A Figma prototype presentation. A new AI-created instance must remain resource-empty for later editor binding.",
-    unsupported: "No invented Figma URL, fallback image, external resource, or additional presentation fields.",
-  },
-  "playable-game": {
-    rendererFields: ["aspectRatio"],
-    semantic: "A playable build presentation. A new AI-created instance is an empty shell for later binding to a saved game.",
-    unsupported: "No invented game, cover, gameId, entryPublicPath, coverId, publicUrl, or file metadata.",
+  "universal-media": {
+    semantic: "A single media presentation whose editor-bound resource may be an image, muted looping video, Figma prototype, or playable game.",
+    unsupported: "AI may select a media type but cannot invent resource URLs, image IDs, local paths, Figma URLs, game IDs, or playable build metadata.",
   },
   "direction-compare": {
     semantic: "A two-sided before/after, direction A/B, platform, or design trade-off comparison with one image and concise copy per side.",
     unsupported: "No extra columns, arbitrary layout fields, third comparison side, or invented image resources.",
-  },
-  "dual-viewpoint-analysis": {
-    semantic: "A centered high-level analysis with two aligned text columns for opportunities/challenges, strengths/problems, or current state/direction.",
-    unsupported: "No images, arbitrary columns, cards, table cells, coordinates, or free layout fields.",
   },
 };
 
@@ -120,47 +84,19 @@ export function normalizeProjectCodeTemplateContent(
   source: Record<string, unknown>,
 ) {
   const content = structuredClone(source);
+  if (!(ACTIVE_P2_TEMPLATE_IDS as readonly string[]).includes(templateId)) return content;
 
   if (templateId === "statement-longform") {
     normalizeLocalizedFields(content, ["sectionNumber", "leftTitle", "statement", "body"]);
   } else if (templateId === "supporting-note") {
     normalizeLocalizedFields(content, ["body"]);
-  } else if (templateId === "process-flow") {
-    normalizeLocalizedFields(content, ["heading"]);
-    normalizeLocalizedItems(content.items, ["number", "title", "description"]);
-  } else if (templateId === "decision-table") {
-    normalizeLocalizedFields(content, ["heading"]);
-    if (Array.isArray(content.columns)) {
-      for (const column of content.columns) {
-        if (isRecord(column) && column.title !== undefined) column.title = localized(column.title);
-      }
-    }
-    if (Array.isArray(content.rows)) {
-      for (const row of content.rows) {
-        if (!isRecord(row) || !isRecord(row.cells)) continue;
-        for (const [key, value] of Object.entries(row.cells)) row.cells[key] = localized(value);
-      }
-    }
-  } else if (templateId === "phase-milestones") {
-    normalizeLocalizedFields(content, ["heading"]);
-    normalizeLocalizedItems(content.items, ["number", "title", "hoverTitle", "hoverText"]);
-  } else if (templateId === "circle-summary") {
-    normalizeLocalizedFields(content, ["heading"]);
-    normalizeLocalizedItems(content.items, ["text"]);
   } else if (templateId === "image-row") {
     normalizeLocalizedFields(content, ["heading"]);
     normalizeLocalizedItems(content.items, ["alt", "caption", "placeholder"]);
-  } else if (templateId === "figma-prototype") {
+  } else if (templateId === "universal-media") {
     normalizeLocalizedFields(content, ["heading", "caption"]);
-  } else if (templateId === "playable-game") {
-    normalizeLocalizedFields(content, ["heading", "description", "versionLabel"]);
-    normalizeLocalizedItems(content.controls, ["key", "action"]);
   } else if (templateId === "direction-compare") {
     normalizeLocalizedFields(content, ["heading", "leftLabel", "rightLabel", "leftTitle", "rightTitle", "leftDescription", "rightDescription"]);
-  } else if (templateId === "dual-viewpoint-analysis") {
-    normalizeLocalizedFields(content, ["title", "subtitle", "leftLabel", "rightLabel", "summary"]);
-    normalizeLocalizedItems(content.leftItems, ["title", "body"]);
-    normalizeLocalizedItems(content.rightItems, ["title", "body"]);
   }
 
   return content;
@@ -248,6 +184,14 @@ export function validateProjectCodeTemplateContent(
   schema: TemplateFieldDefinition[] = [],
 ) {
   const issues: ProjectCodeValidationIssue[] = [];
+  if (!(ACTIVE_P2_TEMPLATE_IDS as readonly string[]).includes(templateId)) {
+    return [{
+      path: "templateId",
+      problem: "is retired and cannot enter active Portfolio 2.0 content",
+      expected: ACTIVE_P2_TEMPLATE_IDS.join(" | "),
+      actual: JSON.stringify(templateId),
+    }];
+  }
   const contract = templateContracts[templateId as ProjectCodeTemplateId];
 
   if (isNew && contract) {
@@ -267,72 +211,19 @@ export function validateProjectCodeTemplateContent(
     for (const field of ["sectionNumber", "leftTitle", "statement", "body"]) addLocalizedIssue(issues, content[field], field);
   } else if (templateId === "supporting-note") {
     addLocalizedIssue(issues, content.body, "body");
-  } else if (templateId === "process-flow") {
-    addLocalizedIssue(issues, content.heading, "heading");
-    validateLocalizedArrayItems(issues, content.items, "items", ["number", "title", "description"]);
-    if (isNew && Array.isArray(content.items)) content.items.forEach((item, index) => {
-      if (isRecord(item)) addUnknownFieldIssues(issues, item, `items[${index}]`, ["id", "number", "title", "description"], "Use only the native process step fields.");
-    });
-  } else if (templateId === "decision-table") {
-    addLocalizedIssue(issues, content.heading, "heading");
-    const columnIds = new Set<string>();
-    if (Array.isArray(content.columns)) content.columns.forEach((column, index) => {
-      const path = `columns[${index}]`;
-      if (!addArrayObjectIssue(issues, column, path)) return;
-      if (typeof column.id !== "string" || !column.id.trim()) {
-        issues.push({ path: `${path}.id`, problem: "must be a non-empty string", expected: "stable column ID", actual: describe(column.id) });
-      } else if (columnIds.has(column.id)) {
-        issues.push({ path: `${path}.id`, problem: "is duplicated", expected: "unique column ID", actual: JSON.stringify(column.id) });
-      } else columnIds.add(column.id);
-      addLocalizedIssue(issues, column.title, `${path}.title`, false);
-      if (isNew) addUnknownFieldIssues(issues, column, path, ["id", "title"], "Use only id and localized title for each column.");
-    });
-    if (Array.isArray(content.rows)) content.rows.forEach((row, index) => {
-      const path = `rows[${index}]`;
-      if (!addArrayObjectIssue(issues, row, path)) return;
-      if (!isRecord(row.cells)) {
-        issues.push({ path: `${path}.cells`, problem: "must be an object keyed by column id", expected: "Record<columnId, localized text>", actual: describe(row.cells) });
-        return;
-      }
-      for (const columnId of columnIds) addLocalizedIssue(issues, row.cells[columnId], `${path}.cells.${columnId}`);
-      if (isNew) {
-        addUnknownFieldIssues(issues, row, path, ["id", "cells"], "Store row text only inside cells, keyed by a declared column id.");
-        addUnknownFieldIssues(issues, row.cells, `${path}.cells`, [...columnIds], "Remove cells that do not correspond to a declared column id.");
-      }
-    });
-  } else if (templateId === "phase-milestones") {
-    addLocalizedIssue(issues, content.heading, "heading");
-    validateLocalizedArrayItems(issues, content.items, "items", ["number", "title", "hoverTitle", "hoverText"]);
-    if (Array.isArray(content.items)) content.items.forEach((item, index) => {
-      if (!isRecord(item)) return;
-      if (isNew) addUnknownFieldIssues(issues, item, `items[${index}]`, ["id", "number", "title", "hoverTitle", "hoverText", "targetId", "state"], "Use only the native milestone fields.");
-      addEnumIssue(issues, item.state, `items[${index}].state`, ["outline", "active"]);
-      if (item.targetId !== undefined && typeof item.targetId !== "string") {
-        issues.push({ path: `items[${index}].targetId`, problem: "must be text", expected: "string", actual: describe(item.targetId) });
-      }
-    });
-  } else if (templateId === "circle-summary") {
-    addLocalizedIssue(issues, content.heading, "heading");
-    validateLocalizedArrayItems(issues, content.items, "items", ["text"]);
-    if (isNew && Array.isArray(content.items)) content.items.forEach((item, index) => {
-      if (isRecord(item)) addUnknownFieldIssues(issues, item, `items[${index}]`, ["id", "text"], "Use only id and localized text for each circle.");
-    });
   } else if (templateId === "image-row") {
     addLocalizedIssue(issues, content.heading, "heading");
-    addEnumIssue(issues, content.columns, "columns", [1, 2, 3, 4]);
-    addEnumIssue(issues, content.rowAlignment, "rowAlignment", ["start", "center"]);
-    for (const key of ["className", "style", "css", "grid", "gridColumn", "grid-column"]) {
+    for (const key of ["className", "style", "css", "grid", "gridColumn", "grid-column", "columns", "rowAlignment"]) {
       if (content[key] !== undefined) issues.push({ path: key, problem: "free layout fields are not supported", expected: "field omitted", actual: describe(content[key]) });
     }
     if (Array.isArray(content.items)) content.items.forEach((item, index) => {
       const path = `items[${index}]`;
       if (!addArrayObjectIssue(issues, item, path)) return;
-      const allowedNewKeys = ["id", "alt", "caption", "placeholder", "suggestedAspectRatio", "suggestedImageCount", "imageDisplayMode", "imageCropRatio", "imageWidthMode", "hoverPreviewMode", "startNewRow", "image"];
+      const allowedNewKeys = ["id", "alt", "caption", "placeholder", "suggestedAspectRatio", "suggestedImageCount", "imageDisplayMode", "hoverPreviewMode", "image"];
       if (isNew) addUnknownFieldIssues(issues, item, path, allowedNewKeys, "Use an empty native Image Row slot and add the real image later through the editor.");
       for (const field of ["alt", "caption", "placeholder"]) addLocalizedIssue(issues, item[field], `${path}.${field}`);
       addEnumIssue(issues, item.imageDisplayMode, `${path}.imageDisplayMode`, ["cover", "natural"]);
       addEnumIssue(issues, item.imageCropRatio, `${path}.imageCropRatio`, ["16:9", "1:1"]);
-      addEnumIssue(issues, item.imageWidthMode, `${path}.imageWidthMode`, ["card", "wide", "full"]);
       addEnumIssue(issues, item.hoverPreviewMode, `${path}.hoverPreviewMode`, ["none", "floating"]);
       if (item.suggestedAspectRatio !== undefined && typeof item.suggestedAspectRatio !== "string") {
         issues.push({ path: `${path}.suggestedAspectRatio`, problem: "must be text", expected: "string", actual: describe(item.suggestedAspectRatio) });
@@ -345,9 +236,6 @@ export function validateProjectCodeTemplateContent(
       )) {
         issues.push({ path: `${path}.suggestedImageCount`, problem: "must be an integer from 1 to 12", expected: "1-12", actual: JSON.stringify(item.suggestedImageCount) });
       }
-      if (item.startNewRow !== undefined && typeof item.startNewRow !== "boolean") {
-        issues.push({ path: `${path}.startNewRow`, problem: "must be boolean", expected: "true | false", actual: describe(item.startNewRow) });
-      }
       if (isNew && item.image !== undefined && item.image !== null) {
         issues.push({ path: `${path}.image`, problem: "new Image Row slots cannot contain real image data", expected: "null or omitted", actual: describe(item.image) });
       }
@@ -357,40 +245,30 @@ export function validateProjectCodeTemplateContent(
         }
       }
     });
-  } else if (templateId === "figma-prototype") {
-    for (const field of ["heading", "caption"]) addLocalizedIssue(issues, content[field], field);
-    // captionTitle was removed from this template entirely — reject it
-    // explicitly (not just via the generic isNew-only unknown-field check
-    // below) so an edit to an existing instance that still echoes it back
-    // gets the same clear rejection a brand-new instance would.
-    if (content.captionTitle !== undefined) {
-      issues.push({
-        path: "captionTitle",
-        problem: "is not a native field supported by this template",
-        expected: "caption",
-        actual: "field supplied",
-        suggestion: "captionTitle has been removed from figma-prototype. Use caption instead.",
-      });
-    }
-    if (content.figmaUrl !== undefined && typeof content.figmaUrl !== "string") {
-      issues.push({ path: "figmaUrl", problem: "must be text", expected: "string", actual: describe(content.figmaUrl) });
-    }
-    if (isNew && ((typeof content.figmaUrl === "string" && content.figmaUrl.trim()) || content.fallbackImage)) {
-      issues.push({ path: "figmaUrl/fallbackImage", problem: "new instances cannot invent an external prototype or image", expected: "empty figmaUrl and no fallbackImage", actual: "resource supplied" });
-    }
-  } else if (templateId === "playable-game") {
-    for (const field of ["heading", "description", "versionLabel"]) addLocalizedIssue(issues, content[field], field);
-    addEnumIssue(issues, content.status, "status", ["prototype", "in-development", "complete", "archived"]);
-    addEnumIssue(issues, content.aspectRatio, "aspectRatio", ["16:9", "4:3", "auto"]);
-    validateLocalizedArrayItems(issues, content.controls, "controls", ["key", "action"]);
-    if (isNew && Array.isArray(content.controls)) content.controls.forEach((item, index) => {
-      if (isRecord(item)) addUnknownFieldIssues(issues, item, `controls[${index}]`, ["id", "key", "action"], "Use only the native control fields.");
-    });
-    if (isNew && content.game !== undefined && content.game !== null) {
-      issues.push({ path: "game", problem: "AI cannot create a real game build reference", expected: "null", actual: describe(content.game) });
-    }
-    if (isNew && content.cover !== undefined && content.cover !== null) {
-      issues.push({ path: "cover", problem: "AI cannot create a real cover reference", expected: "null", actual: describe(content.cover) });
+  } else if (templateId === "universal-media") {
+    addLocalizedIssue(issues, content.heading, "heading");
+    addLocalizedIssue(issues, content.caption, "caption");
+    const media = content.media;
+    if (!isRecord(media)) {
+      issues.push({ path: "media", problem: "must be a discriminated media object", expected: "{ type: image|video|figma|playable-game, ... }", actual: describe(media) });
+    } else {
+      addEnumIssue(issues, media.type, "media.type", ["image", "video", "figma", "playable-game"]);
+      if (media.type === "image") {
+        if (!isRecord(media.image)) issues.push({ path: "media.image", problem: "must be an image reference object", expected: "empty object for a new AI-created instance", actual: describe(media.image) });
+        if (isNew && isRecord(media.image) && Object.keys(media.image).length > 0) issues.push({ path: "media.image", problem: "AI cannot create a real image reference", expected: "{}", actual: "resource supplied" });
+        if (isNew) addUnknownFieldIssues(issues, media, "media", ["type", "image"], "Use only the image discriminator and an empty image object.");
+      } else if (media.type === "video") {
+        if (!isRecord(media.video) || typeof media.video.src !== "string") issues.push({ path: "media.video", problem: "must contain src text", expected: "{ src: string, poster?: string }", actual: describe(media.video) });
+        if (isNew && isRecord(media.video) && (media.video.src || media.video.poster)) issues.push({ path: "media.video", problem: "AI cannot invent video resources", expected: "{ src: '' }", actual: "resource supplied" });
+        if (isNew) addUnknownFieldIssues(issues, media, "media", ["type", "video"], "Use only the video discriminator and an empty video reference.");
+      } else if (media.type === "figma") {
+        if (typeof media.figmaUrl !== "string") issues.push({ path: "media.figmaUrl", problem: "must be text", expected: "string", actual: describe(media.figmaUrl) });
+        if (isNew && (media.figmaUrl || media.fallbackImage)) issues.push({ path: "media", problem: "AI cannot invent a Figma or image resource", expected: "empty figmaUrl and no fallbackImage", actual: "resource supplied" });
+        if (isNew) addUnknownFieldIssues(issues, media, "media", ["type", "figmaUrl"], "Use only the Figma discriminator and an empty figmaUrl.");
+      } else if (media.type === "playable-game") {
+        if (isNew && media.game !== undefined && media.game !== null) issues.push({ path: "media.game", problem: "AI cannot create a real game reference", expected: "null or omitted until editor binding", actual: describe(media.game) });
+        if (isNew) addUnknownFieldIssues(issues, media, "media", ["type", "game"], "Use only the playable-game discriminator with no real game reference.");
+      }
     }
   } else if (templateId === "direction-compare") {
     for (const field of ["heading", "leftLabel", "rightLabel", "leftTitle", "rightTitle", "leftDescription", "rightDescription"]) {
@@ -411,21 +289,6 @@ export function validateProjectCodeTemplateContent(
         }
       }
     }
-  } else if (templateId === "dual-viewpoint-analysis") {
-    for (const field of ["title", "subtitle", "leftLabel", "rightLabel", "summary"]) addLocalizedIssue(issues, content[field], field);
-    for (const field of ["leftItems", "rightItems"] as const) {
-      validateLocalizedArrayItems(issues, content[field], field, ["title", "body"]);
-      if (Array.isArray(content[field])) content[field].forEach((item, index) => {
-        if (isNew && isRecord(item)) addUnknownFieldIssues(issues, item, `${field}[${index}]`, ["id", "title", "body", "icon"], "Use only a stable id, localized title/body, and an editor-managed icon for each viewpoint.");
-        if (!isRecord(item) || item.icon === undefined) return;
-        if (!isRecord(item.icon)) {
-          issues.push({ path: `${field}[${index}].icon`, problem: "must be an object", expected: "editor-managed icon reference", actual: describe(item.icon) });
-          return;
-        }
-        addUnknownFieldIssues(issues, item.icon, `${field}[${index}].icon`, ["id", "name", "title", "svgPath"], "Preserve only the generated icon library reference.");
-        if (isNew) issues.push({ path: `${field}[${index}].icon`, problem: "new AI-created template content cannot invent a saved icon reference", expected: "field omitted", actual: "icon supplied" });
-      });
-    }
   }
 
   return issues;
@@ -442,16 +305,17 @@ function schemaLine(schema: TemplateFieldDefinition[]) {
 
 const specificRules: Record<ProjectCodeTemplateId, string[]> = {
   "statement-longform": ["Native fields only: sectionNumber, leftTitle, statement, body.", "Do not return heading or title. Split a chapter heading into the native leftTitle/statement composition.", "All four text fields are localized {zh,en}."],
-  "supporting-note": ["Native field only: body, localized as {zh,en}.", "This is intentionally untitled. Do not return heading or title."],
-  "process-flow": ["Use content.items, never content.steps.", "items must contain exactly 6 objects.", "Each item may contain id and localized number, title, description."],
-  "decision-table": ["columns: 1 or more { id, title:{zh,en} } objects.", "rows: 1-12 { id?, cells:{ [columnId]:{zh,en} } } objects."],
-  "phase-milestones": ["items: 3-12 objects when supplied.", "Item state is outline|active; number/title/hoverTitle/hoverText are localized; targetId is text."],
-  "circle-summary": ["items: 3-5 objects with localized text."],
-  "image-row": ["New instances require 1-12 empty slots.", "image must be null or omitted.", "alt, caption, placeholder use {zh:string,en:string}; en may be empty.", "columns: 1|2|3|4; rowAlignment: start|center.", "imageDisplayMode: cover|natural; imageCropRatio: 16:9|1:1 (only meaningful when imageDisplayMode is cover; omitted/legacy items default to 16:9); imageWidthMode: card|wide|full; hoverPreviewMode: none|floating; startNewRow: boolean.", "New empty slots default to hoverPreviewMode:none.", "Never return localImageId, assetId, publicPath, publicUrl, Blob, Base64, CSS, className, style, grid coordinates, or span values."],
-  "figma-prototype": ["New instances must use an empty figmaUrl and no fallbackImage; real resources are added later in the editor.", "heading and caption are localized.", "captionTitle is not a supported field — it has been removed from this template. Use caption instead."],
-  "playable-game": ["New instances must use game:null and cover:null.", "Never invent gameId, entryPublicPath, coverId, publicUrl, or file paths.", "status: prototype|in-development|complete|archived; aspectRatio: 16:9|4:3|auto.", "heading, description, versionLabel and control key/action are localized."],
+  "supporting-note": [
+    "Native field only: body, localized as {zh,en}. This is intentionally untitled -- do not return heading or title.",
+    "IMPACT is opt-in by evidence, never a default template. If unsure whether the source content counts as real evidence, do not use supporting-note -- use statement-longform (Body) instead.",
+    "Legal content: a stated metric/KPI change, conversion/retention/repurchase uplift, a usability-test result, a validated outcome, confirmed production/business impact, an efficiency or user-behaviour improvement, or another already-confirmed qualitative result.",
+    "Forbidden content: background, problem statement, design goal, design rationale, hypothesis, expected/anticipated benefit, future plan, limitation, an ordinary summary paragraph, or a generic conclusion -- including any unverified or hoped-for effect. Route all of these to statement-longform (Body) or another matching template instead.",
+    "Never invent or infer a percentage, test result, business uplift, KPI, or success conclusion to justify creating this template -- a project 'should' have a result is not evidence that it does.",
+    "Position: only near the narrative's final phase, after the solution/validation, at or near the project ending. Not right after the cover, during context/problem, in the first half of research, or mid-exploration -- unless the source explicitly describes a result already validated at that point.",
+  ],
+  "image-row": ["New instances require exactly 2 empty slots -- this template is always a single side-by-side image pair; use universal-media for a lone image.", "image must be null or omitted.", "alt, caption, placeholder use {zh:string,en:string}; en may be empty.", "Do not return columns, rowAlignment, imageWidthMode, startNewRow, CSS, grid coordinates, spans, or other manual layout controls.", "imageDisplayMode may be cover|natural; hoverPreviewMode may be none|floating. New empty slots default to hoverPreviewMode:none.", "Never return localImageId, assetId, publicPath, publicUrl, Blob, Base64, CSS, className, style, grid coordinates, or span values."],
+  "universal-media": ["Native fields only: heading, media, caption.", "media is a discriminated union with type image|video|figma|playable-game.", "New instances must contain no real resource reference; resources are selected in the editor.", "Never invent URLs, asset IDs, image IDs, game IDs, file paths, or binary data."],
   "direction-compare": ["Native fields only: heading, leftLabel, rightLabel, leftTitle, rightTitle, leftDescription, rightDescription, leftImage, rightImage, direction.", "All seven text fields use localized {zh,en} objects.", "New instances must use leftImage:null and rightImage:null (or omit them).", "Existing leftImage/rightImage may preserve editor-managed hoverPreviewMode, annotationEnabled, and annotations; never create or change their real imageId, publicPath, or annotation evidence resources.", "direction: left-to-right|right-to-left|none.", "Never invent imageId, assetId, localImageId, publicPath, publicUrl, file paths, CSS, className, style, coordinates, columns, or spans."],
-  "dual-viewpoint-analysis": ["Native fields only: title, subtitle, leftLabel, leftItems, rightLabel, rightItems, summary.", "Text fields and item title/body use localized {zh,en} objects.", "Each column contains 1-4 items with id, title, body, and an optional editor-managed icon.", "New AI-created instances must omit icon; saved SVG icons are inserted through the owner editor.", "Use for high-level paired analysis, not image comparison or a data table."],
 };
 
 export function projectCodeTemplateRulesForPrompt(
@@ -459,17 +323,10 @@ export function projectCodeTemplateRulesForPrompt(
 ) {
   return [
     "TEMPLATE SELECTION RULES:",
-    "- Chapter narrative: statement-longform.",
-    "- Untitled supporting constraint or note: supporting-note.",
-    "- Exactly six working steps: process-flow.",
-    "- Comparison, trade-off, responsibility split, or validation plan: decision-table.",
-    "- Phase outcomes: phase-milestones.",
-    "- Parallel relationships or conclusions: circle-summary.",
-    "- Result images: image-row.",
-    "- Figma prototype: figma-prototype.",
-    "- Playable build: playable-game.",
+    "- Chapter narrative, background, problem statement, design goal/rationale, hypothesis, expected/future benefit, limitation, or an ordinary summary/conclusion: statement-longform (Body). This is the default for plain narrative text and analysis that is not a verified result.",
+    "- IMPACT (supporting-note) is a RESTRICTED final-result template, opt-in by evidence -- not a default and not a general note/summary/transition template. Use it ONLY when the source content already states an evidenced, already-happened outcome (a metric/KPI change, conversion/retention/repurchase uplift, a usability-test result, a validated outcome, confirmed production/business impact, an efficiency or user-behaviour improvement, or another confirmed qualitative result), placed near the narrative's final phase after the solution/validation. Never invent or infer a result to justify using it. If the source has only ordinary text, analysis, judgment, or an unverified conclusion -- or if you are unsure -- use statement-longform (Body) instead, never supporting-note.",
+    "- A single image, video, Figma prototype, or playable build: universal-media.",
     "- Before/after, direction A/B, platform, or two-proposal comparison: direction-compare.",
-    "- Opportunity/challenge, strength/problem, or current-state/direction analysis: dual-viewpoint-analysis.",
     "- A piece of content having a title does not permit adding heading/title to an arbitrary template.",
     "- If no existing template natively fits, rewrite the content or omit that module. Never extend template fields.",
     "- Return project JSON only. Never suggest, request, or assume changes to template components, styles, registry, validators, schemas, or underlying code.",

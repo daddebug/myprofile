@@ -1,0 +1,78 @@
+[data-dynamic-project-page] {
+  /* Live Figma P2 desktop frame: 1440px with a 130px inset on each side. */
+  --p2-design-width: 1440px;
+  --p2-page-max-width: 1180px;
+  --p2-page-padding-x: 130px;
+  --p2-page-gutter: 24px;
+  --p2-text-measure: 1180px;
+  --p2-kicker-measure: 262px;
+  --p2-wide-media-width: 1179px;
+  --p2-section-gap: 0px;
+
+  --p2-body-padding-block: 38px;
+  --p2-media-padding-block: 65px;
+  --p2-impact-padding-block: 18px;
+  --p2-impact-panel-min-height: 153px;
+  --p2-impact-panel-padding-y: 26px;
+  --p2-impact-panel-padding-x: 50px;
+
+  --p2-notification-padding-top: 30px;
+  --p2-notification-padding-bottom: 42px;
+  --p2-notification-media-width: 712px;
+  --p2-notification-text-width: 410px;
+  --p2-notification-column-gap: 58px;
+  --p2-notification-mobile-column-gap: 24px;
+  --p2-notification-mobile-column-gap: 24px;
+}
+
+.p2-page-rail {
+  box-sizing: border-box;
+  width: min(
+    calc(100% - var(--p2-page-gutter, 24px) - var(--p2-page-gutter, 24px)),
+    var(--p2-page-max-width, 1180px)
+  );
+  margin-inline: auto;
+}
+
+/* Project presentation is viewport-authored. Keep the canonical rail centered
+   against the viewport rather than the scrollbar-reduced document width. */
+[data-dynamic-project-page] .p2-page-rail {
+  width: min(
+    calc(100vw - var(--p2-page-gutter, 24px) - var(--p2-page-gutter, 24px)),
+    var(--p2-page-max-width, 1180px)
+  );
+  margin-right: 0;
+  margin-left: max(
+    var(--p2-page-gutter, 24px),
+    calc((100vw - var(--p2-page-max-width, 1180px)) / 2)
+  );
+}
+
+[data-dynamic-project-page] .project-content-blocks {
+  gap: var(--p2-section-gap, 0px);
+}
+
+@media (max-width: 760px) {
+  [data-dynamic-project-page] {
+    --p2-notification-padding-top: 24px;
+    --p2-notification-padding-bottom: 36px;
+  }
+}
+
+@media (max-width: 760px) {
+  [data-dynamic-project-page] {
+    --p2-notification-padding-top: 24px;
+    --p2-notification-padding-bottom: 36px;
+  }
+}
+
+@media (max-width: 720px) {
+  [data-dynamic-project-page] {
+    --p2-page-gutter: 16px;
+    /* Existing narrow-screen fallbacks; the live Figma file has no mobile frame. */
+    --p2-body-padding-block: 32px;
+    --p2-impact-padding-block: 16px;
+    --p2-impact-panel-padding-y: 24px;
+    --p2-impact-panel-padding-x: 24px;
+  }
+}

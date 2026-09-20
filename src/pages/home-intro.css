@@ -1,0 +1,15 @@
+/* HomeIntroTransition -- the opening aperture reveal. Section-scoped on
+   purpose (part of the Homepage 3.0 modular-rebuild architecture): this
+   file only ever needs to change when the opening choreography itself
+   changes, never when the Hero or Project flow below it change. */
+
+.home-intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: #f7f6ed;
+  pointer-events: none;
+  /* mask-image is set/updated imperatively by HomeIntroTransition.tsx
+     (a radial-gradient whose radius animates) -- no static value here. */
+}
+

@@ -1,0 +1,31 @@
+.portfolio2-body {
+  width: 100%;
+  padding: var(--p2-body-padding-block, 38px) 0;
+  color: #495d47;
+  background: transparent;
+}
+
+.portfolio2-body__kicker {
+  display: block;
+  width: min(100%, var(--p2-kicker-measure, 262px));
+  margin: 0;
+  color: #495d47;
+  font: italic 300 24px/1.2 Inter, sans-serif;
+}
+
+.portfolio2-body__headline {
+  display: block;
+  width: min(100%, var(--p2-text-measure, 1180px));
+  margin: 13px 0 0;
+  color: #495d47;
+  font: 800 17px/1.25 Inter, "Noto Sans SC", sans-serif;
+}
+
+.portfolio2-body__copy {
+  display: block;
+  width: 100%;
+  margin: 8px 0 0;
+  color: #495d47;
+  font: 400 17px/1.45 Inter, "Noto Sans SC", sans-serif;
+  white-space: pre-wrap;
+}

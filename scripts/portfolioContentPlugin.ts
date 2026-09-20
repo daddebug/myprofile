@@ -133,7 +133,7 @@ type DynamicProjectImageRecord = {
   imageId: string;
   projectId: string;
   instanceId: string;
-  templateId: "image-row" | "direction-compare";
+  templateId: "image-row" | "direction-compare" | "universal-media";
   itemId: string;
   originalFileName: string;
   sourcePath: string;
@@ -149,7 +149,7 @@ type DynamicProjectImageRecord = {
 
 type DynamicProjectImageInstance = {
   instanceId: string;
-  templateId: "image-row" | "direction-compare";
+  templateId: "image-row" | "direction-compare" | "universal-media";
   regionId: string;
   anchorId: string;
   content: Record<string, unknown>;
@@ -1460,7 +1460,7 @@ function validateDynamicImageInstance(
   }
   const instance = value as Record<string, unknown>;
   const instanceId = validateTemplateStructureId(instance.instanceId, "instanceId");
-  if (instance.templateId !== "image-row" && instance.templateId !== "direction-compare") {
+  if (instance.templateId !== "image-row" && instance.templateId !== "direction-compare" && instance.templateId !== "universal-media") {
     throw new RequestError("Only image-backed dynamic templates can bind project images.", 400);
   }
   const regionId = validateTemplateStructureId(instance.regionId, "regionId");
@@ -1492,6 +1492,21 @@ function validateDynamicImageInstance(
         ? item.image as Record<string, unknown>
         : null;
       primaryImageMatches = Boolean(item && image && image.imageId === requiredImage.imageId && image.publicPath === requiredImage.publicUrl);
+    } else if (instance.templateId === "universal-media") {
+      const media = content.media;
+      if (media && typeof media === "object" && !Array.isArray(media)) {
+        const mediaRecord = media as Record<string, unknown>;
+        const image = requiredImage.itemId === "universal-image"
+          ? mediaRecord.image
+          : requiredImage.itemId === "universal-figma-fallback"
+            ? mediaRecord.fallbackImage
+            : null;
+        primaryImageMatches = Boolean(
+          image && typeof image === "object" && !Array.isArray(image)
+          && (image as Record<string, unknown>).imageId === requiredImage.imageId
+          && (image as Record<string, unknown>).publicPath === requiredImage.publicUrl,
+        );
+      }
     } else if (requiredImage.itemId === "leftImage" || requiredImage.itemId === "rightImage") {
       const image = content[requiredImage.itemId];
       primaryImageMatches = Boolean(

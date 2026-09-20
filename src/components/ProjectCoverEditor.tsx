@@ -19,8 +19,11 @@ type ProjectCoverEditorProps = {
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
-const MAX_COVER_FILE_SIZE = 8 * 1024 * 1024;
-const ACCEPTED_COVER_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
+// Exported so WorkPage.tsx's inline thumbnail-click upload (no separate
+// cover-edit panel there) validates against the exact same limits instead
+// of hand-duplicating them.
+export const MAX_COVER_FILE_SIZE = 8 * 1024 * 1024;
+export const ACCEPTED_COVER_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 
 const coverCopy = {
   zh: {

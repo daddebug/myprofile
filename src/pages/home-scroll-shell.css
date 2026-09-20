@@ -1,0 +1,84 @@
+/* Homepage 3.0, Haoqi-track Phase 2.1 -- the fixed-viewport shell + inner
+   scroll-container architecture, confirmed against the live reference
+   (html/body overflow:hidden; the real scrollable element is an inner
+   div Lenis binds to, not window/document). `home-scroll-lock` is only
+   ever toggled by HomeScrollContainer's own mount/unmount effect -- never
+   a static rule applied unconditionally -- so it can only affect <html>
+   while the Homepage route is actually mounted; every other route keeps
+   ordinary document scrolling untouched. */
+html.home-scroll-lock,
+html.home-scroll-lock body {
+  height: 100%;
+  overflow: hidden;
+}
+
+.home-scroll-container {
+  position: relative;
+  /* Phase 3: must outrank the WebGL canvas (z-index 0, see
+     .home-project-canvas below) so editing overlays, links, and every
+     other DOM control in the scrolling content stay clickable and
+     visible above it -- .home-v2's own `isolation: isolate` (home-
+     v2.css) keeps this comparison scoped to the Homepage, never
+     colliding with unrelated fixed chrome elsewhere in the app. */
+  z-index: 1;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: clip;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Viewport-pinned chrome layer -- see HomeFixedLayer.tsx. Carries no
+   z-index of its own (Phase 3): each child manages its own, so the
+   canvas can sit BELOW .home-scroll-container while nav/indicator stay
+   above it, all within the same fixed wrapper. */
+.home-fixed-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Phase 3: the one shared WebGL canvas -- deliberately behind the
+   scrolling content (see .home-scroll-container's own z-index note)
+   so DOM editing overlays/links always paint above it. */
+.home-project-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.home-project-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Structural reference-baseline nav -- see HomeFixedNav.tsx's own
+   comment for what is and is not implemented yet. */
+.home-fixed-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: flex-end;
+  gap: 24px;
+  padding: 24px 32px;
+  font: 500 12px/1.4 "Inter", sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.home-fixed-nav__item {
+  pointer-events: auto;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  cursor: pointer;
+}
+.home-fixed-nav__item--placeholder {
+  cursor: default;
+  opacity: 0.4;
+  pointer-events: none;
+}
+

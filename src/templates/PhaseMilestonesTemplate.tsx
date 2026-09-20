@@ -1,13 +1,6 @@
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type KeyboardEvent,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
-import {
+  TemplateContent,
   TemplateSurface,
 } from "../components/template-tools/TemplateResponsiveFoundation";
 import type {
@@ -15,6 +8,7 @@ import type {
   TemplateMeta,
   TemplateProps,
 } from "../lib/templateLibrary";
+import "./phase-milestones-template.css";
 
 export const layoutControls = {
   emphasisMode: "custom",
@@ -48,7 +42,7 @@ export const templateMeta: TemplateMeta = {
       labelEn: "Milestones",
       type: "list",
       min: 3,
-      max: 12,
+      max: 5,
     },
   ],
   createdAt: "2026-07-26T00:00:04.000Z",
@@ -66,26 +60,16 @@ type MilestoneItem = {
   state?: MilestoneState;
 };
 
-const establishedProjectTargetIds = new Set([
-  "business-decision",
-  "technical-direction",
-  "system-scope",
-  "my-entry-point",
-  "function-hierarchy-optimisation",
-  "production-guidelines",
-  "iteration-result",
-]);
-
-const nodeGapRem = {
+const columnGapRem = {
   compact: 1.5,
   standard: 2,
   wide: 3,
 } as const;
 
 const sectionSpacing = {
-  compact: "3.5rem",
-  standard: "5rem",
-  wide: "6rem",
+  compact: "2.25rem",
+  standard: "3rem",
+  wide: "4rem",
 } as const;
 
 function localizedValue(
@@ -100,109 +84,86 @@ function isMilestoneItem(value: unknown): value is MilestoneItem {
   return Boolean(value && typeof value === "object");
 }
 
-function MilestoneNode({
+// Number is always derived from position, never from stored data or the
+// content schema -- see templateMeta.schema (unchanged) and the owner
+// editor, which no longer exposes a number field at all.
+function displayNumber(index: number) {
+  return String(index + 1).padStart(2, "0");
+}
+
+function MilestoneItemColumn({
   item,
   index,
   itemCount,
   locale,
-  fixedWidth = false,
+  revealed,
 }: {
   item: MilestoneItem;
   index: number;
   itemCount: number;
   locale: "zh" | "en";
-  fixedWidth?: boolean;
+  revealed: boolean;
 }) {
-  const number = localizedValue(item.number, locale);
   const title = localizedValue(item.title, locale);
-  const hoverTitle = localizedValue(item.hoverTitle, locale);
-  const hoverText = localizedValue(item.hoverText, locale);
-  const hasHoverContent = Boolean(hoverTitle || hoverText);
-  const itemId = item.id?.trim() ?? "";
-  const targetId = item.targetId?.trim()
-    || (establishedProjectTargetIds.has(itemId) ? itemId : "");
+  // Reuses the existing hoverText field -- no schema change, no new
+  // content field. hoverTitle and targetId remain on the type/data for
+  // backward compatibility with existing published instances, but this
+  // template no longer displays or acts on them.
+  //
+  // Per the 2026-09-08 PSD re-sync, the description is no longer one
+  // wrapped paragraph -- it's up to 3 short bullet rows (dot + line). The
+  // owner authors this the same way the Hero title's manual line breaks
+  // work: a literal newline in the existing text starts a new row.
+  // Existing content with no newline still renders (as a single row that
+  // wraps if long); see docs/design/psd-template-spec.json's NODE_DESC
+  // dataMappingNote.
+  const descriptionRows = localizedValue(item.hoverText, locale)
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 3);
   const isActive =
     String(layoutControls.emphasisMode) === "second-half"
       ? index >= Math.ceil(itemCount / 2)
       : item.state === "active";
+  // Staggered one-time reveal on first viewport entry (see the
+  // IntersectionObserver in the default export). Starts already-revealed
+  // under prefers-reduced-motion, so there is no delayed pop-in for those
+  // users.
+  const revealDelayMs = index * 90;
 
-  const content = (
+  return (
     <div
-      className={`relative z-10 flex min-w-0 flex-col items-center text-center ${
-        fixedWidth ? "w-[190px]" : ""
-      }`}
+      className={`phase-milestones__item ${isActive ? "is-active" : ""} ${revealed ? "is-revealed" : ""}`}
     >
       <span
-        className={`grid h-[60px] w-[60px] shrink-0 place-items-center rounded-full border font-mono text-lg font-bold ${
-          isActive
-            ? "intervention-node-pulse border-acidGreen bg-acidGreen text-deepIndigo"
-            : "border-softWhite/34 bg-[#121239] text-softWhite/50"
-        }`}
+        className="phase-milestones__number"
+        style={{ transitionDelay: revealed ? `${revealDelayMs}ms` : "0ms" }}
       >
-        {number}
+        {displayNumber(index)}
       </span>
-      {title || hasHoverContent ? (
-        <span className="mt-4 grid h-16 w-full min-w-0 place-items-center overflow-hidden px-3 text-center">
-          <span
-            className={`col-start-1 row-start-1 text-xl leading-6 transition-opacity duration-200 motion-reduce:transition-none ${
-              isActive
-                ? "font-semibold text-softWhite/78"
-                : "font-medium text-softWhite/48"
-            } ${
-              hasHoverContent
-                ? "group-hover/timeline:opacity-0 group-focus-within/timeline:opacity-0"
-                : ""
-            }`}
-          >
-            {title}
-          </span>
-          {hasHoverContent ? (
-            <span className="pointer-events-none col-start-1 row-start-1 flex h-full max-h-16 w-full flex-col items-center justify-center overflow-hidden text-center text-[#9FAAD2] opacity-0 transition-opacity duration-200 group-hover/timeline:opacity-100 group-focus-within/timeline:opacity-100 motion-reduce:transition-none">
-              {hoverTitle ? (
-                <span className="line-clamp-1 text-sm font-semibold leading-5">
-                  {hoverTitle}
-                </span>
-              ) : null}
-              {hoverText ? (
-                <span
-                  className={`line-clamp-2 text-xs leading-4 ${
-                    hoverTitle ? "mt-0.5" : ""
-                  }`}
-                >
-                  {hoverText}
-                </span>
-              ) : null}
-            </span>
-          ) : null}
-        </span>
+      {title ? (
+        <p
+          className="phase-milestones__title"
+          style={{ transitionDelay: revealed ? `${revealDelayMs + 70}ms` : "0ms" }}
+        >
+          {title}
+        </p>
+      ) : null}
+      {descriptionRows.length > 0 ? (
+        <div
+          className="phase-milestones__description"
+          style={{ transitionDelay: revealed ? `${revealDelayMs + 120}ms` : "0ms" }}
+        >
+          {descriptionRows.map((row, rowIndex) => (
+            <div className="phase-milestones__description-row" key={rowIndex}>
+              <span className="phase-milestones__description-dot" aria-hidden="true" />
+              <span className="phase-milestones__description-text">{row}</span>
+            </div>
+          ))}
+        </div>
       ) : null}
     </div>
-  );
-
-  const scrollToTarget = (event: { preventDefault: () => void }) => {
-    if (!targetId) return;
-    const target = document.getElementById(targetId);
-    if (!target) return;
-    event.preventDefault();
-    window.history.replaceState(null, "", `#${targetId}`);
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  return targetId ? (
-    <a
-      href={`#${targetId}`}
-      className="group/timeline relative z-10 block min-w-0 transition hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-acidGreen"
-      onClick={scrollToTarget}
-    >
-      {content}
-    </a>
-  ) : (
-    <span
-      tabIndex={hasHoverContent ? 0 : undefined}
-      className="group/timeline relative z-10 block min-w-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-acidGreen"
-    >
-      {content}
-    </span>
   );
 }
 
@@ -211,340 +172,92 @@ export default function PhaseMilestonesTemplate({
   locale,
   horizontalInset,
 }: TemplateProps) {
-  const insetStyle = { "--template-horizontal-inset": `${Math.max(0, horizontalInset ?? 0)}px` } as CSSProperties;
   const heading = localizedValue(
     content.heading as LocalizedText | undefined,
     locale,
   );
   const items = Array.isArray(content.items)
-    ? content.items.filter(isMilestoneItem).slice(0, 12)
+    ? content.items.filter(isMilestoneItem).slice(0, 5)
     : [];
-  const isScrollable = items.length > 6;
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-  const autoScrollFrameRef = useRef<number | null>(null);
-  const autoScrollDirectionRef = useRef<-1 | 0 | 1>(0);
-  const autoScrollTimeRef = useRef<number | null>(null);
-  const autoScrollPositionRef = useRef(0);
-  const pointerPressedRef = useRef(false);
-  const reducedMotionRef = useRef(false);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
 
-  // The horizontal-scroll track (isScrollable above, >6 milestones) is
-  // handled by the canonical exact-web exporter's own generic horizontal-
-  // row scaling (markHorizontalExportRows/horizontalExportLayoutScript in
-  // src/components/ProjectExactWebExportAction.tsx and
-  // scripts/exactWebExportPlugin.ts) for BOTH the single-project button and
-  // Portfolio Collection — this template no longer runs its own Collection-
-  // only zoom/centering pass. See docs/PDF_EXPORT_ARCHITECTURE.md's
-  // canonical-renderer rule.
+  // One-time, sequential "light up" of the items the first time this
+  // section enters the viewport (see MilestoneItemColumn's per-index
+  // reveal delay). Disconnects after firing once; starts already-revealed
+  // under prefers-reduced-motion so there is no delayed pop-in for those
+  // users.
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const [revealed, setRevealed] = useState(false);
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return undefined;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setRevealed(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setRevealed(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.25 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   const gapRem =
-    nodeGapRem[
-      layoutControls.nodeSpacing as keyof typeof nodeGapRem
-    ] ?? nodeGapRem.standard;
+    columnGapRem[
+      layoutControls.nodeSpacing as keyof typeof columnGapRem
+    ] ?? columnGapRem.standard;
   const paddingBlock =
     sectionSpacing[
       layoutControls.verticalSpacing as keyof typeof sectionSpacing
     ] ?? sectionSpacing.standard;
 
-  const updateScrollHints = useCallback(() => {
-    const viewport = scrollRef.current;
-    if (!viewport) return;
-    if (autoScrollDirectionRef.current === 0) {
-      autoScrollPositionRef.current = viewport.scrollLeft;
-    }
-    setCanScrollLeft(viewport.scrollLeft > 2);
-    setCanScrollRight(
-      viewport.scrollLeft < viewport.scrollWidth - viewport.clientWidth - 2,
-    );
-  }, []);
-
-  const stopEdgeAutoScroll = useCallback(() => {
-    autoScrollDirectionRef.current = 0;
-    autoScrollTimeRef.current = null;
-    if (autoScrollFrameRef.current !== null) {
-      window.cancelAnimationFrame(autoScrollFrameRef.current);
-      autoScrollFrameRef.current = null;
-    }
-  }, []);
-
-  const startEdgeAutoScroll = useCallback(
-    (direction: -1 | 1) => {
-      if (
-        reducedMotionRef.current
-        || pointerPressedRef.current
-        || autoScrollDirectionRef.current === direction
-      ) {
-        return;
-      }
-
-      stopEdgeAutoScroll();
-      autoScrollDirectionRef.current = direction;
-      autoScrollPositionRef.current = scrollRef.current?.scrollLeft ?? 0;
-
-      const step = (time: number) => {
-        autoScrollFrameRef.current = null;
-        const viewport = scrollRef.current;
-        if (!viewport || autoScrollDirectionRef.current === 0) return;
-
-        const elapsed =
-          autoScrollTimeRef.current === null
-            ? 16
-            : Math.min(time - autoScrollTimeRef.current, 32);
-        autoScrollTimeRef.current = time;
-        const maxScrollLeft = Math.max(
-          0,
-          viewport.scrollWidth - viewport.clientWidth,
-        );
-        const nextScrollLeft = Math.min(
-          maxScrollLeft,
-          Math.max(
-            0,
-            autoScrollPositionRef.current
-              + (autoScrollDirectionRef.current * 90 * elapsed) / 1000,
-          ),
-        );
-        autoScrollPositionRef.current = nextScrollLeft;
-        viewport.scrollLeft = nextScrollLeft;
-        updateScrollHints();
-
-        const reachedBoundary =
-          autoScrollDirectionRef.current < 0
-            ? nextScrollLeft <= 0
-            : nextScrollLeft >= maxScrollLeft;
-        if (reachedBoundary) {
-          stopEdgeAutoScroll();
-          return;
-        }
-
-        autoScrollFrameRef.current = window.requestAnimationFrame(step);
-      };
-
-      autoScrollFrameRef.current = window.requestAnimationFrame(step);
-    },
-    [stopEdgeAutoScroll, updateScrollHints],
-  );
-
-  const handlePointerMove = (
-    event: ReactPointerEvent<HTMLDivElement>,
-  ) => {
-    if (
-      event.pointerType !== "mouse"
-      || pointerPressedRef.current
-      || reducedMotionRef.current
-    ) {
-      stopEdgeAutoScroll();
-      return;
-    }
-
-    const viewport = scrollRef.current;
-    if (!viewport) return;
-    const bounds = viewport.getBoundingClientRect();
-    const edgeZone = bounds.width * 0.16;
-    const pointerX = event.clientX - bounds.left;
-
-    if (pointerX <= edgeZone && canScrollLeft) {
-      startEdgeAutoScroll(-1);
-    } else if (pointerX >= bounds.width - edgeZone && canScrollRight) {
-      startEdgeAutoScroll(1);
-    } else {
-      stopEdgeAutoScroll();
-    }
-  };
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    const viewport = scrollRef.current;
-    if (!viewport) return;
-    const maxScrollLeft = viewport.scrollWidth - viewport.clientWidth;
-    let nextScrollLeft: number | null = null;
-
-    if (event.key === "ArrowLeft") {
-      nextScrollLeft = viewport.scrollLeft - 222;
-    } else if (event.key === "ArrowRight") {
-      nextScrollLeft = viewport.scrollLeft + 222;
-    } else if (event.key === "Home") {
-      nextScrollLeft = 0;
-    } else if (event.key === "End") {
-      nextScrollLeft = maxScrollLeft;
-    }
-
-    if (nextScrollLeft === null) return;
-    event.preventDefault();
-    viewport.scrollTo({
-      left: Math.max(0, Math.min(maxScrollLeft, nextScrollLeft)),
-      behavior: reducedMotionRef.current ? "auto" : "smooth",
-    });
-  };
-
-  useEffect(() => {
-    if (!isScrollable) return undefined;
-    const reducedMotionQuery = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    );
-    const syncReducedMotion = () => {
-      reducedMotionRef.current = reducedMotionQuery.matches;
-      if (reducedMotionQuery.matches) stopEdgeAutoScroll();
-    };
-    syncReducedMotion();
-    reducedMotionQuery.addEventListener("change", syncReducedMotion);
-    const frame = window.requestAnimationFrame(updateScrollHints);
-    window.addEventListener("resize", updateScrollHints);
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener("resize", updateScrollHints);
-      reducedMotionQuery.removeEventListener("change", syncReducedMotion);
-      stopEdgeAutoScroll();
-    };
-  }, [
-    isScrollable,
-    items.length,
-    stopEdgeAutoScroll,
-    updateScrollHints,
-  ]);
-
   if (items.length < 3) {
     return (
-      <TemplateSurface
-        className="relative left-1/2 -translate-x-1/2"
-        style={{
-          width: "calc(100vw - 8px)",
-          backgroundColor: "rgba(18, 18, 57, 0.78)",
-        }}
-      >
-        <section style={{ paddingBlock }}>
-          <div className="template-library-content" style={insetStyle}>
-            {heading ? (
-              <p className="text-center font-mono text-base font-bold uppercase tracking-[0.12em] text-acidGreen/80">
-                {heading}
-              </p>
-            ) : null}
-            <p className={heading ? "mt-8 text-center text-sm text-softWhite/46" : "text-center text-sm text-softWhite/46"}>
-              {locale === "zh"
-                ? "请添加至少 3 个阶段节点。"
-                : "Add at least 3 milestone items."}
-            </p>
-          </div>
-        </section>
+      <TemplateSurface className="phase-milestones">
+        <TemplateContent horizontalInset={horizontalInset} style={{ paddingBlock }}>
+          <p className="text-center text-sm text-softWhite/46">
+            {locale === "zh"
+              ? "请添加至少 3 个阶段节点。"
+              : "Add at least 3 milestone items."}
+          </p>
+        </TemplateContent>
       </TemplateSurface>
     );
   }
 
-  const lineInset = `calc((100% - ${(items.length - 1) * gapRem}rem) / ${items.length * 2})`;
-
   return (
-    <TemplateSurface
-      className="relative left-1/2 -translate-x-1/2"
-      style={{
-        width: "calc(100vw - 8px)",
-        backgroundColor: "rgba(18, 18, 57, 0.78)",
-      }}
-    >
-      <section style={{ paddingBlock }}>
-        <div className="template-library-content" style={insetStyle}>
-          {heading ? (
-            <p className="text-center font-mono text-base font-bold uppercase tracking-[0.12em] text-acidGreen/80">
-              {heading}
-            </p>
-          ) : null}
-
-          {isScrollable ? (
-            <div className={heading ? "relative mt-10" : "relative"}>
-              <div
-                ref={scrollRef}
-                role="region"
-                aria-label={
-                  locale === "zh" ? "阶段节点轨道" : "Phase milestone track"
-                }
-                tabIndex={0}
-                className="timeline-scroll overflow-x-auto overscroll-x-contain outline-none focus-visible:ring-1 focus-visible:ring-acidGreen/50"
-                onScroll={updateScrollHints}
-                onKeyDown={handleKeyDown}
-                onPointerMove={handlePointerMove}
-                onPointerDown={() => {
-                  pointerPressedRef.current = true;
-                  stopEdgeAutoScroll();
-                }}
-                onPointerUp={() => {
-                  pointerPressedRef.current = false;
-                }}
-                onPointerCancel={() => {
-                  pointerPressedRef.current = false;
-                }}
-                onPointerLeave={() => {
-                  pointerPressedRef.current = false;
-                  stopEdgeAutoScroll();
-                }}
-              >
-                <div
-                  className="relative grid w-max grid-flow-col auto-cols-[190px] px-3 pb-2 pt-1"
-                  style={{ columnGap: `${gapRem}rem` }}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="absolute left-[107px] right-[107px] top-[34px] h-px bg-softWhite/18"
-                  />
-                  {items.map((item, index) => (
-                    <MilestoneNode
-                      key={item.id ?? index}
-                      item={item}
-                      index={index}
-                      itemCount={items.length}
-                      locale={locale}
-                      fixedWidth
-                    />
-                  ))}
-                </div>
-              </div>
-              <span
-                aria-hidden="true"
-                className={`pointer-events-none absolute inset-y-0 left-0 z-20 w-12 transition-opacity motion-reduce:transition-none ${
-                  canScrollLeft ? "opacity-100" : "opacity-0"
-                }`}
-                style={{
-                  backgroundImage:
-                    "linear-gradient(to right, rgba(18, 18, 57, 0.94), transparent)",
-                }}
-              />
-              <span
-                aria-hidden="true"
-                className={`pointer-events-none absolute inset-y-0 right-0 z-20 w-12 transition-opacity motion-reduce:transition-none ${
-                  canScrollRight ? "opacity-100" : "opacity-0"
-                }`}
-                style={{
-                  backgroundImage:
-                    "linear-gradient(to left, rgba(18, 18, 57, 0.94), transparent)",
-                }}
-              />
+    <TemplateSurface className="phase-milestones">
+      <section ref={sectionRef} aria-label={heading || undefined}>
+        <TemplateContent horizontalInset={horizontalInset} style={{ paddingBlock }}>
+          <div
+            className="phase-milestones__track"
+            style={{ "--phase-count": items.length } as CSSProperties}
+          >
+            <span className="phase-milestones__line" aria-hidden="true">
+              <span className="phase-milestones__beam" />
+            </span>
+            <div
+              className="phase-milestones__items"
+              style={{ columnGap: `${gapRem}rem` }}
+            >
+              {items.map((item, index) => (
+                <MilestoneItemColumn
+                  key={item.id ?? index}
+                  item={item}
+                  index={index}
+                  itemCount={items.length}
+                  locale={locale}
+                  revealed={revealed}
+                />
+              ))}
             </div>
-          ) : (
-            <div className={heading ? "relative mt-10" : "relative"}>
-              <span
-                aria-hidden="true"
-                className="absolute top-[30px] h-px bg-softWhite/18"
-                style={{ left: lineInset, right: lineInset }}
-              />
-              <div
-                className="relative grid"
-                style={{
-                  columnGap: `${gapRem}rem`,
-                  gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))`,
-                }}
-              >
-                {items.map((item, index) => (
-                  <MilestoneNode
-                    key={item.id ?? index}
-                    item={item}
-                    index={index}
-                    itemCount={items.length}
-                    locale={locale}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        </TemplateContent>
       </section>
     </TemplateSurface>
   );

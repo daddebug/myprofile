@@ -71,8 +71,7 @@ function describeReference(
     return { sourceAdapterId: "game-experience-covers", assetId: item, declaredPublicPath: stringOrUndefined(record.publicPath) ?? stringOrUndefined(record.publicUrl), fieldPath };
   }
   if (key === "imageId") {
-    const adapterId = context.projectId === "ui-personal-practice" ? "ui-practice-images" : "dynamic-template-images";
-    return { sourceAdapterId: adapterId, assetId: item, declaredPublicPath: stringOrUndefined(record.publicPath) ?? stringOrUndefined(record.publicUrl), fieldPath };
+    return { sourceAdapterId: "dynamic-template-images", assetId: item, declaredPublicPath: stringOrUndefined(record.publicPath) ?? stringOrUndefined(record.publicUrl), fieldPath };
   }
   return null;
 }

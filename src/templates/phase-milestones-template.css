@@ -1,0 +1,213 @@
+/* Editorial, number-led layout: a huge auto-numbered digit anchored to a
+   shared baseline that runs through the whole row, title and optional
+   description below it. No circles, no per-item card/background -- the
+   number itself is the primary visual element. Green-only palette: one
+   base green for number/title/line, full-strength for the active item,
+   and a dimmed variant for description. Screen-only; print/export CSS
+   never sees .phase-milestones-beam since it only exists in the live
+   React render, not any export-specific path.
+
+   Sizing/spacing/color below is read directly off the reference PSD's
+   layer data (ag-psd: canvas 1920x1752, "目录" group), not estimated from
+   a screenshot -- each ratio is the measured px value divided by the PSD
+   canvas width (or, for the number, its measured on-canvas height after
+   its 2.635x Free Transform scale, since the layer's own font-size field
+   ignores that extra scale). See the phase-milestones PSD spec table for
+   the full measurement. */
+.phase-milestones {
+  background: transparent;
+  --pm-green-rgb: 24, 255, 0;
+}
+
+.phase-milestones__track {
+  position: relative;
+  /* Fixed box the number sits inside (bottom-aligned) so the shared
+     baseline below always docks exactly under it, independent of the
+     number's own fluid clamp() font-size. Ratio: measured number layer
+     height (157px) / PSD canvas width (1920) = 8.18vw. */
+  --pm-number-box: clamp(4rem, 8.18vw, 9.8125rem);
+}
+
+.phase-milestones__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--pm-number-box);
+  /* PSD's connector is a solid 24px bar, not a hairline -- ratio 24/1920. */
+  height: clamp(3px, 1.25vw, 24px);
+  overflow: hidden;
+  background: rgba(var(--pm-green-rgb), 0.28);
+}
+
+.phase-milestones__beam {
+  position: absolute;
+  inset-block: 0;
+  width: 25%;
+  background: linear-gradient(90deg, transparent, rgba(var(--pm-green-rgb), 0.85), transparent);
+  animation: phase-milestones-beam 3.6s linear infinite;
+}
+
+@keyframes phase-milestones-beam {
+  0% { left: -25%; }
+  100% { left: 125%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phase-milestones__beam { display: none; }
+}
+
+.phase-milestones__items {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--phase-count, 3), minmax(0, 1fr));
+}
+
+.phase-milestones__item {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+/* The segment of the shared baseline directly under the active item, for a
+   light "this one's current" cue without a second visual element. */
+.phase-milestones__item.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--pm-number-box);
+  height: clamp(3px, 1.25vw, 24px);
+  background: rgba(var(--pm-green-rgb), 0.95);
+  pointer-events: none;
+}
+
+.phase-milestones__number {
+  display: flex;
+  align-items: flex-end;
+  height: var(--pm-number-box);
+  font-family: "Microsoft YaHei", "Microsoft YaHei UI", sans-serif;
+  /* Measured on-canvas height (after the PSD layer's own 2.635x Free
+     Transform scale -- the style.fontSize field alone reads 75px, which
+     is not what's actually rendered) / canvas width: 197.7 / 1920. */
+  font-size: clamp(4.5rem, 10.3vw, 12.35rem);
+  font-weight: 700;
+  line-height: 0.82;
+  letter-spacing: normal;
+  color: rgba(var(--pm-green-rgb), 0.7);
+  white-space: nowrap;
+}
+
+.phase-milestones__title {
+  /* This margin is relative to the NUMBER (its previous DOM sibling), not
+     the line -- the line is a separate absolutely-positioned element, not
+     part of this normal-flow gap. PSD measures line-bottom-to-title as
+     12px, but the line's own bottom edge sits 19px below the number's
+     bottom edge (see GLOBAL_LINE_BASE.verticalRelationToNumber), so the
+     number-bottom-to-title distance this margin actually needs to express
+     is 19 + 12 = 31px / canvas width. Using the raw 12px here (an earlier
+     bug, fixed at the 2026-09-08 re-sync) made the title overlap the
+     bottom of the line bar by 6px. */
+  margin: clamp(1rem, 1.615vw, 1.9375rem) 0 0;
+  font-family: "Microsoft YaHei", "Microsoft YaHei UI", sans-serif;
+  font-size: clamp(1.25rem, 2.92vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: rgba(var(--pm-green-rgb), 0.82);
+}
+
+/* Redesigned per the 2026-09-08 PSD re-sync: no longer one wrapped
+   paragraph -- up to 3 short bullet rows, each a small dot + one line of
+   text. The existing hoverText field is still the only data source (split
+   on \n, capped at 3 lines); see docs/design/psd-template-spec.json's
+   SECTION_02_PHASE_MILESTONES.elements.NODE_DESC.dataMappingNote for why
+   no schema change was needed. This whole list fades in as one unit on
+   reveal (no new per-row motion -- see PSD_TEMPLATE_WORKFLOW.md's "Motion
+   is out of this workflow for now"). */
+.phase-milestones__description {
+  display: flex;
+  flex-direction: column;
+  /* Measured gap between the title's bottom edge and the first bullet row
+     (11px) / canvas width. */
+  margin: clamp(0.35rem, 0.573vw, 0.6875rem) 0 0;
+  /* Measured gap between consecutive bullet rows (~11px) / canvas width --
+     same ratio as the title gap above, so one value covers both. */
+  gap: clamp(0.35rem, 0.573vw, 0.6875rem);
+}
+
+.phase-milestones__description-row {
+  display: flex;
+  align-items: center;
+  /* Measured gap between the dot's right edge and the text's left edge
+     (8px) / canvas width. */
+  gap: clamp(0.25rem, 0.42vw, 0.5rem);
+}
+
+.phase-milestones__description-dot {
+  flex: none;
+  /* Measured dot diameter (22px) / canvas width. */
+  width: clamp(0.7rem, 1.15vw, 1.375rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(var(--pm-green-rgb), 0.85);
+}
+
+.phase-milestones__description-text {
+  min-width: 0;
+  /* Measured single-row text width (168px) / canvas width -- real
+     multi-word content without an embedded line break will wrap inside
+     this width rather than staying on one line; that's expected, not a
+     defect (see NODE_DESC.dataMappingNote). */
+  max-width: clamp(7rem, 8.75vw, 10.5rem);
+  font-family: "Microsoft YaHei", "Microsoft YaHei UI", sans-serif;
+  font-size: clamp(0.85rem, 1.46vw, 1.75rem);
+  font-weight: 400;
+  /* No PSD evidence for wrapped multi-line leading here -- every real PSD
+     bullet row is a single line. 1.4 is a plain non-colliding default for
+     the wrap case, picked the same way the prior paragraph design's
+     override was (see PSD_TEMPLATE_SPEC.md's provenance rule), not a PSD
+     measurement. */
+  line-height: 1.4;
+  color: rgba(var(--pm-green-rgb), 0.52);
+}
+
+.phase-milestones__item.is-active .phase-milestones__number,
+.phase-milestones__item.is-active .phase-milestones__title {
+  color: rgb(var(--pm-green-rgb));
+}
+
+@media (hover: hover) {
+  .phase-milestones__item:hover .phase-milestones__number,
+  .phase-milestones__item:hover .phase-milestones__title {
+    color: rgb(var(--pm-green-rgb));
+  }
+}
+
+/* One-time sequential reveal on first viewport entry, driven by the
+   .is-revealed class (see the IntersectionObserver in the component). */
+.phase-milestones__number,
+.phase-milestones__title,
+.phase-milestones__description {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 500ms ease, transform 500ms ease, color 220ms ease;
+}
+
+.phase-milestones__item.is-revealed .phase-milestones__number,
+.phase-milestones__item.is-revealed .phase-milestones__title,
+.phase-milestones__item.is-revealed .phase-milestones__description {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phase-milestones__number,
+  .phase-milestones__title,
+  .phase-milestones__description {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

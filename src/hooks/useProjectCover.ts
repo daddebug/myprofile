@@ -36,7 +36,13 @@ export function useProjectCover(projectId: string, publicPath: string) {
     let cancelled = false;
     let objectUrl = "";
 
-    if (!import.meta.env.DEV) {
+    // No project id (e.g. an unbound Homepage slot) -- there is nothing to
+    // look up. Skip the disk/legacy fetch entirely rather than sending a
+    // request with an empty projectId, which the content server correctly
+    // rejects (400) but which is still a real, avoidable console error
+    // every consumer that renders unbound slots (Homepage) would otherwise
+    // trigger on every render.
+    if (!projectId || !import.meta.env.DEV) {
       setState({ image: fallbackPath, hasLocalCover: false, source: "fallback" });
       return undefined;
     }

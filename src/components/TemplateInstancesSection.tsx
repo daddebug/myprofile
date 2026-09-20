@@ -16,21 +16,15 @@ import {
   Braces,
   Check,
   Copy,
-  Figma,
-  GitBranch,
-  Gamepad2,
   Image as ImageIcon,
   LayoutTemplate,
-  ListOrdered,
-  PieChart,
+  MonitorPlay,
   Pencil,
   Plus,
   Settings,
   StickyNote,
-  Table2,
   Trash2,
   Undo2,
-  Workflow,
   X,
 } from "lucide-react";
 import {
@@ -43,6 +37,7 @@ import {
   type TemplateContentValue,
   type TemplateFieldDefinition,
 } from "../lib/templateLibrary";
+import { isUniversalMedia } from "../lib/universalMedia";
 import {
   anchorForInsertPosition,
   applyRegionOrder,
@@ -54,13 +49,7 @@ import {
 } from "../lib/projectTemplateInstances";
 import { useTemplateHorizontalInset } from "../lib/templateLayoutDefaults";
 import type { ImageAnnotation } from "./template-tools/ImageAnnotation";
-import { isCollectionExportCapture } from "../lib/collectionExportStaging";
-import { recordTemplateFit } from "../lib/collectionMediaDiagnostics";
 import { optimizeUploadedImage } from "../lib/imageOptimization";
-import {
-  figmaPrototypeUrlErrorMessage,
-  normalizeFigmaPrototypeUrl,
-} from "../lib/figmaEmbed";
 import {
   abortDynamicProjectImageStage,
   abortPlayableGameImport,
@@ -79,29 +68,14 @@ import {
   type PlayableGameImportStage,
   verifyPlayableGameEntry,
 } from "../lib/portfolioContentClient";
-import {
-  CircleSummaryContentEditor,
-  DecisionTableContentEditor,
-  DualViewpointAnalysisContentEditor,
-  PhaseMilestonesContentEditor,
-  sampleContentFor,
-  XMindContentEditor,
-} from "../pages/OwnerTemplateBuilderPage";
+import { sampleContentFor } from "../pages/OwnerTemplateBuilderPage";
 
 const TEMPLATE_PICKER_ICONS: Record<string, typeof LayoutTemplate> = {
-  "project-header": LayoutTemplate,
   "statement-longform": AlignLeft,
-  "xmind-breakdown": GitBranch,
   "supporting-note": StickyNote,
-  "phase-milestones": ListOrdered,
-  "circle-summary": PieChart,
-  "decision-table": Table2,
   "image-row": ImageIcon,
-  "figma-prototype": Figma,
-  "process-flow": Workflow,
-  "playable-game": Gamepad2,
+  "universal-media": MonitorPlay,
   "direction-compare": ArrowLeftRight,
-  "dual-viewpoint-analysis": ArrowLeftRight,
 };
 
 const ACCEPTED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp", "image/avif", "image/gif"];
@@ -118,7 +92,6 @@ const UI_16IENXJ_SECTION_TARGETS: Record<string, string> = {
 
 function projectInstanceDomId(projectId: string, instance: TemplateInstance) {
   if (projectId !== "ui-16ienxj") return undefined;
-  if (instance.templateId === "process-flow") return "system-scope";
   if (instance.templateId !== "statement-longform") return undefined;
   const sectionNumber = instance.content.sectionNumber;
   if (!sectionNumber || typeof sectionNumber !== "object" || Array.isArray(sectionNumber)) return undefined;
@@ -129,30 +102,6 @@ function projectInstanceDomId(projectId: string, instance: TemplateInstance) {
       ? localized.en.trim()
       : "";
   return UI_16IENXJ_SECTION_TARGETS[value];
-}
-
-function localizedTemplateInstanceLabel(
-  instance: TemplateInstance,
-  registeredTemplates: RegisteredTemplate[],
-  language: "zh" | "en",
-  index: number,
-) {
-  for (const field of ["leftTitle", "heading", "sectionTitle", "title"] as const) {
-    const value = instance.content[field];
-    if (typeof value === "string" && value.trim()) return value.trim();
-    if (value && typeof value === "object" && !Array.isArray(value)) {
-      const localized = value as { zh?: unknown; en?: unknown };
-      const preferred = localized[language];
-      const fallback = localized.zh;
-      if (typeof preferred === "string" && preferred.trim()) return preferred.trim();
-      if (typeof fallback === "string" && fallback.trim()) return fallback.trim();
-    }
-  }
-  const registered = registeredTemplates.find((template) => template.meta.id === instance.templateId);
-  const name = registered
-    ? language === "zh" ? registered.meta.nameZh : registered.meta.nameEn
-    : instance.templateId;
-  return `${name} ${index + 1}`;
 }
 
 export type ProjectImageRecord = {
@@ -203,115 +152,6 @@ function GenericTextFieldsEditor({
         );
       })}
     </div>
-  );
-}
-
-type ProjectProcessFlowItem = {
-  id: string;
-  number: { zh: string; en: string };
-  title: { zh: string; en: string };
-  description: { zh: string; en: string };
-};
-
-function ProcessFlowContentEditor({
-  content,
-  language,
-  onChange,
-}: {
-  content: Record<string, TemplateContentValue>;
-  language: "zh" | "en";
-  onChange: (content: Record<string, TemplateContentValue>) => void;
-}) {
-  const heading = (content.heading as { zh: string; en: string } | undefined) ?? {
-    zh: "",
-    en: "",
-  };
-  const items = Array.isArray(content.items)
-    ? (content.items as ProjectProcessFlowItem[]).slice(0, 6)
-    : [];
-
-  const updateItem = (
-    index: number,
-    field: "number" | "title" | "description",
-    value: string,
-  ) => {
-    const next = items.map((item, itemIndex) =>
-      itemIndex === index
-        ? {
-            ...item,
-            [field]: {
-              ...(item[field] ?? { zh: "", en: "" }),
-              [language]: value,
-            },
-          }
-        : item,
-    );
-    onChange({ ...content, items: next });
-  };
-
-  return (
-    <section className="mt-5">
-      <label className="block max-w-xl">
-        <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">
-          {language === "zh" ? "模板主标题（可选）" : "Heading (optional)"}
-        </span>
-        <input
-          className="w-full border-b border-softWhite/18 bg-transparent py-2 text-sm text-softWhite outline-none focus:border-acidGreen"
-          value={heading[language]}
-          onChange={(event) =>
-            onChange({
-              ...content,
-              heading: { ...heading, [language]: event.target.value },
-            })
-          }
-        />
-      </label>
-
-      <div className="mt-5 grid gap-4 md:grid-cols-2">
-        {items.map((item, index) => (
-          <div
-            key={item.id}
-            className="grid gap-3 rounded-[8px] border border-softWhite/12 bg-deepIndigo/24 p-4"
-          >
-            <strong className="font-mono text-xs text-acidGreen">
-              {String(index + 1).padStart(2, "0")}
-            </strong>
-            <label>
-              <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">
-                {language === "zh" ? "编号" : "Number"}
-              </span>
-              <input
-                className="w-full border-b border-softWhite/18 bg-transparent py-2 text-sm text-softWhite outline-none focus:border-acidGreen"
-                value={item.number?.[language] ?? ""}
-                onChange={(event) => updateItem(index, "number", event.target.value)}
-              />
-            </label>
-            <label>
-              <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">
-                {language === "zh" ? "标题" : "Title"}
-              </span>
-              <input
-                className="w-full border-b border-softWhite/18 bg-transparent py-2 text-sm text-softWhite outline-none focus:border-acidGreen"
-                value={item.title?.[language] ?? ""}
-                onChange={(event) => updateItem(index, "title", event.target.value)}
-              />
-            </label>
-            <label>
-              <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">
-                {language === "zh" ? "简短描述（可选）" : "Short description (optional)"}
-              </span>
-              <textarea
-                className="min-h-20 w-full resize-y border border-softWhite/14 bg-deepIndigo/28 px-3 py-2 text-sm leading-6 text-softWhite outline-none focus:border-acidGreen"
-                value={item.description?.[language] ?? ""}
-                onChange={(event) =>
-                  updateItem(index, "description", event.target.value)
-                }
-              />
-            </label>
-          </div>
-        ))}
-      </div>
-    </section>
   );
 }
 
@@ -495,95 +335,6 @@ function ProjectImageRowContentEditor({
   );
 }
 
-function ProjectFigmaPrototypeContentEditor({
-  content,
-  language,
-  onChange,
-  db,
-}: {
-  content: Record<string, TemplateContentValue>;
-  language: "zh" | "en";
-  onChange: (content: Record<string, TemplateContentValue>) => void;
-  db: ProjectImageDb;
-}) {
-  const caption = (content.caption as { zh: string; en: string } | undefined) ?? { zh: "", en: "" };
-  const figmaUrl = typeof content.figmaUrl === "string" ? content.figmaUrl : "";
-  const fallbackImage = content.fallbackImage as { localImageId?: string } | undefined;
-  const [urlDraft, setUrlDraft] = useState(figmaUrl);
-  const [urlError, setUrlError] = useState("");
-  const [thumbnail, setThumbnail] = useState("");
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    let url = "";
-    const id = fallbackImage?.localImageId;
-    if (!id) { setThumbnail(""); return undefined; }
-    db.getDraftImage(id).then((record) => {
-      if (cancelled || !record) return;
-      url = URL.createObjectURL(record.blob);
-      setThumbnail(url);
-    }).catch(() => undefined);
-    return () => { cancelled = true; if (url) URL.revokeObjectURL(url); };
-  }, [fallbackImage?.localImageId]);
-
-  const applyUrl = () => {
-    const trimmed = urlDraft.trim();
-    if (!trimmed) { setUrlError(""); onChange({ ...content, figmaUrl: "" }); return; }
-    const result = normalizeFigmaPrototypeUrl(trimmed);
-    if (!result.ok) { setUrlError(figmaPrototypeUrlErrorMessage(result.error)); return; }
-    setUrlError("");
-    onChange({ ...content, figmaUrl: trimmed });
-  };
-
-  const uploadFallback = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file) return;
-    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-      setUrlError(language === "zh" ? "请选择 PNG、JPEG、WebP、AVIF 或 GIF 图片。" : "Choose a PNG, JPEG, WebP, AVIF, or GIF image.");
-      return;
-    }
-    const previousId = fallbackImage?.localImageId;
-    const optimized = await optimizeUploadedImage(file);
-    const imageId = createInstanceId("image");
-    await db.putDraftImage({ id: imageId, blob: optimized, fileName: file.name, mimeType: optimized.type || file.type, size: optimized.size, updatedAt: new Date().toISOString() });
-    onChange({ ...content, fallbackImage: { localImageId: imageId } });
-    if (previousId) await db.deleteDraftImage(previousId).catch(() => undefined);
-  };
-
-  return (
-    <section className="mt-5">
-      <label className="block max-w-xl">
-        <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">{language === "zh" ? "Figma 链接" : "Figma URL"}</span>
-        <input
-          className="w-full border-b border-softWhite/18 bg-transparent py-2 text-sm text-softWhite outline-none focus:border-acidGreen"
-          placeholder="https://www.figma.com/proto/..."
-          value={urlDraft}
-          onChange={(event) => setUrlDraft(event.target.value)}
-          onBlur={applyUrl}
-          onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); applyUrl(); } }}
-        />
-      </label>
-      {urlError ? <p className="mt-2 text-sm text-peach">{urlError}</p> : null}
-      <div className="mt-5 max-w-xl">
-        <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">{language === "zh" ? "备用图片" : "Fallback image"}</span>
-        <div className="flex h-24 w-full items-center justify-center overflow-hidden rounded-[10px] bg-deepIndigo/48 text-xs text-softWhite/38">
-          {thumbnail ? <img src={thumbnail} alt="" className="h-full w-full object-contain" /> : <span>{language === "zh" ? "尚未上传" : "No image yet"}</span>}
-        </div>
-        <input ref={fileInputRef} type="file" accept={ACCEPTED_IMAGE_TYPES.join(",")} className="hidden" onChange={(event) => void uploadFallback(event)} />
-        <button type="button" className="editor-action mt-2" onClick={() => fileInputRef.current?.click()}>
-          {fallbackImage?.localImageId ? (language === "zh" ? "替换图片" : "Replace image") : (language === "zh" ? "上传图片" : "Add image")}
-        </button>
-      </div>
-      <label className="mt-5 block max-w-xl">
-        <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">{language === "zh" ? "说明文字" : "Caption"}</span>
-        <input className="w-full border-b border-softWhite/18 bg-transparent py-2 text-sm text-softWhite outline-none focus:border-acidGreen" value={caption[language]} onChange={(event) => onChange({ ...content, caption: { ...caption, [language]: event.target.value } })} />
-      </label>
-    </section>
-  );
-}
-
 function InstanceEditor({
   templateId,
   schema,
@@ -591,9 +342,6 @@ function InstanceEditor({
   language,
   onChange,
   db,
-  jumpTargets,
-  projectId,
-  moduleId,
 }: {
   templateId: string;
   schema: TemplateFieldDefinition[];
@@ -601,24 +349,15 @@ function InstanceEditor({
   language: "zh" | "en";
   onChange: (content: Record<string, TemplateContentValue>) => void;
   db: ProjectImageDb;
-  jumpTargets: Array<{ instanceId: string; label: string }>;
-  projectId: string;
-  moduleId: string;
 }) {
-  if (templateId === "xmind-breakdown") return <XMindContentEditor mode="double" content={content} language={language} onChange={onChange} />;
-  if (templateId === "phase-milestones") return <PhaseMilestonesContentEditor emphasisMode="custom" content={content} language={language} onChange={onChange} jumpTargets={jumpTargets} />;
-  if (templateId === "circle-summary") return <CircleSummaryContentEditor content={content} language={language} onChange={onChange} />;
-  if (templateId === "decision-table") return <DecisionTableContentEditor content={content} language={language} onChange={onChange} />;
-  if (templateId === "dual-viewpoint-analysis") return <DualViewpointAnalysisContentEditor content={content} language={language} onChange={onChange} projectId={projectId} moduleId={moduleId} />;
   if (templateId === "image-row") return <ProjectImageRowContentEditor content={content} language={language} onChange={onChange} db={db} />;
-  if (templateId === "figma-prototype") return <ProjectFigmaPrototypeContentEditor content={content} language={language} onChange={onChange} db={db} />;
-  if (templateId === "process-flow") return <ProcessFlowContentEditor content={content} language={language} onChange={onChange} />;
   return <GenericTextFieldsEditor schema={schema} content={content} language={language} onChange={onChange} />;
 }
 
 function ResolvedInstancePreview({
   instance,
   instanceOrder,
+  sectionIntroIndex,
   projectId,
   locale,
   db,
@@ -628,6 +367,7 @@ function ResolvedInstancePreview({
 }: {
   instance: TemplateInstance;
   instanceOrder: number;
+  sectionIntroIndex?: number;
   projectId: string;
   locale: "zh" | "en";
   db: ProjectImageDb;
@@ -656,7 +396,7 @@ function ResolvedInstancePreview({
   const [availableGames, setAvailableGames] = useState<Awaited<ReturnType<typeof listPlayableGames>>>([]);
 
   useEffect(() => {
-    if (!inlineEditing || instance.templateId !== "playable-game") return;
+    if (!inlineEditing || instance.templateId !== "universal-media") return;
     let cancelled = false;
     void listPlayableGames(projectId).then((games) => {
       if (!cancelled) setAvailableGames(games);
@@ -673,7 +413,7 @@ function ResolvedInstancePreview({
       setGameUploadStage("saving");
       const game = await commitPlayableGame(projectId, staged.commitToken);
       setAvailableGames((current) => [...current.filter((item) => item.gameId !== game.gameId), game]);
-      onContentChange({ ...instance.content, game });
+      onContentChange({ ...instance.content, media: { type: "playable-game", game } });
     } catch (error) {
       await abortPlayableGameImport(projectId, staged.commitToken).catch(() => undefined);
       throw error;
@@ -726,7 +466,10 @@ function ResolvedInstancePreview({
       const staged = await stagePlayableGameCover(projectId, file);
       await decodeProjectCover(staged.publicUrl);
       const cover = await commitPlayableGameCover(projectId, staged.commitToken);
-      onContentChange({ ...instance.content, cover });
+      const media = instance.content.media;
+      if (media && typeof media === "object" && !Array.isArray(media) && (media as Record<string, unknown>).type === "playable-game") {
+        onContentChange({ ...instance.content, media: { ...media, cover } });
+      }
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : "Game cover could not be saved.");
     } finally { setGameUploadBusy(false); }
@@ -750,19 +493,6 @@ function ResolvedInstancePreview({
         }));
         if (!cancelled) setResolvedContent({ ...instance.content, items: resolvedItems });
         return;
-      }
-      if (instance.templateId === "figma-prototype") {
-        const fallback = instance.content.fallbackImage as { localImageId?: string } | undefined;
-        const id = fallback?.localImageId;
-        if (id) {
-          const record = await db.getDraftImage(id).catch(() => undefined);
-          if (record && !cancelled) {
-            const url = URL.createObjectURL(record.blob);
-            urls.push(url);
-            setResolvedContent({ ...instance.content, fallbackImage: { ...fallback, publicPath: url } });
-            return;
-          }
-        }
       }
       if (!cancelled) setResolvedContent(instance.content);
     }
@@ -886,6 +616,25 @@ function ResolvedInstancePreview({
           ...instance.content,
           [persistedItemId]: { imageId: staged.imageId, publicPath: staged.publicUrl, hoverPreviewMode },
         };
+      } else if (instance.templateId === "universal-media") {
+        const currentMedia = instance.content.media;
+        if (persistedItemId === "universal-image") {
+          nextContent = {
+            ...instance.content,
+            media: { type: "image", image: { imageId: staged.imageId, publicPath: staged.publicUrl } },
+          };
+        } else if (
+          persistedItemId === "universal-figma-fallback"
+          && currentMedia && typeof currentMedia === "object" && !Array.isArray(currentMedia)
+          && (currentMedia as Record<string, unknown>).type === "figma"
+        ) {
+          nextContent = {
+            ...instance.content,
+            media: { ...currentMedia, fallbackImage: { imageId: staged.imageId, publicPath: staged.publicUrl } },
+          };
+        } else {
+          throw new Error("Universal Media image target is not active.");
+        }
       } else {
         const items = Array.isArray(instance.content.items) ? instance.content.items : [];
         let nextItems: unknown[];
@@ -1018,12 +767,6 @@ function ResolvedInstancePreview({
     if (itemIndex < 0) return;
     const removedItem = items[itemIndex] as Record<string, unknown>;
     const nextItems = items.filter((_, index) => index !== itemIndex);
-    if ((removedItem.startNewRow === true || removedItem.imageWidthMode === "full") && itemIndex < nextItems.length) {
-      const nextItem = nextItems[itemIndex];
-      if (nextItem && typeof nextItem === "object" && !Array.isArray(nextItem)) {
-        nextItems[itemIndex] = { ...(nextItem as Record<string, unknown>), startNewRow: true };
-      }
-    }
     const nextContent = {
       ...instance.content,
       items: nextItems,
@@ -1084,12 +827,11 @@ function ResolvedInstancePreview({
     }
   };
 
-  const createEmptyImageRowItem = (startNewRow = false) => ({
+  const createEmptyImageRowItem = () => ({
     id: createInstanceId("image-row-item"),
     alt: { zh: "", en: "" },
     caption: { zh: "", en: "" },
     hoverPreviewMode: "none",
-    ...(startNewRow ? { startNewRow: true } : {}),
   });
 
   const addImageRowItemAfter = (itemId: string) => {
@@ -1110,13 +852,13 @@ function ResolvedInstancePreview({
   const addImageRowNewRow = () => {
     const items = Array.isArray(instance.content.items) ? instance.content.items : [];
     if (items.length === 0 || items.length >= 12) return;
-    onContentChange({ ...instance.content, items: [...items, createEmptyImageRowItem(true)] });
+    onContentChange({ ...instance.content, items: [...items, createEmptyImageRowItem()] });
   };
 
   if (!registered) return null;
   const { Component, meta } = registered;
   const name = locale === "zh" ? meta.nameZh : meta.nameEn;
-  const supportsInlineEditing = instance.templateId === "statement-longform" || instance.templateId === "image-row" || instance.templateId === "playable-game" || instance.templateId === "direction-compare" || instance.templateId === "figma-prototype";
+  const supportsInlineEditing = instance.templateId === "statement-longform" || instance.templateId === "supporting-note" || instance.templateId === "image-row" || instance.templateId === "direction-compare" || instance.templateId === "universal-media";
   const inlineEditor = inlineEditing && supportsInlineEditing ? {
     onLocalizedTextChange: updateLocalizedText,
     ...(instance.templateId === "image-row" ? {
@@ -1134,29 +876,6 @@ function ResolvedInstancePreview({
         error: uploadError,
       },
     } : {}),
-    ...(instance.templateId === "playable-game" ? {
-      playableGame: {
-        onChooseFolder: () => gameFolderInputRef.current?.click(),
-        onChooseZip: () => gameInputRef.current?.click(),
-        onChooseCover: () => gameCoverInputRef.current?.click(),
-        onUseSavedBuild: async (gameId: string) => {
-          setUploadError(""); setGameUploadBusy(true);
-          try {
-            const game = await bindPlayableGame(projectId, gameId);
-            onContentChange({ ...instance.content, game });
-          } catch (error) {
-            setUploadError(error instanceof Error ? error.message : "The saved game could not be bound.");
-          } finally {
-            setGameUploadBusy(false);
-          }
-        },
-        availableGames,
-        onContentChange: (updates: Record<string, unknown>) => onContentChange({ ...instance.content, ...updates }),
-        busy: gameUploadBusy,
-        stage: gameUploadStage,
-        error: uploadError,
-      },
-    } : {}),
     ...(instance.templateId === "direction-compare" ? {
       directionCompare: {
         onUploadImage: (side: "left" | "right") => chooseImage(side === "left" ? "leftImage" : "rightImage"),
@@ -1166,6 +885,33 @@ function ResolvedInstancePreview({
         onRemoveAnnotationEvidence: (side: "left" | "right", annotationId: string, evidenceId: string) => void removeAnnotationEvidence(side === "left" ? "leftImage" : "rightImage", annotationId, evidenceId),
         onDirectionChange: (direction: "left-to-right" | "right-to-left" | "none") => onContentChange({ ...instance.content, direction }),
         status: uploadStatus,
+        error: uploadError,
+      },
+    } : {}),
+    ...(instance.templateId === "universal-media" ? {
+      universalMedia: {
+        onMediaChange: (media: import("../lib/universalMedia").UniversalMedia) => onContentChange({ ...instance.content, media }),
+        onChooseImage: () => chooseImage("universal-image"),
+        onChooseFigmaFallback: () => chooseImage("universal-figma-fallback"),
+        onChooseGameFolder: () => gameFolderInputRef.current?.click(),
+        onChooseGameZip: () => gameInputRef.current?.click(),
+        onChooseGameCover: () => gameCoverInputRef.current?.click(),
+        onUseSavedGame: async (gameId: string) => {
+          setUploadError("");
+          setGameUploadBusy(true);
+          try {
+            const game = await bindPlayableGame(projectId, gameId);
+            onContentChange({ ...instance.content, media: { type: "playable-game", game } });
+          } catch (error) {
+            setUploadError(error instanceof Error ? error.message : "The saved game could not be bound.");
+          } finally {
+            setGameUploadBusy(false);
+          }
+        },
+        availableGames,
+        activeType: instance.content.media && typeof instance.content.media === "object" && !Array.isArray(instance.content.media)
+          ? ((instance.content.media as Record<string, unknown>).type as import("../lib/universalMedia").UniversalMediaType) ?? "image"
+          : "image",
         error: uploadError,
       },
     } : {}),
@@ -1179,7 +925,13 @@ function ResolvedInstancePreview({
       <input ref={gameCoverInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(event) => void uploadGameCover(event)} />
       <TemplatePreviewFrame>
         <TemplateRenderBoundary name={name} resetKey={`${instance.instanceId}-${locale}`}>
-          <Component content={resolvedContent} locale={locale} horizontalInset={horizontalInset} inlineEditor={inlineEditor} />
+          <Component
+            content={resolvedContent}
+            locale={locale}
+            horizontalInset={horizontalInset}
+            sectionIntroIndex={sectionIntroIndex}
+            inlineEditor={inlineEditor}
+          />
         </TemplateRenderBoundary>
       </TemplatePreviewFrame>
       {inlineEditing && instance.templateId === "image-row" && uploadStatus ? (
@@ -1314,6 +1066,11 @@ export function validateContentAgainstSchemaIssues(
       continue;
     }
 
+    if (field.type === "media" && value !== undefined && !isUniversalMedia(value)) {
+      issues.push({ path: field.id, problem: "must be a valid discriminated media object", expected: "image | video | figma | playable-game", actual: value === null ? "null" : typeof value });
+      continue;
+    }
+
     if (field.required && (value === undefined || value === null || value === "")) {
       issues.push({ path: field.id, problem: "is required", expected: field.type, actual: value === undefined ? "missing" : String(value) });
       continue;
@@ -1343,35 +1100,20 @@ export function validateContentAgainstSchema(
 export function validateImageRowOptions(
   content: Record<string, TemplateContentValue>,
 ): string | null {
-  for (const key of ["className", "style", "css", "grid", "gridColumn", "grid-column"]) {
+  for (const key of ["className", "style", "css", "grid", "gridColumn", "grid-column", "columns", "rowAlignment"]) {
     if (content[key] !== undefined) return `${key} is not supported by Image Row.`;
-  }
-  const columns = content.columns;
-  if (columns !== undefined && columns !== 1 && columns !== 2 && columns !== 3 && columns !== 4) {
-    return "columns must be 1, 2, 3, or 4.";
-  }
-  const rowAlignment = content.rowAlignment;
-  if (rowAlignment !== undefined && rowAlignment !== "start" && rowAlignment !== "center") {
-    return "rowAlignment must be start or center.";
   }
   if (!Array.isArray(content.items)) return null;
 
   for (const [index, value] of content.items.entries()) {
     if (!value || typeof value !== "object" || Array.isArray(value)) continue;
     const item = value as Record<string, unknown>;
-    for (const key of ["width", "imageWidth", "maxWidth", "className", "style", "css", "grid", "gridColumn", "grid-column", "gridArea", "grid-area", "span", "columnSpan", "columns", "rowIndex", "columnIndex", "position"]) {
+    for (const key of ["width", "imageWidth", "maxWidth", "className", "style", "css", "grid", "gridColumn", "grid-column", "gridArea", "grid-area", "span", "columnSpan", "columns", "rowIndex", "columnIndex", "position", "imageWidthMode", "startNewRow"]) {
       if (item[key] !== undefined) return `items[${index}].${key} is not supported by Image Row.`;
-    }
-    if (item.startNewRow !== undefined && typeof item.startNewRow !== "boolean") {
-      return `items[${index}].startNewRow must be boolean.`;
     }
     const mode = item.imageDisplayMode;
     if (mode !== undefined && mode !== "cover" && mode !== "natural") {
       return `items[${index}].imageDisplayMode must be cover or natural.`;
-    }
-    const widthMode = item.imageWidthMode;
-    if (widthMode !== undefined && widthMode !== "card" && widthMode !== "wide" && widthMode !== "full") {
-      return `items[${index}].imageWidthMode must be card, wide, or full.`;
     }
     const hoverPreviewMode = item.hoverPreviewMode;
     if (hoverPreviewMode !== undefined && hoverPreviewMode !== "none" && hoverPreviewMode !== "floating") {
@@ -1598,6 +1340,7 @@ function CodeFillModal({
 function InstanceBlock({
   instance,
   instanceOrder,
+  sectionIntroIndex,
   projectId,
   registeredTemplates,
   language,
@@ -1616,10 +1359,10 @@ function InstanceBlock({
   onLayoutSettingsChange,
   onDiskImagesChanged,
   domId,
-  jumpTargets,
 }: {
   instance: TemplateInstance;
   instanceOrder: number;
+  sectionIntroIndex?: number;
   projectId: string;
   registeredTemplates: RegisteredTemplate[];
   language: "zh" | "en";
@@ -1638,7 +1381,6 @@ function InstanceBlock({
   onLayoutSettingsChange: (layoutSettings: TemplateInstanceLayoutSettings) => void;
   onDiskImagesChanged?: () => void;
   domId?: string;
-  jumpTargets: Array<{ instanceId: string; label: string }>;
 }) {
   const registered = registeredTemplates.find((t) => t.meta.id === instance.templateId);
   const name = registered ? (language === "zh" ? registered.meta.nameZh : registered.meta.nameEn) : instance.templateId;
@@ -1647,75 +1389,13 @@ function InstanceBlock({
   const effectiveInset = instance.layoutSettings?.horizontalInset ?? templateDefaultInset;
   const [codeFillOpen, setCodeFillOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const supportsInlineEditing = instance.templateId === "statement-longform" || instance.templateId === "image-row" || instance.templateId === "playable-game" || instance.templateId === "direction-compare";
+  const supportsInlineEditing = instance.templateId === "statement-longform" || instance.templateId === "supporting-note" || instance.templateId === "image-row" || instance.templateId === "direction-compare" || instance.templateId === "universal-media";
   const imageRowItemCount = instance.templateId === "image-row" && Array.isArray(instance.content.items)
     ? instance.content.items.length
     : 0;
-  const imageRowEditingGridCount = Math.max(1, imageRowItemCount);
-  const storedImageRowColumns = instance.content.columns;
-  const effectiveImageRowColumns = storedImageRowColumns === 1 || storedImageRowColumns === 2 || storedImageRowColumns === 3 || storedImageRowColumns === 4
-    ? storedImageRowColumns
-    : Math.min(4, Math.max(1, imageRowEditingGridCount));
-  const effectiveImageRowAlignment = instance.content.rowAlignment === "center" ? "center" : "start";
-
-  // In collection-export mode only: a small, explicit allowlist of known
-  // horizontal-scroll viewport selectors (templates that rely on the live
-  // site's horizontal-scroll affordance at narrow widths — fine for a
-  // visitor, but a one-shot PDF capture can't scroll, so content past the
-  // visible edge would otherwise be clipped). Deliberately NOT a generic
-  // "scan every descendant of every instance" scanner — that shrank
-  // unrelated templates whenever any nested element merely reported
-  // overflow, which is exactly what this was asked not to do. Templates
-  // with their own more specific needs (e.g. phase-milestones, which must
-  // also keep its heading at normal size and re-center its track) own a
-  // dedicated fix inside their own component instead of relying on this.
-  // Add a selector here only for a template whose live layout is "one
-  // fixed-min-width viewport, otherwise scrollable" like process-flow's.
-  const HORIZONTAL_FIT_VIEWPORT_SELECTORS = [".process-flow-viewport"];
-  const fitRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!isCollectionExportCapture()) return;
-    const node = fitRef.current;
-    if (!node) return;
-    for (const selector of HORIZONTAL_FIT_VIEWPORT_SELECTORS) {
-      const viewport = node.querySelector<HTMLElement>(selector);
-      if (!viewport) continue;
-      viewport.style.zoom = "1";
-      const availableWidth = viewport.clientWidth;
-      const naturalWidth = viewport.scrollWidth;
-      const fitScale = availableWidth > 0 && naturalWidth > availableWidth
-        ? Math.min(1, availableWidth / naturalWidth)
-        : 1;
-      // Scale the viewport itself, not the whole instance — its sibling
-      // heading/copy (if any, outside this selector) stays at normal size.
-      if (fitScale < 1) viewport.style.zoom = String(fitScale);
-      // Verifying success must use getBoundingClientRect, not
-      // clientWidth/scrollWidth: this Chromium build does not recompute
-      // those integer DOM properties after a zoom change, even though the
-      // real rendered pixels (and the real capture) are correctly scaled —
-      // confirmed empirically by comparing both. Checks whether the
-      // viewport's own direct children now fit inside its edge, both
-      // measured post-zoom.
-      const viewportRect = viewport.getBoundingClientRect();
-      let overflowAfterFit = 0;
-      for (const child of Array.from(viewport.children)) {
-        const childRect = child.getBoundingClientRect();
-        overflowAfterFit = Math.max(overflowAfterFit, Math.round(childRect.right - viewportRect.right));
-      }
-      recordTemplateFit({
-        templateInstanceId: instance.instanceId,
-        templateId: instance.templateId,
-        naturalWidth,
-        availableWidth: Math.round(availableWidth),
-        fitScale,
-        overflowAfterFit: Math.max(0, overflowAfterFit),
-      });
-    }
-  }, [instance.instanceId, instance.templateId, instance.content]);
 
   return (
     <div
-      ref={fitRef}
       id={instance.instanceId}
       data-template-instance-id={instance.instanceId}
       data-template-instance-template-id={instance.templateId}
@@ -1729,11 +1409,7 @@ function InstanceBlock({
         // template" tier — that nicety is a live-site-only distinction),
         // gated by isCollectionExportCapture(); the live site's own
         // vertical rhythm is untouched.
-        marginTop: isCollectionExportCapture()
-          ? "24px"
-          : followsTemplate
-            ? "var(--template-library-adjacent-instance-gap)"
-            : "var(--template-library-instance-gap)",
+        marginTop: 0,
       }}
     >
       {domId && domId !== instance.instanceId ? <span id={domId} className="absolute left-0 top-0" aria-hidden="true" /> : null}
@@ -1830,36 +1506,9 @@ function InstanceBlock({
               {language === "zh" ? `跟随模板默认值（${templateDefaultInset}px）` : `Following template default (${templateDefaultInset}px)`}
             </span>
           )}
-          {instance.templateId === "image-row" ? (
-            <>
-              <span className="h-5 w-px bg-softWhite/12" aria-hidden="true" />
-              <span className="text-xs font-semibold text-softWhite/64">{language === "zh" ? "每行图片" : "Images per row"}</span>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4].map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={`editor-action min-w-8 justify-center ${effectiveImageRowColumns === value ? "border-acidGreen text-acidGreen" : ""}`}
-                    onClick={() => onContentChange({ ...instance.content, columns: value })}
-                  >
-                    {value}
-                  </button>
-                ))}
-              </div>
-              <span className="text-xs font-semibold text-softWhite/64">{language === "zh" ? "最后一行" : "Last row"}</span>
-              <div className="flex gap-1">
-                <button type="button" className={`editor-action ${effectiveImageRowAlignment === "start" ? "border-acidGreen text-acidGreen" : ""}`} onClick={() => onContentChange({ ...instance.content, rowAlignment: "start" })}>
-                  {language === "zh" ? "左对齐" : "Left"}
-                </button>
-                <button type="button" className={`editor-action ${effectiveImageRowAlignment === "center" ? "border-acidGreen text-acidGreen" : ""}`} onClick={() => onContentChange({ ...instance.content, rowAlignment: "center" })}>
-                  {language === "zh" ? "居中" : "Center"}
-                </button>
-              </div>
-            </>
-          ) : null}
         </div>
       ) : null}
-      <ResolvedInstancePreview instance={instance} instanceOrder={instanceOrder} projectId={projectId} locale={language} db={db} inlineEditing={isEditing} onContentChange={onContentChange} onDiskImagesChanged={onDiskImagesChanged} />
+      <ResolvedInstancePreview instance={instance} instanceOrder={instanceOrder} sectionIntroIndex={sectionIntroIndex} projectId={projectId} locale={language} db={db} inlineEditing={isEditing} onContentChange={onContentChange} onDiskImagesChanged={onDiskImagesChanged} />
       {isEditing && registered && !supportsInlineEditing ? (
         <InstanceEditor
           templateId={instance.templateId}
@@ -1868,9 +1517,6 @@ function InstanceBlock({
           language={language}
           onChange={onContentChange}
           db={db}
-          jumpTargets={jumpTargets}
-          projectId={projectId}
-          moduleId={instance.instanceId}
         />
       ) : null}
       {isEditing && registered && codeFillOpen ? (
@@ -1943,6 +1589,15 @@ export function TemplateFlowRegion({
     instances.filter((instance) => instance.regionId === regionId).map((instance) => [instance.instanceId, instance] as const),
   );
   const legacyNodeById = new Map(legacyItems.map((item) => [item.id, item.node] as const));
+  const sectionIntroIndexById = new Map<string, number>();
+  let sectionIntroCount = 0;
+  for (const unit of units) {
+    if (unit.kind !== "instance") continue;
+    const instance = instanceById.get(unit.instanceId);
+    if (instance?.templateId !== "statement-longform") continue;
+    sectionIntroIndexById.set(unit.instanceId, sectionIntroCount);
+    sectionIntroCount += 1;
+  }
 
   const insertInstance = (index: number, templateId: string) => {
     const registered = registeredTemplates.find((t) => t.meta.id === templateId);
@@ -1986,16 +1641,24 @@ export function TemplateFlowRegion({
       return;
     }
     const [instance] = matches;
-    if (instance?.templateId === "image-row" || instance?.templateId === "direction-compare") {
+    if (instance?.templateId === "image-row" || instance?.templateId === "direction-compare" || instance?.templateId === "universal-media") {
       const imageValues = instance.templateId === "image-row" && Array.isArray(instance.content.items)
         ? instance.content.items.flatMap((value) => {
             if (!value || typeof value !== "object" || Array.isArray(value)) return [];
             return [(value as Record<string, unknown>).image];
           })
-        : [instance.content.leftImage, instance.content.rightImage];
+        : instance.templateId === "universal-media"
+          ? (() => {
+              const media = instance.content.media;
+              if (!media || typeof media !== "object" || Array.isArray(media)) return [];
+              const record = media as Record<string, unknown>;
+              return [record.image, record.fallbackImage];
+            })()
+          : [instance.content.leftImage, instance.content.rightImage];
       const imageIds = imageValues.flatMap((image) => {
         if (!image || typeof image !== "object" || Array.isArray(image)) return [];
-        const imageId = (image as Record<string, unknown>).imageId;
+        const record = image as Record<string, unknown>;
+        const imageId = record.imageId ?? record.assetId ?? record.localImageId;
         return typeof imageId === "string" ? [imageId] : [];
       });
       if (imageIds.length) {
@@ -2052,6 +1715,7 @@ export function TemplateFlowRegion({
             <InstanceBlock
               instance={instanceById.get(unit.instanceId)!}
               instanceOrder={instances.findIndex((candidate) => candidate.instanceId === unit.instanceId)}
+              sectionIntroIndex={sectionIntroIndexById.get(unit.instanceId)}
               projectId={projectId}
               registeredTemplates={registeredTemplates}
               language={language}
@@ -2070,12 +1734,6 @@ export function TemplateFlowRegion({
               onLayoutSettingsChange={(layoutSettings) => updateInstanceLayoutSettings(unit.instanceId, layoutSettings)}
               onDiskImagesChanged={onDiskImagesChanged}
               domId={projectInstanceDomId(projectId, instanceById.get(unit.instanceId)!)}
-              jumpTargets={instances
-                .filter((candidate) => candidate.instanceId !== unit.instanceId)
-                .map((candidate, candidateIndex) => ({
-                  instanceId: candidate.instanceId,
-                  label: localizedTemplateInstanceLabel(candidate, registeredTemplates, language, candidateIndex),
-                }))}
             />
           )}
         </Fragment>
@@ -2095,3 +1753,7 @@ export function TemplateFlowRegion({
     </>
   );
 }
+
+
+
+

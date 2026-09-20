@@ -1,6 +1,6 @@
 import { createContext, useContext, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { Edit3, X } from "lucide-react";
 import { isCollectionExportCapture } from "../lib/collectionExportStaging";
+import { useEditingMode } from "../hooks/useEditingMode";
 
 export type CaseStudySaveStatus = "ready" | "saving" | "saved" | "error";
 
@@ -13,16 +13,29 @@ type CaseStudyEditorContextValue = {
 const CaseStudyEditorContext = createContext<CaseStudyEditorContextValue | null>(null);
 
 export function CaseStudyEditorProvider({ children }: { children: ReactNode }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const canEdit = import.meta.env.DEV;
+  // Content editing is automatic now -- no second "EDIT CONTENT" activation
+  // click. isEditing tracks editingMode directly; `suppressed` exists only
+  // for the one remaining caller that needs to hide inline editor chrome
+  // for a moment without touching global editingMode: the live Exact Web
+  // PDF capture (ProjectExactWebExportAction's onBeforeExport/onAfterExport
+  // via setIsEditing(false)/(true) below) mutates the real page's own DOM
+  // before screenshotting it, then restores editing once the export
+  // settles. Nothing else should call setIsEditing/toggleEditing anymore.
+  const [suppressed, setSuppressed] = useState(false);
+  // Content-editing capability is gated on the same shared owner-permission
+  // + editingMode pair every other editor surface uses (ProductionExportDock,
+  // HomePage's InlineTemplateField/slot pickers) -- not on
+  // import.meta.env.DEV alone, so it stays unavailable until the global
+  // Edit trigger is on, even in a DEV build.
+  const canEdit = useEditingMode();
 
   const value = {
-    isEditing: canEdit && isEditing,
+    isEditing: canEdit && !suppressed,
     setIsEditing: (next: boolean) => {
-      if (canEdit) setIsEditing(next);
+      if (canEdit) setSuppressed(!next);
     },
     toggleEditing: () => {
-      if (canEdit) setIsEditing((current) => !current);
+      if (canEdit) setSuppressed((current) => !current);
     },
   };
 
@@ -36,13 +49,9 @@ export function useCaseStudyEditor() {
 }
 
 export function CaseStudyEditorDock({
-  isEditing,
-  onToggle,
   actions,
   children,
 }: {
-  isEditing: boolean;
-  onToggle: () => void;
   actions?: ReactNode;
   children?: ReactNode;
 }) {
@@ -67,14 +76,26 @@ export function CaseStudyEditorDock({
       observer.disconnect();
       document.documentElement.style.removeProperty("--owner-dock-bottom");
     };
-  }, [isEditing, actions, children]);
+  }, [actions, children]);
 
-  // Also hidden during a collection export capture — this dock (EDIT
-  // CONTENT, EDIT PROJECT INFO, EXPORT EXACT WEB PDF) is owner-only chrome
-  // that must never appear in the captured screenshot the Portfolio
-  // Collection PDF embeds; the DOM-trim step upstream only drops nodes
-  // outside [data-project-route-shell], and this dock is rendered inside it.
-  if (!import.meta.env.DEV || isCollectionExportCapture()) return null;
+  // Gated on editingMode itself, not just import.meta.env.DEV -- this whole
+  // dock (EDIT PROJECT INFO, Quick Settings, EXPORT EXACT WEB PDF) is editor
+  // chrome, so it must disappear the moment editingMode is off, the same as
+  // ProductionExportDock's own contents. No separate "EDIT CONTENT"
+  // activation anymore -- content editing is automatic whenever editingMode
+  // is on (see CaseStudyEditorProvider), so this dock no longer needs an
+  // isEditing-driven toggle button; it renders whenever it's visible at
+  // all. Also hidden during a collection export capture, since this
+  // owner-only chrome must never appear in the captured screenshot the
+  // Portfolio Collection PDF embeds (the DOM-trim step upstream only drops
+  // nodes outside [data-project-route-shell], and this dock renders inside
+  // it). The literal `!import.meta.env.DEV` check stays first (same as
+  // every other editor-chrome gate in this codebase) so the whole component
+  // body is dead-code-eliminated from the production bundle, not just made
+  // to return null at runtime -- useEditingMode() alone can't be statically
+  // folded away since its result depends on a runtime hook chain.
+  const editingModeActive = useEditingMode();
+  if (!import.meta.env.DEV || !editingModeActive || isCollectionExportCapture()) return null;
 
   return (
     <div
@@ -83,21 +104,9 @@ export function CaseStudyEditorDock({
       className="fixed right-3 top-[calc(var(--site-header-height)+13px)] z-[80] flex max-w-[calc(100vw-1.5rem)] flex-col items-end gap-2 md:right-6"
     >
       <div className="flex max-w-full flex-wrap justify-end gap-2">
-        <button
-          type="button"
-          className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.12em] shadow-archive backdrop-blur transition ${
-            isEditing
-              ? "border-acidGreen/70 bg-acidGreen text-deepIndigo"
-              : "border-electricBlue/55 bg-deepIndigo/92 text-acidGreen hover:border-acidGreen/70 hover:bg-archiveBlue/92"
-          }`}
-          onClick={onToggle}
-        >
-          {isEditing ? <X className="h-3.5 w-3.5" aria-hidden="true" /> : <Edit3 className="h-3.5 w-3.5" aria-hidden="true" />}
-          {isEditing ? "DONE EDITING" : "EDIT CONTENT"}
-        </button>
         {actions}
       </div>
-      {isEditing ? children : null}
+      {children}
     </div>
   );
 }

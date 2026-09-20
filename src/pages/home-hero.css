@@ -1,0 +1,103 @@
+/* HomeHero -- section-scoped so a future "Hero doesn't look good" note
+   only touches this file, never the Project flow below it or the opening
+   aperture above it (Homepage 3.0 modular-rebuild architecture). Reuses
+   the shared tokens (--ink/--paper/--ease-reveal/etc.) declared on
+   .home-v2 in home-v2.css -- those stay global to the whole page, not
+   duplicated per module.
+
+   The Hero's name is always plain, readable DOM typography -- never
+   letterform/tube 3D geometry, a cursive script font, or a CSS
+   pseudo-3D/clip-path text effect (all three were tried and explicitly
+   rejected; see CHANGELOG.md). The failed continuous-3D-ambient-scene
+   experiment that used to frame this Hero has been removed outright, not
+   replaced with another decorative layer -- depth here comes from
+   spacing/scale/entry timing instead (see HomeIntroTransition.tsx). */
+
+.home-v2__hero {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: min(88vh, 760px);
+  box-sizing: border-box;
+  padding: clamp(96px, 16vh, 168px) 24px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.home-v2__name {
+  margin: 0;
+  color: var(--ink);
+  font-family: Inter, "Noto Sans SC", sans-serif;
+  font-size: clamp(48px, 8vw, 92px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+.home-v2__name[data-editable="true"] {
+  cursor: text;
+}
+.home-v2__name[data-editable="true"]:hover,
+.home-v2__name[data-editable="true"]:focus {
+  outline: 1px solid rgb(52 67 47 / 0.45);
+  outline-offset: 10px;
+  border-radius: 4px;
+}
+
+.home-v2__intro,
+.home-v2__role-line {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.8s var(--ease-reveal), transform 0.8s var(--ease-reveal);
+}
+.home-v2__hero.is-revealed .home-v2__intro { transition-delay: 0.55s; opacity: 1; transform: none; }
+.home-v2__hero.is-revealed .home-v2__role-line { transition-delay: 0.72s; opacity: 1; transform: none; }
+
+.home-v2__intro {
+  margin: 30px 0 0;
+  max-width: 640px;
+  font: 400 17px/1.65 Inter, "Noto Sans SC", sans-serif;
+  color: var(--ink-soft);
+  white-space: pre-line;
+}
+
+.home-v2__intro[data-editable="true"] {
+  cursor: text;
+}
+.home-v2__intro[data-editable="true"]:hover,
+.home-v2__intro[data-editable="true"]:focus {
+  outline: 1px solid rgb(52 67 47 / 0.45);
+  outline-offset: 6px;
+}
+
+.home-v2__role-line {
+  margin: 18px 0 0;
+  font: 500 13px/1.4 "Inter", sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.home-v2__role-line[data-editable="true"] {
+  cursor: text;
+}
+.home-v2__role-line[data-editable="true"]:hover,
+.home-v2__role-line[data-editable="true"]:focus {
+  outline: 1px solid rgb(52 67 47 / 0.45);
+  outline-offset: 6px;
+}
+
+@media (max-width: 760px) {
+  .home-v2__hero { min-height: auto; padding-top: 120px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-v2__intro,
+  .home-v2__role-line {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

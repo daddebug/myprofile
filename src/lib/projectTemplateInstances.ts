@@ -1,3 +1,5 @@
+import activePortfolioTemplateIds from "../data/activePortfolioTemplateIds.json";
+
 // Project-level "template instance" data — the layer that lets a real
 // project page hold one or more independent uses of a Template Library
 // template (project-header, image-row, etc.), each with its own saved
@@ -35,6 +37,18 @@ export type TemplateInstance = {
   content: Record<string, unknown>;
   layoutSettings?: TemplateInstanceLayoutSettings;
 };
+
+export type ActiveP2TemplateId = keyof typeof activePortfolioTemplateIds;
+
+export const ACTIVE_P2_TEMPLATE_IDS = Object.freeze(
+  Object.keys(activePortfolioTemplateIds) as ActiveP2TemplateId[],
+);
+
+const activeP2TemplateIdSet = new Set<string>(ACTIVE_P2_TEMPLATE_IDS);
+
+export function isActiveP2TemplateId(value: unknown): value is ActiveP2TemplateId {
+  return typeof value === "string" && activeP2TemplateIdSet.has(value);
+}
 
 export const REGION_END_ANCHOR = "__end__";
 
@@ -90,7 +104,7 @@ export function mergeTemplateInstances(value: unknown): TemplateInstance[] {
     const record = item as Record<string, unknown>;
     if (
       typeof record.instanceId !== "string"
-      || typeof record.templateId !== "string"
+      || !isActiveP2TemplateId(record.templateId)
       || !record.content
       || typeof record.content !== "object"
     ) return [];

@@ -1,23 +1,32 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowDown, ArrowUp, Clock, ImageIcon, Pencil, Plus, Settings2, Trophy, X } from "lucide-react";
 import { GameCoverImage } from "../components/GameCoverImage";
 import { GameExperienceManager } from "../components/GameExperienceManager";
 import { PageTransition } from "../components/PageTransition";
 import { useGameCover } from "../hooks/useGameCover";
-import { useOwnerMode } from "../hooks/useOwnerMode";
+import { useEditingMode } from "../hooks/useEditingMode";
+import { useSurfaceSignal } from "../hooks/useSurfaceSignal";
 import { formatAchievement, formatPaidAmount, formatPlaytime, gameTitle, useGameExperienceStore, type GameExperienceRecord } from "../lib/gameExperience";
 import { useLocale } from "../locales/LocaleContext";
 
 export function GameArchivePage() {
   const { locale } = useLocale();
-  const isOwnerMode = useOwnerMode();
+  // This page's own permanent dark (bg-deepIndigo) background, declared for
+  // ProductionExportDock's surface-adaptive glass buttons -- see
+  // useSurfaceSignal's own comment for why this can't just be page CSS.
+  useSurfaceSignal("dark");
+  // Editor chrome (Add game / Edit order / per-row owner toolbar) is gated
+  // on isOwner && editingMode via useEditingMode() -- not owner permission
+  // alone, and not auto-shown on mount, so this page's toolbar stays hidden
+  // until the global Edit trigger is on, same as every other editor surface.
+  const editingMode = useEditingMode();
   const store = useGameExperienceStore();
   const [query, setQuery] = useState("");
   const [managing, setManaging] = useState(false);
   const [editRecordId, setEditRecordId] = useState<string | null>(null);
   const [startWithNewGame, setStartWithNewGame] = useState(false);
-  const [isEditingGames, setIsEditingGames] = useState(isOwnerMode);
+  const [isEditingGames, setIsEditingGames] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const visibleGames = useMemo(() => store.records
     .filter((game) => game.publication.visibility === "public" && !game.publication.archived)
@@ -29,13 +38,9 @@ export function GameArchivePage() {
   const recordedHours = store.records.reduce((sum, game) => sum + (game.stats.playtimeHours ?? 0), 0);
   const selectedCount = store.records.filter((game) => game.publication.showOnHomepage && !game.publication.archived).length;
 
-  useEffect(() => {
-    if (isOwnerMode) setIsEditingGames(true);
-  }, [isOwnerMode]);
-
   return <PageTransition>
     <main className="min-h-screen bg-deepIndigo pb-28 pt-16 text-softWhite md:pb-36 md:pt-24">
-      {import.meta.env.DEV ? isEditingGames ? <div className="fixed right-4 top-[84px] z-[80] flex max-w-[calc(100vw-2rem)] flex-wrap justify-end gap-2 md:right-6" data-game-experience-editor-actions><button type="button" className="editor-action bg-deepIndigo/95 text-acidGreen shadow-archive" onClick={() => { setStartWithNewGame(true); setEditRecordId(null); setManaging(true); }}><Plus className="h-3.5 w-3.5" />{locale === "zh" ? "新增游戏经验" : "Add game"}</button><button type="button" className="editor-action bg-deepIndigo/95 shadow-archive" onClick={() => { setStartWithNewGame(false); setEditRecordId(null); setManaging(true); }}><Settings2 className="h-3.5 w-3.5" />{locale === "zh" ? "编辑排序" : "Edit order"}</button><span className="editor-action cursor-default bg-deepIndigo/95 text-softWhite/62">{locale === "zh" ? `首页展示：${selectedCount} / ${store.homepageLimit}` : `Homepage: ${selectedCount} / ${store.homepageLimit}`}</span><button type="button" className="editor-action bg-deepIndigo/95 shadow-archive" onClick={() => setIsEditingGames(false)}><X className="h-3.5 w-3.5" />{locale === "zh" ? "完成编辑" : "Done"}</button></div> : <button type="button" className="fixed right-4 top-[84px] z-[80] inline-flex items-center gap-2 rounded-full border border-acidGreen/55 bg-deepIndigo/95 px-4 py-2.5 font-mono text-[10px] font-bold tracking-[0.08em] text-acidGreen shadow-archive md:right-6" onClick={() => setIsEditingGames(true)}><Pencil className="h-3.5 w-3.5" />{locale === "zh" ? "编辑游戏经验" : "Edit game experience"}</button> : null}
+      {editingMode ? isEditingGames ? <div className="fixed right-4 top-[84px] z-[80] flex max-w-[calc(100vw-2rem)] flex-wrap justify-end gap-2 md:right-6" data-game-experience-editor-actions><button type="button" className="editor-action bg-deepIndigo/95 text-acidGreen shadow-archive" onClick={() => { setStartWithNewGame(true); setEditRecordId(null); setManaging(true); }}><Plus className="h-3.5 w-3.5" />{locale === "zh" ? "新增游戏经验" : "Add game"}</button><button type="button" className="editor-action bg-deepIndigo/95 shadow-archive" onClick={() => { setStartWithNewGame(false); setEditRecordId(null); setManaging(true); }}><Settings2 className="h-3.5 w-3.5" />{locale === "zh" ? "编辑排序" : "Edit order"}</button><span className="editor-action cursor-default bg-deepIndigo/95 text-softWhite/62">{locale === "zh" ? `首页展示：${selectedCount} / ${store.homepageLimit}` : `Homepage: ${selectedCount} / ${store.homepageLimit}`}</span><button type="button" className="editor-action bg-deepIndigo/95 shadow-archive" onClick={() => setIsEditingGames(false)}><X className="h-3.5 w-3.5" />{locale === "zh" ? "完成编辑" : "Done"}</button></div> : <button type="button" className="fixed right-4 top-[84px] z-[80] inline-flex items-center gap-2 rounded-full border border-acidGreen/55 bg-deepIndigo/95 px-4 py-2.5 font-mono text-[10px] font-bold tracking-[0.08em] text-acidGreen shadow-archive md:right-6" onClick={() => setIsEditingGames(true)}><Pencil className="h-3.5 w-3.5" />{locale === "zh" ? "编辑游戏经验" : "Edit game experience"}</button> : null}
       <section className="site-container">
         <p className="font-mono text-[11px] font-bold tracking-[0.24em] text-acidGreen">PLAY HISTORY / DESIGN NOTES</p>
         <div className="mt-5 grid gap-8 lg:grid-cols-[minmax(0,1.25fr)_minmax(300px,0.75fr)] lg:items-end"><div><h1 className="max-w-5xl font-display text-[clamp(3rem,7vw,7.5rem)] font-semibold leading-[0.94] text-softWhite">{locale === "zh" ? "游戏经历" : "Game Experience"}</h1><p className="mt-5 font-display text-xl text-acidGreen/90 md:text-2xl">{locale === "zh" ? "游玩时长、成就、评测与设计观察。" : "Playtime, achievements, reviews, and design observations."}</p></div><p className="max-w-xl text-base leading-8 text-softWhite/62 lg:pb-1">{locale === "zh" ? "记录我为什么进入一款游戏、它做对了什么、留下了哪些问题，以及这些观察如何帮助我的设计判断。" : "A record of why I played, what each game does well, where it falls short, and how those observations shape my design judgment."}</p></div>
@@ -45,7 +50,7 @@ export function GameArchivePage() {
       <section className="site-container mt-12">
         <label className="block max-w-md"><span className="sr-only">{locale === "zh" ? "搜索游戏" : "Search games"}</span><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={locale === "zh" ? "按标题或标签搜索" : "Search by title or tag"} className="w-full rounded-full border border-softWhite/12 bg-softWhite/[0.04] px-5 py-3 text-sm text-softWhite outline-none placeholder:text-softWhite/35 focus:border-acidGreen/60" /></label>
         <div className="mt-12 columns-1 [column-gap:1.5rem] lg:columns-2 lg:[column-gap:1.75rem]">
-          {visibleGames.map((game, index) => <GameExperienceRow key={game.id} game={game} locale={locale} index={index} owner={isEditingGames && import.meta.env.DEV} prefersReducedMotion={Boolean(prefersReducedMotion)} onManage={() => { setStartWithNewGame(false); setEditRecordId(game.id); setManaging(true); }} />)}
+          {visibleGames.map((game, index) => <GameExperienceRow key={game.id} game={game} locale={locale} index={index} owner={isEditingGames && editingMode} prefersReducedMotion={Boolean(prefersReducedMotion)} onManage={() => { setStartWithNewGame(false); setEditRecordId(game.id); setManaging(true); }} />)}
         </div>
       </section>
       {managing ? <GameExperienceManager locale={locale} store={store} initialEditingId={editRecordId} startWithNewGame={startWithNewGame} onClose={() => { setManaging(false); setEditRecordId(null); setStartWithNewGame(false); }} /> : null}

@@ -18,11 +18,11 @@
 // (via ProjectPage.tsx) can prefer it over the browser's own (empty, in
 // Playwright) storage.
 
-import { mergeTemplateInstances, type TemplateInstance } from "./projectTemplateInstances";
+import type { TemplateInstance } from "./projectTemplateInstances";
 import { getProjectBodyAsset } from "./projectBodyAssetDb";
 import { getLocalProjectDocumentStoreSnapshot, type ProjectDocument } from "./projectDocuments";
 import { getPublishedProjectDraft } from "./publishedPortfolio";
-import { backfillMatchingTemplateImagePublicPaths } from "./templateImageReferences";
+import { resolveDevProjectDraft } from "./dynamicProjectDraftHydration";
 
 const createJobEndpoint = "/__local-export/collection/create-job";
 const jobProjectEndpoint = (jobId: string, projectId: string) =>
@@ -71,22 +71,8 @@ function readLocalDynamicDraft(projectId: string): StagedDynamicDraft | null {
   try {
     const raw = window.localStorage.getItem(dynamicDraftStorageKey(projectId));
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as unknown;
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || (parsed as Record<string, unknown>).version !== 1) return null;
-    const instances = (parsed as Record<string, unknown>).templateInstances;
     const published = getPublishedProjectDraft(projectId);
-    const publishedInstances = published && typeof published === "object" && !Array.isArray(published)
-      ? mergeTemplateInstances((published as Record<string, unknown>).templateInstances)
-      : [];
-    const normalizedInstances = backfillMatchingTemplateImagePublicPaths(
-      Array.isArray(instances) ? (instances as TemplateInstance[]) : [],
-      publishedInstances,
-    );
-    return {
-      version: 1,
-      templateInstances: normalizedInstances,
-      updatedAt: typeof (parsed as Record<string, unknown>).updatedAt === "string" ? (parsed as Record<string, unknown>).updatedAt as string : new Date(0).toISOString(),
-    };
+    return resolveDevProjectDraft(raw, published).draft;
   } catch {
     return null;
   }

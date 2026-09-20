@@ -29,7 +29,15 @@ function sendJson(res: ServerResponse, status: number, value: object) {
 
 function isLocalRequest(req: IncomingMessage) {
   const address = req.socket.remoteAddress ?? "";
-  return ["::1", "127.0.0.1", "::ffff:127.0.0.1"].includes(address) && req.headers.host === "localhost:5173";
+  const host = req.headers.host ?? "";
+  let hostname = "";
+  try {
+    hostname = new URL(`http://${host}`).hostname;
+  } catch {
+    return false;
+  }
+  return ["::1", "127.0.0.1", "::ffff:127.0.0.1"].includes(address)
+    && ["localhost", "127.0.0.1", "[::1]", "::1"].includes(hostname);
 }
 
 async function readBody(req: IncomingMessage) {
@@ -57,9 +65,12 @@ function slug(value: string) {
 function validateSvg(value: unknown) {
   const svg = safeText(value, "SVG", 48 * 1024);
   if (!/^<svg\b[\s\S]*<\/svg>$/.test(svg)) throw new Error("SVG must be a complete SVG document.");
+  if (!/xmlns=["']http:\/\/www\.w3\.org\/2000\/svg["']/.test(svg)) throw new Error("SVG must use the standard SVG namespace.");
   if (!/viewBox=["']0 0 64 64["']/.test(svg) || !/fill=["']none["']/.test(svg)) throw new Error("SVG must use the canonical 64 × 64 line-icon geometry.");
   if (!/stroke=["'](?:#ffffff|white|currentColor)["']/i.test(svg)) throw new Error("SVG must use a white or currentColor stroke.");
-  if (/<(?:script|foreignObject|image|use|style|a)\b/i.test(svg) || /\bon[a-z]+\s*=|\bhref\s*=|url\s*\(|data:|https?:/i.test(svg)) throw new Error("SVG contains unsafe or external content.");
+  if (!/stroke-linecap=["']round["']/.test(svg) || !/stroke-linejoin=["']round["']/.test(svg)) throw new Error("SVG must use rounded strokes.");
+  const svgWithoutNamespace = svg.replace(/\s+xmlns=["']http:\/\/www\.w3\.org\/2000\/svg["']/, "");
+  if (/<(?:script|foreignObject|image|use|style|a)\b/i.test(svgWithoutNamespace) || /\bon[a-z]+\s*=|\bhref\s*=|url\s*\(|data:|https?:/i.test(svgWithoutNamespace)) throw new Error("SVG contains unsafe or external content.");
   for (const match of svg.matchAll(/<\/?([A-Za-z][\w:-]*)\b/g)) {
     if (!allowedElements.has(match[1])) throw new Error(`SVG element <${match[1]}> is not allowed.`);
   }

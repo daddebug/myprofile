@@ -7,17 +7,11 @@ export type TemplateSourceRecord = {
 export type LayoutControls = Record<string, string>;
 
 export const templateFilesById: Record<string, string> = {
-  "project-header": "ProjectHeaderTemplate",
   "statement-longform": "StatementLongformTemplate",
-  "xmind-breakdown": "XMindBreakdownTemplate",
   "supporting-note": "SupportingNoteTemplate",
-  "phase-milestones": "PhaseMilestonesTemplate",
-  "circle-summary": "CircleSummaryTemplate",
-  "decision-table": "DecisionTableTemplate",
   "image-row": "ImageRowTemplate",
-  "figma-prototype": "FigmaPrototypeTemplate",
-  "process-flow": "ProcessFlowTemplate",
-  "dual-viewpoint-analysis": "DualViewpointAnalysisTemplate",
+  "universal-media": "UniversalMediaTemplate",
+  "direction-compare": "DirectionCompareTemplate",
 };
 
 async function readJson<T>(response: Response): Promise<T> {

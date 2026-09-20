@@ -1,0 +1,111 @@
+/* Homepage 3.0 -- a modular rebuild, one file per section (Homepage 3.0
+   Modular Interaction Redesign): this file now only owns shared page-
+   level tokens plus the Project-flow grid and the closing long-form/
+   footer -- the Hero has its own stylesheet (home-hero.css) and the
+   opening aperture has its own (home-intro.css), so a change to one
+   module's look never touches the others. Not a literal Figma sync (the
+   old fixed-anchor "主界面" composition this superseded is intentionally
+   not used as visual authority here -- see CHANGELOG.md for the full
+   design contract this file implements: art direction, material system,
+   motion system, performance/fallback strategy). Shares p2-page-rail's
+   own left/right margin convention (130px at 1440 design width) only for
+   the footer, which keeps its existing cross-page visual family
+   untouched.
+
+   A prior continuous-3D-ambient-scene experiment (a scroll-driven organic
+   tube/ribbon meant to frame the Hero and Project flow) was built,
+   iterated on twice, and ultimately removed outright rather than kept as
+   partially-working code -- see CHANGELOG.md/TASKS.md for the full
+   account. This round replaces it with a plain, restrained opening
+   choreography (home-intro.css) instead of any decorative WebGL layer. */
+
+.home-v2 {
+  --ink: #34432f;
+  --ink-soft: rgb(52 67 47 / 0.72);
+  --ink-faint: rgb(52 67 47 / 0.46);
+  --paper: #f7f6ed;
+  --glass: rgb(255 255 255 / 0.55);
+  --line: rgb(52 67 47 / 0.16);
+  /* Named curves from the design contract -- never a bare `ease`/`linear`
+     literal at a call site. */
+  --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-playful: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-cut: cubic-bezier(0.87, 0, 0.13, 1);
+
+  width: 100%;
+  height: 100dvh;
+  background: var(--paper);
+  color: var(--ink);
+  overflow: hidden;
+  /* Phase 3: contains all of this page's own z-index comparisons (fixed
+     nav/indicator above the scroll container, the WebGL canvas below
+     it) so they can never collide with unrelated fixed chrome elsewhere
+     in the app (ProductionExportDock, etc.), without needing to know or
+     match those elements' own z-index values. */
+  isolation: isolate;
+}
+
+/* Plain positioning context for the hero/grid/long-form DOM content --
+   gives its own children (z-index 1 throughout below) a stacking
+   context. */
+.home-v2__content-stage {
+  position: relative;
+}
+
+/* ---------------------------------------------------------------------
+   Hero -- see home-hero.css.
+   --------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------
+   Portfolio flow -- see home-project-flow.css (HomeProjectFlow.tsx).
+   --------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------
+   Long-form close + footer
+   --------------------------------------------------------------------- */
+
+.home-v2__long {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 48px 24px 120px;
+  display: flex;
+  justify-content: center;
+}
+.home-v2__long-text {
+  width: 100%;
+  max-width: 760px;
+  margin: 0;
+  text-align: center;
+  font: 300 19px/1.6 Inter, "Noto Sans SC", sans-serif;
+  color: var(--ink);
+  white-space: pre-line;
+}
+.home-v2__long-text[data-editable="true"] {
+  cursor: text;
+}
+.home-v2__long-text[data-editable="true"]:hover,
+.home-v2__long-text[data-editable="true"]:focus {
+  outline: 1px solid rgb(52 67 47 / 0.45);
+  outline-offset: 6px;
+}
+
+/* Footer credit sits on the footer's white-on-green bar -- InlineLayoutTextField
+   has no hardcoded colors of its own (unlike the old InlineTemplateField), so
+   this just needs the same light outline treatment as the Hero fields, tinted
+   for a dark background instead of the light Hero surface. This footer's own
+   art style (portfolio2-project-footer) is untouched by this redesign. */
+[data-home-footer] [data-editable="true"] {
+  cursor: text;
+}
+[data-home-footer] [data-editable="true"]:hover,
+[data-home-footer] [data-editable="true"]:focus {
+  outline: 1px solid rgba(255, 255, 255, 0.45);
+  outline-offset: 4px;
+}
+
+/* Mobile/reduced-motion for the long-form close: see home-project-flow.css
+   for the Project flow's own equivalents, and home-hero.css/home-intro.css
+   for the Hero and opening-aperture ones. Nothing below this line has its
+   own responsive/motion variance to declare right now. */
+

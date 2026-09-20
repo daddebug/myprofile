@@ -4,7 +4,7 @@ export const PORTFOLIO_PDF_CONFIG_STORAGE_KEY = "dilida-portfolio:pdf-export-con
 
 export type PdfPreset = "compact" | "standard" | "detailed";
 export type PdfTheme = "website-dark" | "print-light";
-export type PdfSectionId = "cover" | "profile" | "projects" | "ui-works" | "games" | "contact";
+export type PdfSectionId = "cover" | "profile" | "projects" | "games" | "contact";
 export type PdfDetailLevel = "compact" | "detailed";
 
 export type PdfSectionConfig = {
@@ -26,7 +26,6 @@ export type PdfProjectItemConfig = {
   selectedMediaIds: string[];
 };
 
-export type PdfUiItemConfig = { id: string; enabled: boolean; order: number };
 export type PdfGameItemConfig = { id: string; enabled: boolean; order: number; detailLevel: "metadata" | "summary" | "detail" };
 
 export type PortfolioPdfConfig = {
@@ -38,35 +37,32 @@ export type PortfolioPdfConfig = {
   theme: PdfTheme;
   sections: PdfSectionConfig[];
   projects: PdfProjectItemConfig[];
-  uiWorks: PdfUiItemConfig[];
   games: PdfGameItemConfig[];
   profile: { detailLevel: "concise" | "full"; showSkills: boolean; showExperience: boolean; showEducation: boolean };
-  uiOptions: { density: 2 | 4 | 6; showCaptions: boolean; cropMode: "contain" | "cover" };
   gameOptions: { showAchievements: boolean; showTags: boolean };
 };
 
-type ConfigInputs = { locale: Locale; projectIds: string[]; uiIds: string[]; gameIds: string[] };
+type ConfigInputs = { locale: Locale; projectIds: string[]; gameIds: string[] };
 
-const sectionOrder: PdfSectionId[] = ["cover", "profile", "projects", "ui-works", "games", "contact"];
+const sectionOrder: PdfSectionId[] = ["cover", "profile", "projects", "games", "contact"];
 
 export function pdfSectionLabel(id: PdfSectionId, locale: Locale) {
   const values: Record<PdfSectionId, { zh: string; en: string }> = {
     cover: { zh: "封面", en: "Cover" },
     profile: { zh: "个人资料与经历", en: "Profile & Experience" },
     projects: { zh: "项目案例", en: "Projects" },
-    "ui-works": { zh: "UI 作品", en: "UI Works" },
     games: { zh: "游戏经历", en: "Game Experience" },
     contact: { zh: "联系方式", en: "Contact" },
   };
   return values[id][locale];
 }
 
-export function createPortfolioPdfConfig({ locale, projectIds, uiIds, gameIds }: ConfigInputs, preset: PdfPreset = "standard"): PortfolioPdfConfig {
+export function createPortfolioPdfConfig({ locale, projectIds, gameIds }: ConfigInputs, preset: PdfPreset = "standard"): PortfolioPdfConfig {
   const limits = preset === "compact"
-    ? { projects: 3, ui: 6, games: 3 }
+    ? { projects: 3, games: 3 }
     : preset === "standard"
-      ? { projects: 3, ui: 12, games: 5 }
-      : { projects: 5, ui: 18, games: 10 };
+      ? { projects: 3, games: 5 }
+      : { projects: 5, games: 10 };
   const detailed = preset !== "compact";
   const year = new Date().getFullYear();
   return {
@@ -89,10 +85,8 @@ export function createPortfolioPdfConfig({ locale, projectIds, uiIds, gameIds }:
       selectedSectionIds: [],
       selectedMediaIds: [],
     })),
-    uiWorks: uiIds.map((id, order) => ({ id, enabled: order < limits.ui, order })),
     games: gameIds.map((id, order) => ({ id, enabled: order < limits.games, order, detailLevel: preset === "detailed" ? "detail" : "summary" })),
     profile: { detailLevel: preset === "compact" ? "concise" : "full", showSkills: true, showExperience: true, showEducation: true },
-    uiOptions: { density: preset === "compact" ? 6 : preset === "standard" ? 4 : 4, showCaptions: true, cropMode: "contain" },
     gameOptions: { showAchievements: true, showTags: true },
   };
 }
@@ -100,7 +94,7 @@ export function createPortfolioPdfConfig({ locale, projectIds, uiIds, gameIds }:
 function isConfig(value: unknown, locale: Locale): value is PortfolioPdfConfig {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const candidate = value as Partial<PortfolioPdfConfig>;
-  return candidate.version === 1 && candidate.locale === locale && Array.isArray(candidate.sections) && Array.isArray(candidate.projects) && Array.isArray(candidate.uiWorks) && Array.isArray(candidate.games);
+  return candidate.version === 1 && candidate.locale === locale && Array.isArray(candidate.sections) && Array.isArray(candidate.projects) && Array.isArray(candidate.games);
 }
 
 export function loadPortfolioPdfConfig(inputs: ConfigInputs): PortfolioPdfConfig {
@@ -119,7 +113,6 @@ export function loadPortfolioPdfConfig(inputs: ConfigInputs): PortfolioPdfConfig
       ...saved,
       sections: mergeItems(saved.sections, defaults.sections),
       projects: mergeItems(saved.projects, defaults.projects),
-      uiWorks: mergeItems(saved.uiWorks, defaults.uiWorks),
       games: mergeItems(saved.games, defaults.games),
     };
   } catch {

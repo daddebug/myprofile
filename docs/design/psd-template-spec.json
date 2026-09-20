@@ -1,0 +1,2172 @@
+{
+  "status": "DEPRECATED / LEGACY -- superseded by docs/design/figma-template-map.json. Kept for historical reference only; not used to sync new web work. See skills/figma-template-sync/SKILL.md.",
+  "$schema": "see PSD_TEMPLATE_SPEC.md for field meanings and usage rules",
+  "sourceFile": {
+    "name": "网页设计模板.psd",
+    "location": "OneDrive-redirected Desktop (%OneDrive%\\Desktop), not in the repo",
+    "readAt": "2026-09-08",
+    "readTool": "ag-psd (Node), now a repo devDependency -- see scripts/psd/ (inspect-psd.mjs, diff-psd.mjs, extract-template-spec.mjs).",
+    "note": "Canvas measured as 1920x1752 (a variable-height PSD document, not a fixed 1920x1080). The user's stated 1920x1080 is the per-Frame design unit (see document.baseFrameHeight below), not the document's own height -- these are two different numbers and must not be conflated.",
+    "liveFileChangedDuringThisTask": "The PSD on disk changed (new mtime/size, new layers) partway through this infrastructure task -- diff-psd.mjs correctly reported both sections as changed. rawExtraction on both sections below now reflects the NEW file content; the curated `elements`/`variants`/`status` fields were deliberately left as-is (documenting the PREVIOUS read) since this task's scope is infrastructure, not a template resync. A real sync (reasoning over the new rawExtraction to update elements, then updating the actual template code) is pending and should be run as its own explicit task -- see the diffs summarized in each section's rawExtraction for what changed."
+  },
+  "document": {
+    "baseWidth": 1920,
+    "baseFrameHeight": 1080,
+    "note": "Every major portfolio section is designed to fit inside one 1920x1080 Frame where possible (see frames.FRAME_01_COVER); the PSD document itself just keeps growing downward as more Frames are added below.",
+    "measuredHeight": 1752
+  },
+  "canvas": {
+    "width": 1920,
+    "height": 1752,
+    "note": "kept for backward compatibility with the first version of this spec; document.baseWidth/measuredHeight above are the canonical fields going forward."
+  },
+  "guideLayers": {
+    "status": "candidates found, not yet renamed to the GUIDE_* convention",
+    "candidates": [
+      {
+        "sourceLayerName": "标题+目录大小",
+        "translatedName": "Title+TOC size",
+        "x": -2,
+        "y": 0,
+        "width": 1923,
+        "height": 1082,
+        "likelyRole": "GUIDE_FRAME for FRAME_01_COVER",
+        "note": "Appeared in the PSD partway through this task (was not present in the first read). Its bounds (1923x1082 at roughly x=0,y=0) are almost exactly the stated 1920x1080 Frame unit -- much stronger evidence for FRAME_01_COVER.bounds than the earlier gradient-wash inference. Not yet renamed to GUIDE_FRAME_01_COVER; this script cannot write to the PSD (read-only), so renaming is a manual step or a future write-back feature."
+      },
+      {
+        "sourceLayerName": "标题目录范围给个渐变",
+        "translatedName": "Title+TOC range, give it a gradient",
+        "x": -1,
+        "y": 0,
+        "width": 1923,
+        "height": 1082,
+        "likelyRole": "GUIDE_RANGE (or GUIDE_FRAME, duplicate of the above) -- name suggests it also doubles as a real background-gradient layer, not a pure non-rendered guide",
+        "note": "Same bounds as 标题+目录大小. If this layer is actually painted/visible in the composite (not just a marker), it may not be a pure GUIDE layer by this workflow's definition (guides are never rendered) -- worth clarifying with the user before assuming it's purely a range annotation."
+      }
+    ],
+    "note": "Per PSD_TEMPLATE_WORKFLOW.md, guide layers take priority over inferred bounding boxes the moment they exist. These two candidates are new since the first read this task did; they are recorded here as candidates rather than promoted to authoritative GUIDE_FRAME status because (a) they are not yet named per the GUIDE_* convention and (b) it's not yet confirmed the second one is non-rendered. Ask the user to confirm/rename before fully relying on them."
+  },
+  "alignmentAnchors": {
+    "contentLeft": {
+      "value": 92,
+      "ratio": 0.0479,
+      "source": "confirmed",
+      "note": "Hero's META_CATEGORY/TITLE_MAIN/DESC all start at x=91-92 (internally consistent). SECTION_02_PHASE_MILESTONES's row starts at x=94 -- a 3px difference, read as manual-placement tolerance around the same intended anchor, not two deliberately different margins. Both sections should reference this one anchor; a future template must not invent its own left margin."
+    },
+    "contentRight": {
+      "value": null,
+      "source": "unconfirmed",
+      "note": "Not a meaningful shared anchor yet. Hero's title box (x=91, width=1656) ends at x=1747, leaving an asymmetric 173px on the right -- driven by clearing DECOR_ORB_RIGHT, not a mirrored right margin. SECTION_02_PHASE_MILESTONES's canonical 5-column row (if trusted) would end around x=1833, leaving 87px, closer to symmetric with contentLeft -- but see that section's variants.5 note on why the canonical-5 geometry isn't trusted yet either. Do not invent a contentRight value from this; leave unconfirmed until a section provides unambiguous evidence."
+    }
+  },
+  "frames": {
+    "FRAME_01_COVER": {
+      "coverBundle": true,
+      "note": "Hero + Phase Milestones together form the default 'cover page' unit for a new project (title/summary/metadata + a table-of-contents-style node row). Per the current task's instructions, the cover-bundle project-creation UI itself is NOT being built yet -- this is architecture/mapping only.",
+      "bounds": {
+        "status": "candidate-confirmed, not yet GUIDE_FRAME-convention-confirmed (see guideLayers.candidates above)",
+        "x": -2,
+        "y": 0,
+        "width": 1923,
+        "height": 1082,
+        "note": "Was 'inferred' from a background gradient wash's rough extent in the first read; a much stronger candidate guide layer ('标题+目录大小', bounds 1923x1082) appeared in a later read of the same PSD and is used here instead. Still short of full confidence because that layer hasn't been confirmed as an intentional GUIDE_FRAME (vs. some other purpose) and isn't named per convention yet."
+      },
+      "sections": {
+        "SECTION_01_HERO": {
+          "templateId": "unmapped -- see PSD_TEMPLATE_WORKFLOW.md \"Web template mapping\" (implemented ad hoc in DynamicProjectPage.tsx's built-in hero, not a Template Library template)",
+          "sourceLayerGroup": "标题",
+          "status": "re-synced 2026-09-08 (first real code sync, not just a spec update) -- see src/pages/DynamicProjectPage.tsx / src/pages/dynamic-project-hero.css. Coordinates below are from the 03:05 PSD read (the whole hero content shifted up ~90px vs the very first read; ratios were recomputed against the current values, not the stale ones).",
+          "implementationNote": "The shared heroContainer (caseStudyLayout, used by other pages too) caps content at --site-content-max-width (1536px) and centers it -- but the PSD hero is an edge-to-edge, full-viewport-width composition. .project-hero (only that class, not the shared heroContainer/heroSection) now breaks out to 100vw so its own vw-based ratios are measured against the same 1920 reference the PSD uses, instead of silently being measured against a narrower, off-center 1536px box. Verified live: without this, every position in this section would have been wrong the moment the real viewport exceeds 1536px.",
+          "section": {
+            "note": "No single container/background layer isolates just this section's own top/bottom padding; bounds below are the content layers' own bounding extent, not a measured section band.",
+            "contentTop": 111,
+            "contentBottom": 585,
+            "contentTopRatio": 0.0578,
+            "contentBottomRatio": 0.3047
+          },
+          "elements": {
+            "META_CATEGORY": {
+              "role": "ITEM",
+              "kind": "eyebrow / category line",
+              "sourceLayerName": "Game UX / 体验设计 / 系统交互",
+              "text": "Game UX / 体验设计 / 系统交互",
+              "x": 92,
+              "y": 111,
+              "width": 414,
+              "height": 27,
+              "xRatio": 0.0479,
+              "yRatio": 0.0578,
+              "widthRatio": 0.2156,
+              "heightRatio": 0.0154,
+              "fontFamily": {
+                "value": "Microsoft YaHei, Microsoft YaHei UI, sans-serif",
+                "source": "policy",
+                "status": "confirmed",
+                "note": "PSD layer font is MicrosoftYaHei-Bold; the site-wide font policy forces Microsoft YaHei regardless, so no conflict here."
+              },
+              "fontSize": {
+                "value": 28,
+                "ratio": 0.0146,
+                "source": "psd",
+                "status": "confirmed"
+              },
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "leading": 40,
+              "fill": {
+                "value": "rgb(45, 192, 42)",
+                "source": "psd",
+                "status": "confirmed"
+              }
+            },
+            "META_YEAR": {
+              "role": "ITEM",
+              "kind": "duration / year, rendered as part of DECOR_RULER's cluster",
+              "sourceLayerName": "2026",
+              "text": "2026",
+              "x": 103,
+              "y": 434,
+              "width": 68,
+              "height": 21,
+              "xRatio": 0.0536,
+              "yRatio": 0.2260,
+              "widthRatio": 0.0354,
+              "heightRatio": 0.0109,
+              "fontFamily": {
+                "value": "Microsoft YaHei, Microsoft YaHei UI, sans-serif",
+                "source": "policy",
+                "status": "confirmed"
+              },
+              "fontSize": {
+                "value": 28,
+                "ratio": 0.0146,
+                "source": "psd",
+                "status": "confirmed"
+              },
+              "fontWeight": 700,
+              "fill": {
+                "value": "rgb(45, 192, 42)",
+                "source": "psd",
+                "status": "confirmed"
+              },
+              "note": "Same font/size/color as META_CATEGORY, but NOT on the same row -- it sits inside the DECOR_RULER cluster, well below the category. RESYNCED: shipped as .project-hero__ruler-year, absolutely positioned at the ruler's own local (14,100), no longer in the .project-hero__meta flex row.",
+              "knownGap": "The ruler (and this year label) sits at a fixed position measured against the PSD's 2-line reference title. A project whose title is short enough to render as ONE line leaves the flow-positioned DESC much higher than in the reference, and it can visually overlap this fixed-position ruler/year -- confirmed live on a real project (ui-16ienxj, whose title fits on one line at 1920px). The PSD does not define what should happen for a short title, so this is left as-is (matching the confirmed 2-line reference exactly) rather than inventing an unconfirmed repositioning rule; flagged for the user to decide (always author 2-line titles, or request a follow-up rule for the short-title case)."
+            },
+            "TITLE_MAIN": {
+              "role": "ITEM",
+              "kind": "hero title, manual line breaks authored directly in the PSD text content",
+              "sourceLayerName": "轻竞技卡牌公会战                  社交体验优化 拷贝",
+              "text": "轻竞技卡牌公会战\\n                 社交体验优化",
+              "manualLineBreak": true,
+              "line2IndentTechnique": "leading space characters inside the text run itself (~17 spaces), not a CSS margin/transform",
+              "x": 91,
+              "y": 196,
+              "width": 1656,
+              "height": 306,
+              "xRatio": 0.0474,
+              "yRatio": 0.1021,
+              "widthRatio": 0.8625,
+              "heightRatio": 0.1747,
+              "fontFamily": {
+                "value": "Microsoft YaHei, Microsoft YaHei UI, sans-serif",
+                "source": "policy",
+                "status": "confirmed",
+                "note": "PSD layer font is MicrosoftYaHei-Bold -- matches policy already."
+              },
+              "fontSize": {
+                "value": 150,
+                "ratio": 0.0781,
+                "source": "psd",
+                "status": "confirmed"
+              },
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "leading": 160,
+              "lineHeightRatio": 1.067,
+              "baseFill": {
+                "value": "rgb(244, 245, 250)",
+                "source": "psd",
+                "status": "confirmed"
+              },
+              "note": "baseFill is a flat near-white (matches the site's softWhite token, #F4F5FA), NOT a multi-stop gradient text-fill. The green-to-white look comes from a separate gradientOverlay layer effect (see gradientOverlay below), not the text's own fill.",
+              "gradientOverlay": {
+                "enabled": true,
+                "type": "linear",
+                "angle": 90,
+                "reverse": true,
+                "scale": 1.14,
+                "colorStops": [
+                  {
+                    "color": "rgb(24, 255, 0)",
+                    "location": 0
+                  }
+                ],
+                "opacityStops": [
+                  {
+                    "opacity": 1,
+                    "location": 0
+                  },
+                  {
+                    "opacity": 0,
+                    "location": 1
+                  }
+                ],
+                "source": "psd",
+                "status": "confirmed",
+                "note": "RESYNCED: shipped as a 2-stop `linear-gradient(180deg, rgb(24,255,0) 0%, rgb(244,245,250) 100%)` text-fill. Alpha-compositing an opacity-fading green over a solid white base (normal blend mode, confirmed in the PSD layer's own blendMode field) is mathematically identical to a plain green-to-white color interpolation, so this is a faithful translation, not an approximation of the visual result -- just a simpler DOM for it (no duplicate text layers needed). Direction (180deg = top-to-bottom in CSS) is a best-effort translation of Photoshop's angle=90+reverse=true convention -- verified by eye against the reference (line 1 reads more saturated green, line 2 more pale), not from a documented exact angle-convention mapping; flagged as the one remaining soft spot in this element's fidelity."
+              }
+            },
+            "DESC": {
+              "role": "ITEM",
+              "kind": "description / summary paragraph",
+              "sourceLayerName": "围绕轻竞技卡牌游戏的长期养成与公会社交矛盾...",
+              "x": 91,
+              "y": 520,
+              "width": 1657,
+              "height": 65,
+              "xRatio": 0.0474,
+              "yRatio": 0.2705,
+              "widthRatio": 0.863,
+              "heightRatio": 0.0371,
+              "fontFamily": {
+                "value": "Microsoft YaHei, Microsoft YaHei UI, sans-serif",
+                "source": "policy",
+                "status": "confirmed"
+              },
+              "fontSize": {
+                "value": 24,
+                "ratio": 0.0125,
+                "source": "psd",
+                "status": "confirmed"
+              },
+              "fontWeight": 400,
+              "leading": 40,
+              "lineHeightRatio": 1.667,
+              "fill": {
+                "value": "rgb(244, 245, 250)",
+                "source": "psd",
+                "status": "confirmed"
+              }
+            },
+            "DECOR_ORB_RIGHT": {
+              "role": "DECOR",
+              "kind": "floating decorative orb, upper right",
+              "sourceLayerName": "椭圆 1",
+              "x": 1453,
+              "y": 108,
+              "width": 372,
+              "height": 372,
+              "xRatio": 0.7568,
+              "yRatio": 0.0563,
+              "widthRatio": 0.1938,
+              "heightRatio": 0.2123,
+              "shape": "circle (equal width/height)",
+              "gradient": {
+                "type": "linear",
+                "angle": 54,
+                "reverse": true,
+                "colorStops": [
+                  {
+                    "color": "rgb(24, 255, 0)",
+                    "location": 0
+                  },
+                  {
+                    "color": "rgb(45, 192, 42)",
+                    "location": 1
+                  }
+                ],
+                "opacityStops": [
+                  {
+                    "opacity": 1,
+                    "location": 0
+                  },
+                  {
+                    "opacity": 0,
+                    "location": 1
+                  }
+                ],
+                "source": "psd",
+                "status": "confirmed"
+              },
+              "note": "RESYNCED: shipped as `linear-gradient(135deg, rgba(24,255,0,0.92) 0%, rgba(24,255,0,0) 100%)` -- a single color fading via opacity (the PSD's second color stop is moot once opacity reaches 0, so this is a faithful single-color-fade translation, not a 2-color blend). Direction (135deg, a diagonal) is a best-effort translation of Photoshop's angle=54+reverse=true; the exact angle-to-CSS-degree mapping is not independently verified, only checked by eye against the reference render."
+            },
+            "DECOR_RULER": {
+              "role": "DECOR",
+              "kind": "small ruler/tick-mark bracket decoration near META_YEAR",
+              "sourceLayerNames": [
+                "矩形 2",
+                "矩形 2 拷贝",
+                "椭圆 3",
+                "矩形 3 (and 7 copies)"
+              ],
+              "composition": "one vertical bracket bar (16x128 at x=89,y=334) + one horizontal bracket bar (745x9 at x=89,y=460) forming an L, a small 11x11 dot near the corner (x=173,y=428), the year label (META_YEAR) at local (14,100), and a row of tick marks spanning local x=191..707 (canvas x=280..796) at local top=100",
+              "fill": {
+                "value": "rgb(45, 192, 42)",
+                "source": "psd",
+                "status": "confirmed"
+              },
+              "status": "RESYNCED and implemented -- shipped as .project-hero__ruler (absolutely positioned cluster) + -bracket (border-left/border-bottom technique reproducing the two rectangles as one element) + -dot + -year + -ticks. Verified live: bracket/dot/year/tick positions all match the PSD's measured (x,y) exactly at a true 1920px viewport (this requred the .project-hero full-bleed fix above -- see implementationNote on this section).",
+              "ticksNote": "PSD's 12 tick marks have a ~44px pitch with a couple of manual-placement outliers and alternate between 32px/43px heights. Shipped as one uniform, evenly-spaced repeating-linear-gradient pattern (using the taller 43px height, ~44px pitch) rather than hand-placing each measured outlier -- reproducing the ruler's repeating-tick design intent rather than overfitting placement noise that reads as unintentional."
+            }
+          },
+          "rawExtraction": {
+            "extractedAt": "2026-09-08T03:00:14.471Z",
+            "sourcePsd": {
+              "fileMtime": "2026-09-08T02:51:04.422Z",
+              "fileSize": 7727794,
+              "fileHash": "ba6c26fafad809b5af2dcb0b93facee297dd936887839f3e82ed17356ea8fe3c"
+            },
+            "layers": [
+              {
+                "name": "标题",
+                "hidden": false,
+                "left": 0,
+                "top": 0,
+                "width": 0,
+                "height": 0,
+                "leftRatio": 0,
+                "topRatio": 0,
+                "widthRatio": 0,
+                "heightRatio": 0
+              },
+              {
+                "name": "椭圆 1",
+                "hidden": false,
+                "left": 1453,
+                "top": 108,
+                "width": 372,
+                "height": 372,
+                "leftRatio": 0.7568,
+                "topRatio": 0.0616,
+                "widthRatio": 0.1938,
+                "heightRatio": 0.2123,
+                "vectorFill": {
+                  "type": "solid",
+                  "name": "前景色到透明渐变",
+                  "smoothness": 1,
+                  "colorStops": [
+                    {
+                      "color": {
+                        "r": 23.9996337890625,
+                        "g": 255,
+                        "b": 0
+                      },
+                      "location": 0,
+                      "midpoint": 0.5
+                    },
+                    {
+                      "color": {
+                        "r": 45.003204345703125,
+                        "g": 191.9970703125,
+                        "b": 41.999359130859375
+                      },
+                      "location": 1,
+                      "midpoint": 0.5
+                    }
+                  ],
+                  "opacityStops": [
+                    {
+                      "opacity": 1,
+                      "location": 0,
+                      "midpoint": 0.5
+                    },
+                    {
+                      "opacity": 0,
+                      "location": 1,
+                      "midpoint": 0.5
+                    }
+                  ],
+                  "style": "linear",
+                  "dither": true,
+                  "interpolationMethod": "perceptual",
+                  "reverse": true,
+                  "angle": 54
+                }
+              },
+              {
+                "name": "图层 4",
+                "hidden": true,
+                "left": 0,
+                "top": -81,
+                "width": 1920,
+                "height": 807,
+                "leftRatio": 0,
+                "topRatio": -0.0462,
+                "widthRatio": 1,
+                "heightRatio": 0.4606
+              },
+              {
+                "name": "轻竞技卡牌公会战                  社交体验优化 拷贝",
+                "hidden": false,
+                "left": 91,
+                "top": 196,
+                "width": 1656,
+                "height": 306,
+                "leftRatio": 0.0474,
+                "topRatio": 0.1119,
+                "widthRatio": 0.8625,
+                "heightRatio": 0.1747,
+                "text": {
+                  "value": "轻竞技卡牌公会战\n                 社交体验优化",
+                  "fontName": "MicrosoftYaHei-Bold",
+                  "nominalFontSize": 150,
+                  "transformScale": 1,
+                  "effectiveFontSize": 150,
+                  "fillColor": {
+                    "r": 243.99675,
+                    "g": 244.9989,
+                    "b": 249.9969
+                  },
+                  "leading": 160
+                },
+                "gradientOverlay": [
+                  {
+                    "enabled": true,
+                    "present": true,
+                    "showInDialog": true,
+                    "blendMode": "normal",
+                    "opacity": 1,
+                    "gradient": {
+                      "type": "solid",
+                      "name": "自定",
+                      "smoothness": 1,
+                      "colorStops": [
+                        {
+                          "color": {
+                            "r": 24.01167344301939,
+                            "g": 255,
+                            "b": 0.0038910505827516317
+                          },
+                          "location": 0,
+                          "midpoint": 0.5
+                        }
+                      ],
+                      "opacityStops": [
+                        {
+                          "opacity": 1,
+                          "location": 0,
+                          "midpoint": 0.5
+                        },
+                        {
+                          "opacity": 0,
+                          "location": 1,
+                          "midpoint": 0.5
+                        }
+                      ]
+                    },
+                    "angle": 90,
+                    "type": "linear",
+                    "reverse": true,
+                    "dither": false,
+                    "interpolationMethod": "perceptual",
+                    "align": true,
+                    "scale": 1.14,
+                    "offset": {
+                      "x": 0,
+                      "y": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "name": "矩形 2",
+                "hidden": false,
+                "left": 89,
+                "top": 460,
+                "width": 745,
+                "height": 9,
+                "leftRatio": 0.0464,
+                "topRatio": 0.2626,
+                "widthRatio": 0.388,
+                "heightRatio": 0.0051,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              },
+              {
+                "name": "矩形 2 拷贝",
+                "hidden": false,
+                "left": 89,
+                "top": 334,
+                "width": 16,
+                "height": 128,
+                "leftRatio": 0.0464,
+                "topRatio": 0.1906,
+                "widthRatio": 0.0083,
+                "heightRatio": 0.0731,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              },
+              {
+                "name": "围绕轻竞技卡牌游戏的长期养成与公会社交矛盾，通过竞品、公会使用习惯与信息需求分析，定位个人成长、集体目标与成员关系之间的体验断",
+                "hidden": false,
+                "left": 91,
+                "top": 520,
+                "width": 1657,
+                "height": 65,
+                "leftRatio": 0.0474,
+                "topRatio": 0.2968,
+                "widthRatio": 0.863,
+                "heightRatio": 0.0371,
+                "text": {
+                  "value": "围绕轻竞技卡牌游戏的长期养成与公会社交矛盾，通过竞品、公会使用习惯与信息需求分析，定位个人成长、集体目标与成员关系之间的体验断点，并提出状\n态外显、成员参与和贡献反馈等优化方向。",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 24,
+                  "transformScale": 1,
+                  "effectiveFontSize": 24,
+                  "fillColor": {
+                    "r": 243.99675,
+                    "g": 244.9989,
+                    "b": 249.9969
+                  },
+                  "leading": 40
+                }
+              },
+              {
+                "name": "Game UX / 体验设计 / 系统交互",
+                "hidden": false,
+                "left": 92,
+                "top": 111,
+                "width": 414,
+                "height": 27,
+                "leftRatio": 0.0479,
+                "topRatio": 0.0634,
+                "widthRatio": 0.2156,
+                "heightRatio": 0.0154,
+                "text": {
+                  "value": "Game UX / 体验设计 / 系统交互",
+                  "fontName": "MicrosoftYaHei-Bold",
+                  "nominalFontSize": 28,
+                  "transformScale": 1,
+                  "effectiveFontSize": 28,
+                  "fillColor": {
+                    "r": 45.00495,
+                    "g": 191.99715,
+                    "b": 42.00105
+                  },
+                  "leading": 40
+                }
+              },
+              {
+                "name": "2026",
+                "hidden": false,
+                "left": 103,
+                "top": 434,
+                "width": 68,
+                "height": 21,
+                "leftRatio": 0.0536,
+                "topRatio": 0.2477,
+                "widthRatio": 0.0354,
+                "heightRatio": 0.012,
+                "text": {
+                  "value": "2026",
+                  "fontName": "MicrosoftYaHei-Bold",
+                  "nominalFontSize": 28,
+                  "transformScale": 1,
+                  "effectiveFontSize": 28,
+                  "fillColor": {
+                    "r": 45.00495,
+                    "g": 191.99715,
+                    "b": 42.00105
+                  },
+                  "leading": 40
+                }
+              },
+              {
+                "name": "椭圆 3",
+                "hidden": false,
+                "left": 173,
+                "top": 428,
+                "width": 11,
+                "height": 11,
+                "leftRatio": 0.0901,
+                "topRatio": 0.2443,
+                "widthRatio": 0.0057,
+                "heightRatio": 0.0063,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              },
+              {
+                "name": "矩形 3",
+                "hidden": false,
+                "left": 280,
+                "top": 434,
+                "width": 5,
+                "height": 32,
+                "leftRatio": 0.1458,
+                "topRatio": 0.2477,
+                "widthRatio": 0.0026,
+                "heightRatio": 0.0183,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              },
+              {
+                "name": "矩形 3 拷贝",
+                "hidden": false,
+                "left": 324,
+                "top": 422,
+                "width": 5,
+                "height": 43,
+                "leftRatio": 0.1688,
+                "topRatio": 0.2409,
+                "widthRatio": 0.0026,
+                "heightRatio": 0.0245,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              },
+              {
+                "name": "矩形 3 拷贝 2",
+                "hidden": false,
+                "left": 368,
+                "top": 433,
+                "width": 5,
+                "height": 32,
+                "leftRatio": 0.1917,
+                "topRatio": 0.2471,
+                "widthRatio": 0.0026,
+                "heightRatio": 0.0183,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              },
+              {
+                "name": "矩形 3 拷贝 3",
+                "hidden": false,
+                "left": 412,
+                "top": 434,
+                "width": 5,
+                "height": 32,
+                "leftRatio": 0.2146,
+                "topRatio": 0.2477,
+                "widthRatio": 0.0026,
+                "heightRatio": 0.0183,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              },
+              {
+                "name": "矩形 3 拷贝 3",
+                "hidden": false,
+                "left": 456,
+                "top": 422,
+                "width": 5,
+                "height": 43,
+                "leftRatio": 0.2375,
+                "topRatio": 0.2409,
+                "widthRatio": 0.0026,
+                "heightRatio": 0.0245,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              },
+              {
+                "name": "矩形 3 拷贝 3",
+                "hidden": false,
+                "left": 500,
+                "top": 433,
+                "width": 5,
+                "height": 32,
+                "leftRatio": 0.2604,
+                "topRatio": 0.2471,
+                "widthRatio": 0.0026,
+                "heightRatio": 0.0183,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              },
+              {
+                "name": "矩形 3 拷贝 4",
+                "hidden": false,
+                "left": 551,
+                "top": 434,
+                "width": 5,
+                "height": 32,
+                "leftRatio": 0.287,
+                "topRatio": 0.2477,
+                "widthRatio": 0.0026,
+                "heightRatio": 0.0183,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              },
+              {
+                "name": "矩形 3 拷贝 4",
+                "hidden": false,
+                "left": 595,
+                "top": 422,
+                "width": 5,
+                "height": 43,
+                "leftRatio": 0.3099,
+                "topRatio": 0.2409,
+                "widthRatio": 0.0026,
+                "heightRatio": 0.0245,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              },
+              {
+                "name": "矩形 3 拷贝 4",
+                "hidden": false,
+                "left": 639,
+                "top": 433,
+                "width": 5,
+                "height": 32,
+                "leftRatio": 0.3328,
+                "topRatio": 0.2471,
+                "widthRatio": 0.0026,
+                "heightRatio": 0.0183,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              },
+              {
+                "name": "矩形 3 拷贝 5",
+                "hidden": false,
+                "left": 703,
+                "top": 434,
+                "width": 5,
+                "height": 32,
+                "leftRatio": 0.3661,
+                "topRatio": 0.2477,
+                "widthRatio": 0.0026,
+                "heightRatio": 0.0183,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              },
+              {
+                "name": "矩形 3 拷贝 5",
+                "hidden": false,
+                "left": 747,
+                "top": 422,
+                "width": 5,
+                "height": 43,
+                "leftRatio": 0.3891,
+                "topRatio": 0.2409,
+                "widthRatio": 0.0026,
+                "heightRatio": 0.0245,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              },
+              {
+                "name": "矩形 3 拷贝 5",
+                "hidden": false,
+                "left": 791,
+                "top": 433,
+                "width": 5,
+                "height": 32,
+                "leftRatio": 0.412,
+                "topRatio": 0.2471,
+                "widthRatio": 0.0026,
+                "heightRatio": 0.0183,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              },
+              {
+                "name": "椭圆 2",
+                "hidden": false,
+                "left": -3,
+                "top": 358,
+                "width": 200,
+                "height": 200,
+                "leftRatio": -0.0016,
+                "topRatio": 0.2043,
+                "widthRatio": 0.1042,
+                "heightRatio": 0.1142,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 45.003204345703125,
+                    "g": 191.9970703125,
+                    "b": 41.999359130859375
+                  }
+                }
+              }
+            ]
+          },
+          "lastExtractedAt": "2026-09-08T03:00:14.471Z"
+        },
+        "SECTION_02_PHASE_MILESTONES": {
+          "templateId": "phase-milestones",
+          "sourceLayerGroup": "目录",
+          "status": "re-synced 2026-09-08 (second sync, following the PSD's description redesign from one paragraph to a 3-row bullet list) -- see src/templates/PhaseMilestonesTemplate.tsx / phase-milestones-template.css",
+          "outOfScopeLayersFoundNested": {
+            "note": "rawExtraction's layer list includes 组9, 矩形4 (a large black rounded rectangle), and two large paragraph text blocks, all positioned around y=1038-1560 -- well below this section's own content (y=660-1000ish) and overlapping the y=1080+ range that a separate guide layer ('内容标题') marks as the START of the next Frame. These are not part of the phase-milestones row design and were NOT synced into elements above; they look like the next section's content, nested under the wrong PSD group. Flagging for the user to move them, not treating them as phase-milestones data."
+          },
+          "canonicalVariant": {
+            "value": 5,
+            "layoutConfirmedByPsd": true,
+            "note": "The 5-slot canonical LAYOUT (position, pitch, font, color for all 5 number/title slots) is confirmed as of the 2026-09-08 03:06 re-sync: all 5 columns now share the same rgb(24,255,0) green, MicrosoftYaHei-Bold, and a consistent ~417-423px pitch. This is a layout/geometry confirmation, not a content confirmation -- see variants below for which slots have real, authored, distinct CONTENT versus placeholder content sitting in an already-confirmed layout slot."
+          },
+          "variants": {
+            "3": {
+              "layoutConfirmedByPsd": true,
+              "contentConfirmedByPsd": true,
+              "note": "3 real, visible, distinct columns (方向选择/需求理解/方案展示) with unique content -- the current confirmed CONTENT variant actually in use, sitting inside the confirmed 5-slot canonical layout."
+            },
+            "4": {
+              "layoutConfirmedByPsd": true,
+              "contentConfirmedByPsd": false,
+              "note": "Slot 4's geometry/font/color is confirmed (part of the canonical 5-slot layout, group-hidden only because this project currently uses the 3-item content variant). Its CONTENT is not confirmed: title (\"方案展示\") and description are a verbatim, unmodified copy of column 3's, not yet authored as unique content -- a placeholder sitting in an already-confirmed slot, not an unconfirmed slot."
+            },
+            "5": {
+              "layoutConfirmedByPsd": true,
+              "contentConfirmedByPsd": false,
+              "note": "Same as slot 4: layout/geometry confirmed (consistent ~417px pitch, same green/font), content still an unmodified \"方案展示\" duplicate of column 3 -- placeholder content, not an unconfirmed layout."
+            }
+          },
+          "elements": {
+            "GLOBAL_LINE_BASE": {
+              "role": "GLOBAL",
+              "kind": "shared horizontal baseline spanning the row, docked to the bottom of NODE_NUMBER",
+              "sourceLayerName": "矩形 1",
+              "thickness": {
+                "value": 24,
+                "ratio": 0.0125,
+                "source": "psd",
+                "status": "confirmed"
+              },
+              "shape": "solid filled bar, not a hairline",
+              "verticalRelationToNumber": "line top sits 5px above the number's own measured bottom edge; line bottom extends 19px below it -- the bar straddles the digit's visual baseline rather than sitting flush beneath it. Re-confirmed unchanged at the 2026-09-08 03:06 re-sync (number moved from top=770 to top=660 and the line moved from top=922 to top=812 -- the whole row shifted up together by the same ~110px, this relationship itself did not change).",
+              "fill": {
+                "value": "rgb(24, 255, 0)",
+                "source": "psd",
+                "status": "confirmed"
+              },
+              "fullBleed": "layer extends ~142px past both canvas edges in the PSD; read as full-row-width intent, not a literal off-canvas requirement",
+              "spansFullSection": true,
+              "note": "Must always span the section's full row width regardless of how many items (3/4/5) are currently visible -- never truncated to only reach the last visible item. The shipped CSS Grid track (100%-width container, N equal 1fr columns) already satisfies this; confirmed, no change needed."
+            },
+            "NODE_NUMBER": {
+              "role": "ITEM",
+              "kind": "auto-numbered index (01, 02, 03...), never editable data -- derived from array position",
+              "sourceLayerName": "01 (per column)",
+              "fontSize": {
+                "nominal": 75,
+                "layerTransformScale": 2.6359,
+                "effective": 197.7,
+                "effectiveRatio": 0.103,
+                "source": "psd",
+                "status": "confirmed",
+                "note": "The layer's own style.fontSize (75) ignores an additional 2.6359x Free Transform scale baked into the layer's transform matrix -- the rendered size is fontSize x scale, not fontSize alone. Reading fontSize without checking the transform under-measures this element by ~62%."
+              },
+              "measuredBoxHeight": {
+                "value": 157,
+                "ratio": 0.0818,
+                "source": "psd",
+                "status": "confirmed"
+              },
+              "fontFamily": {
+                "value": "Microsoft YaHei, Microsoft YaHei UI, sans-serif",
+                "source": "policy",
+                "status": "confirmed"
+              },
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "fill": {
+                "value": "rgb(24, 255, 0)",
+                "source": "psd",
+                "status": "confirmed"
+              }
+            },
+            "NODE_TITLE": {
+              "role": "ITEM",
+              "kind": "item title",
+              "sourceLayerName": "方向选择 (column 1, the only column with real, non-placeholder title text)",
+              "gapFromLineBottom": {
+                "value": 12,
+                "ratio": 0.00625,
+                "source": "psd",
+                "status": "confirmed",
+                "note": "This is the PSD-measured gap from the LINE's own bottom edge to the title -- it is NOT the CSS margin value, because in the DOM the title's previous sibling is NUMBER, not the (absolutely-positioned) line. See marginFromNumberBottom for the value the CSS actually needs."
+              },
+              "marginFromNumberBottom": {
+                "value": 31,
+                "ratio": 0.01615,
+                "source": "psd",
+                "status": "confirmed",
+                "note": "The actual CSS margin-top value (relative to NUMBER, the title's real previous DOM sibling) = the line's own 19px drop below the number's bottom edge (see GLOBAL_LINE_BASE) + the 12px line-to-title gap above = 31px. FIXED at the 2026-09-08 re-sync: the shipped CSS previously used the raw 12px value here, which made the title visually overlap the bottom of the line bar by 6px -- confirmed live in the browser before the fix."
+              },
+              "fontFamily": {
+                "value": "Microsoft YaHei, Microsoft YaHei UI, sans-serif",
+                "source": "policy",
+                "status": "confirmed"
+              },
+              "fontSize": {
+                "value": 56,
+                "ratio": 0.0292,
+                "source": "psd",
+                "status": "confirmed"
+              },
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "fill": {
+                "value": "rgb(24, 255, 0)",
+                "source": "psd",
+                "status": "confirmed"
+              },
+              "note": "UPDATED at the 2026-09-08 03:06 re-sync: columns 2-5 now use the SAME font/color/size as column 1 (previously columns 2-5 carried an inconsistent HYDianHei-W placeholder) -- font metrics are confirmed consistent across all 5 slots. Columns 3-5 all currently show the literal same text \"方案展示\" (columns 4-5 are unmodified copies of column 3), so while the FONT SPEC is now trustworthy for all 5 slots, distinct per-item content is still only confirmed for columns 1-2."
+            },
+            "NODE_DESC": {
+              "role": "ITEM",
+              "kind": "REDESIGNED at the 2026-09-08 03:06 re-sync: no longer a single wrapped paragraph -- now up to 3 short bullet rows, each a small circular dot marker plus one line of text",
+              "sourceLayerNames": ["椭圆 4 (+ 2 copies, the bullet dot)", "column 1's three text rows: 公会社交共性 / 公会交互特点 / 公会交互特点 (the third repeats the second -- read as not-yet-customized, not a 3-way confirmed content set)"],
+              "priorDesign": "Superseded. The original single-paragraph NODE_DESC (fontSize 32, lineHeightRatio manual-overridden to 1.5) documented in this spec's first version no longer matches the current PSD and is fully replaced by the fields below.",
+              "gapFromTitleBottom": {
+                "value": 11,
+                "ratio": 0.00573,
+                "source": "psd",
+                "status": "confirmed",
+                "note": "Title bottom (848+55=903) to first bullet's icon top (914)."
+              },
+              "rowGap": {
+                "value": 11,
+                "ratio": 0.00573,
+                "source": "psd",
+                "status": "confirmed",
+                "note": "Consistent gap between each bullet row's icon bottom and the next row's icon top (row1->row2: 11px, row2->row3: 10px -- treated as the same ~11px value)."
+              },
+              "bulletDot": {
+                "diameter": { "value": 22, "ratio": 0.0115, "source": "psd", "status": "confirmed" },
+                "shape": "circle",
+                "fill": { "value": "rgb(24, 255, 0)", "source": "psd", "status": "confirmed" }
+              },
+              "dotToTextGap": {
+                "value": 8,
+                "ratio": 0.0042,
+                "source": "psd",
+                "status": "confirmed",
+                "note": "Bullet dot right edge (98+22=120) to text left edge (128)."
+              },
+              "fontFamily": {
+                "value": "Microsoft YaHei, Microsoft YaHei UI, sans-serif",
+                "source": "policy",
+                "status": "confirmed"
+              },
+              "fontWeight": 400,
+              "fontSize": {
+                "value": 28,
+                "ratio": 0.0146,
+                "source": "psd",
+                "status": "confirmed",
+                "note": "Was measured as 32 (ratio 0.0167) in the first read against the old single-paragraph design; the new bullet-row text measures 27.98 (~28)px -- a genuinely different, updated value, not the same field re-measured the same way."
+              },
+              "fill": { "value": "rgb(24, 255, 0)", "source": "psd", "status": "confirmed" },
+              "maxRows": {
+                "value": 3,
+                "source": "psd",
+                "status": "confirmed",
+                "note": "Column 1 (the most complete column) shows exactly 3 bullet rows; no column shows 4+. Treated as a hard cap, matching PSD_TEMPLATE_WORKFLOW.md's \"do not invent an unconfirmed variant\" rule -- do not render a 4th row even if the underlying text data could supply one."
+              },
+              "rowTextWidth": {
+                "value": 168,
+                "ratio": 0.0875,
+                "source": "psd",
+                "status": "confirmed",
+                "note": "PSD's own bullet rows are short, single-line labels at this width. Real existing hoverText content (a full sentence, no embedded line breaks) will wrap across multiple visual lines within one bullet row at this width -- expected graceful degradation, not a defect; see the data-mapping note below."
+              },
+              "lineHeightRatio": {
+                "value": 1.4,
+                "source": "manual",
+                "status": "confirmed",
+                "note": "No PSD evidence either way -- every real bullet row in the PSD is a single line, so there is no measured multi-line leading to read for this new row style. 1.4 is a plain, non-colliding default for wrapped CJK text at this size, picked the same way the prior paragraph design's line-height override was (see PSD_TEMPLATE_SPEC.md's provenance rule) -- not a PSD measurement."
+              },
+              "dataMappingNote": "No schema change this sync (per task boundary). The existing hoverText string field is reused: split on \\n, drop empty lines, cap at maxRows (3); each resulting line becomes one bullet row (dot + text), matching the 'reuse existing field with an embedded newline' pattern already used for the Hero title. Existing real content (no embedded newlines) renders as a single bullet row and simply wraps if long -- not broken, just not yet using the new multi-row authoring convention until an owner adds line breaks."
+            }
+          },
+          "columnLayout": {
+            "measuredPitch": {
+              "value": [423, 417, 418, 417],
+              "ratio": 0.2181,
+              "source": "psd",
+              "status": "confirmed",
+              "note": "UPDATED at the 2026-09-08 03:06 re-sync: all 5 columns now have a consistent ~417-423px pitch (previously only columns 1-3 were consistent at ~398-399px, and the would-be 4th/5th slots broke the pattern). Still not decomposed into a track-width + gap split -- see below."
+            },
+            "contentLeftInset": { "value": 94, "ratio": 0.049, "source": "psd", "status": "confirmed" },
+            "note": "Pitch/track/gap still cannot be cleanly decomposed from this PSD because NODE_NUMBER's paragraph justification is \"center\", not left -- the measured left-edge pitch conflates track width and gap in a way that depends on how wide a track actually is, which the PSD does not directly state. Even with the now-consistent 5-column pitch, this ambiguity is unchanged, so the shipped implementation still keeps its existing CSS Grid column-gap (already verified overflow-safe at 3-5 items) rather than fitting an underdetermined value."
+          },
+          "rawExtraction": {
+            "extractedAt": "2026-09-08T03:06:26.946Z",
+            "sourcePsd": {
+              "fileMtime": "2026-09-08T03:05:26.780Z",
+              "fileSize": 12680772,
+              "fileHash": "a0fd1074c72fad00390a0f067e814a2d756517ccbb31ea148d398d3e40703229"
+            },
+            "layers": [
+              {
+                "name": "目录",
+                "hidden": false,
+                "left": 0,
+                "top": 0,
+                "width": 0,
+                "height": 0,
+                "leftRatio": 0,
+                "topRatio": 0,
+                "widthRatio": 0,
+                "heightRatio": 0
+              },
+              {
+                "name": "矩形 1",
+                "hidden": false,
+                "left": -142,
+                "top": 812,
+                "width": 2194,
+                "height": 24,
+                "leftRatio": -0.074,
+                "topRatio": 0.4635,
+                "widthRatio": 1.1427,
+                "heightRatio": 0.0137,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 24.01167344301939,
+                    "g": 255,
+                    "b": 0.0038910505827516317
+                  }
+                }
+              },
+              {
+                "name": "组 6",
+                "hidden": false,
+                "left": 0,
+                "top": 0,
+                "width": 0,
+                "height": 0,
+                "leftRatio": 0,
+                "topRatio": 0,
+                "widthRatio": 0,
+                "heightRatio": 0
+              },
+              {
+                "name": "椭圆 4",
+                "hidden": false,
+                "left": 98,
+                "top": 914,
+                "width": 22,
+                "height": 22,
+                "leftRatio": 0.051,
+                "topRatio": 0.5217,
+                "widthRatio": 0.0115,
+                "heightRatio": 0.0126,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 23.9996337890625,
+                    "g": 255,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "公会交互特点",
+                "hidden": false,
+                "left": 128,
+                "top": 943,
+                "width": 168,
+                "height": 28,
+                "leftRatio": 0.0667,
+                "topRatio": 0.5382,
+                "widthRatio": 0.0875,
+                "heightRatio": 0.016,
+                "text": {
+                  "value": "公会交互特点",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 27.97539,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 27.99,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  },
+                  "leading": 24
+                }
+              },
+              {
+                "name": "椭圆 4 拷贝",
+                "hidden": false,
+                "left": 98,
+                "top": 947,
+                "width": 22,
+                "height": 23,
+                "leftRatio": 0.051,
+                "topRatio": 0.5405,
+                "widthRatio": 0.0115,
+                "heightRatio": 0.0131,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 23.9996337890625,
+                    "g": 255,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "公会交互特点",
+                "hidden": false,
+                "left": 128,
+                "top": 976,
+                "width": 168,
+                "height": 28,
+                "leftRatio": 0.0667,
+                "topRatio": 0.5571,
+                "widthRatio": 0.0875,
+                "heightRatio": 0.016,
+                "text": {
+                  "value": "公会交互特点",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 27.97539,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 27.99,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  },
+                  "leading": 24
+                }
+              },
+              {
+                "name": "椭圆 4 拷贝 2",
+                "hidden": false,
+                "left": 98,
+                "top": 980,
+                "width": 22,
+                "height": 23,
+                "leftRatio": 0.051,
+                "topRatio": 0.5594,
+                "widthRatio": 0.0115,
+                "heightRatio": 0.0131,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 23.9996337890625,
+                    "g": 255,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "01",
+                "hidden": false,
+                "left": 94,
+                "top": 660,
+                "width": 200,
+                "height": 157,
+                "leftRatio": 0.049,
+                "topRatio": 0.3767,
+                "widthRatio": 0.1042,
+                "heightRatio": 0.0896,
+                "text": {
+                  "value": "01",
+                  "fontName": "MicrosoftYaHei-Bold",
+                  "nominalFontSize": 75,
+                  "transformScale": 2.6359,
+                  "effectiveFontSize": 197.69,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  }
+                }
+              },
+              {
+                "name": "方向选择",
+                "hidden": false,
+                "left": 96,
+                "top": 848,
+                "width": 222,
+                "height": 55,
+                "leftRatio": 0.05,
+                "topRatio": 0.484,
+                "widthRatio": 0.1156,
+                "heightRatio": 0.0314,
+                "text": {
+                  "value": "方向选择",
+                  "fontName": "MicrosoftYaHei-Bold",
+                  "nominalFontSize": 55.95078,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 55.98,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  }
+                }
+              },
+              {
+                "name": "公会社交共性",
+                "hidden": false,
+                "left": 128,
+                "top": 910,
+                "width": 168,
+                "height": 28,
+                "leftRatio": 0.0667,
+                "topRatio": 0.5194,
+                "widthRatio": 0.0875,
+                "heightRatio": 0.016,
+                "text": {
+                  "value": "公会社交共性",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 27.97539,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 27.99,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  },
+                  "leading": 24
+                }
+              },
+              {
+                "name": "组 5",
+                "hidden": false,
+                "left": 0,
+                "top": 0,
+                "width": 0,
+                "height": 0,
+                "leftRatio": 0,
+                "topRatio": 0,
+                "widthRatio": 0,
+                "heightRatio": 0
+              },
+              {
+                "name": "01",
+                "hidden": false,
+                "left": 517,
+                "top": 660,
+                "width": 200,
+                "height": 157,
+                "leftRatio": 0.2693,
+                "topRatio": 0.3767,
+                "widthRatio": 0.1042,
+                "heightRatio": 0.0896,
+                "text": {
+                  "value": "01",
+                  "fontName": "MicrosoftYaHei-Bold",
+                  "nominalFontSize": 75,
+                  "transformScale": 2.6359,
+                  "effectiveFontSize": 197.69,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  }
+                }
+              },
+              {
+                "name": "需求理解",
+                "hidden": false,
+                "left": 517,
+                "top": 846,
+                "width": 222,
+                "height": 55,
+                "leftRatio": 0.2693,
+                "topRatio": 0.4829,
+                "widthRatio": 0.1156,
+                "heightRatio": 0.0314,
+                "text": {
+                  "value": "需求理解",
+                  "fontName": "MicrosoftYaHei-Bold",
+                  "nominalFontSize": 55.95078,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 55.98,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  }
+                }
+              },
+              {
+                "name": "xxxxcccccccc",
+                "hidden": false,
+                "left": 546,
+                "top": 918,
+                "width": 168,
+                "height": 17,
+                "leftRatio": 0.2844,
+                "topRatio": 0.524,
+                "widthRatio": 0.0875,
+                "heightRatio": 0.0097,
+                "text": {
+                  "value": "xxxxcccccccc",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 27.97539,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 27.99,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  },
+                  "leading": 24
+                }
+              },
+              {
+                "name": "椭圆 4",
+                "hidden": false,
+                "left": 516,
+                "top": 914,
+                "width": 22,
+                "height": 22,
+                "leftRatio": 0.2687,
+                "topRatio": 0.5217,
+                "widthRatio": 0.0115,
+                "heightRatio": 0.0126,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 23.9996337890625,
+                    "g": 255,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "xxxxcccccccc",
+                "hidden": false,
+                "left": 546,
+                "top": 951,
+                "width": 168,
+                "height": 17,
+                "leftRatio": 0.2844,
+                "topRatio": 0.5428,
+                "widthRatio": 0.0875,
+                "heightRatio": 0.0097,
+                "text": {
+                  "value": "xxxxcccccccc",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 27.97539,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 27.99,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  },
+                  "leading": 24
+                }
+              },
+              {
+                "name": "椭圆 4 拷贝",
+                "hidden": false,
+                "left": 516,
+                "top": 947,
+                "width": 22,
+                "height": 23,
+                "leftRatio": 0.2687,
+                "topRatio": 0.5405,
+                "widthRatio": 0.0115,
+                "heightRatio": 0.0131,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 23.9996337890625,
+                    "g": 255,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "xxxxcccccccc",
+                "hidden": false,
+                "left": 546,
+                "top": 984,
+                "width": 168,
+                "height": 17,
+                "leftRatio": 0.2844,
+                "topRatio": 0.5616,
+                "widthRatio": 0.0875,
+                "heightRatio": 0.0097,
+                "text": {
+                  "value": "xxxxcccccccc",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 27.97539,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 27.99,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  },
+                  "leading": 24
+                }
+              },
+              {
+                "name": "椭圆 4 拷贝 2",
+                "hidden": false,
+                "left": 516,
+                "top": 980,
+                "width": 22,
+                "height": 23,
+                "leftRatio": 0.2687,
+                "topRatio": 0.5594,
+                "widthRatio": 0.0115,
+                "heightRatio": 0.0131,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 23.9996337890625,
+                    "g": 255,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "组 4",
+                "hidden": false,
+                "left": 0,
+                "top": 0,
+                "width": 0,
+                "height": 0,
+                "leftRatio": 0,
+                "topRatio": 0,
+                "widthRatio": 0,
+                "heightRatio": 0
+              },
+              {
+                "name": "01",
+                "hidden": false,
+                "left": 934,
+                "top": 660,
+                "width": 200,
+                "height": 157,
+                "leftRatio": 0.4865,
+                "topRatio": 0.3767,
+                "widthRatio": 0.1042,
+                "heightRatio": 0.0896,
+                "text": {
+                  "value": "01",
+                  "fontName": "MicrosoftYaHei-Bold",
+                  "nominalFontSize": 75,
+                  "transformScale": 2.6359,
+                  "effectiveFontSize": 197.69,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  }
+                }
+              },
+              {
+                "name": "方案展示",
+                "hidden": false,
+                "left": 935,
+                "top": 846,
+                "width": 222,
+                "height": 55,
+                "leftRatio": 0.487,
+                "topRatio": 0.4829,
+                "widthRatio": 0.1156,
+                "heightRatio": 0.0314,
+                "text": {
+                  "value": "方案展示",
+                  "fontName": "MicrosoftYaHei-Bold",
+                  "nominalFontSize": 55.95078,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 55.98,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  }
+                }
+              },
+              {
+                "name": "xxxxcccccccc",
+                "hidden": false,
+                "left": 964,
+                "top": 918,
+                "width": 168,
+                "height": 17,
+                "leftRatio": 0.5021,
+                "topRatio": 0.524,
+                "widthRatio": 0.0875,
+                "heightRatio": 0.0097,
+                "text": {
+                  "value": "xxxxcccccccc",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 27.97539,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 27.99,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  },
+                  "leading": 24
+                }
+              },
+              {
+                "name": "椭圆 4",
+                "hidden": false,
+                "left": 934,
+                "top": 914,
+                "width": 22,
+                "height": 22,
+                "leftRatio": 0.4865,
+                "topRatio": 0.5217,
+                "widthRatio": 0.0115,
+                "heightRatio": 0.0126,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 23.9996337890625,
+                    "g": 255,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "xxxxcccccccc",
+                "hidden": false,
+                "left": 964,
+                "top": 951,
+                "width": 168,
+                "height": 17,
+                "leftRatio": 0.5021,
+                "topRatio": 0.5428,
+                "widthRatio": 0.0875,
+                "heightRatio": 0.0097,
+                "text": {
+                  "value": "xxxxcccccccc",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 27.97539,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 27.99,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  },
+                  "leading": 24
+                }
+              },
+              {
+                "name": "椭圆 4 拷贝",
+                "hidden": false,
+                "left": 934,
+                "top": 947,
+                "width": 22,
+                "height": 23,
+                "leftRatio": 0.4865,
+                "topRatio": 0.5405,
+                "widthRatio": 0.0115,
+                "heightRatio": 0.0131,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 23.9996337890625,
+                    "g": 255,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "xxxxcccccccc",
+                "hidden": false,
+                "left": 964,
+                "top": 984,
+                "width": 168,
+                "height": 17,
+                "leftRatio": 0.5021,
+                "topRatio": 0.5616,
+                "widthRatio": 0.0875,
+                "heightRatio": 0.0097,
+                "text": {
+                  "value": "xxxxcccccccc",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 27.97539,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 27.99,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  },
+                  "leading": 24
+                }
+              },
+              {
+                "name": "椭圆 4 拷贝 2",
+                "hidden": false,
+                "left": 934,
+                "top": 980,
+                "width": 22,
+                "height": 23,
+                "leftRatio": 0.4865,
+                "topRatio": 0.5594,
+                "widthRatio": 0.0115,
+                "heightRatio": 0.0131,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 23.9996337890625,
+                    "g": 255,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "组 4 拷贝",
+                "hidden": true,
+                "left": 0,
+                "top": 0,
+                "width": 0,
+                "height": 0,
+                "leftRatio": 0,
+                "topRatio": 0,
+                "widthRatio": 0,
+                "heightRatio": 0
+              },
+              {
+                "name": "01",
+                "hidden": false,
+                "left": 1352,
+                "top": 660,
+                "width": 199,
+                "height": 157,
+                "leftRatio": 0.7042,
+                "topRatio": 0.3767,
+                "widthRatio": 0.1036,
+                "heightRatio": 0.0896,
+                "text": {
+                  "value": "01",
+                  "fontName": "MicrosoftYaHei-Bold",
+                  "nominalFontSize": 75,
+                  "transformScale": 2.6359,
+                  "effectiveFontSize": 197.69,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  }
+                }
+              },
+              {
+                "name": "方案展示",
+                "hidden": false,
+                "left": 1352,
+                "top": 846,
+                "width": 223,
+                "height": 55,
+                "leftRatio": 0.7042,
+                "topRatio": 0.4829,
+                "widthRatio": 0.1161,
+                "heightRatio": 0.0314,
+                "text": {
+                  "value": "方案展示",
+                  "fontName": "MicrosoftYaHei-Bold",
+                  "nominalFontSize": 55.95078,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 55.98,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  }
+                }
+              },
+              {
+                "name": "xxxxcccccccc",
+                "hidden": false,
+                "left": 1382,
+                "top": 918,
+                "width": 168,
+                "height": 17,
+                "leftRatio": 0.7198,
+                "topRatio": 0.524,
+                "widthRatio": 0.0875,
+                "heightRatio": 0.0097,
+                "text": {
+                  "value": "xxxxcccccccc",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 27.97539,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 27.99,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  },
+                  "leading": 24
+                }
+              },
+              {
+                "name": "椭圆 4",
+                "hidden": false,
+                "left": 1351,
+                "top": 914,
+                "width": 23,
+                "height": 22,
+                "leftRatio": 0.7036,
+                "topRatio": 0.5217,
+                "widthRatio": 0.012,
+                "heightRatio": 0.0126,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 23.9996337890625,
+                    "g": 255,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "xxxxcccccccc",
+                "hidden": false,
+                "left": 1382,
+                "top": 951,
+                "width": 168,
+                "height": 17,
+                "leftRatio": 0.7198,
+                "topRatio": 0.5428,
+                "widthRatio": 0.0875,
+                "heightRatio": 0.0097,
+                "text": {
+                  "value": "xxxxcccccccc",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 27.97539,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 27.99,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  },
+                  "leading": 24
+                }
+              },
+              {
+                "name": "椭圆 4 拷贝",
+                "hidden": false,
+                "left": 1351,
+                "top": 947,
+                "width": 23,
+                "height": 23,
+                "leftRatio": 0.7036,
+                "topRatio": 0.5405,
+                "widthRatio": 0.012,
+                "heightRatio": 0.0131,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 23.9996337890625,
+                    "g": 255,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "xxxxcccccccc",
+                "hidden": false,
+                "left": 1382,
+                "top": 984,
+                "width": 168,
+                "height": 17,
+                "leftRatio": 0.7198,
+                "topRatio": 0.5616,
+                "widthRatio": 0.0875,
+                "heightRatio": 0.0097,
+                "text": {
+                  "value": "xxxxcccccccc",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 27.97539,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 27.99,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  },
+                  "leading": 24
+                }
+              },
+              {
+                "name": "椭圆 4 拷贝 2",
+                "hidden": false,
+                "left": 1351,
+                "top": 980,
+                "width": 23,
+                "height": 23,
+                "leftRatio": 0.7036,
+                "topRatio": 0.5594,
+                "widthRatio": 0.012,
+                "heightRatio": 0.0131,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 23.9996337890625,
+                    "g": 255,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "组 4 拷贝 2",
+                "hidden": true,
+                "left": 0,
+                "top": 0,
+                "width": 0,
+                "height": 0,
+                "leftRatio": 0,
+                "topRatio": 0,
+                "widthRatio": 0,
+                "heightRatio": 0
+              },
+              {
+                "name": "01",
+                "hidden": false,
+                "left": 1769,
+                "top": 660,
+                "width": 199,
+                "height": 157,
+                "leftRatio": 0.9214,
+                "topRatio": 0.3767,
+                "widthRatio": 0.1036,
+                "heightRatio": 0.0896,
+                "text": {
+                  "value": "01",
+                  "fontName": "MicrosoftYaHei-Bold",
+                  "nominalFontSize": 75,
+                  "transformScale": 2.6359,
+                  "effectiveFontSize": 197.69,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  }
+                }
+              },
+              {
+                "name": "方案展示",
+                "hidden": false,
+                "left": 1769,
+                "top": 846,
+                "width": 223,
+                "height": 55,
+                "leftRatio": 0.9214,
+                "topRatio": 0.4829,
+                "widthRatio": 0.1161,
+                "heightRatio": 0.0314,
+                "text": {
+                  "value": "方案展示",
+                  "fontName": "MicrosoftYaHei-Bold",
+                  "nominalFontSize": 55.95078,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 55.98,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  }
+                }
+              },
+              {
+                "name": "xxxxcccccccc",
+                "hidden": false,
+                "left": 1799,
+                "top": 918,
+                "width": 168,
+                "height": 17,
+                "leftRatio": 0.937,
+                "topRatio": 0.524,
+                "widthRatio": 0.0875,
+                "heightRatio": 0.0097,
+                "text": {
+                  "value": "xxxxcccccccc",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 27.97539,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 27.99,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  },
+                  "leading": 24
+                }
+              },
+              {
+                "name": "椭圆 4",
+                "hidden": false,
+                "left": 1768,
+                "top": 914,
+                "width": 23,
+                "height": 22,
+                "leftRatio": 0.9208,
+                "topRatio": 0.5217,
+                "widthRatio": 0.012,
+                "heightRatio": 0.0126,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 23.9996337890625,
+                    "g": 255,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "xxxxcccccccc",
+                "hidden": false,
+                "left": 1799,
+                "top": 951,
+                "width": 168,
+                "height": 17,
+                "leftRatio": 0.937,
+                "topRatio": 0.5428,
+                "widthRatio": 0.0875,
+                "heightRatio": 0.0097,
+                "text": {
+                  "value": "xxxxcccccccc",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 27.97539,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 27.99,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  },
+                  "leading": 24
+                }
+              },
+              {
+                "name": "椭圆 4 拷贝",
+                "hidden": false,
+                "left": 1768,
+                "top": 947,
+                "width": 23,
+                "height": 23,
+                "leftRatio": 0.9208,
+                "topRatio": 0.5405,
+                "widthRatio": 0.012,
+                "heightRatio": 0.0131,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 23.9996337890625,
+                    "g": 255,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "xxxxcccccccc",
+                "hidden": false,
+                "left": 1799,
+                "top": 984,
+                "width": 168,
+                "height": 17,
+                "leftRatio": 0.937,
+                "topRatio": 0.5616,
+                "widthRatio": 0.0875,
+                "heightRatio": 0.0097,
+                "text": {
+                  "value": "xxxxcccccccc",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 27.97539,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 27.99,
+                  "fillColor": {
+                    "r": 24.0108,
+                    "g": 255,
+                    "b": 0.0051
+                  },
+                  "leading": 24
+                }
+              },
+              {
+                "name": "椭圆 4 拷贝 2",
+                "hidden": false,
+                "left": 1768,
+                "top": 980,
+                "width": 23,
+                "height": 23,
+                "leftRatio": 0.9208,
+                "topRatio": 0.5594,
+                "widthRatio": 0.012,
+                "heightRatio": 0.0131,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 23.9996337890625,
+                    "g": 255,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "组 9",
+                "hidden": false,
+                "left": -38,
+                "top": 1038,
+                "width": 2199,
+                "height": 619,
+                "leftRatio": -0.0198,
+                "topRatio": 0.5925,
+                "widthRatio": 1.1453,
+                "heightRatio": 0.3533
+              },
+              {
+                "name": "矩形 4",
+                "hidden": false,
+                "left": 415,
+                "top": 1258,
+                "width": 1695,
+                "height": 235,
+                "leftRatio": 0.2161,
+                "topRatio": 0.718,
+                "widthRatio": 0.8828,
+                "heightRatio": 0.1341,
+                "vectorFill": {
+                  "type": "color",
+                  "color": {
+                    "r": 0,
+                    "g": 0,
+                    "b": 0
+                  }
+                }
+              },
+              {
+                "name": "公会真正进入玩家日常体验，并逐渐成为成员关系的一部",
+                "hidden": false,
+                "left": 418,
+                "top": 1169,
+                "width": 1396,
+                "height": 56,
+                "leftRatio": 0.2177,
+                "topRatio": 0.6672,
+                "widthRatio": 0.7271,
+                "heightRatio": 0.032,
+                "text": {
+                  "value": "公会真正进入玩家日常体验，并逐渐成为成员关系的一部",
+                  "fontName": "MicrosoftYaHei-Bold",
+                  "nominalFontSize": 55.95078,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 55.98,
+                  "fillColor": {
+                    "r": 0.9995999999999999,
+                    "g": 0.9995999999999999,
+                    "b": 0.9995999999999999
+                  }
+                }
+              },
+              {
+                "name": "轻竞技卡牌游戏通常通过长期养成、高频日常和周期竞争维持玩家投入，公会则同时承担资源、 任务、竞争和社交入口。但实际体验中，玩家",
+                "hidden": false,
+                "left": 468,
+                "top": 1302,
+                "width": 1342,
+                "height": 128,
+                "leftRatio": 0.2437,
+                "topRatio": 0.7432,
+                "widthRatio": 0.699,
+                "heightRatio": 0.0731,
+                "text": {
+                  "value": "轻竞技卡牌游戏通常通过长期养成、高频日常和周期竞争维持玩家投入，公会则同时承担资源、\n任务、竞争和社交入口。但实际体验中，玩家往往只是进入公会领取奖励、完成任务，再回到个\n人养成循环。这个项目因此从公会与个人成长之间的关系入手，分析不同产品如何组织成员参与",
+                  "fontName": "MicrosoftYaHei",
+                  "nominalFontSize": 31.97188,
+                  "transformScale": 1.0004,
+                  "effectiveFontSize": 31.99,
+                  "fillColor": {
+                    "r": 255,
+                    "g": 255,
+                    "b": 255
+                  },
+                  "leading": 47.95781
+                }
+              }
+            ]
+          },
+          "lastExtractedAt": "2026-09-08T03:06:26.946Z"
+        }
+      }
+    }
+  }
+}

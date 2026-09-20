@@ -11,6 +11,10 @@
   transition: opacity 220ms ease-out;
 }
 
+/* Portfolio 2.0 palette (#F7F6ED / #495D47) -- every project route this
+   covers (DynamicProjectPage) is light-themed now, so this full-viewport
+   loading cover must match instead of showing the old dark-navy/acid-green
+   V1 theme during the load/transition window. */
 .project-entry-loading {
   position: fixed;
   inset: 0;
@@ -19,9 +23,7 @@
   place-items: center;
   overflow: hidden;
   opacity: 1;
-  background:
-    radial-gradient(circle at 76% 18%, rgb(40 67 146 / 0.28), transparent 38%),
-    linear-gradient(145deg, #181743 0%, #11143b 55%, #171946 100%);
+  background: #f7f6ed;
 }
 
 .project-entry-loading.is-leaving {
@@ -35,7 +37,7 @@
   width: 54px;
   height: 1px;
   overflow: visible;
-  background: rgb(52 240 37 / 0.24);
+  background: rgb(73 93 71 / 0.24);
 }
 
 .project-entry-loading-line i {
@@ -45,7 +47,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #34f025;
+  background: #495d47;
   transform: translateY(-50%);
   animation: project-entry-pulse 900ms ease-in-out infinite;
 }

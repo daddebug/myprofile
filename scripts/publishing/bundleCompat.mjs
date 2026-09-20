@@ -21,6 +21,24 @@
 // notes) -- the real publish path must not have that gap.
 import { hashContent } from "./contentHash.mjs";
 import { bundleAssetKey } from "./resolveAsset.mjs";
+import { readFileSync } from "node:fs";
+
+const ACTIVE_P2_TEMPLATE_IDS = new Set(Object.keys(JSON.parse(readFileSync(
+  new URL("../../src/data/activePortfolioTemplateIds.json", import.meta.url),
+  "utf8",
+))));
+
+function assertActiveP2Draft(projectId, draft) {
+  if (!draft || typeof draft !== "object" || !Array.isArray(draft.templateInstances)) return;
+  const retired = [...new Set(draft.templateInstances
+    .map((instance) => instance?.templateId)
+    .filter((templateId) => typeof templateId === "string" && !ACTIVE_P2_TEMPLATE_IDS.has(templateId)))];
+  if (retired.length > 0) {
+    throw new Error(
+      `${projectId}: retired template IDs cannot enter the active Portfolio 2.0 publish path: ${retired.join(", ")}`,
+    );
+  }
+}
 
 function currentProjectEntity(currentPublished, projectId) {
   const meta = currentPublished.projectCatalog?.[projectId];
@@ -109,6 +127,10 @@ export function bundleV1ToV2AllIntents(bundle, currentPublished, options = {}) {
     const meta = Object.prototype.hasOwnProperty.call(catalogStore.projects || {}, projectId) ? catalogStore.projects[projectId] : current?.meta;
     const hasBundleDraft = Object.prototype.hasOwnProperty.call(bundleDrafts, projectId);
     const hasBundleDocument = Object.prototype.hasOwnProperty.call(bundleDocuments, projectId);
+    if (hasBundleDocument) {
+      throw new Error(`${projectId}: legacy ProjectDocument content cannot enter the active Portfolio 2.0 publish path.`);
+    }
+    if (hasBundleDraft) assertActiveP2Draft(projectId, bundleDrafts[projectId]);
     const body = hasBundleDraft ? bundleDrafts[projectId] : hasBundleDocument ? bundleDocuments[projectId] : current?.body;
     projectBodyTarget.set(projectId, hasBundleDraft
       ? "drafts"

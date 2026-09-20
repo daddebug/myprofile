@@ -1,0 +1,41 @@
+{
+  "fileKey": "hSSB0YpQ1UfCNI5FqaGuKZ",
+  "presentationRules": {
+    "templateStackGap": 0,
+    "defaultStageBackground": "#F7F6ED",
+    "plainMatchingFigmaBackground": "transparent/inherited",
+    "sectionBackgrounds": "Render only explicit gradients, colors, images, masks, textures, blur, or decorative backgrounds.",
+    "verticalWhitespaceOwnership": "Each template owns its internal vertical whitespace; the stack adds none between templates."
+  },
+  "frames": {
+    "FRAME_01_COVER": {
+      "nodeId": "1:2",
+      "figmaName": "标题",
+      "width": 1440,
+      "height": 440,
+      "status": "implemented",
+      "note": "Portfolio 2.0 Cover synced from the current Figma frame. It is a full-bleed pale-green-to-ivory web section with editable project metadata and no directory or phase-milestones consumption.",
+      "web": {
+        "layout": "full-bleed web section",
+        "components": ["ProjectCoverSection"]
+      }
+    },
+    "FRAME_02_BODY": {
+      "nodeId": "1:89",
+      "figmaName": "正文",
+      "width": 1440,
+      "height": 189,
+      "status": "implemented",
+      "note": "Portfolio 2.0 dynamic-height Body. Existing statement-longform fields supply the editable label, lead sentence, and body; legacy section numbering is not rendered.",
+      "web": {
+        "layout": "full-bleed web section",
+        "components": ["StatementLongformTemplate", "statement-longform"]
+      }
+    },
+    "UNIVERSAL_MEDIA": { "nodeId": "54:8", "figmaName": "图片 单图", "width": 1440, "height": 793, "status": "implemented", "web": { "layout": "normal web flow", "components": ["UniversalMediaTemplate"] } },
+    "DOUBLE_IMAGE": { "nodeId": "54:72", "figmaName": "图片 双图", "width": 1440, "height": 386, "status": "implemented", "web": { "layout": "normal web flow", "components": ["ImageRowTemplate"] } },
+    "NOTIFICATION_BEFORE_AFTER": { "nodeId": "67:25", "figmaName": "notivation", "width": 1440, "height": 473, "status": "implemented", "web": { "layout": "normal web flow", "components": ["DirectionCompareTemplate"] } },
+    "IMPACT": { "nodeId": "69:69", "figmaName": "impact", "width": 1440, "height": 189, "status": "implemented", "web": { "layout": "dynamic-height web flow", "components": ["SupportingNoteTemplate"] } },
+    "OTHER_PROJECTS_FOOTER": { "nodeId": "70:111", "figmaName": "图片 单图", "width": 1440, "height": 776, "status": "implemented", "web": { "layout": "terminal web sections", "components": ["ProjectEndSections"] } }
+  }
+}

@@ -1,0 +1,393 @@
+.project-web-section {
+  position: relative;
+  width: 100%;
+}
+
+[data-dynamic-project-page] {
+  /* Shared desktop alignment origin. Cover begins on this rail; the
+     1440-wide Section Intro derives its composition origin from the same
+     anchor while preserving its Figma-local coordinates. */
+  --project-page-anchor: max(24px, calc((100vw - 1200px) / 2));
+}
+
+.project-web-container {
+  margin-inline: auto;
+}
+
+.project-web-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 24px;
+}
+
+.project-section-intro {
+  left: 50%;
+  width: 100vw;
+  overflow: clip;
+  margin-left: -50vw;
+  color: #495d47;
+  background: transparent;
+}
+
+.project-section-intro-stage {
+  position: relative;
+  width: min(100%, 1440px);
+  height: 346px;
+  margin-right: 0;
+  /* Figma cross-frame relationship: Cover content begins at x=70 in its
+     1440 frame, while this composition's origin is x=0. Derive the whole
+     Section Intro origin from that authored relationship; local element
+     coordinates (number 61, context/panel 289) remain untouched. */
+  margin-left: max(0px, calc(var(--project-page-anchor) - 70px));
+}
+
+.project-section-intro-number {
+  position: absolute;
+  top: -29px;
+  left: 4.236111%;
+  z-index: 0;
+  width: 36.25%;
+  height: 451px;
+  color: transparent;
+  font-family: "Inter", "Noto Sans SC", sans-serif;
+  font-size: 320px;
+  font-weight: 800;
+  line-height: normal;
+  letter-spacing: 0;
+  -webkit-text-stroke: 1px rgb(73 93 71 / 0.3);
+  text-stroke: 1px rgb(73 93 71 / 0.3);
+  user-select: none;
+}
+
+.project-section-intro-content {
+  position: absolute;
+  top: 105px;
+  left: 20.069444%;
+  z-index: 1;
+  width: 75.833333%;
+}
+
+.project-section-intro-context {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  height: 29px;
+}
+
+.project-section-intro-kicker {
+  width: auto;
+  max-width: min(100%, 32rem);
+  margin: 0;
+  color: #495d47;
+  font-family: "Inter", "Noto Sans SC", sans-serif;
+  font-size: 24px;
+  font-style: italic;
+  font-weight: 300;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.project-section-intro-divider-end {
+  position: absolute;
+  top: -10px;
+  left: calc(100% + 3px);
+  width: 6px;
+  height: 6px;
+  background: #b5d298;
+}
+
+.project-section-intro-divider-end::before,
+.project-section-intro-divider-end::after {
+  position: absolute;
+  content: "";
+  background: #b5d298;
+}
+
+.project-section-intro-divider-end::before {
+  top: -18px;
+  left: -4px;
+  width: 1px;
+  height: 28px;
+}
+
+.project-section-intro-divider-end::after {
+  top: 10px;
+  left: -4px;
+  width: 28px;
+  height: 1px;
+}
+
+.project-section-intro-panel {
+  position: relative;
+  margin-top: 0;
+  width: 100%;
+  height: 169px;
+  padding: 36px 58px 24px;
+  border: 1px solid #b5d298;
+  background: rgb(247 246 237 / 0.94);
+  box-shadow: 0 4px 4px rgb(0 0 0 / 0.16);
+}
+
+.project-section-intro-panel h2,
+.project-section-intro-panel p,
+.project-section-intro-headline,
+.project-section-intro-body {
+  max-width: 973px;
+  margin: 0;
+  font-family: "Inter", "Noto Sans SC", sans-serif;
+}
+
+.project-section-intro-headline {
+  width: 100%;
+  color: #495d47;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: normal;
+}
+
+.project-section-intro-body {
+  width: 100%;
+  color: #3d423c;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: normal;
+  white-space: pre-wrap;
+}
+
+.project-section-intro-panel .project-section-intro-body {
+  margin-top: 4px;
+}
+
+.project-cover-section {
+  min-height: 440px;
+  overflow: clip;
+  color: #495d47;
+  /* Derived from the project's own --project-accent (set on the page root,
+     DynamicProjectPage.tsx) -- always blended lighter with #F7F6ED, never
+     the raw accent, so a dark custom pick still renders as a light Hero. */
+  --project-hero-color: color-mix(in srgb, var(--project-accent, #9FCB98) 60%, #F7F6ED 40%);
+  background: linear-gradient(180deg, var(--project-hero-color) 0%, #f7f6ed 86%);
+}
+
+.project-cover-grid {
+  padding-block: 75px 46px;
+  row-gap: 0;
+}
+
+.project-cover-copy {
+  grid-column: 1 / span 10;
+}
+
+.project-cover-year {
+  margin: 0;
+  color: #495d47;
+  font-family: "Inter", "Noto Sans SC", sans-serif;
+  font-style: normal;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: normal;
+  letter-spacing: 0;
+}
+
+.project-cover-category {
+  margin-top: 49px;
+  color: #2b6828;
+  font-family: "Inter", "Noto Sans SC", sans-serif;
+  font-style: normal;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: normal;
+  letter-spacing: 0;
+}
+
+.project-cover-title {
+  display: grid;
+  margin-top: 2px;
+  color: #000;
+  font-family: "Inter", "Noto Sans SC", sans-serif;
+  font-style: normal;
+  font-size: 66px;
+  font-weight: 600;
+  line-height: 80px;
+  letter-spacing: 0;
+}
+
+.project-cover-title span {
+  display: block;
+}
+
+.project-cover-description {
+  max-width: 862px;
+  margin-top: 10px;
+  color: #6e6a64;
+  font-family: "Inter", "Noto Sans SC", sans-serif;
+  font-style: normal;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 28px;
+  letter-spacing: 0;
+}
+
+.project-cover-directory {
+  position: relative;
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  column-gap: 24px;
+  margin-top: 0;
+  min-width: 0;
+}
+
+.project-cover-directory::before {
+  position: absolute;
+  top: 82px;
+  right: calc((100vw - 100%) / -2);
+  left: calc((100vw - 100%) / -2);
+  height: 3px;
+  content: "";
+  background: #495d47;
+}
+
+.project-cover-directory-item,
+.project-cover-directory-slot {
+  min-width: 0;
+}
+
+.project-cover-directory-number {
+  position: relative;
+  z-index: 1;
+  display: block;
+  height: 85px;
+  color: #495d47;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-size: 86px;
+  font-weight: 200;
+  line-height: normal;
+  letter-spacing: 0;
+}
+
+.project-cover-directory-item h2 {
+  margin: 5px 0 0;
+  color: #495d47;
+  font-family: "Inter", "Noto Sans SC", sans-serif;
+  font-style: normal;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 21px;
+  letter-spacing: 0;
+}
+
+.project-cover-directory-item ul {
+  display: grid;
+  gap: 3px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-cover-directory-item li {
+  display: grid;
+  grid-template-columns: 7px minmax(0, 1fr);
+  gap: 4px;
+  align-items: start;
+  color: #495d47;
+  font-family: "Inter", "Noto Sans SC", sans-serif;
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 15px;
+  letter-spacing: 0;
+}
+
+.project-cover-directory-item li::before {
+  width: 7px;
+  height: 7px;
+  margin-top: 4px;
+  border-radius: 50%;
+  content: "";
+  background: #b8dc93;
+}
+
+/* Only DynamicProjectPage's owner/navigation chrome changes on the warm Cover
+   surface. Other project types and all global editor controls retain their
+   existing dark presentation. The Back button (data-project-back-button)
+   gets this exact same treatment as data-project-back-to-top so the two
+   floating circular controls always render identically, wherever on the
+   page each one sits -- the language switch is deliberately excluded here
+   (it uses its own fixed #495D47-based colors regardless of surface, per
+   its own quiet-typography spec, not this box-style override). */
+[data-project-route-shell]:has([data-dynamic-project-page]) [data-project-back-button],
+[data-project-route-shell]:has([data-dynamic-project-page]) [data-owner-editor-dock] button,
+[data-project-route-shell]:has([data-dynamic-project-page]) [data-project-back-to-top],
+body:has([data-dynamic-project-page]) [data-production-export-dock] a,
+body:has([data-dynamic-project-page]) [data-production-export-dock] button {
+  color: #111 !important;
+  border-color: rgb(17 17 17 / 0.28) !important;
+  background: rgb(248 246 241 / 0.72) !important;
+  backdrop-filter: blur(14px);
+}
+
+[data-project-route-shell]:has([data-dynamic-project-page]) [data-project-back-button]:hover,
+[data-project-route-shell]:has([data-dynamic-project-page]) [data-owner-editor-dock] button:hover,
+[data-project-route-shell]:has([data-dynamic-project-page]) [data-project-back-to-top]:hover,
+body:has([data-dynamic-project-page]) [data-production-export-dock] a:hover,
+body:has([data-dynamic-project-page]) [data-production-export-dock] button:hover {
+  color: #000 !important;
+  border-color: rgb(0 0 0 / 0.5) !important;
+  background: rgb(248 246 241 / 0.9) !important;
+}
+
+@media (max-width: 900px) {
+  .project-cover-copy {
+    grid-column: 1 / -1;
+  }
+
+  .project-section-intro-stage {
+    width: min(calc(100% - 32px), 1200px);
+    height: auto;
+    min-height: 346px;
+    padding-block: 4.5rem 3.5rem;
+  }
+
+  .project-section-intro-number {
+    top: -1.75rem;
+    left: -1rem;
+    width: auto;
+    height: auto;
+    font-size: clamp(10rem, 48vw, 16rem);
+  }
+
+  .project-section-intro-content {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: auto;
+    margin-left: clamp(2.5rem, 12vw, 6rem);
+  }
+
+  .project-section-intro-panel {
+    height: auto;
+    min-height: 169px;
+    padding: 26px 24px;
+  }
+
+  .project-cover-title {
+    font-size: clamp(2.8rem, 9vw, 4.125rem);
+  }
+
+  .project-cover-directory {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 2.5rem;
+  }
+
+  .project-cover-directory::before {
+    display: none;
+  }
+}
+
+@media (min-width: 901px) {
+  .project-cover-section .project-web-container {
+    margin-inline: auto;
+  }
+}

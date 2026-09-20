@@ -1,19 +1,17 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Braces, Undo2 } from "lucide-react";
 import { PageTransition } from "../components/PageTransition";
-import { ProjectHeroTitleSummary } from "../components/ProjectHeroTitleSummary";
 import { useCaseStudyEditor } from "../components/CaseStudyEditor";
+import { useOwnerMode } from "../hooks/useOwnerMode";
+import { useSurfaceSignal } from "../hooks/useSurfaceSignal";
 import { useLocale } from "../locales/LocaleContext";
 import { caseStudyLayout } from "../lib/caseStudyLayout";
 import { TemplateFlowRegion } from "../components/TemplateInstancesSection";
-import { mergeTemplateInstances, type TemplateInstance } from "../lib/projectTemplateInstances";
 import { deleteProjectBodyAsset, getProjectBodyAsset, putProjectBodyAssetRecord } from "../lib/projectBodyAssetDb";
-import { useTemplateHorizontalInset } from "../lib/templateLayoutDefaults";
-import { layoutControls as projectHeaderLayoutControls } from "../templates/ProjectHeaderTemplate";
-import type { ResolvedProjectMetadata } from "../lib/projectMetadata";
-import { setProjectPublicMetaOverride, type ProjectPublicMetaOverride } from "../lib/projectMetadata";
+import { setProjectPublicMetaOverride, type ProjectPublicMetaOverride, type ResolvedProjectMetadata } from "../lib/projectMetadata";
+import { useOwnerProjectCatalog } from "../hooks/useProjectCatalog";
 import { DynamicProjectCodePanel } from "../components/DynamicProjectCodePanel";
 import {
   getDynamicProjectImageMapping,
@@ -22,10 +20,18 @@ import {
 import { getStagedDynamicDraft, isCollectionExportCapture, isCollectionStagingMode } from "../lib/collectionExportStaging";
 import { getPublishedProjectDraft } from "../lib/publishedPortfolio";
 import { markProjectDirty } from "../lib/publishIntent";
-import { backfillMatchingTemplateImagePublicPaths } from "../lib/templateImageReferences";
-import { hydrateTranslations } from "../lib/translationHydration";
-
-const dynamicProjectPickerExcludedTemplateIds = ["project-header"];
+import {
+  emptyDynamicProjectDraft,
+  hydrateExistingDiskImageAssets,
+  normalizeDynamicProjectDraft,
+  resolveDevProjectDraft,
+  type DraftLifecycle,
+  type DynamicProjectDraft,
+  type OrphanedDiskMapping,
+} from "../lib/dynamicProjectDraftHydration";
+import { ProjectPresentation } from "../project-presentation/ProjectPresentation";
+import { ProjectEndSections } from "../project-presentation/ProjectEndSections";
+import "../project-presentation/project-end-sections.css";
 
 // The page every project created through "New project" renders on — a
 // blank shell with no auto-generated content, built around the current
@@ -42,36 +48,13 @@ function draftStorageKey(projectId: string) {
   return `dilida-portfolio:dynamic-project:${projectId}:draft:v1`;
 }
 
-type DynamicProjectDraft = {
-  version: 1;
-  templateInstances: TemplateInstance[];
-  updatedAt: string;
-};
-
 type ProjectCodeUndo = {
   draft: DynamicProjectDraft;
   metadata: Partial<ProjectPublicMetaOverride>;
 };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function emptyDraft(): DynamicProjectDraft {
-  return { version: 1, templateInstances: [], updatedAt: new Date(0).toISOString() };
-}
-
-function normalizeDraft(parsed: unknown): DynamicProjectDraft | null {
-  if (!isRecord(parsed) || parsed.version !== 1) return null;
-  return {
-    version: 1,
-    templateInstances: mergeTemplateInstances(parsed.templateInstances),
-    updatedAt: typeof parsed.updatedAt === "string" ? parsed.updatedAt : emptyDraft().updatedAt,
-  };
-}
-
-function loadDraft(projectId: string): DynamicProjectDraft {
-  const publishedDraft = normalizeDraft(getPublishedProjectDraft(projectId));
+function loadDraft(projectId: string) {
+  const publishedDraft = normalizeDynamicProjectDraft(getPublishedProjectDraft(projectId));
   if (typeof window === "undefined" || !import.meta.env.DEV) {
     // Production (and any non-browser/prerender context) has no access to
     // the owner's own localStorage, and is never a Collection-export
@@ -80,7 +63,12 @@ function loadDraft(projectId: string): DynamicProjectDraft {
     // published draft: the same static data already bundled for every
     // visitor via publishedPortfolio.json, produced by the same
     // portfolio:import pipeline that writes the localStorage draft shape.
-    return publishedDraft ?? emptyDraft();
+    return {
+      draft: publishedDraft ?? emptyDynamicProjectDraft(),
+      suspiciousLocalDraft: false,
+      suspiciousReason: "",
+      source: publishedDraft ? "published" as const : "empty" as const,
+    };
   }
   // Collection export capture: this browser's localStorage is Playwright's
   // separate, empty profile, so the real draft was staged ahead of time (see
@@ -90,104 +78,15 @@ function loadDraft(projectId: string): DynamicProjectDraft {
   // genuinely empty rather than silently look like real, saved content.
   if (isCollectionStagingMode()) {
     const staged = getStagedDynamicDraft(projectId);
-    return staged ?? emptyDraft();
-  }
-  try {
-    const stored = window.localStorage.getItem(draftStorageKey(projectId));
-    if (!stored) return emptyDraft();
-    const localDraft = normalizeDraft(JSON.parse(stored) as unknown) ?? emptyDraft();
-    return publishedDraft
-      ? {
-          ...localDraft,
-          templateInstances: backfillMatchingTemplateImagePublicPaths(
-            hydrateTranslations(localDraft.templateInstances, publishedDraft.templateInstances),
-            publishedDraft.templateInstances,
-          ),
-        }
-      : localDraft;
-  } catch {
-    return emptyDraft();
-  }
-}
-
-function mergeDiskImageInstances(
-  instances: TemplateInstance[],
-  mapping: DynamicProjectImageMapping | null,
-) {
-  if (!mapping) return instances;
-  const next = [...instances];
-  const diskInstances = Object.values(mapping.instances).sort((a, b) => a.order - b.order);
-  for (const disk of diskInstances) {
-    const diskItems = Array.isArray(disk.content.items) ? disk.content.items : [];
-    const persistedItems = disk.templateId === "image-row" ? diskItems.filter((value) => {
-      if (!value || typeof value !== "object" || Array.isArray(value)) return false;
-      const image = (value as Record<string, unknown>).image;
-      if (!image || typeof image !== "object" || Array.isArray(image)) return false;
-      const imageId = (image as Record<string, unknown>).imageId;
-      return typeof imageId === "string" && Boolean(mapping.images[imageId]);
-    }) : [];
-    const persistedCompareImages = disk.templateId === "direction-compare"
-      ? (["leftImage", "rightImage"] as const).flatMap((field) => {
-          const image = disk.content[field];
-          if (!image || typeof image !== "object" || Array.isArray(image)) return [];
-          const imageId = (image as Record<string, unknown>).imageId;
-          return typeof imageId === "string" && mapping.images[imageId] ? [[field, image] as const] : [];
-        })
-      : [];
-    if (!persistedItems.length && !persistedCompareImages.length) continue;
-    const existingIndex = next.findIndex((instance) => instance.instanceId === disk.instanceId);
-    if (existingIndex < 0) {
-      const restored: TemplateInstance = {
-        instanceId: disk.instanceId,
-        templateId: disk.templateId,
-        regionId: disk.regionId,
-        anchorId: disk.anchorId,
-        content: structuredClone(disk.content),
-        ...(disk.layoutSettings ? { layoutSettings: structuredClone(disk.layoutSettings) } : {}),
-      };
-      next.splice(Math.min(disk.order, next.length), 0, restored);
-      continue;
-    }
-    const existing = next[existingIndex];
-    if (existing.templateId === "direction-compare" && disk.templateId === "direction-compare") {
-      const restoredContent = { ...existing.content };
-      for (const [field, image] of persistedCompareImages) {
-        const localImage = existing.content[field];
-        restoredContent[field] = localImage && typeof localImage === "object" && !Array.isArray(localImage)
-          ? { ...structuredClone(image), ...localImage, imageId: (image as Record<string, unknown>).imageId, publicPath: (image as Record<string, unknown>).publicPath }
-          : structuredClone(image);
-      }
-      next[existingIndex] = { ...existing, content: restoredContent };
-      continue;
-    }
-    if (existing.templateId !== "image-row" || disk.templateId !== "image-row") continue;
-    const localItems = Array.isArray(existing.content.items) ? existing.content.items : [];
-    const byId = new Map(localItems.flatMap((value) => {
-      if (!value || typeof value !== "object" || Array.isArray(value) || typeof (value as Record<string, unknown>).id !== "string") return [];
-      return [[(value as Record<string, unknown>).id as string, value] as const];
-    }));
-    for (const diskItem of persistedItems) {
-      const diskRecord = diskItem as Record<string, unknown>;
-      const itemId = diskRecord.id as string;
-      const local = byId.get(itemId);
-      byId.set(itemId, local && typeof local === "object" && !Array.isArray(local)
-        ? { ...(diskRecord as Record<string, unknown>), ...(local as Record<string, unknown>), image: diskRecord.image }
-        : diskRecord);
-    }
-    const persistedIds = new Set(persistedItems.map((item) => (item as Record<string, unknown>).id));
-    const mergedItems = [
-      ...localItems.map((item) => {
-        const id = item && typeof item === "object" && !Array.isArray(item) ? (item as Record<string, unknown>).id : undefined;
-        return typeof id === "string" && persistedIds.has(id) ? byId.get(id) : item;
-      }),
-      ...persistedItems.filter((item) => !localItems.some((local) => local && typeof local === "object" && !Array.isArray(local) && (local as Record<string, unknown>).id === (item as Record<string, unknown>).id)),
-    ];
-    next[existingIndex] = {
-      ...existing,
-      content: { ...existing.content, items: mergedItems },
+    return {
+      draft: staged ?? emptyDynamicProjectDraft(),
+      suspiciousLocalDraft: false,
+      suspiciousReason: "",
+      source: staged ? "local" as const : "empty" as const,
     };
   }
-  return next;
+  const stored = window.localStorage.getItem(draftStorageKey(projectId));
+  return resolveDevProjectDraft(stored, publishedDraft);
 }
 
 function editableMetadataSnapshot(metadata: ResolvedProjectMetadata): Partial<ProjectPublicMetaOverride> {
@@ -209,53 +108,73 @@ function editableMetadataSnapshot(metadata: ResolvedProjectMetadata): Partial<Pr
 }
 
 export function DynamicProjectPage({ projectId, metadata }: { projectId: string; metadata: ResolvedProjectMetadata }) {
-  const { locale, pathFor, messages } = useLocale();
+  const { locale, pathFor } = useLocale();
+  const location = useLocation();
   const { isEditing } = useCaseStudyEditor();
-  const [draft, setDraft] = useState<DynamicProjectDraft>(() => loadDraft(projectId));
+  // This page's own light (bg-[#F7F6ED], see the <article> below) background,
+  // declared for ProductionExportDock's surface-adaptive glass buttons --
+  // see useSurfaceSignal's own comment for why this can't just be page CSS.
+  useSurfaceSignal("light");
+  // ProjectEndSections' "Other Projects" slot cards need PERMISSION
+  // (isOwner) kept separate from editor-chrome visibility (isEditing, which
+  // already folds in editingMode via useCaseStudyEditor) -- same split as
+  // HomePage's grid, so draft/hidden projects stay clickable for the owner
+  // even with editingMode off.
+  const isOwner = useOwnerMode();
+  // Reactive, not a one-shot resolveProjectCatalog() snapshot -- Other
+  // Projects (ProjectEndSections below) must never keep recommending a
+  // project whose catalog entry has since changed (deleted, hidden,
+  // unpublished) while this page stays open.
+  const projectCatalog = useOwnerProjectCatalog(locale);
+  const initialHydration = useRef<ReturnType<typeof loadDraft> | null>(null);
+  if (!initialHydration.current) initialHydration.current = loadDraft(projectId);
+  const [draft, setDraft] = useState<DynamicProjectDraft>(() => initialHydration.current!.draft);
+  const [draftLifecycle, setDraftLifecycle] = useState<DraftLifecycle>("hydrating");
+  const draftLifecycleRef = useRef<DraftLifecycle>("hydrating");
+  const [suspiciousLocalDraft, setSuspiciousLocalDraft] = useState(
+    () => initialHydration.current!.suspiciousLocalDraft,
+  );
+  const [suspiciousReason, setSuspiciousReason] = useState(
+    () => initialHydration.current!.suspiciousReason,
+  );
+  const [orphanedDiskMappings, setOrphanedDiskMappings] = useState<OrphanedDiskMapping[]>([]);
   const [projectCodeOpen, setProjectCodeOpen] = useState(false);
   const [projectCodeUndo, setProjectCodeUndo] = useState<ProjectCodeUndo | null>(null);
   const [projectCodeStatus, setProjectCodeStatus] = useState("");
   const [diskImageMapping, setDiskImageMapping] = useState<DynamicProjectImageMapping | null>(null);
-  const didMount = useRef(false);
   const loadedProjectId = useRef(projectId);
+
+  const transitionDraftLifecycle = (next: DraftLifecycle) => {
+    draftLifecycleRef.current = next;
+    setDraftLifecycle(next);
+  };
+
+  const applyAuthoringMutation = (
+    updater: DynamicProjectDraft | ((current: DynamicProjectDraft) => DynamicProjectDraft),
+  ) => {
+    transitionDraftLifecycle("ready-dirty");
+    setDraft(updater);
+  };
 
   // Every other template's own width is clamped to this same rail (see
   // --case-study-master-rail in template-library.css) so nothing can ever
   // render wider than whatever this page's real top title uses.
-  const headerTemplateDefaultInset = useTemplateHorizontalInset("project-header");
-  const xmindTemplateDefaultInset = useTemplateHorizontalInset("xmind-breakdown");
-  const headerInstance = draft.templateInstances.find((instance) => instance.templateId === "project-header");
-  const xmindInstance = draft.templateInstances.find((instance) => instance.templateId === "xmind-breakdown");
-  const xmindHorizontalInset = xmindInstance?.layoutSettings?.horizontalInset ?? xmindTemplateDefaultInset;
-  const masterRailStyle = headerInstance
-    ? {
-        // A real Project Header instance exists — mirror its own current
-        // inset (its own override if set, otherwise the template's saved
-        // default) and its title's max-width, so the rail always matches
-        // Header's real current rendering, including if it's edited later.
-        "--case-study-header-inset": `${headerInstance.layoutSettings?.horizontalInset ?? headerTemplateDefaultInset}px`,
-        "--case-study-header-title-max": projectHeaderLayoutControls.titleMaxWidth,
-        "--dynamic-xmind-horizontal-inset": `${xmindHorizontalInset}px`,
-      } as CSSProperties
-    : {
-        // No Project Header instance on this project — this page's real
-        // top title is instead its own built-in hero (heroContainer, which
-        // renders through .site-container). Falling back to Project
-        // Header's *template default* inset/title-max here would clamp
-        // every template to a rail that has nothing to do with what's
-        // actually anchoring the page. Point the same two inputs at the
-        // site-wide tokens .site-container itself uses instead, so the
-        // rail this produces is exactly .site-container's own box.
-        "--case-study-header-inset": "var(--site-page-gutter)",
-        "--case-study-header-title-max": "var(--site-content-max-width)",
-        "--dynamic-xmind-horizontal-inset": `${xmindHorizontalInset}px`,
-      } as CSSProperties;
+  // Cover content is rendered separately from the active Portfolio 2.0 flow.
+  const instancesAfterCover = draft.templateInstances;
+  const masterRailStyle = {
+    "--case-study-header-inset": "var(--site-page-gutter)",
+    "--case-study-header-title-max": "var(--site-content-max-width)",
+  } as CSSProperties;
 
   useEffect(() => {
     if (loadedProjectId.current === projectId) return;
     loadedProjectId.current = projectId;
-    didMount.current = false;
-    setDraft(loadDraft(projectId));
+    const hydration = loadDraft(projectId);
+    transitionDraftLifecycle("hydrating");
+    setDraft(hydration.draft);
+    setSuspiciousLocalDraft(hydration.suspiciousLocalDraft);
+    setSuspiciousReason(hydration.suspiciousReason);
+    setOrphanedDiskMappings([]);
     setProjectCodeOpen(false);
     setProjectCodeUndo(null);
     setProjectCodeStatus("");
@@ -266,10 +185,11 @@ export function DynamicProjectPage({ projectId, metadata }: { projectId: string;
     try {
       const mapping = await getDynamicProjectImageMapping(projectId);
       setDiskImageMapping(mapping);
-      setDraft((current) => ({
-        ...current,
-        templateInstances: mergeDiskImageInstances(current.templateInstances, mapping),
-      }));
+      setDraft((current) => {
+        const hydration = hydrateExistingDiskImageAssets(current.templateInstances, mapping);
+        setOrphanedDiskMappings(hydration.orphanedMappings);
+        return { ...current, templateInstances: hydration.instances };
+      });
     } catch {
       // Production pages and a stopped local content service keep their existing read path.
     }
@@ -280,24 +200,27 @@ export function DynamicProjectPage({ projectId, metadata }: { projectId: string;
     void getDynamicProjectImageMapping(projectId).then((mapping) => {
       if (cancelled) return;
       setDiskImageMapping(mapping);
-      setDraft((current) => ({
-        ...current,
-        templateInstances: mergeDiskImageInstances(current.templateInstances, mapping),
-      }));
-    }).catch(() => undefined);
+      setDraft((current) => {
+        const hydration = hydrateExistingDiskImageAssets(current.templateInstances, mapping);
+        setOrphanedDiskMappings(hydration.orphanedMappings);
+        return { ...current, templateInstances: hydration.instances };
+      });
+    }).catch(() => undefined).finally(() => {
+      if (!cancelled && draftLifecycleRef.current === "hydrating") {
+        transitionDraftLifecycle("ready-clean");
+      }
+    });
     return () => { cancelled = true; };
   }, [projectId]);
 
   useEffect(() => {
-    if (!didMount.current) {
-      didMount.current = true;
-      return undefined;
-    }
+    if (draftLifecycleRef.current !== "ready-dirty") return undefined;
     const timeout = window.setTimeout(() => {
       if (typeof window === "undefined") return;
       try {
         window.localStorage.setItem(draftStorageKey(projectId), JSON.stringify(draft));
         markProjectDirty(projectId);
+        transitionDraftLifecycle("ready-clean");
       } catch {
         // Best-effort autosave, matching every other draft page in this app.
       }
@@ -305,68 +228,127 @@ export function DynamicProjectPage({ projectId, metadata }: { projectId: string;
     return () => window.clearTimeout(timeout);
   }, [draft, projectId]);
 
+  // Two independent title lines from EDIT PROJECT INFO (titleLine1Zh/
+  // titleLine2Zh, titleLine1En/titleLine2En on the project's metadata
+  // override -- see projectMetadata.ts's resolveTitleLines), not a single
+  // string split on "\n". An empty titleLine2 (old data that has never
+  // been split, or a genuinely single-line title) is filtered out here so
+  const heroTitleLines = [metadata.titleLine1, metadata.titleLine2]
+    .map((line) => line.trim())
+    .filter(Boolean);
+
   // The collection-export-only glow background lives on the ancestor
   // [data-project-route-shell] (styles.css) — this article's own opaque
   // bg-deepIndigo would otherwise sit on top and hide it completely, so it
   // drops to transparent in capture mode only.
   return (
     <PageTransition>
-      <article className={`overflow-hidden text-softWhite ${isCollectionExportCapture() ? "" : "bg-deepIndigo"}`}>
-        {/* paddingBottom override: caseStudyLayout.heroSection's own pb-14/
-            md:pb-20 is shared with CrossPlatformDraftPage/ThreeDCharacterUiDraftPage
-            (untouched there) — this page's hero-to-first-template gap was
-            too large stacked on top of contentSection's own padding-top and
-            the template grid's margin-top, so it's shortened here only. */}
-        <section className={caseStudyLayout.heroSection} style={{ paddingBottom: "40px" }}>
-          <div className="absolute inset-0 bg-grain bg-[length:18px_18px] opacity-25" />
-          <div className={caseStudyLayout.heroContainer}>
-            {isCollectionExportCapture() ? null : (
-              <Link to={pathFor("/work")} className={caseStudyLayout.backLink}>
-                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                {messages.project.backToArchive}
+      <article
+        data-dynamic-project-page
+        data-draft-lifecycle={draftLifecycle}
+        data-suspicious-local-draft={suspiciousLocalDraft ? "true" : "false"}
+        data-orphaned-disk-mapping-count={orphanedDiskMappings.length}
+        className={`overflow-hidden ${isCollectionExportCapture() ? "" : "bg-[#F7F6ED]"}`}
+        // One base accent for this project's Hero + Footer -- both derive
+        // their actual surface color from this via color-mix() in
+        // project-web-sections.css, never rendered raw. Set here (the
+        // common ancestor of both ProjectPresentation/Hero and
+        // ProjectEndSections/Footer) so a single value drives both.
+        style={{ "--project-accent": metadata.projectThemeColor } as CSSProperties}
+      >
+        {isCollectionExportCapture() ? null : (
+          <>
+            {/* Floating circular control, not a header/toolbar row -- reuses
+                ProjectBackToTop's exact visual language (diameter, border,
+                background, shadow, hover transition) so the two read as one
+                family, differing only in icon and fixed corner. Always on
+                (no scroll-triggered fade like BackToTop), and pinned to
+                top-left while BackToTop only ever occupies bottom-right, so
+                the two can never overlap. Always the current-locale
+                Portfolio homepage -- /work is now owner-only Project
+                Archive tooling, not part of public navigation, and there is
+                no browser-history guessing here. data-project-back-button
+                (not data-project-back-to-top) keeps it out of the unrelated
+                scroll-to-top DOM-strip selectors in the export/print
+                pipeline while still picking up the same warm-Cover-surface
+                color override as every other floating control here (see
+                project-web-sections.css). */}
+            <Link
+              to={pathFor("/")}
+              data-project-back-button
+              aria-label={locale === "zh" ? "返回首页" : "Back to home"}
+              title={locale === "zh" ? "返回" : "Back"}
+              className="fixed left-4 top-4 z-[70] grid h-11 w-11 place-items-center rounded-full border border-[#495d47]/30 bg-[#f7f6ed] text-[#495d47] shadow-[0_8px_22px_rgba(3,5,26,0.12)] transition-[opacity,transform,border-color,color,background-color] duration-300 ease-out hover:border-[#495d47] hover:bg-[#495d47] hover:text-[#f7f6ed] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#495d47] motion-reduce:transition-none md:left-7 md:top-7"
+            >
+              <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+            </Link>
+            {/* Quiet typography, not a segmented control -- no shared
+                container, background, or border with Back above. */}
+            <div className="fixed right-4 top-4 z-[70] flex items-center gap-1.5 text-[13px] font-medium md:right-7 md:top-7">
+              <Link
+                to={`${pathFor(location.pathname, "zh")}${location.search}${location.hash}`}
+                className={`transition-colors duration-200 ${locale === "zh" ? "text-[#495d47]" : "text-[#495d47]/45 hover:text-[#495d47]"}`}
+              >
+                中文
               </Link>
-            )}
-            <div className={caseStudyLayout.heroComposition}>
-              <div className={caseStudyLayout.heroCopy}>
-                {metadata.category ? <p className={caseStudyLayout.category}>{metadata.category}</p> : null}
-                <ProjectHeroTitleSummary>
-                  <h1 className={caseStudyLayout.heroTitle}>{metadata.title}</h1>
-                  {metadata.summary ? <p className={caseStudyLayout.subtitle}>{metadata.summary}</p> : null}
-                </ProjectHeroTitleSummary>
-              </div>
-              <div className={caseStudyLayout.durationPosition}>
-                {metadata.duration ? <p className={caseStudyLayout.durationText}>{metadata.duration}</p> : null}
-              </div>
+              <span aria-hidden="true" className="text-[#495d47]/30">/</span>
+              <Link
+                to={`${pathFor(location.pathname, "en")}${location.search}${location.hash}`}
+                className={`transition-colors duration-200 ${locale === "en" ? "text-[#495d47]" : "text-[#495d47]/45 hover:text-[#495d47]"}`}
+              >
+                EN
+              </Link>
             </div>
-          </div>
-        </section>
+          </>
+        )}
+        <ProjectPresentation
+          category={metadata.category ?? ""}
+          titleLines={heroTitleLines}
+          duration={metadata.duration ?? ""}
+          description={metadata.summary ?? ""}
+        />
 
-        {/* paddingTop override — same reasoning as heroSection's paddingBottom
-            above: shortens the hero-to-first-template gap without touching
-            the shared class (CrossPlatformDraftPage/ThreeDCharacterUiDraftPage
-            keep their own py-16/md:py-24 unchanged). */}
-        <section className={caseStudyLayout.contentSection} style={{ paddingTop: "56px" }}>
-          {/* caseStudyLayout.blocks (gap-12), not contentStack (gap-24/32) —
-              matches the container CrossPlatformDraftPage/ThreeDCharacterUiDraftPage
-              wrap their own TemplateFlowRegion calls in, so template-to-template
-              spacing is governed by exactly one grid gap plus InstanceBlock's own
-              margin, the same as every other project page. blocks' own mt-14
-              is overridden to 0 below — it's redundant on top of
-              contentSection's paddingTop for the first template specifically,
-              and this page has no legacy content that depends on it. */}
-          <div className={caseStudyLayout.blocks} style={{ ...masterRailStyle, marginTop: 0 }}>
+        {/* backgroundColor overrides caseStudyLayout.contentSection's own
+            bg-deepIndigo (inline style always wins over a utility class,
+            regardless of Tailwind's generated rule order) -- scoped to
+            this page only, contentSection's shared definition is
+            untouched so every other page that uses it is unaffected. */}
+        <section
+          className={caseStudyLayout.contentSection}
+          style={{ paddingBlock: 0, backgroundColor: "#F7F6ED" }}
+        >
+          {/* Project templates touch edge-to-edge in flow. Each renderer owns
+              any vertical breathing room inside its own section. */}
+          <div
+            className={`${caseStudyLayout.blocks} project-content-blocks`}
+            style={{ ...masterRailStyle, marginTop: 0, gap: 0 }}
+          >
             {isEditing ? (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-[6px] border border-electricBlue/25 bg-archiveBlue/10 px-3 py-2">
-                <span className={`text-xs ${projectCodeStatus ? "text-[#d8bb72]" : "text-softWhite/44"}`}>
-                  {projectCodeStatus || (locale === "zh" ? "当前为本地草稿" : "Current local draft")}
-                </span>
+                <div className="grid gap-1">
+                  <span className={`text-xs ${projectCodeStatus ? "text-[#d8bb72]" : "text-softWhite/44"}`}>
+                    {projectCodeStatus || (locale === "zh" ? "当前为本地草稿" : "Current local draft")}
+                  </span>
+                  {suspiciousLocalDraft ? (
+                    <span data-suspicious-draft-warning className="text-xs text-[#8b4b37]">
+                      {locale === "zh" ? `检测到可疑本地草稿：${suspiciousReason}` : `Suspicious local draft: ${suspiciousReason}`}
+                    </span>
+                  ) : null}
+                  {orphanedDiskMappings.length > 0 ? (
+                    <span data-orphaned-mapping-warning className="text-xs text-[#8b4b37]">
+                      {locale === "zh"
+                        ? `检测到 ${orphanedDiskMappings.length} 条孤立磁盘资源映射；未重建任何模板。`
+                        : `${orphanedDiskMappings.length} orphaned disk asset mappings found; no templates were recreated.`}
+                    </span>
+                  ) : null}
+                </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {projectCodeUndo ? (
                     <button
                       type="button"
                       className="editor-action inline-flex items-center gap-2"
                       onClick={() => {
-                        setDraft(structuredClone(projectCodeUndo.draft));
+                        applyAuthoringMutation(structuredClone(projectCodeUndo.draft));
                         setProjectPublicMetaOverride(projectId, projectCodeUndo.metadata);
                         setProjectCodeUndo(null);
                         setProjectCodeStatus(locale === "zh" ? "本次项目代码应用已撤销，尚未落盘" : "Project-code application undone, not saved to disk");
@@ -387,15 +369,20 @@ export function DynamicProjectPage({ projectId, metadata }: { projectId: string;
               regionId="content"
               projectId={projectId}
               legacyItems={[]}
-              instances={draft.templateInstances}
-              onInstancesChange={(next) => setDraft((current) => ({
-                ...current,
-                templateInstances: mergeDiskImageInstances(next, diskImageMapping),
-                updatedAt: new Date().toISOString(),
-              }))}
+              instances={instancesAfterCover}
+              onInstancesChange={(next) => applyAuthoringMutation((current) => {
+                const hydration = hydrateExistingDiskImageAssets(next, diskImageMapping);
+                setOrphanedDiskMappings(hydration.orphanedMappings);
+                return {
+                  ...current,
+                  // Cover remains presentation-owned. Every other template,
+                  // including statement-longform, stays in this ordered flow.
+                  templateInstances: hydration.instances,
+                  updatedAt: new Date().toISOString(),
+                };
+              })}
               isEditing={isEditing}
               language={locale}
-              pickerExcludedTemplateIds={dynamicProjectPickerExcludedTemplateIds}
               onDiskImagesChanged={() => void reloadDiskImages()}
               db={{
                 getDraftImage: (id) => getProjectBodyAsset(id),
@@ -405,6 +392,13 @@ export function DynamicProjectPage({ projectId, metadata }: { projectId: string;
             />
           </div>
         </section>
+        <ProjectEndSections
+          currentProjectId={projectId}
+          projects={projectCatalog}
+          pathFor={pathFor}
+          isOwner={isOwner}
+          isEditingUI={isEditing}
+        />
         {isEditing && projectCodeOpen ? (
           <DynamicProjectCodePanel
             projectId={projectId}
@@ -413,11 +407,15 @@ export function DynamicProjectPage({ projectId, metadata }: { projectId: string;
             language={locale}
             onApply={(nextInstances, metadataPatch, recoveryPath) => {
               setProjectCodeUndo({ draft: structuredClone(draft), metadata: editableMetadataSnapshot(metadata) });
-              setDraft((current) => ({
-                ...current,
-                templateInstances: mergeDiskImageInstances(nextInstances, diskImageMapping),
-                updatedAt: new Date().toISOString(),
-              }));
+              applyAuthoringMutation((current) => {
+                const hydration = hydrateExistingDiskImageAssets(nextInstances, diskImageMapping);
+                setOrphanedDiskMappings(hydration.orphanedMappings);
+                return {
+                  ...current,
+                  templateInstances: hydration.instances,
+                  updatedAt: new Date().toISOString(),
+                };
+              });
               setProjectPublicMetaOverride(projectId, metadataPatch);
               setProjectCodeStatus(locale === "zh" ? `尚未落盘 · 已备份 ${recoveryPath}` : `Not saved to disk · Backed up to ${recoveryPath}`);
             }}

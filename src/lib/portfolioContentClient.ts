@@ -92,7 +92,7 @@ export type DynamicProjectImageRecord = {
   imageId: string;
   projectId: string;
   instanceId: string;
-  templateId: "image-row" | "direction-compare";
+  templateId: "image-row" | "direction-compare" | "universal-media";
   itemId: string;
   originalFileName: string;
   sourcePath: string;
@@ -108,7 +108,7 @@ export type DynamicProjectImageRecord = {
 
 export type DynamicProjectImageInstance = {
   instanceId: string;
-  templateId: "image-row" | "direction-compare";
+  templateId: "image-row" | "direction-compare" | "universal-media";
   regionId: string;
   anchorId: string;
   content: Record<string, unknown>;

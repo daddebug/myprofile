@@ -15,6 +15,9 @@ Editing UI (`CaseStudyEditor`, `ProjectCoverEditor`, `ProductionExportDock`, man
 
 ## Permanent rules
 
+- **Portfolio 2.0 active template allowlist is exact and shared.** Normal project rendering, Editing Mode, picker, AI copy/paste, validation, publish import, PDF, and static HTML may accept only `statement-longform`, `supporting-note`, `image-row`, `universal-media`, and `direction-compare`. The canonical machine-readable list is `src/data/activePortfolioTemplateIds.json`. Retired template IDs and legacy `ProjectDocument` bodies are archive/reference data only and must never re-enter an active project.
+- **Resources never create presentation structure.** Images, XMind files, game builds, videos, links, Figma URLs, disk mappings, backups, and browser drafts may be preserved or explicitly reused, but none may create a `TemplateInstance`. Missing-instance asset mappings are orphan evidence, not instructions to resurrect a section.
+- **Suspicious browser drafts are quarantined, never merged automatically.** When a local project draft's instance structure differs materially from the published Portfolio 2.0 draft, preserve the local bytes but render the published structure. Do not overwrite, delete, merge, or auto-repair the local draft as a side effect of viewing.
 - **Never clear localStorage, IndexedDB, image blobs, drafts, or canonical project data.** This includes via browser devtools instructions, "reset" scripts, or as a side effect of debugging.
 - **Never reset storage keys** (e.g. bumping an IndexedDB/localStorage version to force a clean slate). Storage schemas must evolve in place.
 - **Never overwrite user-created project content.** Treat everything in `src/data/publishedPortfolio.json`, `src/data/projects.ts`, and browser-stored drafts as authored content, not scaffolding.
@@ -37,6 +40,8 @@ Before changing code, identify the relevant task skill and read its `SKILL.md`. 
 Available skills:
 
 - `skills/safe-project-editing/SKILL.md` — default rules for normal bug fixes, features, and layout/visual work.
+- `skills/figma-template-sync/SKILL.md` — any portfolio visual/project template/artboard/layout/hero/presentation task; Figma is the authoritative visual source (`docs/design/FIGMA_TEMPLATE_WORKFLOW.md`).
+- `skills/psd-template-sync/SKILL.md` — **deprecated/legacy**, superseded by `figma-template-sync`. Only relevant for inspecting an old PSD file for historical reference; not an entry point for new visual work.
 - `skills/portfolio-collection/SKILL.md` — the `/export` Portfolio Collection PDF pipeline.
 - `skills/static-html-export/SKILL.md` — the `/export` single-file Static HTML snapshot pipeline.
 - `skills/project-deletion/SKILL.md` — permanently removing one exact project.

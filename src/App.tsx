@@ -48,29 +48,55 @@ function LegacyLocaleRedirect() {
 function PortfolioExportRoute() {
   const { locale } = useParams();
   if (!isLocale(locale)) return <Navigate to={`/${DEFAULT_LOCALE}/`} replace />;
-  if (!import.meta.env.DEV || !PortfolioPdfBuilderPage) return <Navigate to={`/${locale}/work`} replace />;
+  // Every DEV-only owner tool falls back to the locale homepage, never
+  // /work -- /work is itself DEV-only Project Archive tooling now (see
+  // WorkArchiveRoute below), not a general-purpose public fallback.
+  if (!import.meta.env.DEV || !PortfolioPdfBuilderPage) return <Navigate to={`/${locale}/`} replace />;
   return <LocaleProvider locale={locale}><Suspense fallback={null}><PortfolioPdfBuilderPage /></Suspense></LocaleProvider>;
 }
 
 function OwnerMigrationToolsRoute() {
   const { locale } = useParams();
   if (!isLocale(locale)) return <Navigate to={`/${DEFAULT_LOCALE}/`} replace />;
-  if (!import.meta.env.DEV || !OwnerMigrationToolsPage) return <Navigate to={`/${locale}/work`} replace />;
+  if (!import.meta.env.DEV || !OwnerMigrationToolsPage) return <Navigate to={`/${locale}/`} replace />;
   return <LocaleProvider locale={locale}><Suspense fallback={null}><OwnerMigrationToolsPage /></Suspense></LocaleProvider>;
 }
 
 function OwnerTemplateBuilderRoute() {
   const { locale } = useParams();
   if (!isLocale(locale)) return <Navigate to={`/${DEFAULT_LOCALE}/`} replace />;
-  if (!import.meta.env.DEV || !OwnerTemplateBuilderPage) return <Navigate to={`/${locale}/work`} replace />;
+  if (!import.meta.env.DEV || !OwnerTemplateBuilderPage) return <Navigate to={`/${locale}/`} replace />;
   return <LocaleProvider locale={locale}><Suspense fallback={null}><OwnerTemplateBuilderPage /></Suspense></LocaleProvider>;
 }
 
 function TemplateGalleryRoute() {
   const { locale } = useParams();
   if (!isLocale(locale)) return <Navigate to={`/${DEFAULT_LOCALE}/`} replace />;
-  if (!import.meta.env.DEV || !TemplateGalleryPage) return <Navigate to={`/${locale}/work`} replace />;
+  if (!import.meta.env.DEV || !TemplateGalleryPage) return <Navigate to={`/${locale}/`} replace />;
   return <LocaleProvider locale={locale}><Suspense fallback={null}><TemplateGalleryPage /></Suspense></LocaleProvider>;
+}
+
+// /work (WorkPage.tsx) is owner-only Project Archive / project-management
+// tooling now -- it never participates in public navigation (no Back
+// destination, no homepage link, no catch-all fallback points here anymore).
+// It stays reachable only via the DEV-only ProductionExportDock's "Project
+// Archive" button, and only exists at all when import.meta.env.DEV -- a
+// production build redirects any direct hit on /work straight to the
+// current-locale homepage, exactly like every other owner-only route above.
+function WorkArchiveRoute() {
+  if (!import.meta.env.DEV) return <Navigate to=".." replace />;
+  return <WorkPage />;
+}
+
+// /play (GameArchivePage.tsx) has the identical shape as /work: its editing
+// controls are already DEV-gated internally, but the game-list content
+// itself rendered unconditionally for any visitor who navigated there
+// directly, with no Portfolio 2.0 link ever pointing at it. Same fix, same
+// reasoning -- owner/DEV can still browse and manage it, a production
+// visitor is redirected to the current-locale homepage instead.
+function GameArchiveRoute() {
+  if (!import.meta.env.DEV) return <Navigate to=".." replace />;
+  return <GameArchivePage />;
 }
 
 export default function App() {
@@ -94,7 +120,7 @@ export default function App() {
             <Route path="/:locale/owner-tools/templates/gallery" element={<TemplateGalleryRoute />} />
             <Route path="/:locale" element={<LocaleLayout />}>
               <Route index element={<HomePage />} />
-              <Route path="work" element={<WorkPage />} />
+              <Route path="work" element={<WorkArchiveRoute />} />
               <Route
                 path="work/:slug"
                 element={
@@ -103,11 +129,13 @@ export default function App() {
                   </Suspense>
                 }
               />
-              <Route path="play" element={<GameArchivePage />} />
+              <Route path="play" element={<GameArchiveRoute />} />
               <Route path="about" element={<Navigate to=".." replace />} />
               <Route path="contact" element={<Navigate to=".." replace />} />
               <Route path="game-archive" element={<Navigate to="../play" replace />} />
-              <Route path="*" element={<Navigate to="work" replace />} />
+              {/* Any unmatched sub-path lands on the homepage, never /work --
+                  /work is owner-only tooling now, not a general catch-all. */}
+              <Route path="*" element={<Navigate to=".." replace />} />
             </Route>
             <Route path="*" element={<LegacyLocaleRedirect />} />
           </Routes>

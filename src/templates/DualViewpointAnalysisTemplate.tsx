@@ -3,6 +3,9 @@ import {
   TemplateSurface,
 } from "../components/template-tools/TemplateResponsiveFoundation";
 import type {
+  CSSProperties,
+} from "react";
+import type {
   TemplateLayoutControlDefinition,
   TemplateMeta,
   TemplateProps,
@@ -28,10 +31,7 @@ export const templateMeta: TemplateMeta = {
   schema: [
     { id: "title", labelZh: "主标题", labelEn: "Title", type: "text", required: true },
     { id: "subtitle", labelZh: "副标题", labelEn: "Subtitle", type: "textarea" },
-    { id: "leftLabel", labelZh: "左列标签", labelEn: "Left label", type: "text", required: true },
-    { id: "leftItems", labelZh: "左列观点", labelEn: "Left viewpoints", type: "list", min: 1, max: 4, required: true },
-    { id: "rightLabel", labelZh: "右列标签", labelEn: "Right label", type: "text", required: true },
-    { id: "rightItems", labelZh: "右列观点", labelEn: "Right viewpoints", type: "list", min: 1, max: 4, required: true },
+    { id: "items", labelZh: "分析要点", labelEn: "Analysis points", type: "list", required: true },
     { id: "summary", labelZh: "底部总结", labelEn: "Closing summary", type: "textarea" },
   ],
   createdAt: "2026-09-07T00:00:00.000Z",
@@ -40,15 +40,18 @@ export const templateMeta: TemplateMeta = {
 type LocalizedText = { zh?: string; en?: string };
 type ViewpointItem = {
   id?: string;
+  label?: string | LocalizedText;
+  concept?: string | LocalizedText;
+  description?: string | LocalizedText;
+  conclusion?: string | LocalizedText;
   title?: string | LocalizedText;
   body?: string | LocalizedText;
-  icon?: { id?: string; name?: string; title?: string; svgPath?: string };
 };
 
 const columnGaps = {
-  compact: "clamp(2.5rem, 6vw, 5rem)",
-  standard: "clamp(4rem, 8vw, 7.5rem)",
-  wide: "clamp(5rem, 10vw, 9rem)",
+  compact: "clamp(1rem, 1.6vw, 1.5rem)",
+  standard: "clamp(1.5rem, 2.4vw, 2.25rem)",
+  wide: "clamp(2rem, 3vw, 3.25rem)",
 } as const;
 
 const sectionSpacings = {
@@ -62,62 +65,85 @@ function localizedValue(value: string | LocalizedText | undefined, locale: "zh" 
   return value?.[locale]?.trim() || value?.zh?.trim() || "";
 }
 
-function parseItems(value: unknown, locale: "zh" | "en") {
+function parseItems(value: unknown, locale: "zh" | "en", fallbackLabel = "") {
   if (!Array.isArray(value)) return [];
   return value
     .filter((item): item is ViewpointItem => Boolean(item && typeof item === "object" && !Array.isArray(item)))
     .map((item, index) => ({
       id: item.id ?? `viewpoint-${index + 1}`,
-      title: localizedValue(item.title, locale),
-      body: localizedValue(item.body, locale),
-      icon: item.icon?.svgPath ? item.icon : undefined,
+      label: localizedValue(item.label, locale) || fallbackLabel,
+      concept: localizedValue(item.concept, locale) || localizedValue(item.title, locale),
+      description: localizedValue(item.description, locale) || localizedValue(item.body, locale),
+      conclusion: localizedValue(item.conclusion, locale),
     }))
-    .filter((item) => item.title || item.body)
-    .slice(0, 4);
+    .filter((item) => item.label || item.concept || item.description || item.conclusion);
+}
+
+// The template's real content model is fundamentally two-sided (see
+// leftItems/rightItems below) -- this just groups the flat merged list back
+// into its two original sides for layout, by the *existing* label field
+// (already carried on every item), rather than a flat card grid that loses
+// which side each item belongs to. No new content field.
+function splitIntoColumns<T extends { label: string }>(items: T[]): [T[], T[]] {
+  const seenLabels: string[] = [];
+  for (const item of items) {
+    if (item.label && !seenLabels.includes(item.label)) seenLabels.push(item.label);
+  }
+  if (seenLabels.length >= 2) {
+    const [firstLabel, secondLabel] = seenLabels;
+    const left = items.filter((item) => item.label === firstLabel);
+    const right = items.filter((item) => item.label === secondLabel);
+    const leftover = items.filter((item) => item.label !== firstLabel && item.label !== secondLabel);
+    for (const item of leftover) (left.length <= right.length ? left : right).push(item);
+    return [left, right];
+  }
+  // No usable label to group by (neither side supplied one) -- split the
+  // flat list roughly in half so it still reads as two columns.
+  const mid = Math.ceil(items.length / 2);
+  return [items.slice(0, mid), items.slice(mid)];
+}
+
+function ViewpointBlock({ item }: { item: ReturnType<typeof parseItems>[number] }) {
+  return (
+    <article className="dual-viewpoint__item">
+      {item.concept ? <h3 className="dual-viewpoint__concept">{item.concept}</h3> : null}
+      {item.description ? <p className="dual-viewpoint__description">{item.description}</p> : null}
+      {item.conclusion ? <p className="dual-viewpoint__conclusion">{item.conclusion}</p> : null}
+    </article>
+  );
 }
 
 function ViewpointColumn({
-  side,
   label,
   items,
+  side,
 }: {
-  side: "left" | "right";
   label: string;
   items: ReturnType<typeof parseItems>;
+  side: "left" | "right";
 }) {
-  const defaultIcon = side === "left"
-    ? <><circle cx="20" cy="23" r="5" /><circle cx="44" cy="23" r="5" /><circle cx="32" cy="43" r="5" /><path d="m24 26 5 11m11-11-5 11M25 23h14" /></>
-    : <><path d="M13 18h16v13H18v15h11M51 18H35v13h11v15H35" /><path d="M26 38h12" /></>;
   return (
-    <section className={`dual-viewpoint__column dual-viewpoint__column--${side}`}>
-      {label ? <p className="dual-viewpoint__label">{label}</p> : null}
-      <div className="dual-viewpoint__items">
-        {items.map((item) => (
-          <article className="dual-viewpoint__item" key={item.id}>
-            <div className="dual-viewpoint__item-heading">
-              {item.icon ? (
-                <img className="dual-viewpoint__icon" src={item.icon.svgPath} alt="" />
-              ) : (
-                <svg className="dual-viewpoint__icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{defaultIcon}</svg>
-              )}
-              {item.title ? <h3 className="dual-viewpoint__item-title">{item.title}</h3> : null}
-            </div>
-            <span className="dual-viewpoint__item-rule" aria-hidden="true" />
-            {item.body ? <p className="dual-viewpoint__item-body">{item.body}</p> : null}
-          </article>
-        ))}
-      </div>
-    </section>
+    <div className="dual-viewpoint__column">
+      {label ? <p className={`dual-viewpoint__column-label dual-viewpoint__column-label--${side}`}>{label}</p> : null}
+      {items.map((item) => (
+        <ViewpointBlock item={item} key={item.id} />
+      ))}
+    </div>
   );
 }
 
 export default function DualViewpointAnalysisTemplate({ content, locale, horizontalInset }: TemplateProps) {
   const title = localizedValue(content.title as LocalizedText | undefined, locale);
   const subtitle = localizedValue(content.subtitle as LocalizedText | undefined, locale);
-  const leftLabel = localizedValue(content.leftLabel as LocalizedText | undefined, locale);
-  const rightLabel = localizedValue(content.rightLabel as LocalizedText | undefined, locale);
-  const leftItems = parseItems(content.leftItems, locale);
-  const rightItems = parseItems(content.rightItems, locale);
+  const items = Array.isArray(content.items)
+    ? parseItems(content.items, locale)
+    : [
+        ...parseItems(content.leftItems, locale, localizedValue(content.leftLabel as LocalizedText | undefined, locale)),
+        ...parseItems(content.rightItems, locale, localizedValue(content.rightLabel as LocalizedText | undefined, locale)),
+      ];
+  const [leftItems, rightItems] = splitIntoColumns(items);
+  const leftLabel = leftItems[0]?.label ?? localizedValue(content.leftLabel as LocalizedText | undefined, locale);
+  const rightLabel = rightItems[0]?.label ?? localizedValue(content.rightLabel as LocalizedText | undefined, locale);
   const summary = localizedValue(content.summary as LocalizedText | undefined, locale);
   const columnGap = columnGaps[layoutControls.columnGap as keyof typeof columnGaps] ?? columnGaps.standard;
   const spacing = sectionSpacings[layoutControls.sectionSpacing as keyof typeof sectionSpacings] ?? sectionSpacings.standard;
@@ -131,10 +157,12 @@ export default function DualViewpointAnalysisTemplate({ content, locale, horizon
           {subtitle ? <p className="dual-viewpoint__subtitle">{subtitle}</p> : null}
         </header>
 
-        <div className="dual-viewpoint__body" style={{ columnGap }}>
+        <div className="dual-viewpoint__body" style={{ "--dual-card-gap": columnGap } as CSSProperties}>
           <span className="dual-viewpoint__guide" aria-hidden="true" />
-          <ViewpointColumn side="left" label={leftLabel} items={leftItems} />
-          <ViewpointColumn side="right" label={rightLabel} items={rightItems} />
+          <div className="dual-viewpoint__columns">
+            <ViewpointColumn label={leftLabel} items={leftItems} side="left" />
+            <ViewpointColumn label={rightLabel} items={rightItems} side="right" />
+          </div>
         </div>
         {summary ? <p className="dual-viewpoint__summary">{summary}</p> : null}
       </TemplateContent>

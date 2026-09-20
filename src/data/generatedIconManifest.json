@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": "8ff9e341-a1c3-4f34-8f76-6206b55f23be",
+    "name": "connected-community",
+    "title": "延展游戏玩法",
+    "description": "Three connected nodes held by one open system ring. 公会, 协作, 连接",
+    "keywords": [
+      "公会",
+      "协作",
+      "连接"
+    ],
+    "projectId": "template-library",
+    "moduleId": "dual-viewpoint-analysis:leftItems:opportunity-play",
+    "svgPath": "/assets/generated-icons/connected-community-8ff9e341.svg",
+    "createdAt": "2026-09-06T15:21:07.481Z",
+    "prompt": "延展游戏玩法\n团队协作可以发展出更清晰的策略定位，\n并让玩家获得合作共赢的依赖感与代入感。\n公会、协作、连接"
+  }
+]

@@ -23,21 +23,16 @@ import { discoverAssetReferences } from "./discoverAssetReferences";
 import { listDirtyIntents, type DirtyIntentEntry } from "./dirtyIntentStore";
 import { getGameExperienceStore } from "./gameExperience";
 import { toPublishableGameExperienceRecord, type PublishableGameExperienceRecord } from "./gameExperiencePublishSchema";
-import { getProjectDocument, type ProjectDocument } from "./projectDocuments";
+import { resolveDevProjectDraft } from "./dynamicProjectDraftHydration";
 import { readProjectPublicMetaOverrides } from "./projectMetadata";
-import { getPublishedProjectCover } from "./publishedPortfolio";
+import { getPublishedProjectCover, getPublishedProjectDraft } from "./publishedPortfolio";
 
 export type EntityIntentV2<T> =
   | { kind: "UPSERT"; baseContentHash: string; value: T }
   | { kind: "UNPUBLISH"; baseContentHash: string }
   | { kind: "DELETE"; baseContentHash: string };
 
-// A project's body is EITHER a DynamicProjectDraft (TemplateInstance-based
-// pages) OR a legacy ProjectDocument (bespoke pages) -- never both. Folding
-// ProjectDocument in here, rather than giving it a separate entity type, is
-// deliberate: it is still the SAME "project" entity (Phase A -- "no longer a
-// side-channel outside of projects"), just a different body representation
-// depending on which editor authored it.
+// Active Portfolio 2.0 project bodies are DynamicProjectDraft values only.
 // The cover is shaped as { projectCoverId, publicUrl } -- the exact shape
 // discoverReferences.mjs recognizes as a project-covers-disk reference
 // (Publishing Architecture V2, Pre-Cutover Closure) -- so buildPublishPlan.mjs
@@ -167,20 +162,16 @@ function readLocalDynamicDraft(projectId: string): unknown {
   if (typeof window === "undefined") return undefined;
   try {
     const raw = window.localStorage.getItem(dynamicProjectDraftStorageKey(projectId));
-    return raw ? JSON.parse(raw) : undefined;
+    const published = getPublishedProjectDraft(projectId);
+    if (raw === null && published === undefined) return undefined;
+    return resolveDevProjectDraft(raw, published).draft;
   } catch {
     return undefined;
   }
 }
 
-// A project's body is a DynamicProjectDraft OR a legacy ProjectDocument --
-// whichever this project actually has locally. Both are read; at most one
-// should ever be present for a given real project.
 function readLocalProjectBody(projectId: string): unknown {
-  const draft = readLocalDynamicDraft(projectId);
-  if (draft !== undefined) return draft;
-  const document: ProjectDocument | undefined = getProjectDocument(projectId);
-  return document ?? undefined;
+  return readLocalDynamicDraft(projectId);
 }
 
 function bytesToBase64(buffer: ArrayBuffer): string {

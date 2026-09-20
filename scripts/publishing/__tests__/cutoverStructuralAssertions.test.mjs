@@ -26,8 +26,11 @@ function fixtureDraftWithMissingImage(assetId, projectId) {
   return {
     version: 1,
     templateInstances: [{
-      instanceId: "a", templateId: "figma-prototype", regionId: "content",
-      content: { heading: { zh: "", en: "" }, figmaUrl: "", fallbackImage: { localImageId: assetId, publicPath: `/images/published/project-body/${projectId}/${assetId}.png` } },
+      instanceId: "a", templateId: "universal-media", regionId: "content",
+      content: {
+        heading: { zh: "", en: "" },
+        media: { type: "figma", figmaUrl: "", fallbackImage: { localImageId: assetId, publicPath: `/images/published/project-body/${projectId}/${assetId}.png` } },
+      },
     }],
   };
 }

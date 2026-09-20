@@ -1,352 +1,172 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
 import { PageTransition } from "../components/PageTransition";
-import { HomePortfolioCover } from "../components/HomePortfolioCover";
-import { FeaturedProjectCard, type FeaturedProjectCardItem } from "../components/FeaturedProjectCard";
-import { HomePlayExperience } from "../components/HomePlayExperience";
-import { useProjectCatalog } from "../hooks/useProjectCatalog";
-import type { ResolvedProjectMetadata } from "../lib/projectMetadata";
-import { resolveHomeTrack, usePortfolioTrack } from "../lib/portfolioTrackContext";
+import { InlineLayoutTextField } from "../components/template-tools/InlineLayoutTextField";
+import { useOwnerMode } from "../hooks/useOwnerMode";
+import { useEditingMode } from "../hooks/useEditingMode";
+import { useSurfaceSignal } from "../hooks/useSurfaceSignal";
+import { useLenisScroll } from "../hooks/useLenisScroll";
 import { useLocale } from "../locales/LocaleContext";
+import { loadHomeContent, saveHomeContent, textForLocale, type HomeContent, type LocalizedText } from "../lib/homeContentConfig";
+import { getPublishedGeneratedAt } from "../lib/publishedPortfolio";
+import { HomeIntroTransition } from "./HomeIntroTransition";
+import { HomeHero } from "./HomeHero";
+import { HomeProjectFlow } from "./HomeProjectFlow";
+import { HomeScrollIndicator } from "./HomeScrollIndicator";
+import { HomeScrollContainer } from "./HomeScrollContainer";
+import { HomeFixedLayer } from "./HomeFixedLayer";
+import { HomeFixedNav } from "./HomeFixedNav";
+import { HomeProjectCanvas } from "./HomeProjectCanvas";
+import { isWebglSupported } from "./home-webgl/isWebglSupported";
+import "../project-presentation/portfolio2-layout.css";
+import "../project-presentation/project-end-sections.css";
+import "./home-v2.css";
 
-type ResolvedHomeProjectCard = FeaturedProjectCardItem & { projectId: string };
-
-// How many boundary cards get cloned onto each end of the rail, and (since
-// each button click advances by exactly one visible group) how far a click
-// moves the scroll position — the two are the same number by construction,
-// which is what makes the clone buffer exactly wide enough for one click's
-// worth of travel before a reset is needed.
+// Retained only for src/lib/portfolioStaticHtmlExport.ts's own unrelated
+// carousel-slide-count logic (the /export static-HTML snapshot pipeline,
+// not touched this round) -- no longer used by this component itself,
+// which has no carousel.
 export const VISIBLE_COUNT = 3;
 
-type CarouselSlide = {
-  project: ResolvedHomeProjectCard;
-  renderKey: string;
-  logicalIndex: number;
-};
-
-function resolveHomeProjectCard(project: ResolvedProjectMetadata, index: number): ResolvedHomeProjectCard {
-  return {
-    projectId: project.id,
-    caseNumber: `CASE ${String(index + 1).padStart(2, "0")}`,
-    title: project.title,
-    category: project.category,
-    description: project.summary,
-    image: project.coverImage,
-    imageAlt: `${project.title} cover image`,
-    tags: project.tags,
-    duration: project.duration,
-    href: project.route,
-    cta: "View project",
-    status: project.comingSoon ? "Coming soon" : undefined,
-    placeholderLabel: project.comingSoon ? "COMING SOON" : undefined,
-    hoverStatement: project.summary,
-    layout: index % 2 === 0 ? "image-left" : "image-right",
-    disabled: project.comingSoon || !project.route,
-  };
-}
-
 export function HomePage() {
-  const { locale } = useLocale();
-  const projectCatalog = useProjectCatalog(locale);
-  const { activeTrack } = usePortfolioTrack();
-  const projectOverviewSectionRef = useRef<HTMLElement>(null);
-  const [activeFeaturedIndex, setActiveFeaturedIndex] = useState<number | null>(null);
-  // Tracks the nearest card's LOGICAL project index (0..homeProjects.length-1)
-  // — used for the mobile "01/08" indicator and hover glow, never the
-  // render index below, so it reads the same whether the nearest card is a
-  // real slide or one of the cloned boundary slides representing it.
-  const [activeProjectIndex, setActiveProjectIndex] = useState(0);
-  const projectRailRef = useRef<HTMLDivElement>(null);
-  const pointerFocusRef = useRef(false);
-  // The rail's current target position in RENDER-index space (position
-  // within extendedProjects, not within homeProjects) — a ref, not state,
-  // because it must be readable synchronously inside the same click handler
-  // that also kicks off a smooth-scroll animation whose intermediate onScroll
-  // events would otherwise race a state-based value (see the two-clicks bug
-  // this replaced). Each click moves it by exactly one VISIBLE_COUNT step in
-  // either direction, with no modulo — the illusion of looping comes from
-  // silently re-pointing the rail at the equivalent real position once a
-  // click's smooth-scroll has carried it onto a cloned boundary card, not
-  // from wrapping the index itself.
-  const renderIndexRef = useRef(VISIBLE_COUNT);
-  const settleTimeoutRef = useRef<number | undefined>(undefined);
-  // True only while a Track-tab click's programmatic scroll is in flight --
-  // guards card hover-activation so it can't fire (and touch layout) while
-  // the browser's native smooth scroll is running. Cleared by the scrollend
-  // handler in scrollToProjectOverview, with a bounded fallback in case
-  // scrollend isn't supported.
-  const isTrackScrollingRef = useRef(false);
-  const trackScrollFallbackRef = useRef<number | undefined>(undefined);
-  const prefersReducedMotion = useReducedMotion();
-  const homeActiveTrack = resolveHomeTrack(activeTrack);
-  const homeProjects = useMemo(() => {
-    return projectCatalog
-      .filter((project) => project.featured && project.visibility === "public" && project.portfolioTrack === homeActiveTrack)
-      .sort((left, right) => left.archiveOrder - right.archiveOrder)
-      .map(resolveHomeProjectCard);
-  }, [projectCatalog, homeActiveTrack]);
-  // Real pagination state, not a hardcoded "3 projects" check: with
-  // VISIBLE_COUNT cards shown per page, there is another page to navigate to
-  // only once the catalog needs more than one page to hold every card.
-  const totalPages = Math.ceil(homeProjects.length / VISIBLE_COUNT) || 1;
-  const hasMultipleGroups = totalPages > 1;
-  // Clone the last/first VISIBLE_COUNT real cards onto the opposite ends of
-  // the rail so scrolling one click past either real boundary lands on a
-  // card that looks identical to where a silent, unanimated reset will put
-  // it — e.g. real [1,2,3,4,5,6,7,8] renders as [6,7,8, 1..8, 1,2,3]. Skipped
-  // entirely when there's nothing to loop (<=VISIBLE_COUNT real cards).
-  const extendedProjects = useMemo<CarouselSlide[]>(() => {
-    const real = homeProjects.map((project, logicalIndex) => ({ project, renderKey: `real-${project.projectId}`, logicalIndex }));
-    if (homeProjects.length <= VISIBLE_COUNT) return real;
-    const prepend = homeProjects.slice(-VISIBLE_COUNT).map((project, i) => ({
-      project,
-      renderKey: `prepend-${project.projectId}-${i}`,
-      logicalIndex: homeProjects.length - VISIBLE_COUNT + i,
-    }));
-    const append = homeProjects.slice(0, VISIBLE_COUNT).map((project, i) => ({
-      project,
-      renderKey: `append-${project.projectId}-${i}`,
-      logicalIndex: i,
-    }));
-    return [...prepend, ...real, ...append];
-  }, [homeProjects]);
-  const previousGroupLabel = locale === "zh" ? "上一组项目" : "Previous project group";
-  const nextGroupLabel = locale === "zh" ? "下一组项目" : "Next project group";
-  const emptyTrackLabel = locale === "zh" ? "该方向暂无项目" : "No projects in this track yet";
+  const { locale, pathFor } = useLocale();
+  // Homepage's own light (#F7F6ED) background, declared for
+  // ProductionExportDock's surface-adaptive glass buttons -- see
+  // useSurfaceSignal's own comment for why this can't just be page CSS.
+  useSurfaceSignal("light");
+  // isOwner: project-click PERMISSION only. isEditingUI: whether editor
+  // chrome (cover-upload overlays, etc.) actually renders -- these are
+  // deliberately two separate conditions, never one flag reused for both.
+  // A project stays clickable for the owner even with editingMode off.
+  const isOwner = useOwnerMode();
+  const editingMode = useEditingMode();
+  const isEditingUI = isOwner && editingMode;
 
-  // Only ever called from a track tab's onClick (see HomePortfolioCover
-  // below) -- never on mount, refresh, or locale change, per the "no
-  // auto-scroll" requirement.
-  //
-  // Deliberately NOT scrollIntoView({block:"start"}) -- that scrolls until
-  // the project section's own top touches the viewport top, which (since
-  // the section sits right after a 100svh hero) scrolls past enough of the
-  // page to cross Shell's home-header reveal threshold, popping the site's
-  // fixed top nav into view and pushing the tabs themselves off-screen.
-  // Instead, scroll by exactly enough to land the *tabs* (an existing,
-  // already-visible element right above the section) at a fixed, modest
-  // distance from the viewport top -- derived from the tabs' own live
-  // position, not a guessed pixel offset tied to one screenshot.
-  const scrollToProjectOverview = () => {
-    const tabs = document.querySelector<HTMLElement>("[data-portfolio-track-tabs]");
-    if (!tabs) {
-      projectOverviewSectionRef.current?.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
-      return;
-    }
-    const desiredTabsTop = 96; // comfortably below Shell's header height, well under the ~0.96*viewportHeight scroll needed to reveal it
+  // Phase 2.1's one shared scroll-state source, bound to the Homepage's
+  // own scroll container (see HomeScrollContainer.tsx) rather than
+  // `window` -- HomeScrollIndicator reads it here; the Phase 3/4 WebGL
+  // bridge and shader distortion will read from this same hook instance
+  // rather than attaching their own listener.
+  const scrollWrapperRef = useRef<HTMLDivElement | null>(null);
+  const scrollContentRef = useRef<HTMLDivElement | null>(null);
+  const { scroll, progress: scrollProgress } = useLenisScroll(scrollWrapperRef, scrollContentRef);
 
-    // Card hover must not be able to touch layout -- and, before that was
-    // fixed at the source (see FeaturedProjectCard.tsx), could cancel this
-    // in-flight native smooth scroll. Suppress hover-activation for the
-    // duration as extra insurance, clearing anything already active first.
-    isTrackScrollingRef.current = true;
-    setActiveFeaturedIndex(null);
+  // Phase 3: checked once, not per-frame -- if WebGL genuinely isn't
+  // available, HomeProjectCanvas is never mounted at all, no project's
+  // registry entry is ever marked ready, and every HomeProjectCard's DOM
+  // <img> simply stays visible at its default opacity (see
+  // homeProjectCanvasRegistry.ts's own comment on setProjectCoverReady).
+  const webglSupported = useMemo(() => isWebglSupported(), []);
 
-    const finishTrackScroll = () => {
-      if (!isTrackScrollingRef.current) return;
-      isTrackScrollingRef.current = false;
-      window.removeEventListener("scrollend", finishTrackScroll);
-      window.clearTimeout(trackScrollFallbackRef.current);
-      // Re-measure now that layout has actually settled -- a late web-font
-      // swap or other reflow during the animation can leave the one
-      // pre-scroll measurement stale -- and instantly correct any residual
-      // drift so the tabs land exactly at desiredTabsTop, never short of it.
-      const settledDelta = tabs.getBoundingClientRect().top - desiredTabsTop;
-      if (Math.abs(settledDelta) > 1) {
-        window.scrollTo({ top: window.scrollY + settledDelta, behavior: "auto" });
-      }
-    };
-    window.addEventListener("scrollend", finishTrackScroll, { once: true });
-    window.clearTimeout(trackScrollFallbackRef.current);
-    // Bounded safety net only, in case scrollend ever fails to fire -- not
-    // the primary completion signal.
-    trackScrollFallbackRef.current = window.setTimeout(finishTrackScroll, 1000);
-
-    const deltaY = tabs.getBoundingClientRect().top - desiredTabsTop;
-    window.scrollTo({ top: window.scrollY + deltaY, behavior: prefersReducedMotion ? "auto" : "smooth" });
+  const scrollToProjects = () => {
+    // Lenis owns this container's scroll position via its own per-frame
+    // sync -- a native `behavior: "smooth"` scrollIntoView animates in
+    // tiny increments that Lenis reads back and eases toward its still-
+    // unmoved internal target every frame, which nets out to no visible
+    // movement at all (confirmed: scrollTop never left 0 across 1.5s).
+    // `"instant"` fires a single native scroll event that Lenis just
+    // absorbs as its new position, which is why this works reliably.
+    const grid = scrollWrapperRef.current?.querySelector<HTMLElement>(".home-project-flow");
+    grid?.scrollIntoView({ behavior: "instant", block: "start" });
   };
 
-  const scrollToRenderIndex = (renderIndex: number, instant = false) => {
-    const rail = projectRailRef.current;
-    const item = rail?.querySelector<HTMLElement>(`[data-carousel-index="${renderIndex}"]`);
-    if (!rail || !item) return;
-    const firstItem = rail.querySelector<HTMLElement>("[data-carousel-index]");
-    const railOffset = firstItem?.offsetLeft ?? 0;
-    rail.scrollTo({ left: item.offsetLeft - railOffset, behavior: instant || prefersReducedMotion ? "auto" : "smooth" });
-  };
+  const [content, setContent] = useState<HomeContent>(() => loadHomeContent());
 
-  useEffect(() => {
-    setActiveProjectIndex((current) => Math.min(current, Math.max(0, homeProjects.length - 1)));
-    const startRenderIndex = hasMultipleGroups ? VISIBLE_COUNT : 0;
-    renderIndexRef.current = startRenderIndex;
-    // Instant — this is the initial mount / project-list-change position,
-    // landing on the middle real block's first item, not a user-triggered
-    // transition, so it must never animate.
-    scrollToRenderIndex(startRenderIndex, true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [homeProjects, hasMultipleGroups]);
+  // Intro/role-line entrance reveal: driven by HomeIntroTransition's own
+  // onComplete -- it fires immediately for reduced motion or a same-
+  // session return visit (no aperture played), and after the aperture
+  // finishes opening on a real first entry, so the Hero's own reveal
+  // never happens hidden behind an already-gone overlay or, worse, before
+  // one still covering it.
+  const [revealed, setRevealed] = useState(false);
 
-  const showProjectGroup = (direction: "previous" | "next") => {
-    if (!hasMultipleGroups) return;
-    const target = renderIndexRef.current + (direction === "next" ? VISIBLE_COUNT : -VISIBLE_COUNT);
-    renderIndexRef.current = target;
-    setActiveFeaturedIndex(null);
-    scrollToRenderIndex(target);
-  };
+  // Every editable field is a LocalizedText -- edits always write into the
+  // CURRENT viewing locale's slot, leaving the other locale's value
+  // untouched, so zh/en content evolves independently.
+  function commitField(field: "name" | "intro" | "roleLine" | "longDescription" | "footerCredit", value: string) {
+    const nextField: LocalizedText = { ...content[field], [locale]: value };
+    const next: HomeContent = { ...content, [field]: nextField, updatedAt: new Date().toISOString() };
+    setContent(next);
+    saveHomeContent(next);
+  }
 
-  const syncActiveProject = () => {
-    const rail = projectRailRef.current;
-    if (!rail) return;
-    const items = [...rail.querySelectorAll<HTMLElement>("[data-carousel-index]")];
-    if (!items.length) return;
-    const railOffset = items[0].offsetLeft;
-    const nearest = items.reduce((best, item) => Math.abs(item.offsetLeft - railOffset - rail.scrollLeft) < Math.abs(best.offsetLeft - railOffset - rail.scrollLeft) ? item : best);
-    setActiveProjectIndex(Number(nearest.dataset.logicalIndex ?? 0));
+  const nameText = textForLocale(content.name, locale);
+  const introText = textForLocale(content.intro, locale);
+  const roleLineText = textForLocale(content.roleLine, locale);
+  const longDescriptionText = textForLocale(content.longDescription, locale);
+  const footerCreditText = textForLocale(content.footerCredit, locale);
 
-    if (!hasMultipleGroups) return;
-    const renderIndex = Number(nearest.dataset.carouselIndex ?? 0);
-    const total = homeProjects.length;
-    window.clearTimeout(settleTimeoutRef.current);
-    // Debounced so this only fires once scrolling has actually settled
-    // (button-triggered smooth scroll or a manual drag) — every scroll
-    // event along the way re-arms it, matching the "wait for the smooth
-    // scroll to finish" requirement rather than resetting mid-animation.
-    settleTimeoutRef.current = window.setTimeout(() => {
-      let resetTo: number | null = null;
-      if (renderIndex < VISIBLE_COUNT) resetTo = renderIndex + total;
-      else if (renderIndex >= VISIBLE_COUNT + total) resetTo = renderIndex - total;
-      if (resetTo === null) return;
-      renderIndexRef.current = resetTo;
-      // Instant — the clone and the real card it stands in for are visually
-      // identical, so this repositioning is imperceptible.
-      scrollToRenderIndex(resetTo, true);
-    }, 160);
-  };
+  const generatedAt = getPublishedGeneratedAt();
+  const parsedGeneratedAt = generatedAt ? new Date(generatedAt) : null;
+  const lastUpdateDisplay = parsedGeneratedAt && !Number.isNaN(parsedGeneratedAt.getTime())
+    ? String(parsedGeneratedAt.getFullYear())
+    : "—";
 
   return (
     <PageTransition>
-      <HomePortfolioCover onSelectTrack={scrollToProjectOverview} />
+      <div className="home-v2" data-home-v2>
+        {/* Opening aperture -- plays once per browser session on a real
+            first entry, skipped outright for reduced motion or a same-
+            session return visit. See HomeIntroTransition.tsx; the failed
+            continuous-3D-ambient-scene experiment this used to sit
+            alongside has been removed outright, not replaced with
+            another decorative layer. Fixed/full-viewport on its own, so
+            it doesn't need to live inside HomeFixedLayer to stay pinned
+            above the scroll container. */}
+        <HomeIntroTransition onComplete={() => setRevealed(true)} />
 
-      <section ref={projectOverviewSectionRef} className="home-projects-top-fade bg-deepIndigo pb-8 pt-8 text-softWhite md:pb-10 md:pt-10 lg:pt-12">
-        <div className="site-container">
-          {homeProjects.length === 0 ? (
-            <p className="text-center text-sm leading-6 text-softWhite/48">{emptyTrackLabel}</p>
-          ) : (
-          <div
-            className={hasMultipleGroups ? "xl:grid xl:grid-cols-[5.5rem_minmax(0,1fr)_5.5rem] xl:items-center xl:gap-2" : ""}
-            data-carousel-nav-grid
-          >
-            {hasMultipleGroups ? (
-              <div className="hidden justify-self-stretch xl:block" data-carousel-nav="previous">
-                <ProjectGroupButton direction="previous" label={previousGroupLabel} onClick={() => showProjectGroup("previous")} />
-              </div>
-            ) : null}
+        <HomeFixedLayer>
+          {webglSupported ? <HomeProjectCanvas scroll={scroll} /> : null}
+          <HomeFixedNav onWorkClick={scrollToProjects} />
+          <HomeScrollIndicator progress={scrollProgress} />
+        </HomeFixedLayer>
 
-            <div className="min-w-0">
-              <div
-                ref={projectRailRef}
-                className="home-project-rail flex snap-x snap-mandatory gap-3.5 overflow-x-auto md:gap-6 xl:gap-6"
-                data-featured-project-group={homeProjects.map((project) => project.projectId).join("-") || "empty"}
-                aria-label={locale === "zh" ? "精选项目，可横向滑动" : "Featured projects, horizontally scrollable"}
-                onScroll={syncActiveProject}
-                onPointerLeave={() => setActiveFeaturedIndex(null)}
-                onPointerDown={() => {
-                  pointerFocusRef.current = true;
-                }}
-                onFocusCapture={(event) => {
-                  const item = (event.target as HTMLElement).closest<HTMLElement>("[data-carousel-index]");
-                  if (!item) return;
-                  const logicalIndex = Number(item.dataset.logicalIndex ?? 0);
-                  const focusFromPointer = pointerFocusRef.current;
-                  pointerFocusRef.current = false;
-                  if (!focusFromPointer) {
-                    item.scrollIntoView({ block: "nearest", inline: "start", behavior: prefersReducedMotion ? "auto" : "smooth" });
-                  }
-                  setActiveProjectIndex(logicalIndex);
-                }}
-              >
-                {extendedProjects.map((slide, renderIndex) => (
-                  <div key={slide.renderKey} className="home-project-slide snap-start" data-carousel-index={renderIndex} data-logical-index={slide.logicalIndex}>
-                  <FeaturedProjectCard
-                    projectId={slide.project.projectId}
-                    project={slide.project}
-                    index={slide.logicalIndex}
-                    isActive={activeFeaturedIndex === slide.logicalIndex}
-                    hasActive={activeFeaturedIndex !== null}
-                    onActivate={() => {
-                      if (isTrackScrollingRef.current) return;
-                      setActiveFeaturedIndex(slide.logicalIndex);
-                    }}
-                    onDeactivate={() => setActiveFeaturedIndex(null)}
-                  />
-                  </div>
-                ))}
-              </div>
-              {homeProjects.length ? (
-                <div className="mt-5 flex items-center justify-center gap-3 font-mono text-[10px] font-bold tracking-[0.14em] text-softWhite/52 xl:hidden" aria-live="polite" aria-atomic="true">
-                  <span className="text-acidGreen">{String(activeProjectIndex + 1).padStart(2, "0")}</span>
-                  <span aria-hidden="true">/</span>
-                  <span>{String(homeProjects.length).padStart(2, "0")}</span>
-                </div>
-              ) : null}
-            </div>
+        <HomeScrollContainer wrapperRef={scrollWrapperRef} contentRef={scrollContentRef}>
+          <div className="home-v2__content-stage">
+            <HomeHero
+              nameText={nameText}
+              introText={introText}
+              roleLineText={roleLineText}
+              onCommitField={commitField}
+              isEditingUI={isEditingUI}
+              revealed={revealed}
+            />
 
-            {hasMultipleGroups ? (
-              <div className="hidden justify-self-stretch xl:block" data-carousel-nav="next">
-                <ProjectGroupButton direction="next" label={nextGroupLabel} onClick={() => showProjectGroup("next")} />
-              </div>
-            ) : null}
+            {/* Phase B: one continuous, catalog-driven, archive-order flow --
+                no manually-bound Homepage-only slot array, no PROJECT/EXPLORE
+                public categorization. See HomeProjectFlow.tsx. */}
+            <HomeProjectFlow isOwner={isOwner} isEditingUI={isEditingUI} pathFor={pathFor} />
+
+            <section className="home-v2__long">
+              <InlineLayoutTextField
+                as="p"
+                value={longDescriptionText}
+                onChange={(value) => commitField("longDescription", value)}
+                className="home-v2__long-text"
+                ariaLabel="Long-form description"
+                placeholder="Long-form description"
+                editable={isEditingUI}
+                multiline
+              />
+            </section>
           </div>
-          )}
-        </div>
-      </section>
 
-      <section id="home-play-experience" className="flex min-h-[82vh] flex-col items-center justify-center bg-deepIndigo px-4 pb-32 pt-20 text-softWhite md:min-h-[88vh] md:px-6 md:pb-40 md:pt-24">
-        <motion.p
-          className="max-w-5xl text-center font-display text-[clamp(2.25rem,5vw,5.9rem)] leading-[1.02] text-softWhite/86 md:max-w-[1280px] md:text-[clamp(3rem,3.6vw,4.75rem)] md:leading-[1.1]"
-          initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.45 }}
-          transition={{ duration: prefersReducedMotion ? 0.01 : 0.55, ease: [0.22, 1, 0.36, 1] }}
-        >
-          Meaningful experiences are built from the small interactions we choose to refine.
-        </motion.p>
-
-        <HomePlayExperience />
-
-      </section>
+          <footer className="portfolio2-project-footer" data-home-footer>
+            <div className="portfolio2-project-footer__inner p2-page-rail">
+              <InlineLayoutTextField
+                as="span"
+                value={footerCreditText}
+                onChange={(value) => commitField("footerCredit", value)}
+                ariaLabel="Footer credit"
+                placeholder="Footer credit"
+                editable={isEditingUI}
+                renderEmpty
+              />
+              <span>{`Last update:${lastUpdateDisplay}`}</span>
+            </div>
+          </footer>
+        </HomeScrollContainer>
+      </div>
     </PageTransition>
   );
 }
 
-function ProjectGroupButton({
-  direction,
-  label,
-  onClick,
-}: {
-  direction: "previous" | "next";
-  label: string;
-  onClick: () => void;
-}) {
-  const isPrevious = direction === "previous";
-  const Icon = isPrevious ? ChevronLeft : ChevronRight;
-
-  return (
-    <button
-      type="button"
-      className="group grid h-24 w-full place-items-center border-0 bg-transparent text-softWhite/62 shadow-none transition-colors duration-200 hover:text-softWhite focus:outline-none focus-visible:text-softWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-softWhite/70 sm:h-32 lg:h-40"
-      onClick={onClick}
-      aria-label={label}
-    >
-      <Icon
-        className={`h-20 w-11 stroke-[2.6] transition-transform duration-200 motion-reduce:transform-none motion-reduce:transition-none sm:h-24 sm:w-14 lg:h-32 lg:w-16 ${
-          isPrevious
-            ? "group-hover:-translate-x-1 group-hover:scale-105 group-focus-visible:-translate-x-1 group-focus-visible:scale-105"
-            : "group-hover:translate-x-1 group-hover:scale-105 group-focus-visible:translate-x-1 group-focus-visible:scale-105"
-        }`}
-        aria-hidden="true"
-      />
-    </button>
-  );
-}

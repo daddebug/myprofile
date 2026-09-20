@@ -4,6 +4,9 @@ import { deleteProjectBodyAssetsForProject } from "./projectBodyAssetDb";
 import { getProjectCover, removeProjectCover } from "./projectCoverDb";
 import { removeProjectPublicMetaOverride } from "./projectMetadata";
 import { currentPublishedProjectSnapshot } from "./publishIntent";
+import { loadHomeProjectSlots, saveHomeProjectSlots } from "./homeProjectSlots";
+import { loadHomeExplorationSlots, saveHomeExplorationSlots } from "./homeExplorationSlots";
+import type { HomeSlotConfig } from "./homeSlotsStore";
 
 // Each bespoke draft page uses a dedicated IndexedDB, entirely owned by that
 // one project (never shared), so clearing the whole store is safe. Dynamic
@@ -55,7 +58,38 @@ export type DeletePortfolioProjectResult = {
   removedBodyAssetCount: number;
   clearedImageRecordCount: number;
   removedRegistryOverride: boolean;
+  clearedHomeSlotCount: number;
 };
+
+// Legacy data hygiene only -- homeProjectSlots.ts/homeExplorationSlots.ts
+// no longer drive what renders on the Homepage (HomeProjectFlow.tsx reads
+// the canonical catalog directly, sorted by archiveOrder; see Homepage 3.0
+// Modular Interaction Redesign Phase B.1) and `/work` no longer has any UI
+// to edit them. This function still clears a dangling slot reference on
+// permanent deletion purely so the old, inert stored data doesn't keep
+// pointing at an id that no longer resolves to anything -- not because it
+// affects presentation. Slots store only a project id reference, never a
+// copy of that project's title/image/summary (see homeSlotsStore.ts). This
+// only ever runs from purgeProjectLocalData() below, i.e. only after the
+// project is truly and permanently gone -- never as a side effect of
+// merely marking a project pending deletion (undoProjectPendingDeletion
+// must still be able to fully reverse that with zero side effects
+// elsewhere).
+function clearProjectFromHomeSlots(
+  load: () => HomeSlotConfig[],
+  save: (slots: HomeSlotConfig[]) => void,
+  projectId: string,
+): number {
+  const slots = load();
+  let cleared = 0;
+  const next = slots.map((slot) => {
+    if (slot.ref !== projectId) return slot;
+    cleared += 1;
+    return { ref: null };
+  });
+  if (cleared > 0) save(next);
+  return cleared;
+}
 
 // The actual, permanent, local-data purge -- everything deletePortfolioProject
 // used to do immediately on click. Now ONLY ever called by
@@ -69,6 +103,7 @@ async function purgeProjectLocalData(projectId: string): Promise<DeletePortfolio
     removedBodyAssetCount: 0,
     clearedImageRecordCount: 0,
     removedRegistryOverride: false,
+    clearedHomeSlotCount: 0,
   };
 
   // Bespoke pages each have their own hardcoded key; every project created
@@ -96,6 +131,10 @@ async function purgeProjectLocalData(projectId: string): Promise<DeletePortfolio
 
   result.removedRegistryOverride = true;
   removeProjectPublicMetaOverride(projectId);
+
+  result.clearedHomeSlotCount =
+    clearProjectFromHomeSlots(loadHomeProjectSlots, saveHomeProjectSlots, projectId)
+    + clearProjectFromHomeSlots(loadHomeExplorationSlots, saveHomeExplorationSlots, projectId);
 
   return result;
 }

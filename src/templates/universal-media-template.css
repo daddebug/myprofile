@@ -1,0 +1,124 @@
+.universal-media-template {
+  padding-block: var(--p2-media-padding-block, 65px);
+  color: #495d47;
+}
+
+.universal-media-template > h2 {
+  width: 100%;
+  margin: 0 0 16px;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.universal-media-inline-heading {
+  width: 100%;
+  margin: 0 0 16px;
+  color: #495d47;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.universal-media-frame {
+  position: relative;
+  width: min(100%, var(--p2-wide-media-width, 1179px));
+  aspect-ratio: 1179 / 663;
+  margin-inline: 0;
+  overflow: hidden;
+  background: rgb(73 93 71 / 0.05);
+}
+
+.universal-media-asset,
+.universal-media-embed {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: cover;
+}
+
+.universal-media-empty {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  color: rgb(73 93 71 / 0.35);
+}
+
+.universal-media-empty svg {
+  width: 40px;
+  height: 40px;
+}
+
+/* An externally-hosted playable game (Unity Play, via media.game.playUrl)
+   -- shows its cover like any other media asset, with a small persistent
+   label instead of an iframe. See MediaFrame's playable-game branch in
+   UniversalMediaTemplate.tsx for why this is never framed. */
+.universal-media-external-game {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.universal-media-external-game-label {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  left: 12px;
+  padding: 8px 12px;
+  background: rgb(17 23 70 / 0.72);
+  color: rgb(255 255 255 / 0.92);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.universal-media-caption {
+  width: 100%;
+  margin: 12px 0 0;
+  color: #6e6a64;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.universal-media-inline-caption {
+  display: block;
+}
+
+.universal-media-editor {
+  display: grid;
+  width: 100%;
+  gap: 12px;
+  margin: 18px 0 0;
+  padding: 16px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  background: #111746;
+  color: rgb(255 255 255 / 0.78);
+}
+
+.universal-media-editor label,
+.universal-media-editor-fields {
+  display: grid;
+  gap: 8px;
+}
+
+.universal-media-editor select,
+.universal-media-editor input {
+  min-height: 38px;
+  border: 1px solid rgb(255 255 255 / 0.16);
+  background: #0d1238;
+  padding: 8px 10px;
+  color: white;
+}
+
+.universal-media-editor-error {
+  color: #ffb5a6;
+}
+
+@media print {
+  .universal-media-editor {
+    display: none !important;
+  }
+}

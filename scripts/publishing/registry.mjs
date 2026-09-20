@@ -43,6 +43,13 @@ const PUBLISHED_IMAGE_PATH_BY_ADAPTER = {
   "dynamic-template-images": (id, projectId) => `public/images/published/template-images/${projectId}/${id}`,
   "ui-practice-images": (id, projectId) => `public/images/published/template-images/${projectId}/${id}`,
   "playable-game-covers": (id, projectId) => `public/images/published/playable-game-covers/${projectId}/${id}`,
+  // Not an image (a PDF) -- reuses this same path-computation strategy map
+  // anyway, since getPublishedAssetLocation's own logic (sanitize id, take
+  // the extension from the real source file, join a strategy-declared
+  // directory) is exactly what a CV asset needs too, and the map's name is
+  // an artifact of every adapter added here so far having been an image,
+  // not a constraint the function itself enforces.
+  "cv-library": (id) => `public/assets/cv/${id}`,
 };
 
 export function isPublishedImageAdapter(adapterId) {

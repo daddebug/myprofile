@@ -41,7 +41,43 @@ const canonicalWebsiteRootFiles = new Set([
   "vercel.json",
   "vite.config.ts",
 ]);
-const canonicalWebsitePrefixes = ["docs/", "scripts/", "skills/", "src/", "public/images/profile/", "public/assets/generated-icons/"];
+const canonicalWebsitePrefixes = ["docs/", "scripts/", "skills/", "src/"];
+// Rebase Publish Scope (2026-09-21): public/ is canonical publishing scope
+// BY DEFAULT -- every subdirectory under it (images/, assets/, games/, any
+// future one a normal Homepage/UI-Practice/Project asset drop creates) is
+// automatically in scope with no per-directory allowlist entry required.
+// The two directories enumerated by name before this
+// (public/images/profile/, public/assets/generated-icons/) are already
+// covered by this blanket rule; the site rebuild had since added
+// public/images/home/ and a loose public/assets/*.svg file that neither
+// entry covered -- exactly the kind of staleness a per-directory list
+// cannot avoid. public/portfolio-assets/ is the one deliberate carve-out
+// (see docs/PUBLISHING_ARCHITECTURE.md and skills/publish-portfolio/
+// SKILL.md's own "Exclude From Commits" list: local-only owner-editing
+// staging, never a publish source) -- already .gitignore'd at the repo
+// root, so it will not normally reach this function at all; excluded
+// here too as a documented second layer, not a load-bearing one.
+const excludedPublicPrefixes = ["public/portfolio-assets/"];
+function isCanonicalPublicAsset(normalized) {
+  return normalized.startsWith("public/") && !excludedPublicPrefixes.some((prefix) => normalized.startsWith(prefix));
+}
+
+// Dev-only preflight exclusion (2026-09-21): Claude outputs/ is a
+// development/research artifacts folder -- it must never enter the
+// canonical publish payload, but a file existing there is also not a
+// "blocker" the owner needs to review before syncing (unlike a genuinely
+// unaccounted-for change elsewhere). Exclusion, not allowlisting: these
+// paths are filtered out of changedFiles()/stagedFiles() entirely, before
+// the allowed/blocked split even runs, so they can never appear in
+// either list and never reach any payload/diff this workflow computes.
+// Nothing on disk or in git is touched by this -- the files stay exactly
+// where they are, in the local repository, untracked by this workflow.
+// Scoped to exactly this one folder; do not widen it to other paths.
+const devOnlyExcludedPrefixes = ["Claude outputs/"];
+function isDevOnlyExcluded(file) {
+  const normalized = file.replaceAll(String.fromCharCode(92), "/");
+  return devOnlyExcludedPrefixes.some((prefix) => normalized.startsWith(prefix));
+}
 
 function fail(message) {
   console.error(`\nERROR: ${message}\n`);
@@ -99,14 +135,31 @@ function assertOfficialDirectory() {
 }
 
 function changedFiles() {
-  const output = execFileSync("git", ["status", "--porcelain=v1", "--untracked-files=all"], { cwd: OFFICIAL_ROOT, encoding: "utf8" }).trimEnd();
+  // -z: NUL-terminated, byte-exact paths, never quoted or octal-escaped.
+  // The prior human-readable porcelain parsing quoted and octal-escaped
+  // any non-ASCII filename (every Chinese ui-practice asset name), which
+  // silently broke every prefix/Set check downstream -- the tested string
+  // began with a literal quote character, so even "src/" (already in the
+  // canonical prefix list) never matched.
+  const output = execFileSync("git", ["status", "--porcelain=v1", "--untracked-files=all", "-z"], { cwd: OFFICIAL_ROOT, encoding: "utf8" });
   if (!output) return [];
-  return output.split(/\r?\n/).map((line) => line.slice(3).trim()).filter(Boolean);
+  const entries = output.split(String.fromCharCode(0)).filter(Boolean);
+  const files = [];
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
+    const statusCode = entry.slice(0, 2);
+    files.push(entry.slice(3));
+    // Rename/copy entries carry a second NUL-terminated field (the old
+    // path) right after the new path -- skip it.
+    if (statusCode[0] === "R" || statusCode[0] === "C") i++;
+  }
+  return files.filter((file) => !isDevOnlyExcluded(file));
 }
 
 function stagedFiles() {
-  const output = capture("git", ["diff", "--cached", "--name-only"]);
-  return output ? output.split(/\r?\n/).map((file) => file.trim()).filter(Boolean) : [];
+  // -z: same reasoning as changedFiles() above -- never quoted/escaped.
+  const output = capture("git", ["diff", "--cached", "--name-only", "-z"]);
+  return output ? output.split(String.fromCharCode(0)).filter(Boolean).filter((file) => !isDevOnlyExcluded(file)) : [];
 }
 
 function isCanonicalPublishOutput(file) {
@@ -118,7 +171,8 @@ function isCanonicalWebsiteFile(file) {
   const normalized = file.replaceAll("\\", "/");
   return isCanonicalPublishOutput(normalized)
     || canonicalWebsiteRootFiles.has(normalized)
-    || canonicalWebsitePrefixes.some((prefix) => normalized.startsWith(prefix));
+    || canonicalWebsitePrefixes.some((prefix) => normalized.startsWith(prefix))
+    || isCanonicalPublicAsset(normalized);
 }
 
 function buildLauncherFileReview(files = changedFiles()) {

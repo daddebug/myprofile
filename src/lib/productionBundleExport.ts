@@ -4,11 +4,16 @@ import { GAME_COVER_DB_NAME, GAME_COVER_STORE_NAME } from "./gameCoverDb";
 import { getGameExperienceStore } from "./gameExperience";
 import { getProjectDocumentsExportStore } from "./projectDocuments";
 import { getProjectCollectionExportStore } from "./projectMetadata";
-import uiPracticeMetadata from "../data/uiPracticeMetadata.json";
 import { getPublishSourceAdapter, publishSourceRegistry } from "./publishing/publishSourceRegistry";
 import { getDiskProjectCover, getDiskPlayableGameCover } from "./portfolioContentClient";
 import { getPublishedProjectDraft } from "./publishedPortfolio";
 import { hydrateTranslations } from "./translationHydration";
+import { loadSiteConnectConfig } from "./siteConnectConfig";
+import { CV_LIBRARY_DB_NAME, CV_LIBRARY_STORE_NAME, getCvAsset } from "./cvLibraryDb";
+import { loadHomeContent } from "./homeContentConfig";
+import { loadHomeProjectSlots } from "./homeProjectSlots";
+import { loadHomeExplorationSlots } from "./homeExplorationSlots";
+import { resolveDevProjectDraft, type DynamicProjectDraft } from "./dynamicProjectDraftHydration";
 
 type ExportedImage = {
   sourceAdapterId: string;
@@ -42,8 +47,6 @@ const draftSources: readonly { projectId: string; key: string; database: string;
 // portfolioContentPlugin.ts wrote under public/portfolio-assets/, so the only
 // way to get the bytes here is to fetch that already-serving local URL.
 const templateImageSource = getPublishSourceAdapter("dynamic-template-images").storage!;
-const uiPracticeImageSource = getPublishSourceAdapter("ui-practice-images").storage!;
-const UI_PRACTICE_PROJECT_ID = "ui-personal-practice";
 
 function collectTemplateImageRefs(value: unknown, refs = new Map<string, string>()): Map<string, string> {
   if (!value || typeof value !== "object") return refs;
@@ -66,8 +69,8 @@ async function fetchTemplateImage(sourceAdapterId: string, projectId: string, im
   const fileName = publicPath.split("/").pop() || `${imageId}.bin`;
   return {
     sourceAdapterId,
-    database: sourceAdapterId === "ui-practice-images" ? uiPracticeImageSource.database : templateImageSource.database,
-    store: sourceAdapterId === "ui-practice-images" ? uiPracticeImageSource.store : templateImageSource.store,
+    database: templateImageSource.database,
+    store: templateImageSource.store,
     id: imageId,
     projectId,
     fileName,
@@ -295,7 +298,7 @@ function dynamicProjectDraftStorageKey(projectId: string) {
   return `dilida-portfolio:dynamic-project:${projectId}:draft:v1`;
 }
 
-function readDynamicProjectDraft(projectId: string, warnings: string[]): unknown {
+function readDynamicProjectDraft(projectId: string, warnings: string[]): DynamicProjectDraft | undefined {
   const key = dynamicProjectDraftStorageKey(projectId);
   const raw = window.localStorage.getItem(key);
   if (!raw) {
@@ -331,11 +334,12 @@ function readDynamicProjectDraft(projectId: string, warnings: string[]): unknown
     return undefined;
   }
 
-  if ((parsed as { templateInstances: unknown[] }).templateInstances.length === 0) {
-    warnings.push(`${projectId}: draft found but templateInstances is empty.`);
+  const hydration = resolveDevProjectDraft(raw, getPublishedProjectDraft(projectId));
+  if (hydration.suspiciousLocalDraft) {
+    warnings.push(`${projectId}: local draft structure differs from the published Portfolio 2.0 revision; the published revision was used and the local draft was left unchanged.`);
   }
-
-  return parsed;
+  if (hydration.draft.templateInstances.length === 0) warnings.push(`${projectId}: active Portfolio 2.0 draft contains no template instances.`);
+  return hydration.draft;
 }
 
 export async function exportProductionBundle(options?: { launcherRequestToken?: string }): Promise<ProductionExportSummary> {
@@ -415,20 +419,6 @@ export async function exportProductionBundle(options?: { launcherRequestToken?: 
     }
   }
 
-  // UI Personal Practice is a source-controlled gallery rather than a
-  // dynamic-project draft, but its newer items use the same disk-staged
-  // imageId/publicPath shape. Export those bytes through the same published
-  // image channel so its canonical metadata never points at local-only
-  // /portfolio-assets files in production.
-  const uiPractice = structuredClone(uiPracticeMetadata) as unknown;
-  const uiPracticeImageRefs = collectTemplateImageRefs(uiPractice);
-  for (const [imageId, publicPath] of uiPracticeImageRefs) {
-    try {
-      images.push(await fetchTemplateImage("ui-practice-images", UI_PRACTICE_PROJECT_ID, imageId, publicPath));
-    } catch (error) {
-      missingReferences.push(`${UI_PRACTICE_PROJECT_ID}: ${imageId} (could not fetch ${publicPath}: ${error instanceof Error ? error.message : String(error)})`);
-    }
-  }
   if (dynamicProjectWarnings.length) {
     console.warn("[Portfolio export] dynamic project draft warnings:", dynamicProjectWarnings);
   }
@@ -533,6 +523,50 @@ export async function exportProductionBundle(options?: { launcherRequestToken?: 
     missingReferences.push(`game-cover: ${id}`);
   }
 
+  // Let's Connect config + selected CV -- a single site-wide (not
+  // per-project) settings blob, exported through the SAME images[]/
+  // dataBase64 byte transport every other asset above already uses (cv-library
+  // is a registered source adapter, see publishSourceRegistry.json), not a
+  // parallel mechanism. Only the SELECTED CV's bytes are ever collected here
+  // -- other uploaded-but-unselected library entries stay local/editor-only,
+  // matching "the website only ever needs the one currently chosen."
+  const connectConfig = loadSiteConnectConfig();
+  if (connectConfig.selectedCvId) {
+    const cvRecord = await getCvAsset(connectConfig.selectedCvId);
+    if (cvRecord) {
+      images.push({
+        sourceAdapterId: "cv-library",
+        database: CV_LIBRARY_DB_NAME,
+        store: CV_LIBRARY_STORE_NAME,
+        id: cvRecord.id,
+        fileName: cvRecord.fileName,
+        mimeType: cvRecord.mimeType,
+        size: cvRecord.size,
+        updatedAt: cvRecord.updatedAt,
+        dataBase64: bytesToBase64(await cvRecord.blob.arrayBuffer()),
+      });
+    } else {
+      missingReferences.push(`site-settings: selected CV "${connectConfig.selectedCvId}" not found in the local CV library.`);
+    }
+  }
+  const siteSettings = {
+    connectItems: connectConfig.items,
+    cv: { selectedCvId: connectConfig.selectedCvId },
+    // homeContent is still live Homepage text content. homeProjectSlots/
+    // homeExplorationSlots are legacy/inert as of Homepage 3.0 Modular
+    // Interaction Redesign Phase B.1 -- the Homepage no longer reads them
+    // (HomeProjectFlow.tsx renders the canonical catalog directly, sorted
+    // by archiveOrder) and `/work` no longer has UI to edit them. Still
+    // collected here (migration/compatibility only, per this project's
+    // non-destructive-data rule) purely so the old stored data stays in
+    // sync across publishes rather than silently going stale or orphaned --
+    // this does not mean it drives what appears on the Homepage. Plain
+    // JSON either way, no asset bytes involved.
+    homeContent: loadHomeContent(),
+    homeProjectSlots: loadHomeProjectSlots(),
+    homeExplorationSlots: loadHomeExplorationSlots(),
+  };
+
   const bundle = {
     version: 1,
     publishingRegistryVersion: publishSourceRegistry.version,
@@ -542,7 +576,7 @@ export async function exportProductionBundle(options?: { launcherRequestToken?: 
     projectCatalog,
     projectDocuments,
     gameExperience,
-    uiPractice,
+    siteSettings,
     images,
     diagnostics: {
       missingReferences,

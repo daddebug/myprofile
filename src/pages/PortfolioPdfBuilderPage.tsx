@@ -2,7 +2,8 @@ import { useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowDown, ArrowLeft, ArrowUp, Check, Clipboard, Eye, FileCode2, FileText, FolderOpen, RotateCcw, Save, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useProjectCatalog } from "../hooks/useProjectCatalog";
+import { useOwnerProjectCatalog } from "../hooks/useProjectCatalog";
+import { useSurfaceSignal } from "../hooks/useSurfaceSignal";
 import { formatPlaytime, gameTitle, useGameExperienceStore } from "../lib/gameExperience";
 import {
   createPortfolioPdfConfig,
@@ -14,7 +15,6 @@ import {
   type PdfPreset,
   type PortfolioPdfConfig,
 } from "../lib/portfolioPdf";
-import { getUiPracticeCatalog } from "../lib/uiPracticeCatalog";
 import { useLocale } from "../locales/LocaleContext";
 import {
   runPortfolioCollectionExport,
@@ -48,7 +48,6 @@ import "../pdf.css";
 const SECTION_ID_TO_COLLECTION_SECTION: Partial<Record<PdfSectionId, PortfolioCollectionSectionId>> = {
   cover: "cover",
   projects: "projects",
-  "ui-works": "ui-works",
   games: "game-experience",
   contact: "contact",
 };
@@ -77,7 +76,6 @@ function isGameExperienceSelected(config: PortfolioPdfConfig): boolean {
 
 function buildCollectionSelection(config: PortfolioPdfConfig): PortfolioCollectionSelection {
   const orderedProjectIds = [...config.projects].sort((a, b) => a.order - b.order).filter((item) => item.enabled).map((item) => item.id);
-  const orderedUiWorkIds = [...config.uiWorks].sort((a, b) => a.order - b.order).filter((item) => item.enabled).map((item) => item.id);
   const orderedGameIds = [...config.games].sort((a, b) => a.order - b.order).filter((item) => item.enabled).map((item) => item.id);
   const sectionOrder = [...new Set(
     [...config.sections].sort((a, b) => a.order - b.order)
@@ -90,27 +88,28 @@ function buildCollectionSelection(config: PortfolioPdfConfig): PortfolioCollecti
   return {
     projectIds: orderedProjectIds.slice(0, MAX_COLLECTION_PROJECTS),
     sectionOrder,
-    includeUiWorks: sectionOrder.includes("ui-works") && orderedUiWorkIds.length > 0,
-    selectedUiWorkIds: orderedUiWorkIds,
     includeGameExperience: sectionOrder.includes("game-experience") && orderedGameIds.length > 0,
     selectedGameIds: orderedGameIds,
     includeContact: sectionOrder.includes("contact"),
   };
 }
 
-type Panel = "outline" | "projects" | "ui" | "games" | "settings";
+type Panel = "outline" | "projects" | "games" | "settings";
 
 const panelLabels = {
-  zh: { outline: "章节", projects: "项目", ui: "UI 作品", games: "游戏经历", settings: "设置" },
-  en: { outline: "Sections", projects: "Projects", ui: "UI Works", games: "Games", settings: "Settings" },
+  zh: { outline: "章节", projects: "项目", games: "游戏经历", settings: "设置" },
+  en: { outline: "Sections", projects: "Projects", games: "Games", settings: "Settings" },
 };
 
 export function PortfolioPdfBuilderPage() {
   const { locale, pathFor } = useLocale();
-  const projects = useProjectCatalog(locale).filter((item) => item.visibility === "public");
+  // This page's own permanent dark (bg-[#0b1035]) background, declared for
+  // ProductionExportDock's surface-adaptive glass buttons -- see
+  // useSurfaceSignal's own comment for why this can't just be page CSS.
+  useSurfaceSignal("dark");
+  const projects = useOwnerProjectCatalog(locale).filter((item) => item.visibility === "public");
   const games = useGameExperienceStore().records.filter((item) => item.publication.visibility === "public" && !item.publication.archived).sort((a, b) => a.publication.libraryOrder - b.publication.libraryOrder);
-  const uiWorks = useMemo(() => getUiPracticeCatalog(), []);
-  const inputs = useMemo(() => ({ locale, projectIds: projects.map((item) => item.id), uiIds: uiWorks.map((item) => item.id), gameIds: games.map((item) => item.id) }), [games, locale, projects, uiWorks]);
+  const inputs = useMemo(() => ({ locale, projectIds: projects.map((item) => item.id), gameIds: games.map((item) => item.id) }), [games, locale, projects]);
   const [config, setConfig] = useState<PortfolioPdfConfig>(() => loadPortfolioPdfConfig(inputs));
   const [panel, setPanel] = useState<Panel>("outline");
   const [saved, setSaved] = useState(false);
@@ -134,13 +133,12 @@ export function PortfolioPdfBuilderPage() {
 
     <div className="mx-auto min-h-[calc(100vh-4rem)] max-w-[720px]">
       <div className="max-h-[calc(100vh-4rem)] overflow-y-auto p-4 md:p-6">
-        <div className="grid grid-cols-5 gap-1 rounded-lg bg-softWhite/[0.04] p-1">
+        <div className="grid grid-cols-4 gap-1 rounded-lg bg-softWhite/[0.04] p-1">
           {(Object.keys(panelLabels[locale]) as Panel[]).map((id) => <button type="button" key={id} onClick={() => setPanel(id)} className={`rounded px-2 py-2 text-[10px] font-semibold ${panel === id ? "bg-acidGreen text-deepIndigo" : "text-softWhite/55 hover:text-softWhite"}`}>{panelLabels[locale][id]}</button>)}
         </div>
         <div className="mt-5">
           {panel === "outline" ? <OutlinePanel locale={locale} config={config} setConfig={setConfig} /> : null}
           {panel === "projects" ? <ProjectsPanel locale={locale} config={config} setConfig={setConfig} projects={projects} /> : null}
-          {panel === "ui" ? <UiPanel locale={locale} config={config} setConfig={setConfig} items={uiWorks} /> : null}
           {panel === "games" ? <GamesPanel locale={locale} config={config} setConfig={setConfig} games={games} /> : null}
           {panel === "settings" ? <SettingsPanel locale={locale} config={config} applyPreset={applyPreset} /> : null}
         </div>
@@ -149,7 +147,7 @@ export function PortfolioPdfBuilderPage() {
   </main>;
 }
 
-function StaticHtmlGenerateAction({ locale, projects, config }: { locale: "zh" | "en"; projects: ReturnType<typeof useProjectCatalog>; config: PortfolioPdfConfig }) {
+function StaticHtmlGenerateAction({ locale, projects, config }: { locale: "zh" | "en"; projects: ReturnType<typeof useOwnerProjectCatalog>; config: PortfolioPdfConfig }) {
   const [phase, setPhase] = useState<StaticHtmlExportPhase>("idle");
   const [message, setMessage] = useState("");
   const [directionDialog, setDirectionDialog] = useState<DirectionDialogState | null>(null);
@@ -264,7 +262,7 @@ function StaticHtmlGenerateAction({ locale, projects, config }: { locale: "zh" |
 // entirely by save()/loadPortfolioPdfConfig() above. This does not restore
 // the old window.print() A4 pipeline — Export PDF (A4) above is unchanged
 // and still does that; this is a separate, additive action.
-function CollectionGenerateAction({ locale, projects, config }: { locale: "zh" | "en"; projects: ReturnType<typeof useProjectCatalog>; config: PortfolioPdfConfig }) {
+function CollectionGenerateAction({ locale, projects, config }: { locale: "zh" | "en"; projects: ReturnType<typeof useOwnerProjectCatalog>; config: PortfolioPdfConfig }) {
   const [phase, setPhase] = useState<CollectionExportPhase>("idle");
   const [message, setMessage] = useState("");
   const [directionDialog, setDirectionDialog] = useState<DirectionDialogState | null>(null);
@@ -516,7 +514,7 @@ function OutlinePanel({ locale, config, setConfig }: { locale: "zh" | "en"; conf
   return <div><PanelHeading hint={locale === "zh" ? "启用、禁用或调整 PDF 章节顺序。" : "Enable, disable, or reorder PDF sections."}>{locale === "zh" ? "文档结构" : "Document outline"}</PanelHeading><div className="space-y-2">{ordered.map((section, index) => <div key={section.id} className="pdf-config-row"><label className="flex min-w-0 flex-1 items-center gap-3"><input type="checkbox" checked={section.enabled} onChange={(event) => setConfig((current) => ({ ...current, sections: current.sections.map((item) => item.id === section.id ? { ...item, enabled: event.target.checked } : item) }))} /><span className="truncate text-sm">{pdfSectionLabel(section.id, locale)}</span></label><MoveButtons index={index} count={ordered.length} onMove={(direction) => setConfig((current) => ({ ...current, sections: moveOrderedItem(current.sections, index, direction) }))} /></div>)}</div></div>;
 }
 
-function ProjectsPanel({ locale, config, setConfig, projects }: { locale: "zh" | "en"; config: PortfolioPdfConfig; setConfig: ConfigSetter; projects: ReturnType<typeof useProjectCatalog> }) {
+function ProjectsPanel({ locale, config, setConfig, projects }: { locale: "zh" | "en"; config: PortfolioPdfConfig; setConfig: ConfigSetter; projects: ReturnType<typeof useOwnerProjectCatalog> }) {
   const byId = new Map(projects.map((item) => [item.id, item]));
   const ordered = [...config.projects].sort((a, b) => a.order - b.order);
   return <div>
@@ -526,11 +524,6 @@ function ProjectsPanel({ locale, config, setConfig, projects }: { locale: "zh" |
       return <div key={item.id} className="pdf-config-row"><label className="flex min-w-0 flex-1 items-center gap-3"><input type="checkbox" checked={item.enabled} onChange={(event) => setConfig((current) => ({ ...current, projects: current.projects.map((entry) => entry.id === item.id ? { ...entry, enabled: event.target.checked } : entry) }))} /><span className="truncate text-sm">{project.title}</span></label><MoveButtons index={index} count={ordered.length} onMove={(direction) => setConfig((current) => ({ ...current, projects: moveOrderedItem(current.projects, index, direction) }))} /></div>;
     })}</div>
   </div>;
-}
-
-function UiPanel({ locale, config, setConfig, items }: { locale: "zh" | "en"; config: PortfolioPdfConfig; setConfig: ConfigSetter; items: ReturnType<typeof getUiPracticeCatalog> }) {
-  const byId = new Map(items.map((item) => [item.id, item])); const ordered = [...config.uiWorks].sort((a, b) => a.order - b.order);
-  return <div><PanelHeading>{locale === "zh" ? "UI 作品选择" : "UI work selection"}</PanelHeading><div className="mb-4 grid grid-cols-2 gap-3"><SelectField label={locale === "zh" ? "每页数量" : "Items per page"} value={String(config.uiOptions.density)} options={[["2", "2"], ["4", "4"], ["6", "6"]]} onChange={(value) => setConfig((current) => ({ ...current, uiOptions: { ...current.uiOptions, density: Number(value) as 2 | 4 | 6 } }))} /><SelectField label={locale === "zh" ? "图片适配" : "Image fit"} value={config.uiOptions.cropMode} options={[["contain", locale === "zh" ? "完整显示" : "Contain"], ["cover", locale === "zh" ? "裁切填充" : "Cover"]]} onChange={(value) => setConfig((current) => ({ ...current, uiOptions: { ...current.uiOptions, cropMode: value as "contain" | "cover" } }))} /></div><label className="mb-4 block text-xs"><input className="mr-2" type="checkbox" checked={config.uiOptions.showCaptions} onChange={(event) => setConfig((current) => ({ ...current, uiOptions: { ...current.uiOptions, showCaptions: event.target.checked } }))} />{locale === "zh" ? "显示标题与说明" : "Show titles and captions"}</label><div className="space-y-2">{ordered.map((entry, index) => { const item = byId.get(entry.id); if (!item) return null; return <div className="pdf-config-row" key={entry.id}><label className="flex min-w-0 flex-1 items-center gap-2"><input type="checkbox" checked={entry.enabled} onChange={(event) => setConfig((current) => ({ ...current, uiWorks: current.uiWorks.map((value) => value.id === entry.id ? { ...value, enabled: event.target.checked } : value) }))} /><img src={item.src} alt="" className="h-9 w-12 rounded object-cover" /><span className="truncate text-xs">{item.title || item.filename}</span></label><MoveButtons index={index} count={ordered.length} onMove={(direction) => setConfig((current) => ({ ...current, uiWorks: moveOrderedItem(current.uiWorks, index, direction) }))} /></div>; })}</div></div>;
 }
 
 function GamesPanel({ locale, config, setConfig, games }: { locale: "zh" | "en"; config: PortfolioPdfConfig; setConfig: ConfigSetter; games: ReturnType<typeof useGameExperienceStore>["records"] }) {
@@ -546,6 +539,3 @@ function MoveButtons({ index, count, onMove }: { index: number; count: number; o
   return <span className="flex shrink-0"><button type="button" className="pdf-icon-button" disabled={index === 0} onClick={(event) => { event.preventDefault(); onMove(-1); }} aria-label="Move up"><ArrowUp className="h-3.5 w-3.5" /></button><button type="button" className="pdf-icon-button" disabled={index === count - 1} onClick={(event) => { event.preventDefault(); onMove(1); }} aria-label="Move down"><ArrowDown className="h-3.5 w-3.5" /></button></span>;
 }
 
-function SelectField({ label, value, options, onChange }: { label: string; value: string; options: string[][]; onChange: (value: string) => void }) {
-  return <label className="pdf-field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}>{options.map(([key, text]) => <option value={key} key={key}>{text}</option>)}</select></label>;
-}

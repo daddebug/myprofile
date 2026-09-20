@@ -1,0 +1,140 @@
+.portfolio2-other-projects {
+  width: 100%;
+  /* Figma OTHER_PROJECTS_FOOTER (node 70:111): heading y=60, cards end
+     y=485, Let's connect heading y=558 -- the 73px gap between cards
+     ending and the next heading belongs to Let's Connect's own top
+     padding below, not here, since that's a real visual gap between two
+     separate structural blocks now that Let's Connect sits between them. */
+  padding: 60px 0 0;
+  color: #495d47;
+  background: transparent;
+}
+
+.portfolio2-other-projects h2 { margin: 0; text-align: center; font: 800 17px/1.25 Inter, sans-serif; }
+.portfolio2-other-projects__rule { height: 1px; margin-top: 45px; background: #81a17d; }
+.portfolio2-other-projects__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 27px; margin-top: 36px; }
+.portfolio2-project-card-wrap { display: grid; gap: 8px; min-width: 0; }
+.portfolio2-project-card { display: block; min-width: 0; border: 1px solid #b5d298; color: inherit; text-decoration: none; }
+.portfolio2-project-card--disabled { cursor: default; opacity: 0.7; }
+.portfolio2-project-card__image { aspect-ratio: 375 / 199; overflow: hidden; background: rgb(73 93 71 / 0.05); }
+.portfolio2-project-card__image img { width: 100%; height: 100%; object-fit: cover; transition: transform 220ms ease; }
+.portfolio2-project-card:hover img { transform: scale(1.02); }
+.portfolio2-project-card__copy { min-height: 127px; padding: 17px 25px; background: #f7f6ed; box-shadow: 0 4px 4px #b5d298; }
+.portfolio2-project-card h3 { margin: 0; font: 600 14px/1.35 Inter, "Noto Sans SC", sans-serif; }
+.portfolio2-project-card p { margin: 12px 0 0; color: rgb(73 93 71 / 0.78); font: 300 14px/1.35 Inter, "Noto Sans SC", sans-serif; }
+
+.portfolio2-slot-editor {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border: 1px dashed rgba(73, 93, 71, 0.35);
+  background: rgba(73, 93, 71, 0.04);
+  font-size: 12px;
+}
+.portfolio2-slot-editor label { display: grid; gap: 4px; }
+.portfolio2-slot-editor select,
+.portfolio2-slot-editor input {
+  min-height: 28px;
+  border: 1px solid rgba(73, 93, 71, 0.3);
+  background: #fff;
+  padding: 3px 6px;
+  font: inherit;
+  color: inherit;
+}
+
+.portfolio2-lets-connect {
+  width: 100%;
+  /* Figma: cards end y=485, heading y=558 (73px gap) -- heading-to-row
+     44px, row (y=602, ~22px tall incl. font) to footer bar (y=713) ~89px. */
+  padding: 73px 0 89px;
+  color: #495d47;
+  background: transparent;
+}
+.portfolio2-lets-connect h2 { margin: 0 0 24px; text-align: center; font: 800 17px/1.25 Inter, sans-serif; }
+.portfolio2-lets-connect__row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+.portfolio2-lets-connect__item {
+  color: #495d47;
+  font: 600 17px/1 Inter, sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.portfolio2-lets-connect__item:hover { text-decoration: underline; }
+.portfolio2-lets-connect__item--disabled {
+  color: rgba(73, 93, 71, 0.4);
+  cursor: default;
+}
+.portfolio2-lets-connect__item--disabled:hover { text-decoration: none; }
+.portfolio2-lets-connect__line {
+  flex: 1 1 60px;
+  max-width: 179px;
+  height: 1px;
+  background: #81a17d;
+}
+
+.portfolio2-lets-connect-editor {
+  display: grid;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 12px;
+  border: 1px dashed rgba(73, 93, 71, 0.35);
+  background: rgba(73, 93, 71, 0.04);
+  font-size: 12px;
+}
+.portfolio2-lets-connect-editor__row {
+  display: grid;
+  grid-template-columns: 80px 140px 1fr auto;
+  align-items: start;
+  gap: 8px;
+  padding-block: 4px;
+}
+.portfolio2-lets-connect-editor__row input {
+  min-height: 28px;
+  border: 1px solid rgba(73, 93, 71, 0.3);
+  background: #fff;
+  padding: 3px 6px;
+  font: inherit;
+  color: inherit;
+}
+.portfolio2-lets-connect-editor__type { font-weight: 700; }
+.portfolio2-lets-connect-editor__note { color: #a8412a; font-size: 11px; }
+.portfolio2-lets-connect-editor__enabled { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+
+.portfolio2-cv-editor { display: grid; gap: 6px; }
+.portfolio2-cv-editor__list { display: grid; gap: 4px; }
+.portfolio2-cv-editor__item { display: flex; align-items: center; gap: 6px; }
+.portfolio2-cv-editor__empty { color: rgba(73, 93, 71, 0.6); font-size: 11px; }
+
+.portfolio2-project-footer { width: 100%; background: #81d87e; color: white; }
+.portfolio2-project-footer__inner { display: flex; min-height: 63px; align-items: center; justify-content: space-between; gap: 24px; font: 400 17px/1.2 Inter, sans-serif; }
+
+/* Project-page footer only (never the homepage footer, data-home-footer) --
+   derived from the project's own --project-accent, always blended lighter
+   with #F7F6ED so a dark custom pick never renders as a deep/black footer.
+   Text stays dark on purpose (see the Project Theme Color spec); no
+   automatic light/dark contrast switch until a real contrast system exists. */
+.portfolio2-project-footer[data-project-portfolio-footer] {
+  --project-footer-color: color-mix(in srgb, var(--project-accent, #9FCB98) 78%, #F7F6ED 22%);
+  background: var(--project-footer-color);
+  color: #2F3B2F;
+}
+
+body:has([data-dynamic-project-page]) > #root > div > footer { display: none; }
+
+@media print {
+  [data-project-other-projects] { display: none !important; }
+  [data-project-lets-connect] { display: none !important; }
+  [data-project-portfolio-footer] { display: block !important; }
+}
+
+@media (max-width: 760px) {
+  .portfolio2-other-projects__grid { grid-template-columns: 1fr; }
+  .portfolio2-lets-connect__row { gap: 20px; }
+  .portfolio2-lets-connect-editor__row { grid-template-columns: 1fr; }
+  .portfolio2-project-footer__inner { flex-direction: column; align-items: flex-start; justify-content: center; padding-block: 18px; }
+}

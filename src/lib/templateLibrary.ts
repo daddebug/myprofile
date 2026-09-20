@@ -3,6 +3,7 @@
 // loaded by the new library and cannot appear in its builder or gallery.
 
 import type { ComponentType } from "react";
+import type { UniversalMedia, UniversalMediaType } from "./universalMedia";
 
 export type TemplateFieldType =
   | "text"
@@ -11,6 +12,7 @@ export type TemplateFieldType =
   | "image"
   | "images"
   | "game"
+  | "media"
   | "xmind"
   | "list"
   | "select"
@@ -46,6 +48,9 @@ export type TemplateContentValue =
 export type TemplateProps = {
   content: Record<string, TemplateContentValue>;
   locale: "zh" | "en";
+  // Presentation-only ordinal for templates whose visual numbering follows
+  // their occurrence in the current ordered flow. Never persisted as data.
+  sectionIntroIndex?: number;
   inlineEditor?: {
     onLocalizedTextChange: (field: string, value: string) => void;
     imageRow?: {
@@ -88,6 +93,18 @@ export type TemplateProps = {
       stage?: "" | "reading" | "checking" | "copying" | "verifying" | "saving";
       error?: string;
     };
+    universalMedia?: {
+      onMediaChange: (media: UniversalMedia) => void;
+      onChooseImage: () => void;
+      onChooseFigmaFallback: () => void;
+      onChooseGameFolder: () => void;
+      onChooseGameZip: () => void;
+      onChooseGameCover: () => void;
+      onUseSavedGame: (gameId: string) => void | Promise<void>;
+      availableGames: Array<{ gameId: string; originalFileName: string; displayName: string }>;
+      activeType: UniversalMediaType;
+      error?: string;
+    };
   };
   // Symmetric left/right inset (px) for this template's outer container,
   // resolved by the caller as: this project instance's own override ->
@@ -119,19 +136,11 @@ type TemplateModule = {
 
 const modules = import.meta.glob<TemplateModule>(
   [
-    "../templates/ProjectHeaderTemplate.tsx",
     "../templates/StatementLongformTemplate.tsx",
-    "../templates/XMindBreakdownTemplate.tsx",
     "../templates/SupportingNoteTemplate.tsx",
-    "../templates/PhaseMilestonesTemplate.tsx",
-    "../templates/CircleSummaryTemplate.tsx",
-    "../templates/DecisionTableTemplate.tsx",
     "../templates/ImageRowTemplate.tsx",
-    "../templates/FigmaPrototypeTemplate.tsx",
-    "../templates/ProcessFlowTemplate.tsx",
-    "../templates/PlayableGameTemplate.tsx",
+    "../templates/UniversalMediaTemplate.tsx",
     "../templates/DirectionCompareTemplate.tsx",
-    "../templates/DualViewpointAnalysisTemplate.tsx",
   ],
   { eager: true },
 );

@@ -21,7 +21,6 @@ import type { Locale } from "../locales/types";
 import type { ResolvedProjectMetadata } from "./projectMetadata";
 import { buildDynamicProjectStagingPayload, createCollectionJob, deleteCollectionJob, reportCollectionExportError, type StagedProjectPayload } from "./collectionExportStaging";
 import { portfolioProfile } from "../data/portfolioProfile";
-import { getUiPracticeCatalog, type UiPracticeCatalogItem } from "./uiPracticeCatalog";
 import { formatAchievement, formatPlaytime, gameTitle, getGameExperienceStore, type GameExperienceRecord } from "./gameExperience";
 import { getGameCoverRecord } from "./gameCoverDb";
 import { getDiskProjectCover } from "./portfolioContentClient";
@@ -76,13 +75,11 @@ export type CollectionExportResult = {
 // capturing and composing. project order, section order, and which UI
 // Works/games are included all come from here — never re-decided or
 // silently re-sliced inside this function once a selection exists.
-export type PortfolioCollectionSectionId = "cover" | "projects" | "ui-works" | "game-experience" | "contact";
+export type PortfolioCollectionSectionId = "cover" | "projects" | "game-experience" | "contact";
 
 export type PortfolioCollectionSelection = {
   projectIds: string[];
   sectionOrder: PortfolioCollectionSectionId[];
-  includeUiWorks: boolean;
-  selectedUiWorkIds: string[];
   includeGameExperience: boolean;
   selectedGameIds: string[];
   includeContact: boolean;
@@ -189,45 +186,6 @@ async function downscaleToJpegDataUrl(src: string, maxWidth: number, maxHeight: 
   } catch {
     return src;
   }
-}
-
-// --- UI Works page(s) ---
-
-const uiWorksPageCss = `${coverPageCss}
-  html, body { height: auto; min-height: 0; }
-  .cx-brand { position: absolute; right: ${SAFE_MARGIN_PX}px; bottom: ${Math.round(SAFE_MARGIN_PX * 0.6)}px; font: 700 9px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; color: rgba(244,245,250,0.34); }
-  .cx-ui-page { height: auto; min-height: 0; padding-bottom: ${SAFE_MARGIN_PX}px; }
-  .cx-ui-grid { width: min(100%, 1180px); align-self: center; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 8px; }
-  .cx-ui-card { border: 1px solid rgba(133,165,255,0.22); border-radius: 12px; overflow: hidden; background: rgba(10,14,40,0.5); aspect-ratio: 16 / 9; }
-  .cx-ui-card img { width: 100%; height: 100%; object-fit: contain; display: block; }
-`;
-
-// Cards render at roughly 583x328 CSS px (2-column grid inside the
-// 1440px page safe area) — 1200x675 is a comfortable 2x for a
-// sharp print without embedding each source image at full original size.
-const UI_WORKS_CARD_MAX_WIDTH = 1200;
-const UI_WORKS_CARD_MAX_HEIGHT = 675;
-
-// One continuous, content-driven page for every selected UI Work — no
-// per-count pagination, no fixed 900px page height. Mirrors
-// buildGameExperienceSectionsHtml's own content-driven page below:
-// data-collection-height="content" tells renderSectionPdf
-// (scripts/portfolioCollectionExportPlugin.ts) to measure this section's
-// real rendered height instead of defaulting to the fixed 1440x900
-// section-page size, so the page grows with however many works are
-// selected instead of splitting into "/01" "/02" fixed-height pages.
-async function buildUiWorksSectionsHtml(items: UiPracticeCatalogItem[], locale: Locale) {
-  if (!items.length) return [];
-  const title = locale === "zh" ? "UI 作品" : "UI Works";
-  const downscaled = await Promise.all(items.map((item) => downscaleToJpegDataUrl(item.src, UI_WORKS_CARD_MAX_WIDTH, UI_WORKS_CARD_MAX_HEIGHT)));
-  const grid = items.map((_item, index) => `<div class="cx-ui-card"><img src="${escapeHtml(downscaled[index])}" alt="" /></div>`).join("");
-  const body = `<p class="cx-eyebrow">${escapeHtml(locale === "zh" ? "UI 作品" : "UI WORKS")}</p>
-    <h1 class="cx-title">${escapeHtml(title)}</h1>
-    <div class="cx-ui-grid">${grid}</div>
-    ${brandFooterHtml}`;
-  const html = `<!doctype html><html lang="${locale}"><head><meta charset="utf-8">${absoluteStylesheetMarkup()}<style>${uiWorksPageCss}</style></head>
-    <body><div data-collection-export-section data-collection-height="content"><div class="cx-page cx-ui-page" style="position:relative;">${body}</div></div></body></html>`;
-  return [html];
 }
 
 // --- Game Experience page(s) ---
@@ -377,14 +335,10 @@ export async function runPortfolioCollectionExport(
   const unselectedProjectIds = eligible.filter((project) => !selectedSet.has(project.id)).map((project) => project.id);
   if (!visible.length) throw new Error(locale === "zh" ? "没有选中任何项目。" : "No projects selected.");
 
-  // Same pattern for UI Works / Game Experience: the editor's explicit
-  // include flag + ordered id list wins outright — never silently padded
-  // back out to "first N" once an explicit (possibly empty) selection
-  // exists, per the editor's own enabled/disabled + order controls.
-  const uiCatalogById = new Map(getUiPracticeCatalog().map((item) => [item.id, item]));
-  const uiWorks = selection.includeUiWorks
-    ? selection.selectedUiWorkIds.map((id) => uiCatalogById.get(id)).filter((item): item is UiPracticeCatalogItem => Boolean(item))
-    : [];
+  // Same pattern for Game Experience: the editor's explicit include flag +
+  // ordered id list wins outright — never silently padded back out to
+  // "first N" once an explicit (possibly empty) selection exists, per the
+  // editor's own enabled/disabled + order controls.
   const gameById = new Map(getGameExperienceStore().records.map((record) => [record.id, record]));
   const games = selection.includeGameExperience
     ? selection.selectedGameIds.map((id) => gameById.get(id)).filter((record): record is GameExperienceRecord => Boolean(record))
@@ -405,7 +359,6 @@ export async function runPortfolioCollectionExport(
   const total = sectionOrder.reduce((sum, section) => {
     if (section === "cover") return sum + 1;
     if (section === "projects") return sum + visible.length;
-    if (section === "ui-works") return sum + (uiWorks.length ? 1 : 0);
     if (section === "game-experience") return sum + (games.length ? 1 : 0);
     if (section === "contact") return sum + (includeContact ? 1 : 0);
     return sum;
@@ -497,17 +450,6 @@ export async function runPortfolioCollectionExport(
           completed += 1;
           report("staging", project.title);
         }
-      } else if (section === "ui-works" && uiWorks.length) {
-        report("staging", locale === "zh" ? "UI 作品" : "UI Works");
-        const uiPages = await buildUiWorksSectionsHtml(uiWorks, locale);
-        for (const [index, html] of uiPages.entries()) {
-          checkCancelled();
-          const sectionId = index === 0 ? "ui-works" : `ui-works-${index}`;
-          const { token } = await stageSection({ sectionId, label: "UI Works", kind: "section", html }, signal);
-          staged.push({ sectionId, label: "UI Works", token });
-        }
-        completed += 1;
-        report("staging");
       } else if (section === "game-experience" && games.length) {
         report("staging", locale === "zh" ? "游戏经历" : "Game Experience");
         const gamePages = await buildGameExperienceSectionsHtml(games, locale);

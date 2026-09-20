@@ -20,7 +20,6 @@ const COMPLETE_EMBEDDED_IMAGE_PROFILES = [
   { screenshotQuality: 0.9, photoQuality: 0.86 },
   { screenshotQuality: 0.86, photoQuality: 0.82 },
 ] as const;
-const UI_PRACTICE_PROJECT_ID = "ui-personal-practice";
 
 export type StaticHtmlExportMode = "standard" | "complete-offline";
 export type StaticHtmlDelivery = "download" | "return";
@@ -50,7 +49,6 @@ export type StaticHtmlExportValidation = {
   coverIncluded: boolean;
   gameExperienceIncluded: boolean;
   unselectedProjectAssetsIncluded: string[];
-  uiPracticeIncludedWithoutSelection: boolean;
   duplicateEmbeddedPayloads: number;
   embeddedImageCount: number;
 };
@@ -957,15 +955,9 @@ function validateStaticExportScope(
       || html.includes(`/covers/${id}.`)
       || html.includes(`/project-images/${id}/`)
       || html.includes(`/playable-game-covers/${id}/`));
-  const uiPracticeIncludedWithoutSelection = !selectedProjectIds.includes(UI_PRACTICE_PROJECT_ID)
-    && (homepageProjectIds.includes(UI_PRACTICE_PROJECT_ID)
-      || exportedProjectIds.includes(UI_PRACTICE_PROJECT_ID)
-      || html.includes("/ui-personal-practice/"));
-
   if (unselectedProjectAssetsIncluded.length) {
     throw new Error(`Unselected project assets were packaged: ${unselectedProjectAssetsIncluded.join(", ")}.`);
   }
-  if (uiPracticeIncludedWithoutSelection) throw new Error("UI Practice was packaged without being selected.");
 
   return {
     selectedProjectIds,
@@ -975,7 +967,6 @@ function validateStaticExportScope(
     coverIncluded,
     gameExperienceIncluded,
     unselectedProjectAssetsIncluded,
-    uiPracticeIncludedWithoutSelection,
     duplicateEmbeddedPayloads: imageStats.duplicateEmbeddedPayloads,
     embeddedImageCount: imageStats.embeddedImageCount,
   };
@@ -1046,7 +1037,6 @@ function validateCompleteOfflineScope(
     coverIncluded: true,
     gameExperienceIncluded: true,
     unselectedProjectAssetsIncluded: [],
-    uiPracticeIncludedWithoutSelection: false,
     duplicateEmbeddedPayloads: imageStats.duplicateEmbeddedPayloads,
     embeddedImageCount: imageStats.embeddedImageCount,
   };

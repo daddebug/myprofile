@@ -465,33 +465,90 @@ export function sampleContentFor(
     return {
       title: { zh: "轻竞技游戏公会社交共性", en: "Social Dynamics in Light Competitive Games" },
       subtitle: { zh: "SLG、卡牌与养成游戏中，公会社交共同面对的机遇与挑战", en: "Shared opportunities and challenges across guild-based progression systems" },
-      leftLabel: { zh: "机遇", en: "Opportunity" },
-      leftItems: [
+      items: [
         {
           id: "opportunity-play",
-          title: { zh: "延展游戏玩法", en: "Extend the play loop" },
-          body: { zh: "团队协作可以发展出更清晰的策略定位，\n并让玩家获得合作共赢的依赖感与代入感。", en: "Team play can create clearer strategic roles and a stronger sense of shared progress." },
+          label: { zh: "机遇", en: "Opportunity" },
+          concept: { zh: "延展游戏玩法", en: "Extend the play loop" },
+          description: { zh: "团队协作可以发展出更清晰的策略定位，\n并让玩家获得合作共赢的依赖感与代入感。", en: "Team play can create clearer strategic roles and a stronger sense of shared progress." },
+          conclusion: { zh: "合作目标让个人养成获得群体意义。", en: "Shared goals give personal progression a collective purpose." },
         },
         {
           id: "opportunity-growth",
-          title: { zh: "养成差异带来社交机会", en: "Progression differences create social opportunity" },
-          body: { zh: "合理利用玩家成长差异，\n可以为不同熟悉程度的用户提供互补的社交方式。", en: "Differences in progression can support complementary roles for players with different levels of familiarity." },
+          label: { zh: "机遇", en: "Opportunity" },
+          concept: { zh: "养成差异带来社交机会", en: "Progression differences create social opportunity" },
+          description: { zh: "合理利用玩家成长差异，\n可以为不同熟悉程度的用户提供互补的社交方式。", en: "Differences in progression can support complementary roles for players with different levels of familiarity." },
+          conclusion: { zh: "差异可以成为协作分工，而不是社交门槛。", en: "Differences can enable cooperation instead of becoming barriers." },
         },
-      ],
-      rightLabel: { zh: "挑战", en: "Challenge" },
-      rightItems: [
         {
           id: "challenge-belonging",
-          title: { zh: "公会代入感不足，维护困难", en: "Weak belonging makes guilds hard to sustain" },
-          body: { zh: "成员短期内难以获得认同感，\n核心成员与普通成员之间的体验差距持续扩大。", en: "Members struggle to build belonging while the experience gap between core and casual members grows." },
+          label: { zh: "挑战", en: "Challenge" },
+          concept: { zh: "公会代入感不足，维护困难", en: "Weak belonging makes guilds hard to sustain" },
+          description: { zh: "成员短期内难以获得认同感，\n核心成员与普通成员之间的体验差距持续扩大。", en: "Members struggle to build belonging while the experience gap between core and casual members grows." },
+          conclusion: { zh: "认同建立速度决定公会能否持续运转。", en: "The pace of belonging determines whether a guild can endure." },
         },
         {
           id: "challenge-fragmentation",
-          title: { zh: "养成中社交割裂", en: "Progression fragments social play" },
-          body: { zh: "个人核心玩法与公会系统关系不够紧密，\n额外奖励难以形成长期吸引力。", en: "Core progression and guild systems remain disconnected, limiting long-term motivation." },
+          label: { zh: "挑战", en: "Challenge" },
+          concept: { zh: "养成中社交割裂", en: "Progression fragments social play" },
+          description: { zh: "个人核心玩法与公会系统关系不够紧密，\n额外奖励难以形成长期吸引力。", en: "Core progression and guild systems remain disconnected, limiting long-term motivation." },
+          conclusion: { zh: "社交必须进入核心循环，而不是停留在额外奖励。", en: "Social play must enter the core loop instead of remaining a bonus." },
         },
       ],
       summary: { zh: "公会社交需要同时连接个人成长、群体目标与持续的成员认同。", en: "Guild social design must connect personal progression, shared goals, and lasting member belonging." },
+    };
+  }
+
+  if (templateId === "concept-diagnosis-cards") {
+    return {
+      title: { zh: "系统诊断：三个核心矛盾", en: "System Diagnosis: Three Core Tensions" },
+      items: [
+        {
+          id: "diagnosis-onboarding",
+          label: { zh: "新手体验", en: "Onboarding" },
+          title: { zh: "首次引导信息过载", en: "First-run guidance overloads new players" },
+          description: { zh: "新手教学在短时间内堆叠了过多系统概念，\n玩家难以在留存关键期建立清晰的心智模型。", en: "Too many systems are introduced at once, making it hard for new players to form a clear mental model during the retention-critical window." },
+          conclusion: { zh: "引导节奏需要让位给理解速度。", en: "Pacing must yield to comprehension speed." },
+        },
+        {
+          id: "diagnosis-progression",
+          label: { zh: "成长曲线", en: "Progression" },
+          title: { zh: "中期成长感知模糊", en: "Mid-game progress feels unclear" },
+          description: { zh: "数值成长与视觉反馈脱节，\n玩家难以感知自己投入的时间正在转化为实际进步。", en: "Numeric growth is disconnected from visible feedback, so players struggle to feel that their time investment is paying off." },
+          conclusion: { zh: "反馈的可见性和数值同样重要。", en: "Visible feedback matters as much as the numbers behind it." },
+        },
+        {
+          id: "diagnosis-social",
+          label: { zh: "社交粘性", en: "Social stickiness" },
+          title: { zh: "社交入口缺乏持续理由", en: "Social entry points lack a lasting reason to return" },
+          description: { zh: "社交系统更多是一次性的功能入口，\n没有形成持续吸引玩家回归的稳定习惯。", en: "Social features act as one-off entry points rather than building a stable habit that brings players back." },
+          conclusion: { zh: "社交需要变成习惯，而不是功能。", en: "Social play needs to become a habit, not just a feature." },
+        },
+      ],
+    };
+  }
+
+  if (templateId === "solution-directions") {
+    return {
+      title: { zh: "接下来的三个方向", en: "Three Directions Going Forward" },
+      subtitle: { zh: "围绕引导、成长反馈与社交习惯，分别给出可以落地的调整方向", en: "Concrete directions across onboarding, growth feedback, and social habit-building" },
+      items: [
+        {
+          id: "direction-onboarding",
+          title: { zh: "分阶段拆解首次引导", en: "Split first-run guidance into stages" },
+          body: { zh: "把系统概念按玩家实际会用到的顺序拆成多次短引导，\n而不是一次性讲完，降低理解门槛。", en: "Break system concepts into several short guided moments in the order players actually need them, instead of front-loading everything at once." },
+        },
+        {
+          id: "direction-progression",
+          title: { zh: "让数值成长可见", en: "Make numeric growth visible" },
+          body: { zh: "在关键节点补充直观的视觉反馈，\n让玩家能实时感知投入时间带来的变化。", en: "Add clear visual feedback at key moments so players can see, in real time, what their time investment is producing." },
+        },
+        {
+          id: "direction-social",
+          title: { zh: "把社交嵌入核心循环", en: "Move social play into the core loop" },
+          body: { zh: "把社交行为和日常养成目标绑定，\n形成稳定的回访习惯，而不是一次性入口。", en: "Tie social actions to everyday progression goals so they build a lasting habit instead of staying a one-off entry point." },
+        },
+      ],
     };
   }
 
@@ -520,6 +577,14 @@ export function sampleContentFor(
       versionLabel: { zh: "", en: "" },
       status: "prototype",
       aspectRatio: "16:9",
+    };
+  }
+
+  if (templateId === "universal-media") {
+    return {
+      heading: { zh: "单媒体展示", en: "Universal Media" },
+      media: { type: "image", image: {} },
+      caption: { zh: "", en: "" },
     };
   }
 
@@ -706,7 +771,10 @@ export function sampleContentFor(
   if (templateId === "image-row") {
     return {
       heading: { zh: "", en: "" },
-      items: [],
+      items: [
+        { id: `double-image-${Date.now()}-left`, alt: { zh: "", en: "" }, caption: { zh: "", en: "" }, hoverPreviewMode: "none" },
+        { id: `double-image-${Date.now()}-right`, alt: { zh: "", en: "" }, caption: { zh: "", en: "" }, hoverPreviewMode: "none" },
+      ],
     };
   }
 
@@ -842,9 +910,10 @@ export function sampleContentFor(
 
 type DualViewpointEditorItem = {
   id: string;
-  title: { zh: string; en: string };
-  body: { zh: string; en: string };
-  icon?: ModuleIconReference;
+  label: { zh: string; en: string };
+  concept: { zh: string; en: string };
+  description: { zh: string; en: string };
+  conclusion: { zh: string; en: string };
 };
 
 function dualViewpointLocalized(value: unknown) {
@@ -856,21 +925,25 @@ function dualViewpointLocalized(value: unknown) {
   };
 }
 
-function dualViewpointItems(value: unknown): DualViewpointEditorItem[] {
+function dualViewpointItems(value: unknown, fallbackLabel?: { zh: string; en: string }): DualViewpointEditorItem[] {
   if (!Array.isArray(value)) return [];
   return value.flatMap((item, index) => {
     if (!item || typeof item !== "object" || Array.isArray(item)) return [];
-    const candidate = item as { id?: unknown; title?: unknown; body?: unknown; icon?: unknown };
-    const icon = candidate.icon && typeof candidate.icon === "object" && !Array.isArray(candidate.icon)
-      ? candidate.icon as Partial<ModuleIconReference>
-      : undefined;
+    const candidate = item as {
+      id?: unknown;
+      label?: unknown;
+      concept?: unknown;
+      description?: unknown;
+      conclusion?: unknown;
+      title?: unknown;
+      body?: unknown;
+    };
     return [{
       id: typeof candidate.id === "string" && candidate.id ? candidate.id : `viewpoint-${index + 1}`,
-      title: dualViewpointLocalized(candidate.title),
-      body: dualViewpointLocalized(candidate.body),
-      icon: icon && typeof icon.id === "string" && typeof icon.svgPath === "string"
-        ? { id: icon.id, name: icon.name ?? "generated-icon", title: icon.title ?? "", svgPath: icon.svgPath }
-        : undefined,
+      label: candidate.label ? dualViewpointLocalized(candidate.label) : (fallbackLabel ?? { zh: "", en: "" }),
+      concept: dualViewpointLocalized(candidate.concept ?? candidate.title),
+      description: dualViewpointLocalized(candidate.description ?? candidate.body),
+      conclusion: dualViewpointLocalized(candidate.conclusion),
     }];
   });
 }
@@ -879,26 +952,28 @@ export function DualViewpointAnalysisContentEditor({
   content,
   language,
   onChange,
-  projectId = "template-library",
-  moduleId = "dual-viewpoint-analysis",
 }: {
   content: Record<string, TemplateContentValue>;
   language: "zh" | "en";
   onChange: (content: Record<string, TemplateContentValue>) => void;
-  projectId?: string;
-  moduleId?: string;
 }) {
-  const textFields = ["title", "subtitle", "leftLabel", "rightLabel", "summary"] as const;
+  const textFields = ["title", "subtitle", "summary"] as const;
   const labels = {
     title: { zh: "主标题", en: "Title" },
     subtitle: { zh: "副标题", en: "Subtitle" },
-    leftLabel: { zh: "左列标签", en: "Left label" },
-    rightLabel: { zh: "右列标签", en: "Right label" },
     summary: { zh: "底部总结", en: "Closing summary" },
   };
 
-  const updateItems = (field: "leftItems" | "rightItems", items: DualViewpointEditorItem[]) => {
-    onChange({ ...content, [field]: items });
+  const items = Array.isArray(content.items)
+    ? dualViewpointItems(content.items)
+    : [
+        ...dualViewpointItems(content.leftItems, dualViewpointLocalized(content.leftLabel)),
+        ...dualViewpointItems(content.rightItems, dualViewpointLocalized(content.rightLabel)),
+      ];
+
+  const updateItems = (nextItems: DualViewpointEditorItem[]) => {
+    const { leftLabel: _leftLabel, leftItems: _leftItems, rightLabel: _rightLabel, rightItems: _rightItems, ...canonicalContent } = content;
+    onChange({ ...canonicalContent, items: nextItems });
   };
 
   return (
@@ -917,72 +992,333 @@ export function DualViewpointAnalysisContentEditor({
         );
       })}
 
-      {(["leftItems", "rightItems"] as const).map((field) => {
-        const items = dualViewpointItems(content[field]);
-        const sideName = field === "leftItems"
-          ? (language === "zh" ? "左列观点" : "Left viewpoints")
-          : (language === "zh" ? "右列观点" : "Right viewpoints");
-        return (
-          <section className="border-t border-softWhite/12 pt-4" key={field}>
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="text-sm font-semibold text-softWhite/76">{sideName}</h3>
+      <section className="border-t border-softWhite/12 pt-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-softWhite/76">{language === "zh" ? "分析要点" : "Analysis points"}</h3>
+            <p className="mt-1 text-xs text-softWhite/40">{items.length} {language === "zh" ? "条 · 按 label 自动分成左右两列" : "points · grouped into two columns by label"}</p>
+          </div>
+          <button
+            type="button"
+            className="editor-action"
+            onClick={() => updateItems([...items, {
+              id: `viewpoint-${Date.now()}`,
+              label: { zh: "", en: "" },
+              concept: { zh: "", en: "" },
+              description: { zh: "", en: "" },
+              conclusion: { zh: "", en: "" },
+            }])}
+          >
+            {language === "zh" ? "添加要点" : "Add point"}
+          </button>
+        </div>
+        <div className="mt-3 grid gap-3">
+          {items.map((item, index) => (
+            <div className="grid gap-2 border border-softWhite/10 bg-deepIndigo/24 p-3" key={item.id}>
+              {([
+                ["label", language === "zh" ? "顶部小标签" : "Top label"],
+                ["concept", language === "zh" ? "核心概念" : "Core concept"],
+              ] as const).map(([field, placeholder]) => (
+                <input
+                  key={field}
+                  className="w-full border-b border-softWhite/14 bg-transparent py-2 text-sm font-semibold text-softWhite outline-none focus:border-acidGreen"
+                  placeholder={placeholder}
+                  value={item[field][language]}
+                  onChange={(event) => updateItems(items.map((candidate, itemIndex) => itemIndex === index
+                    ? { ...candidate, [field]: { ...candidate[field], [language]: event.target.value } }
+                    : candidate))}
+                />
+              ))}
+              <textarea
+                className="min-h-20 w-full resize-y bg-transparent py-2 text-sm leading-6 text-softWhite/72 outline-none"
+                placeholder={language === "zh" ? "简短说明" : "Short explanation"}
+                value={item.description[language]}
+                onChange={(event) => updateItems(items.map((candidate, itemIndex) => itemIndex === index
+                  ? { ...candidate, description: { ...candidate.description, [language]: event.target.value } }
+                  : candidate))}
+              />
+              <textarea
+                className="min-h-14 w-full resize-y border-t border-softWhite/10 bg-transparent py-2 text-sm leading-6 text-acidGreen/72 outline-none"
+                placeholder={language === "zh" ? "底部一句结论" : "One-line conclusion"}
+                value={item.conclusion[language]}
+                onChange={(event) => updateItems(items.map((candidate, itemIndex) => itemIndex === index
+                  ? { ...candidate, conclusion: { ...candidate.conclusion, [language]: event.target.value } }
+                  : candidate))}
+              />
               <button
                 type="button"
-                className="editor-action"
-                disabled={items.length >= 4}
-                onClick={() => updateItems(field, [...items, {
-                  id: `${field}-${Date.now()}`,
-                  title: { zh: "", en: "" },
-                  body: { zh: "", en: "" },
-                }])}
+                className="editor-action justify-self-end text-peach"
+                onClick={() => updateItems(items.filter((_, itemIndex) => itemIndex !== index))}
               >
-                {language === "zh" ? "添加观点" : "Add viewpoint"}
+                {language === "zh" ? "删除" : "Delete"}
               </button>
             </div>
-            <div className="mt-3 grid gap-3">
-              {items.map((item, index) => (
-                <div className="grid gap-2 border border-softWhite/10 bg-deepIndigo/24 p-3" key={item.id}>
-                  <input
-                    className="w-full border-b border-softWhite/14 bg-transparent py-2 text-sm font-semibold text-softWhite outline-none focus:border-acidGreen"
-                    placeholder={language === "zh" ? "小节标题" : "Section title"}
-                    value={item.title[language]}
-                    onChange={(event) => updateItems(field, items.map((candidate, itemIndex) => itemIndex === index
-                      ? { ...candidate, title: { ...candidate.title, [language]: event.target.value } }
-                      : candidate))}
-                  />
-                  <textarea
-                    className="min-h-20 w-full resize-y bg-transparent py-2 text-sm leading-6 text-softWhite/72 outline-none"
-                    placeholder={language === "zh" ? "2–4 行简短说明" : "A short 2–4 line explanation"}
-                    value={item.body[language]}
-                    onChange={(event) => updateItems(field, items.map((candidate, itemIndex) => itemIndex === index
-                      ? { ...candidate, body: { ...candidate.body, [language]: event.target.value } }
-                      : candidate))}
-                  />
-                  <GeneratedSvgIconEditor
-                    language={language}
-                    title={item.title[language]}
-                    description={item.body[language]}
-                    projectId={projectId}
-                    moduleId={`${moduleId}:${field}:${item.id}`}
-                    currentIcon={item.icon}
-                    onInsert={(icon) => updateItems(field, items.map((candidate, itemIndex) => itemIndex === index
-                      ? { ...candidate, icon }
-                      : candidate))}
-                  />
-                  <button
-                    type="button"
-                    className="editor-action justify-self-end text-peach"
-                    disabled={items.length <= 1}
-                    onClick={() => updateItems(field, items.filter((_, itemIndex) => itemIndex !== index))}
-                  >
-                    {language === "zh" ? "删除" : "Delete"}
-                  </button>
-                </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+type ConceptDiagnosisEditorItem = {
+  id: string;
+  label: { zh: string; en: string };
+  title: { zh: string; en: string };
+  description: { zh: string; en: string };
+  conclusion: { zh: string; en: string };
+  icon?: ModuleIconReference;
+};
+
+function conceptDiagnosisItems(value: unknown): ConceptDiagnosisEditorItem[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item, index) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const candidate = item as {
+      id?: unknown;
+      label?: unknown;
+      title?: unknown;
+      description?: unknown;
+      conclusion?: unknown;
+      icon?: unknown;
+    };
+    const icon = candidate.icon && typeof candidate.icon === "object" && !Array.isArray(candidate.icon)
+      ? candidate.icon as Partial<ModuleIconReference>
+      : undefined;
+    return [{
+      id: typeof candidate.id === "string" && candidate.id ? candidate.id : `diagnosis-${index + 1}`,
+      label: dualViewpointLocalized(candidate.label),
+      title: dualViewpointLocalized(candidate.title),
+      description: dualViewpointLocalized(candidate.description),
+      conclusion: dualViewpointLocalized(candidate.conclusion),
+      icon: icon && typeof icon.id === "string" && typeof icon.svgPath === "string"
+        ? { id: icon.id, name: icon.name ?? "generated-icon", title: icon.title ?? "", svgPath: icon.svgPath }
+        : undefined,
+    }];
+  });
+}
+
+// Separate from DualViewpointAnalysisContentEditor -- concept-diagnosis-cards
+// is its own template with its own (unified, non-left/right) items list and
+// field names (title, not concept). Kept as a sibling editor rather than a
+// shared one so the two templates' content models stay independently
+// editable, per the fields belonging to each template.
+export function ConceptDiagnosisCardsContentEditor({
+  content,
+  language,
+  onChange,
+  projectId = "template-library",
+  moduleId = "concept-diagnosis-cards",
+}: {
+  content: Record<string, TemplateContentValue>;
+  language: "zh" | "en";
+  onChange: (content: Record<string, TemplateContentValue>) => void;
+  projectId?: string;
+  moduleId?: string;
+}) {
+  const items = conceptDiagnosisItems(content.items);
+
+  const updateItems = (nextItems: ConceptDiagnosisEditorItem[]) => {
+    onChange({ ...content, items: nextItems });
+  };
+
+  return (
+    <div className="mt-5 grid gap-5">
+      <label className="block">
+        <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">{language === "zh" ? "主标题" : "Title"}</span>
+        <textarea
+          className="min-h-16 w-full resize-y border border-softWhite/14 bg-deepIndigo/28 px-3 py-2 text-sm leading-6 text-softWhite outline-none focus:border-acidGreen"
+          value={dualViewpointLocalized(content.title)[language]}
+          onChange={(event) => onChange({ ...content, title: { ...dualViewpointLocalized(content.title), [language]: event.target.value } })}
+        />
+      </label>
+
+      <section className="border-t border-softWhite/12 pt-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-softWhite/76">{language === "zh" ? "诊断卡片" : "Diagnosis cards"}</h3>
+            <p className="mt-1 text-xs text-softWhite/40">{items.length} / 5 · {language === "zh" ? "至少保留 3 张" : "Keep at least 3"}</p>
+          </div>
+          <button
+            type="button"
+            className="editor-action"
+            disabled={items.length >= 5}
+            onClick={() => updateItems([...items, {
+              id: `diagnosis-${Date.now()}`,
+              label: { zh: "", en: "" },
+              title: { zh: "", en: "" },
+              description: { zh: "", en: "" },
+              conclusion: { zh: "", en: "" },
+            }])}
+          >
+            {language === "zh" ? "添加卡片" : "Add card"}
+          </button>
+        </div>
+        <div className="mt-3 grid gap-3">
+          {items.map((item, index) => (
+            <div className="grid gap-2 border border-softWhite/10 bg-deepIndigo/24 p-3" key={item.id}>
+              {([
+                ["label", language === "zh" ? "顶部小标签" : "Top label"],
+                ["title", language === "zh" ? "核心概念" : "Core concept"],
+              ] as const).map(([field, placeholder]) => (
+                <input
+                  key={field}
+                  className="w-full border-b border-softWhite/14 bg-transparent py-2 text-sm font-semibold text-softWhite outline-none focus:border-acidGreen"
+                  placeholder={placeholder}
+                  value={item[field][language]}
+                  onChange={(event) => updateItems(items.map((candidate, itemIndex) => itemIndex === index
+                    ? { ...candidate, [field]: { ...candidate[field], [language]: event.target.value } }
+                    : candidate))}
+                />
               ))}
+              <textarea
+                className="min-h-20 w-full resize-y bg-transparent py-2 text-sm leading-6 text-softWhite/72 outline-none"
+                placeholder={language === "zh" ? "简短说明" : "Short explanation"}
+                value={item.description[language]}
+                onChange={(event) => updateItems(items.map((candidate, itemIndex) => itemIndex === index
+                  ? { ...candidate, description: { ...candidate.description, [language]: event.target.value } }
+                  : candidate))}
+              />
+              <textarea
+                className="min-h-14 w-full resize-y border-t border-softWhite/10 bg-transparent py-2 text-sm leading-6 text-acidGreen/72 outline-none"
+                placeholder={language === "zh" ? "底部结论条" : "Bottom conclusion"}
+                value={item.conclusion[language]}
+                onChange={(event) => updateItems(items.map((candidate, itemIndex) => itemIndex === index
+                  ? { ...candidate, conclusion: { ...candidate.conclusion, [language]: event.target.value } }
+                  : candidate))}
+              />
+              <GeneratedSvgIconEditor
+                language={language}
+                title={item.title[language]}
+                description={item.description[language]}
+                projectId={projectId}
+                moduleId={`${moduleId}:items:${item.id}`}
+                currentIcon={item.icon}
+                onInsert={(icon) => updateItems(items.map((candidate, itemIndex) => itemIndex === index
+                  ? { ...candidate, icon }
+                  : candidate))}
+              />
+              <button
+                type="button"
+                className="editor-action justify-self-end text-peach"
+                disabled={items.length <= 3}
+                onClick={() => updateItems(items.filter((_, itemIndex) => itemIndex !== index))}
+              >
+                {language === "zh" ? "删除" : "Delete"}
+              </button>
             </div>
-          </section>
-        );
-      })}
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+type SolutionDirectionEditorItem = {
+  id: string;
+  title: { zh: string; en: string };
+  body: { zh: string; en: string };
+};
+
+function solutionDirectionItems(value: unknown): SolutionDirectionEditorItem[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item, index) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const candidate = item as { id?: unknown; title?: unknown; body?: unknown };
+    return [{
+      id: typeof candidate.id === "string" && candidate.id ? candidate.id : `solution-${index + 1}`,
+      title: dualViewpointLocalized(candidate.title),
+      body: dualViewpointLocalized(candidate.body),
+    }];
+  });
+}
+
+// Separate from both DualViewpointAnalysisContentEditor (two labeled
+// columns) and ConceptDiagnosisCardsContentEditor (icon-forward cards) --
+// solution-directions is a flat 3-5 item list, no label, no icon.
+export function SolutionDirectionsContentEditor({
+  content,
+  language,
+  onChange,
+}: {
+  content: Record<string, TemplateContentValue>;
+  language: "zh" | "en";
+  onChange: (content: Record<string, TemplateContentValue>) => void;
+}) {
+  const items = solutionDirectionItems(content.items);
+
+  const updateItems = (nextItems: SolutionDirectionEditorItem[]) => {
+    onChange({ ...content, items: nextItems });
+  };
+
+  return (
+    <div className="mt-5 grid gap-5">
+      <label className="block">
+        <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">{language === "zh" ? "主标题" : "Title"}</span>
+        <textarea
+          className="min-h-16 w-full resize-y border border-softWhite/14 bg-deepIndigo/28 px-3 py-2 text-sm leading-6 text-softWhite outline-none focus:border-acidGreen"
+          value={dualViewpointLocalized(content.title)[language]}
+          onChange={(event) => onChange({ ...content, title: { ...dualViewpointLocalized(content.title), [language]: event.target.value } })}
+        />
+      </label>
+      <label className="block">
+        <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">{language === "zh" ? "副标题" : "Subtitle"}</span>
+        <textarea
+          className="min-h-16 w-full resize-y border border-softWhite/14 bg-deepIndigo/28 px-3 py-2 text-sm leading-6 text-softWhite outline-none focus:border-acidGreen"
+          value={dualViewpointLocalized(content.subtitle)[language]}
+          onChange={(event) => onChange({ ...content, subtitle: { ...dualViewpointLocalized(content.subtitle), [language]: event.target.value } })}
+        />
+      </label>
+
+      <section className="border-t border-softWhite/12 pt-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-softWhite/76">{language === "zh" ? "方案项" : "Solution items"}</h3>
+            <p className="mt-1 text-xs text-softWhite/40">{items.length} / 5 · {language === "zh" ? "至少保留 3 个" : "Keep at least 3"}</p>
+          </div>
+          <button
+            type="button"
+            className="editor-action"
+            disabled={items.length >= 5}
+            onClick={() => updateItems([...items, {
+              id: `solution-${Date.now()}`,
+              title: { zh: "", en: "" },
+              body: { zh: "", en: "" },
+            }])}
+          >
+            {language === "zh" ? "添加方案" : "Add item"}
+          </button>
+        </div>
+        <div className="mt-3 grid gap-3">
+          {items.map((item, index) => (
+            <div className="grid gap-2 border border-softWhite/10 bg-deepIndigo/24 p-3" key={item.id}>
+              <input
+                className="w-full border-b border-softWhite/14 bg-transparent py-2 text-sm font-semibold text-softWhite outline-none focus:border-acidGreen"
+                placeholder={language === "zh" ? "短标题" : "Short title"}
+                value={item.title[language]}
+                onChange={(event) => updateItems(items.map((candidate, itemIndex) => itemIndex === index
+                  ? { ...candidate, title: { ...candidate.title, [language]: event.target.value } }
+                  : candidate))}
+              />
+              <textarea
+                className="min-h-20 w-full resize-y bg-transparent py-2 text-sm leading-6 text-softWhite/72 outline-none"
+                placeholder={language === "zh" ? "说明文字" : "Explanation"}
+                value={item.body[language]}
+                onChange={(event) => updateItems(items.map((candidate, itemIndex) => itemIndex === index
+                  ? { ...candidate, body: { ...candidate.body, [language]: event.target.value } }
+                  : candidate))}
+              />
+              <button
+                type="button"
+                className="editor-action justify-self-end text-peach"
+                disabled={items.length <= 3}
+                onClick={() => updateItems(items.filter((_, itemIndex) => itemIndex !== index))}
+              >
+                {language === "zh" ? "删除" : "Delete"}
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
@@ -1175,14 +1511,19 @@ export function XMindContentEditor({
   );
 }
 
+// number/hoverTitle/targetId/state stay optional and are preserved
+// pass-through on existing items (never surfaced in this editor anymore --
+// see PhaseMilestonesTemplate.tsx, which now always derives the displayed
+// number from array position and no longer renders hoverTitle or acts on
+// targetId), matching the template's own MilestoneItem shape exactly.
 type PhaseMilestoneEditorItem = {
   id: string;
-  number: string;
+  number?: string;
   title: { zh: string; en: string };
   hoverTitle?: { zh: string; en: string };
   hoverText?: { zh: string; en: string };
   targetId?: string;
-  state: "outline" | "active";
+  state?: "outline" | "active";
 };
 
 export function PhaseMilestonesContentEditor({
@@ -1234,17 +1575,17 @@ export function PhaseMilestonesContentEditor({
   };
 
   const addItem = () => {
-    if (items.length >= 12) return;
+    if (items.length >= 5) return;
     updateItems([
       ...items,
+      // No number, hoverTitle, targetId, or state: the node number is
+      // always derived from array position (see displayNumber in the
+      // template itself), and the click-to-jump / hover-reveal UI this
+      // template used to expose is retired -- see PhaseMilestonesTemplate.tsx.
       {
         id: `phase-${Date.now()}`,
-        number: String(items.length + 1).padStart(2, "0"),
         title: { zh: "新阶段", en: "New phase" },
-        hoverTitle: { zh: "", en: "" },
         hoverText: { zh: "", en: "" },
-        targetId: "",
-        state: "outline",
       },
     ]);
   };
@@ -1271,24 +1612,16 @@ export function PhaseMilestonesContentEditor({
         />
       </label>
 
-      <div className="mt-6 grid gap-3">
+      <p className="mt-6 text-xs text-softWhite/40">
+        {items.length} / 5 · {language === "zh" ? "至少保留 3 个" : "Keep at least 3"}
+      </p>
+
+      <div className="mt-3 grid gap-3">
         {items.map((item, index) => (
           <div
             key={item.id}
-            className="grid gap-3 border-b border-softWhite/10 pb-5 md:grid-cols-[72px_minmax(0,1fr)_auto] md:items-end"
+            className="grid gap-3 border-b border-softWhite/10 pb-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end"
           >
-            <label>
-              <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">
-                {language === "zh" ? "编号" : "Number"}
-              </span>
-              <input
-                className="w-full border-b border-softWhite/18 bg-transparent py-2 font-mono text-sm text-softWhite outline-none focus:border-acidGreen"
-                value={item.number}
-                onChange={(event) =>
-                  updateItem(item.id, { number: event.target.value })
-                }
-              />
-            </label>
             <label>
               <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">
                 {language === "zh" ? "阶段名称" : "Milestone title"}
@@ -1307,27 +1640,6 @@ export function PhaseMilestonesContentEditor({
               />
             </label>
             <div className="flex flex-wrap gap-2">
-              {emphasisMode === "custom" ? (
-                <select
-                  aria-label={
-                    language === "zh" ? "节点状态" : "Node state"
-                  }
-                  className="editor-select"
-                  value={item.state}
-                  onChange={(event) =>
-                    updateItem(item.id, {
-                      state: event.target.value as "outline" | "active",
-                    })
-                  }
-                >
-                  <option value="outline">
-                    {language === "zh" ? "空心" : "Outline"}
-                  </option>
-                  <option value="active">
-                    {language === "zh" ? "绿色强调" : "Green active"}
-                  </option>
-                </select>
-              ) : null}
               <button
                 type="button"
                 className="editor-action"
@@ -1347,6 +1659,7 @@ export function PhaseMilestonesContentEditor({
               <button
                 type="button"
                 className="editor-action text-peach"
+                disabled={items.length <= 3}
                 onClick={() =>
                   updateItems(
                     items.filter((current) => current.id !== item.id),
@@ -1356,86 +1669,32 @@ export function PhaseMilestonesContentEditor({
                 {language === "zh" ? "删除" : "Delete"}
               </button>
             </div>
-            <div className="grid gap-3 md:col-span-3 md:grid-cols-2">
-              <label>
-                <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">
-                  {language === "zh"
-                    ? "悬浮标题（可选）"
-                    : "Hover title (optional)"}
-                </span>
-                <input
-                  className="w-full border-b border-softWhite/18 bg-transparent py-2 text-sm text-softWhite outline-none focus:border-acidGreen"
-                  value={item.hoverTitle?.[language] ?? ""}
-                  onChange={(event) =>
-                    updateItem(item.id, {
-                      hoverTitle: {
-                        zh: item.hoverTitle?.zh ?? "",
-                        en: item.hoverTitle?.en ?? "",
-                        [language]: event.target.value,
-                      },
-                    })
-                  }
-                />
-              </label>
-              <label>
-                <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">
-                  {language === "zh"
-                    ? "悬浮说明（可选）"
-                    : "Hover note (optional)"}
-                </span>
-                <input
-                  className="w-full border-b border-softWhite/18 bg-transparent py-2 text-sm text-softWhite outline-none focus:border-acidGreen"
-                  value={item.hoverText?.[language] ?? ""}
-                  onChange={(event) =>
-                    updateItem(item.id, {
-                      hoverText: {
-                        zh: item.hoverText?.zh ?? "",
-                        en: item.hoverText?.en ?? "",
-                        [language]: event.target.value,
-                      },
-                    })
-                  }
-                />
-              </label>
-              <label className="md:col-span-2">
-                <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">
-                  {language === "zh" ? "跳转到模板（可选）" : "Jump to template (optional)"}
-                </span>
-                <select
-                  className="editor-select w-full"
-                  value={item.targetId ?? ""}
-                  onChange={(event) =>
-                    updateItem(item.id, { targetId: event.target.value })
-                  }
-                >
-                  <option value="">{language === "zh" ? "不跳转" : "No jump"}</option>
-                  {item.targetId && !jumpTargets.some((target) => target.instanceId === item.targetId) ? (
-                    <option value={item.targetId}>
-                      {language === "zh" ? "旧跳转目标（保留）" : "Legacy jump target (kept)"}
-                    </option>
-                  ) : null}
-                  {jumpTargets.map((target) => (
-                    <option key={target.instanceId} value={target.instanceId}>{target.label}</option>
-                  ))}
-                </select>
-              </label>
-            </div>
+            <label className="md:col-span-2">
+              <span className="mb-1.5 block text-xs font-semibold text-softWhite/46">
+                {language === "zh" ? "说明（可选）" : "Description (optional)"}
+              </span>
+              <textarea
+                className="min-h-14 w-full resize-y border-b border-softWhite/18 bg-transparent py-2 text-sm leading-5 text-softWhite/80 outline-none focus:border-acidGreen"
+                value={item.hoverText?.[language] ?? ""}
+                onChange={(event) =>
+                  updateItem(item.id, {
+                    hoverText: {
+                      zh: item.hoverText?.zh ?? "",
+                      en: item.hoverText?.en ?? "",
+                      [language]: event.target.value,
+                    },
+                  })
+                }
+              />
+            </label>
           </div>
         ))}
       </div>
 
-      {items.length < 3 ? (
-        <p className="mt-4 text-sm text-peach">
-          {language === "zh"
-            ? "至少需要 3 个阶段节点。"
-            : "At least 3 milestone items are required."}
-        </p>
-      ) : null}
-
       <button
         type="button"
         className="editor-action mt-4"
-        disabled={items.length >= 12}
+        disabled={items.length >= 5}
         onClick={addItem}
       >
         {language === "zh" ? "添加节点" : "Add milestone"}
@@ -2943,6 +3202,22 @@ export function OwnerTemplateBuilderPage() {
 
           {selectedTemplate.meta.id === "dual-viewpoint-analysis" ? (
             <DualViewpointAnalysisContentEditor
+              content={templateContent}
+              language={language}
+              onChange={setTemplateContent}
+            />
+          ) : null}
+
+          {selectedTemplate.meta.id === "concept-diagnosis-cards" ? (
+            <ConceptDiagnosisCardsContentEditor
+              content={templateContent}
+              language={language}
+              onChange={setTemplateContent}
+            />
+          ) : null}
+
+          {selectedTemplate.meta.id === "solution-directions" ? (
+            <SolutionDirectionsContentEditor
               content={templateContent}
               language={language}
               onChange={setTemplateContent}
