@@ -14,6 +14,7 @@ import { loadHomeContent } from "./homeContentConfig";
 import { loadHomeProjectSlots } from "./homeProjectSlots";
 import { loadHomeExplorationSlots } from "./homeExplorationSlots";
 import { resolveDevProjectDraft, type DynamicProjectDraft } from "./dynamicProjectDraftHydration";
+import { listDirtyIntents } from "./dirtyIntentStore";
 
 type ExportedImage = {
   sourceAdapterId: string;
@@ -373,6 +374,17 @@ export async function exportProductionBundle(options?: { launcherRequestToken?: 
   }
 
   const projectCatalog = getProjectCollectionExportStore();
+  // Fix Publish Project Deletion Semantics: propagate the Owner's real
+  // DELETE dirty intents into the bundle explicitly, rather than letting
+  // the importer infer "deleted" from "absent from this bundle" (ambiguous
+  // -- --exclude-project and any future partial/scoped export must stay
+  // safe). The V2 import pipeline (bundleCompat.mjs's bundleV1ToV2AllIntents,
+  // buildPublishPlan.mjs, assemblePublishedOutput.mjs) already fully
+  // implements DELETE intents end to end via this exact field name -- it
+  // was simply never populated by this exporter until now.
+  const deletedProjectIds = listDirtyIntents("project")
+    .filter((entry) => entry.kind === "DELETE")
+    .map((entry) => entry.entityId);
 
   // Some template-instance images (e.g. older image-row items) were saved
   // via the same localImageId + project-body-asset IndexedDB store used by
@@ -574,6 +586,7 @@ export async function exportProductionBundle(options?: { launcherRequestToken?: 
     origin: window.location.origin,
     drafts,
     projectCatalog,
+    deletedProjectIds,
     projectDocuments,
     gameExperience,
     siteSettings,
