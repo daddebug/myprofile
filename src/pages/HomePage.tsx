@@ -11,10 +11,12 @@ import { getPublishedGeneratedAt } from "../lib/publishedPortfolio";
 import { HomeIntroTransition } from "./HomeIntroTransition";
 import { HomeHero } from "./HomeHero";
 import { HomeProjectFlow } from "./HomeProjectFlow";
+import { HomeContourBackground } from "./home-background/HomeContourBackground";
 import { HomeScrollIndicator } from "./HomeScrollIndicator";
 import { HomeScrollContainer } from "./HomeScrollContainer";
 import { HomeFixedLayer } from "./HomeFixedLayer";
 import { HomeFixedNav } from "./HomeFixedNav";
+import { TopViewportBlur } from "./TopViewportBlur";
 import { HomeProjectCanvas } from "./HomeProjectCanvas";
 import { isWebglSupported } from "./home-webgl/isWebglSupported";
 import "../project-presentation/portfolio2-layout.css";
@@ -44,11 +46,11 @@ export function HomePage() {
   // Phase 2.1's one shared scroll-state source, bound to the Homepage's
   // own scroll container (see HomeScrollContainer.tsx) rather than
   // `window` -- HomeScrollIndicator reads it here; the Phase 3/4 WebGL
-  // bridge and shader distortion will read from this same hook instance
-  // rather than attaching their own listener.
+  // bridge and elastic card motion read from this same hook instance
+  // rather than attaching their own scroll driver.
   const scrollWrapperRef = useRef<HTMLDivElement | null>(null);
   const scrollContentRef = useRef<HTMLDivElement | null>(null);
-  const { scroll, progress: scrollProgress } = useLenisScroll(scrollWrapperRef, scrollContentRef);
+  const { scroll, progress: scrollProgress, velocity } = useLenisScroll(scrollWrapperRef, scrollContentRef);
 
   // Phase 3: checked once, not per-frame -- if WebGL genuinely isn't
   // available, HomeProjectCanvas is never mounted at all, no project's
@@ -114,14 +116,34 @@ export function HomePage() {
             above the scroll container. */}
         <HomeIntroTransition onComplete={() => setRevealed(true)} />
 
+        {/* Independent of HomeFixedLayer for the same reason as
+            HomeIntroTransition above: it must reliably render above
+            .home-scroll-container's own content (explicit z-index:1),
+            which .home-fixed-layer's children cannot guarantee -- see
+            top-viewport-blur.css. */}
+        <TopViewportBlur />
+
         <HomeFixedLayer>
-          {webglSupported ? <HomeProjectCanvas scroll={scroll} /> : null}
+          {webglSupported ? <HomeProjectCanvas scroll={scroll} velocity={velocity} /> : null}
           <HomeFixedNav onWorkClick={scrollToProjects} />
           <HomeScrollIndicator progress={scrollProgress} />
         </HomeFixedLayer>
 
         <HomeScrollContainer wrapperRef={scrollWrapperRef} contentRef={scrollContentRef}>
           <div className="home-v2__content-stage">
+            {/* Contour-line background -- ONE continuous field spanning
+                the whole content stage (Hero through the long-form
+                section), not a per-section instance. Replaces every
+                earlier dot-grid experiment outright (deleted, not
+                layered underneath). Its own isolated module; see
+                home-background/HomeContourBackground.tsx. Positioned
+                absolute/z-index:0 against this already-relative
+                container, so it sits behind every sibling below (Hero/
+                HomeProjectFlow/the long-form section all carry their own
+                position:relative + z-index:1) without needing a
+                dedicated wrapper of its own. */}
+            <HomeContourBackground />
+
             <HomeHero
               nameText={nameText}
               introText={introText}
@@ -169,4 +191,3 @@ export function HomePage() {
     </PageTransition>
   );
 }
-

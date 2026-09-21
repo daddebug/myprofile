@@ -17,6 +17,12 @@ import { useSyncExternalStore } from "react";
 export type ProjectCoverEntry = {
   element: HTMLElement;
   coverUrl: string;
+  // Section B (Homepage 3.0): the hover-reveal texture. Empty string means
+  // "no hover texture for this project" -- HomeProjectCanvas then leaves
+  // uHoverMix at 0 permanently, so a project with neither real nor
+  // placeholder hover art degrades to "no hover effect", never a crash or
+  // a blank/black swap.
+  hoverUrl: string;
   ratio: number;
 };
 
@@ -79,4 +85,31 @@ export function useProjectCoverReady(id: string): boolean {
     },
     () => isProjectCoverReady(id),
   );
+}
+
+
+// Section B (Homepage 3.0): hover intent, set by HomeProjectCard's own
+// onMouseEnter/onMouseLeave (mouse only -- React's mouseenter/mouseleave
+// never fire persistently for touch, so this never gets stuck "on" on a
+// touch device). A plain external store, same reasoning as the rest of
+// this file: membership/hover changes are rare compared to the 60fps read
+// HomeProjectCanvas does of it, so it must not be React state.
+const hoveredIds = new Set<string>();
+const hoverListeners = new Set<() => void>();
+
+export function setProjectHovered(id: string, hovered: boolean): void {
+  const wasHovered = hoveredIds.has(id);
+  if (wasHovered === hovered) return;
+  if (hovered) hoveredIds.add(id);
+  else hoveredIds.delete(id);
+  hoverListeners.forEach((listener) => listener());
+}
+
+export function isProjectHovered(id: string): boolean {
+  return hoveredIds.has(id);
+}
+
+export function subscribeProjectHover(listener: () => void): () => void {
+  hoverListeners.add(listener);
+  return () => hoverListeners.delete(listener);
 }

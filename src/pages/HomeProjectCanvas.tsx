@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import {
   getRegisteredProjectCovers,
+  isProjectHovered,
   setProjectCoverReady,
   subscribeProjectCoverMembership,
 } from "./home-webgl/homeProjectCanvasRegistry";
@@ -13,8 +14,8 @@ import "./home-scroll-shell.css";
 // layout authority (x/y/width/height/title/year/links/editing all still
 // come from HomeProjectFlow.tsx's own grid); this is a rendering-only
 // bridge that reads each registered project's DOM rect and paints a
-// matching plane behind it. No distortion/hover/transition yet -- see
-// coverShaders.ts's own comment.
+// matching plane behind it. Cover crop and hover rendering live in
+// coverShaders.ts; scrolling never deforms the texture geometry or UVs.
 //
 // Rect-sync strategy (spec'd, not independently re-derived from Haoqi's
 // own minified bundle this round): every registered project's rect is
@@ -30,28 +31,36 @@ import "./home-scroll-shell.css";
 const STAGGER_BUCKETS = 12;
 const NEAR_VIEWPORT_MARGIN_FACTOR = 1; // one extra viewport-height of margin on each side
 
-// Homepage 3.0, Haoqi-track Phase 4.1: values confirmed against
-// haoqi-design-teardown.md section 4.1 (GLSL/JS extracted directly off
-// the live compiled GPU program, cross-checked against Haoqi's own
-// Codrops writeup) -- not invented, not approximated from a spec. One
-// shared, JS-smoothed scroll-velocity term drives every plane's
-// `uCurlStrength` uniform identically; the per-fragment profile
-// (screen-space, in the shader) is what makes center-of-viewport read as
-// near-zero and top/bottom edges read as strongest, regardless of which
-// plane a given fragment belongs to.
-//
-// Corrected this round from this round's own original Phase 4 spec,
-// which asked for a SIGNED effect (preserve scroll direction, clamp
-// -1..1) -- the confirmed reference has no directional component at
-// all: velocity is `Math.abs(delta)`, normalized 0..1. Since this file
-// now has real extracted source to check against, that takes priority
-// over the earlier approximation.
-const MAX_CURL_STRENGTH = 0.06;
-const VELOCITY_NORMALIZE_PX_PER_SEC = 800;
-const ATTACK_TAU = 0.025;
-const RELEASE_TAU = 0.175;
-const MIN_DT = 1 / 240;
-const MAX_DT = 0.1;
+// Haoqi-style square-cell hover reveal (2026-09-21 rework): a fixed-
+// duration LINEAR clock drives uHoverProgress; the shader itself derives
+// each cell's own delayed, cosine-eased local reveal from that single
+// linear value (see coverShaders.ts). This is deliberately NOT an
+// exponential smoothing constant anymore -- a real "~0.42s total reveal"
+// requirement needs a real elapsed-time-bounded transition, not an RC
+// filter that only asymptotically approaches its target.
+const HOVER_REVEAL_DURATION_SECONDS = 0.42;
+
+type ElasticLane = "left" | "center" | "right";
+const PROJECT_LANES: Record<string, ElasticLane> = {
+  "project-1ua2677": "right",
+  "project-1ied3i": "left",
+  "project-e51ezw": "right",
+  "project-1op4ad7": "left",
+  "googo-ai-pt5mwd": "right",
+  "eli-early-stage-product-design-internship-1fk25s": "left",
+  "ai-assisted-gui-design-generative-visual-e-16j0qnx": "center",
+  "case-odvwa3": "right",
+};
+const SPRING_FREQUENCY = 22;
+const SPRING_DAMPING = 0.65;
+const MOBILE_BREAKPOINT = 760;
+const LANE_MOTION: Record<ElasticLane, { gain: number; maxOffset: number }> = {
+  left: { gain: 0.1, maxOffset: 14 },
+  center: { gain: 0.16, maxOffset: 18 },
+  right: { gain: 0.085, maxOffset: 12 },
+};
+
+type LaneMotionState = { offset: number; velocity: number };
 
 type MeshRecord = {
   mesh: THREE.Mesh;
@@ -91,10 +100,18 @@ function HomeProjectPlaneMesh({
   const uniforms = useMemo(
     () => ({
       uMap: { value: null as THREE.Texture | null },
+      uMapHover: { value: null as THREE.Texture | null },
+      uHasHoverMap: { value: 0 },
+      uHoverProgress: { value: 0 },
+      uHoverFrom: { value: 0 },
+      uHoverTarget: { value: 0 },
+      uRectPixelSize: { value: new THREE.Vector2(1, 1) },
+      uElasticOffset: { value: 0 },
+      uElasticOverscan: { value: 0 },
+      uViewportHeight: { value: 1 },
+      uAtmosphereEnabled: { value: 0 },
+      uAtmosphereStrength: { value: 0 },
       uCoverScale: { value: new THREE.Vector2(1, 1) },
-      uCurlStrength: { value: 0 },
-      uRectOrigin: { value: new THREE.Vector2(0, 0) },
-      uRectSize: { value: new THREE.Vector2(1, 1) },
     }),
     [],
   );
@@ -104,7 +121,9 @@ function HomeProjectPlaneMesh({
       registerMesh(id, null);
       const material = materialRef.current;
       const texture = material?.uniforms.uMap.value as THREE.Texture | undefined;
+      const hoverTexture = material?.uniforms.uMapHover.value as THREE.Texture | undefined;
       texture?.dispose();
+      hoverTexture?.dispose();
       material?.dispose();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,21 +153,24 @@ function HomeProjectPlaneMesh({
   );
 }
 
-function HomeProjectCanvasScene({ scroll }: { scroll: number }) {
-  const { size, camera } = useThree();
+function HomeProjectCanvasScene({ scroll, velocity }: { scroll: number; velocity: number }) {
+  const { size, camera, gl } = useThree();
   const meshRecords = useRef(new Map<string, MeshRecord>());
   const lastRects = useRef(new Map<string, LastRect>());
   const notifiedReady = useRef(new Set<string>());
   const frameCounter = useRef(0);
   const lastSize = useRef({ width: 0, height: 0 });
-  // Phase 4: derived locally from the same `scroll` value Phase 2.1's
-  // Lenis instance already produces (passed down as a prop) -- not a new
-  // scroll/wheel listener. Computed as a true px/s rate (scroll delta /
-  // real frame delta) rather than reusing Lenis's own `velocity` (a raw
-  // per-internal-tick delta, not already in px/s), so the "~800 px/s"
-  // reference value means what it says regardless of frame rate.
-  const lastScrollValue = useRef(scroll);
-  const smoothedVelocity = useRef(0);
+  const motionPreference = useMemo(() => window.matchMedia("(prefers-reduced-motion: reduce)"), []);
+  const mobilePreference = useMemo(() => window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`), []);
+  const laneMotion = useRef<Record<ElasticLane, LaneMotionState>>({
+    left: { offset: 0, velocity: 0 },
+    center: { offset: 0, velocity: 0 },
+    right: { offset: 0, velocity: 0 },
+  });
+  const mobileFollowers = useRef<Record<ElasticLane, number>>({ left: scroll, center: scroll, right: scroll });
+  const lastScroll = useRef(scroll);
+  const lastMobileScrollChange = useRef(0);
+  const atmosphereStrength = useRef(0);
   const [projectIds, setProjectIds] = useState<string[]>(() => Array.from(getRegisteredProjectCovers().keys()));
 
   useEffect(() => {
@@ -157,29 +179,52 @@ function HomeProjectCanvasScene({ scroll }: { scroll: number }) {
     });
   }, []);
 
-  useFrame((_state, rawDelta) => {
+  useFrame((state, rawDelta) => {
     frameCounter.current += 1;
 
-    // Confirmed reference algorithm (haoqi-design-teardown.md 4.1):
-    // dt clamped to [1/240, 0.1]s to guard against frame-drop/
-    // backgrounded-tab spikes; velocity is UNSIGNED (Math.abs), so the
-    // curl has no directional component -- same strength scrolling up
-    // or down, only speed matters. Normalized against the confirmed
-    // ~800px/s reference, clamped to [0, 1], then smoothed with
-    // asymmetric attack/release time constants -- fast attack (0.025s)
-    // when growing, slow release (0.175s) when decaying, so the effect
-    // snaps in quickly on a flick but settles back out smoothly with no
-    // oscillation/overshoot (a first-order exponential filter has
-    // neither by construction).
-    const delta = THREE.MathUtils.clamp(rawDelta, MIN_DT, MAX_DT);
-    const rawVelocity = Math.abs(scroll - lastScrollValue.current) / delta;
-    lastScrollValue.current = scroll;
-    const velocityTarget = THREE.MathUtils.clamp(rawVelocity / VELOCITY_NORMALIZE_PX_PER_SEC, 0, 1);
-    const isAttack = velocityTarget > smoothedVelocity.current;
-    const tau = isAttack ? ATTACK_TAU : RELEASE_TAU;
-    const alpha = 1 - Math.exp(-delta / tau);
-    smoothedVelocity.current += (velocityTarget - smoothedVelocity.current) * alpha;
-    const curlStrength = smoothedVelocity.current * MAX_CURL_STRENGTH;
+    const scrollDelta = scroll - lastScroll.current;
+    lastScroll.current = scroll;
+    const reducedMotion = motionPreference.matches;
+    const isMobile = mobilePreference.matches;
+    const atmosphereTarget = reducedMotion || isMobile
+      ? 0
+      : THREE.MathUtils.clamp((Math.abs(velocity) - 8) / 30, 0, 1);
+    const atmosphereTau = atmosphereTarget > atmosphereStrength.current ? 0.18 : 0.38;
+    atmosphereStrength.current += (atmosphereTarget - atmosphereStrength.current)
+      * (1 - Math.exp(-Math.min(rawDelta, 0.1) / atmosphereTau));
+    if (Math.abs(scrollDelta) > 0.01) lastMobileScrollChange.current = state.clock.elapsedTime;
+    const laneOffsets = {} as Record<ElasticLane, number>;
+    (["left", "center", "right"] as const).forEach((lane) => {
+      const motion = laneMotion.current[lane];
+      if (reducedMotion) {
+        motion.offset = 0;
+        motion.velocity = 0;
+        mobileFollowers.current[lane] = scroll;
+      } else if (isMobile) {
+        const lag = state.clock.elapsedTime - lastMobileScrollChange.current > 0.12
+          ? 0.22
+          : lane === "center" ? 0.7 : 0.5;
+        const follower = mobileFollowers.current[lane];
+        const next = follower + (scroll - follower) * (1 - Math.exp(-Math.min(rawDelta, 1) / lag));
+        mobileFollowers.current[lane] = Math.abs(scroll - next) < 0.15 ? scroll : next;
+      } else {
+        const { gain, maxOffset } = LANE_MOTION[lane];
+        motion.offset = THREE.MathUtils.clamp(motion.offset + scrollDelta * gain, -maxOffset, maxOffset);
+        const delta = Math.min(rawDelta, 1 / 30);
+        motion.velocity += (-(SPRING_FREQUENCY ** 2) * motion.offset
+          - 2 * SPRING_DAMPING * SPRING_FREQUENCY * motion.velocity) * delta;
+        motion.offset += motion.velocity * delta;
+        if (Math.abs(scrollDelta) < 0.01 && Math.abs(motion.offset) < 0.05 && Math.abs(motion.velocity) < 0.5) {
+          motion.offset = 0;
+          motion.velocity = 0;
+        }
+      }
+      laneOffsets[lane] = reducedMotion ? 0 : isMobile
+        ? THREE.MathUtils.clamp(scroll - mobileFollowers.current[lane],
+          -size.width / 12 * (lane === "center" ? 0.65 : 0.4),
+          size.width / 12 * (lane === "center" ? 0.65 : 0.4))
+        : motion.offset;
+    });
 
     // Orthographic camera in plain CSS-pixel units: world (0,0) is the
     // viewport's top-left corner, +X right, Y goes negative downward --
@@ -237,9 +282,18 @@ function HomeProjectCanvasScene({ scroll }: { scroll: number }) {
         rect = { left: prior.left, top: prior.top - deltaScroll, width: prior.width, height: prior.height };
       }
 
-      mesh.position.set(rect.left + rect.width / 2, -(rect.top + rect.height / 2), 0);
-      mesh.scale.set(Math.max(rect.width, 0.001), Math.max(rect.height, 0.001), 1);
-      material.uniforms.uCurlStrength.value = curlStrength;
+      const lane = PROJECT_LANES[id] ?? "center";
+      const elasticOffset = reducedMotion ? 0 : laneOffsets[lane];
+      const overscan = isMobile
+        ? size.width / 12 * (lane === "center" ? 0.65 : 0.4)
+        : LANE_MOTION[lane].maxOffset + 2;
+      mesh.position.set(rect.left + rect.width / 2, -(rect.top + rect.height / 2 + elasticOffset), 0);
+      mesh.scale.set(Math.max(rect.width, 0.001), Math.max(rect.height + 2 * overscan, 0.001), 1);
+      material.uniforms.uElasticOffset.value = elasticOffset;
+      material.uniforms.uElasticOverscan.value = overscan;
+      material.uniforms.uViewportHeight.value = gl.domElement.height;
+      material.uniforms.uAtmosphereEnabled.value = reducedMotion || isMobile ? 0 : 1;
+      material.uniforms.uAtmosphereStrength.value = reducedMotion || isMobile ? 0 : atmosphereStrength.current;
 
       // Confirmed reference visibility culling (haoqi-design-teardown.md
       // section 2.5) -- reuses the `rect` already computed above (no new
@@ -251,11 +305,7 @@ function HomeProjectCanvasScene({ scroll }: { scroll: number }) {
       const margin = 0.25 * size.height;
       const isVisible = rectBottom > -margin && rect.top < size.height + margin;
       const isHardSkip = rectBottom < -(2 * size.height) || rect.top > 3 * size.height;
-      // Viewport-fraction rect, matching the shader's own vScreenUv
-      // space -- lets the fragment shader map the already-distorted
-      // absolute screen coordinate back into this card's local UV.
-      (material.uniforms.uRectOrigin.value as THREE.Vector2).set(rect.left / size.width, rect.top / size.height);
-      (material.uniforms.uRectSize.value as THREE.Vector2).set(rect.width / size.width, rect.height / size.height);
+      (material.uniforms.uRectPixelSize.value as THREE.Vector2).set(rect.width, rect.height);
 
       // Texture load / cover-replacement -- keyed on the registry's own
       // coverUrl, checked every frame against what this material last
@@ -292,6 +342,57 @@ function HomeProjectCanvasScene({ scroll }: { scroll: number }) {
         }
       }
 
+      // Section B: the hover texture loads unconditionally as soon as the
+      // card registers (never gated on hover state) -- "preload both
+      // textures when the card registers", so the very first hover on a
+      // fresh page load already has a resolved texture to cross-fade to.
+      material.uniforms.uHasHoverMap.value = material.userData.loadedHoverUrl && material.userData.loadedHoverUrl === entry.hoverUrl ? 1 : 0;
+      if (material.userData.loadedHoverUrl !== entry.hoverUrl && material.userData.loadingHover !== entry.hoverUrl) {
+        material.userData.loadingHover = entry.hoverUrl;
+        if (!entry.hoverUrl) {
+          material.userData.loadingHover = null;
+        } else {
+          const hoverLoader = new THREE.TextureLoader();
+          hoverLoader.load(
+            entry.hoverUrl,
+            (texture) => {
+              texture.colorSpace = THREE.SRGBColorSpace;
+              const previousHoverTexture = material.uniforms.uMapHover.value as THREE.Texture | null;
+              material.uniforms.uMapHover.value = texture;
+              material.userData.loadedHoverUrl = entry.hoverUrl;
+              material.userData.loadingHover = null;
+              previousHoverTexture?.dispose();
+            },
+            undefined,
+            () => {
+              material.userData.loadingHover = null;
+            },
+          );
+        }
+      }
+
+      // Real fixed-duration reveal clock -- read the hover-intent store
+      // directly (not React state/props), same reasoning as scroll
+      // velocity above: this runs every frame regardless of whether React
+      // re-rendered. A transition only (re)starts when the target itself
+      // actually flips (edge-detected via userData.hoverTargetValue), so
+      // re-reading an unchanged hover state doesn't reset the clock.
+      const hoverTargetValue = isProjectHovered(id) ? 1 : 0;
+      if (material.userData.hoverTargetValue !== hoverTargetValue) {
+        material.userData.hoverFromValue = (material.userData.hoverTargetValue as number | undefined) ?? 0;
+        material.userData.hoverTargetValue = hoverTargetValue;
+        material.userData.hoverTransitionStart = state.clock.elapsedTime;
+      }
+      const hoverTransitionStart = (material.userData.hoverTransitionStart as number | undefined) ?? state.clock.elapsedTime;
+      const hoverProgress = THREE.MathUtils.clamp(
+        (state.clock.elapsedTime - hoverTransitionStart) / HOVER_REVEAL_DURATION_SECONDS,
+        0,
+        1,
+      );
+      material.uniforms.uHoverProgress.value = hoverProgress;
+      material.uniforms.uHoverFrom.value = (material.userData.hoverFromValue as number | undefined) ?? 0;
+      material.uniforms.uHoverTarget.value = hoverTargetValue;
+
       if (material.userData.textureLoaded) {
         const textureAspect = (material.userData.textureAspect as number) ?? entry.ratio;
         applyCoverScale(material, rect.width, rect.height, textureAspect);
@@ -323,7 +424,7 @@ function HomeProjectCanvasScene({ scroll }: { scroll: number }) {
   );
 }
 
-export function HomeProjectCanvas({ scroll }: { scroll: number }) {
+export function HomeProjectCanvas({ scroll, velocity }: { scroll: number; velocity: number }) {
   return (
     <div className="home-project-canvas" aria-hidden="true">
       <Canvas
@@ -343,9 +444,8 @@ export function HomeProjectCanvas({ scroll }: { scroll: number }) {
           gl.toneMapping = THREE.NoToneMapping;
         }}
       >
-        <HomeProjectCanvasScene scroll={scroll} />
+        <HomeProjectCanvasScene scroll={scroll} velocity={velocity} />
       </Canvas>
     </div>
   );
 }
-

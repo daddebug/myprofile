@@ -1,0 +1,16 @@
+/* Mounted as a child of .home-v2__content-stage, which already has its
+   own position:relative (home-v2.css) -- no separate positioning-context
+   wrapper needed. Spans Hero through the long-form section as one
+   continuous field (see HomePage.tsx). */
+.home-contour-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.home-contour-background canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

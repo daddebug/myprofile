@@ -1,14 +1,31 @@
 # Changelog
 
+Last reviewed: 2026-09-21
+
+## 2026-09-20/21 - Portfolio runtime & publishing stabilization
+
+- Fixed the authoritative development tree to `D:\myprofilegit\myprofile` on branch `main`. Both `localhost:5173` and DILIDA Desk's `portfolio_path` must resolve to this checkout. The old `.claude/worktrees/silly-sammet-0ef78d` checkout is not authoritative; when it previously took port 5173, it exposed stale renderers and caused visible layout regressions.
+- Confirmed that the user's real Chrome profile and the Claude/Codex browser pane are separate browser profiles. Real Chrome is the authority for Owner-side `localStorage` and draft lifecycle state; isolated browser state must never be substituted for it.
+- Captured the real Owner project lifecycle as **8 ACTIVE + 9 DELETE**. `publishedPortfolio.json` remains the published production baseline, not the Owner catalog or deletion authority.
+- Added the canonical `useOwnerProjectCatalog` lifecycle view: resolved catalog entries, including local-only projects, minus open project `DELETE` intents. Project Control Center's active list, Homepage, Other Projects, and PDF/static-HTML/collection owner export now use this shared lifecycle filter instead of independent ad hoc rules.
+- Restored the approved Figma Portfolio 2.0 geometry on main: a shared 1180px rail in the 1440px reference frame, with corrected `statement-longform` and `direction-compare` alignment. The main checkout's current P2 renderer and layout rail remain the visual authority.
+- Removed the obsolete structural-equality corruption rule from `dynamicProjectDraftHydration.ts`. Legitimate instance add/delete/reorder changes now survive reload. Only invalid/unparseable drafts and the known empty-sentinel case remain suspicious; simply differing from published structure is not corruption.
+- Repaired canonical publish-scope discovery: Git porcelain parsing is NUL-safe for Chinese and other non-ASCII paths, `public/` is the canonical asset root with explicit exclusions, and `Claude outputs/` is dev-only.
+- Traced the launcher `scanBuild()` false positive to the literal `EDIT CONTENT` text in a development validator string. The source string was changed; the scanner and its safety rule were not weakened.
+- Traced production deletion failure to the live V1 exporter: the importer already understood explicit deletes, but `productionBundleExport.ts` did not populate `deletedProjectIds`. The wired exporter now emits the Owner's explicit project `DELETE` intents; absence from a bundle is never treated as deletion.
+- Verified the resulting publish plan/report with 8 active projects and 9 explicitly `REMOVED` projects, with 0 blocked and 0 failed items.
+
+**Superseded conclusions:** the old worktree is not authoritative; `DELETE_PROJECT_IDS = none` / `DELETE = 0` is false for the real Owner state; `publishedPortfolio.json` is not Owner truth; local-vs-published structural difference alone is not corruption; and omission from a bundle never implies deletion. Earlier entries remain below as historical evidence, but these later conclusions govern current work.
+
 ## 2026-09-20 - Final Portfolio 2.0 template cutover
 
 - Established `src/data/activePortfolioTemplateIds.json` as the exact five-template allowlist: `statement-longform`, `supporting-note`, `image-row`, `universal-media`, and `direction-compare`.
 - Removed retired template modules and editor branches from the active renderer registry, picker, source client, layout defaults, AI validation/normalization contract, normal project flow, and publish serializers. Universal Media's internal `figma` and `playable-game` media discriminators remain supported; the retired standalone template IDs do not.
-- Hydration now filters retired IDs and quarantines structurally divergent local drafts without modifying them. Disk asset mappings can fill matching current resource fields but cannot create missing instances.
+- **Superseded behavior (historical):** this cutover initially quarantined any structurally divergent local draft. The 2026-09-20/21 stabilization above replaced that over-broad rule: legitimate add/delete/reorder differences are preserved, while only invalid/unparseable drafts and the known empty-sentinel case remain suspicious. Disk asset mappings still cannot create missing instances.
 - The live V1 publish adapter now rejects retired template IDs and legacy `ProjectDocument` bodies before plan execution. The future V2 exporter resolves through the same quarantine-aware active draft boundary.
 - Current published audit: 11 drafts, 100 instances, 0 retired instances, 0 `ProjectDocument` bodies. No published data rewrite was required.
 - Preserved 13 stale-browser instances and 12 image references in `.local-backups/retired-template-archive/retired-template-instances-20260920-202811.json` (SHA-256 `948BDA21AA1A68B41AB484625845274E593BEA244DF022698A6D7092C3EEDABD`). No original assets or browser storage were deleted.
-- Verification passed: hydration tests (6/6), publishing compatibility rejection tests, publishing structural assertions, `pnpm typecheck`, full `pnpm build`, and production privacy verification (9 markers). Authoritative-worktree browser QA rendered `project-1ua2677` with 9 active-only instances and no retired section composition. No deploy, publish, commit, push, or browser-storage mutation was performed.
+- Verification passed: hydration tests (6/6), publishing compatibility rejection tests, publishing structural assertions, `pnpm typecheck`, full `pnpm build`, and production privacy verification (9 markers). The then-used worktree browser QA rendered `project-1ua2677` with 9 active-only instances and no retired section composition; that worktree is historical evidence only and is no longer authoritative. No deploy, publish, commit, push, or browser-storage mutation was performed.
 
 ## 2026-09-19 - Homepage 3.0 Modular Interaction Redesign: Phase B (static unequal-size project layout, catalog-driven data source)
 

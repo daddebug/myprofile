@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-20T15:48:18.398Z",
+  "generatedAt": "2026-09-21T10:25:01.123Z",
   "drafts": {
     "project-1ua2677": {
       "version": 1,
@@ -771,6 +771,473 @@
       ],
       "updatedAt": "2026-09-19T00:49:58.306Z"
     },
+    "eli-early-stage-product-design-internship-1fk25s": {
+      "version": 1,
+      "templateInstances": [
+        {
+          "instanceId": "statement-longform-ae87b6f3-aec1-4e57-8f27-974869b1d3d1",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "01",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "产品背景",
+              "en": ""
+            },
+            "statement": {
+              "zh": "这是我第一次在真实互联网产品中理解：设计并不止发生在某一个页面里。",
+              "en": ""
+            },
+            "body": {
+              "zh": "实习期间，我进入正在研发中的 eli 项目。产品围绕恋爱心理内容展开，并包含社区、Vlog 分享与关系分析等方向。由于团队规模较小，我从早期 App 页面设计开始，逐渐接触开发协作、内容呈现、分享传播与上线运营。相比一个深度单点项目，这段经历更像是我第一次完整看到一个数字产品如何由不同触点共同组成。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-06062d32-2ed9-4097-8d17-f60e7e0d50c8",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "02",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "页面设计与迭代",
+              "en": ""
+            },
+            "statement": {
+              "zh": "从表达自己的设计风格，转向理解产品需要怎样保持一致。",
+              "en": ""
+            },
+            "body": {
+              "zh": "前期主要使用 Figma 参与 App 页面设计。设计经过多轮评审后，我开始意识到商业产品与课程练习最大的差异：页面不能只追求单张效果，而需要同时考虑产品内容、色彩体系、字体规范、间距和整体一致性。我通过分析已上线产品和设计案例不断调整方案，也逐渐形成了最早的 Design Consistency 意识。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "image-row-f55fce84-0d3b-4535-8969-a8ae05ae54c6",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "Early Product Interface Work",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "image-row-item-5a20bb71-de5b-4265-a974-e07b5d601b81",
+                "alt": {
+                  "zh": "eli 核心产品页面",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "展示课程、心理内容或关系分析等实际参与设计的产品页面。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "核心页面 / 内容模块 / 交互状态",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 2,
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-3cba898d-948f-46fc-a066-b0ab4ee439bd",
+                "alt": {
+                  "zh": "页面规范与视觉迭代",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "展示评审后在字体、色彩、间距和页面一致性上的调整。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "Iteration / Typography / Spacing / Visual Consistency",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 2,
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-bde9b1c0-8b27-4323-8fde-845b09577485",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "03",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "产品触点",
+              "en": ""
+            },
+            "statement": {
+              "zh": "随着产品逐渐完整，我的工作也从核心界面延伸到了用户接触产品的其他位置。",
+              "en": ""
+            },
+            "body": {
+              "zh": "页面逻辑逐渐稳定后，我开始参与 Banner、内容页、分享文案与分享落地页，同时接触更多与技术实现相关的协作。后续还参与了宣传视频的后期、配音与字幕，以及内部测试阶段的体验反馈。这让我第一次意识到 Product Experience 不只由核心功能组成：用户从看到内容、打开分享链接，到真正进入产品和持续使用，中间的每一个 Touchpoint 都会影响对产品的理解。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "image-row-327d50d1-3002-447d-aa54-39dc1ddb7bdd",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "From Interface to Product Touchpoints",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "image-row-item-78df9349-6b11-4fa5-9f14-51aba7d2bcff",
+                "alt": {
+                  "zh": "产品内内容与宣传设计",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "Banner 与内容模块逐渐成为连接产品内容、视觉表达与用户注意力的重要触点。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "Banner / Content Page / Product Promotion",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 2,
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-82a623d2-6ccc-478e-a0fe-13b5d5429359",
+                "alt": {
+                  "zh": "分享与传播触点",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "分享文案、链接落地页与视频内容让我开始从产品内部界面之外理解完整用户接触路径。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "Share Copy / Landing Page / Video",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 2,
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-87c843ad-1ded-490d-a715-c5c5697c49bd",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "04",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "内容与运营",
+              "en": ""
+            },
+            "statement": {
+              "zh": "产品进入上线阶段后，设计之外的内容质量和持续维护同样成为体验的一部分。",
+              "en": ""
+            },
+            "body": {
+              "zh": "后期随着 App 内容不断增加，我开始参与外文内容整理与翻译、文章编辑和发布，累计上传 300+ 篇内容，同时协助传播素材与上线支持。这部分工作本身并不是复杂的 UX 设计，但让我更早接触到产品上线后的 Content Operations，也让我理解到一个数字产品需要在设计、内容、品牌表达和长期运营之间持续保持一致。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-6e419b09-f6d1-4bdf-8ac5-72d4f2bd0a75",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "05",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "早期产品经验",
+              "en": ""
+            },
+            "statement": {
+              "zh": "This was my first experience seeing a digital product beyond individual screens.",
+              "en": ""
+            },
+            "body": {
+              "zh": "这段实习没有形成一个独立而深入的 UX Case，但它成为了我进入商业产品设计的起点。从页面设计、多轮评审、技术协作，到分享、内容、测试与运营，我第一次理解设计师需要融入产品本身，而不是只留下个人风格。它也让我在进入游戏行业之前，就已经接触到真实数字产品从研发到上线的基本工作方式。",
+              "en": ""
+            }
+          }
+        }
+      ],
+      "updatedAt": "2026-09-19T03:57:44.459Z"
+    },
+    "ai-assisted-gui-design-generative-visual-e-16j0qnx": {
+      "version": 1,
+      "templateInstances": [
+        {
+          "instanceId": "statement-longform-89174622-3153-4df9-8d00-c0c59b3bc9bb",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "01",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "项目背景",
+              "en": ""
+            },
+            "statement": {
+              "zh": "生成式 AI 可以快速扩大视觉探索范围，但成熟游戏的 GUI 不能因此失去已有的品牌与美术语言。",
+              "en": ""
+            },
+            "body": {
+              "zh": "在《非人学园》相关设计工作中，我参与生成式 AI 辅助的 GUI 视觉探索。项目并不是从空白风格开始，而是在已经建立的游戏视觉体系中寻找新的表现方向。因此核心问题不是“AI 能生成什么”，而是如何让 AI 输出受到既有 Style Language、构图逻辑和界面使用场景的约束，并最终进入可用的 GUI 设计。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-0daee479-24be-42cf-b422-f06ae2516db5",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "02",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "风格拆解",
+              "en": ""
+            },
+            "statement": {
+              "zh": "在开始生成之前，我先把“像这个游戏”拆成可以被描述和约束的视觉特征。",
+              "en": ""
+            },
+            "body": {
+              "zh": "我从现有 GUI 中整理色彩、材质、形状、装饰语言、构图密度与视觉重心等 Style Attributes，并区分哪些元素属于稳定的品牌识别，哪些部分可以被重新探索。这个过程帮助我把模糊的“保持原风格”转化为更具体的 Prompt 与 Visual Constraints，也降低了生成结果只追求表面风格相似、却无法真正进入界面的风险。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "universal-media-565e03b7-a967-42b7-9aa8-fc85a08fc504",
+          "templateId": "universal-media",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "Style Deconstruction",
+              "en": ""
+            },
+            "media": {
+              "type": "image",
+              "image": {}
+            },
+            "caption": {
+              "zh": "建议展示现有 GUI 的风格拆解：色彩、材质、形状、装饰元素、构图与可保留 / 可探索的视觉边界。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-b895cff4-db14-4b6b-8bdb-4a88f787121c",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "03",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "生成式探索",
+              "en": ""
+            },
+            "statement": {
+              "zh": "AI 的价值首先是扩大 Design Space，而不是一次生成最终答案。",
+              "en": ""
+            },
+            "body": {
+              "zh": "在明确视觉约束后，我通过 Prompt 与多轮生成快速探索多个方向，并有意识地控制材质、色彩、装饰密度、构图和氛围等变量。相比只追求一张“好看”的结果，我更关注不同方向之间为什么成立、哪些元素能够继续发展，以及哪些结果虽然视觉新鲜，但已经偏离游戏原有的 GUI 语言。生成阶段因此更接近快速 Visual Exploration，而不是直接生产最终素材。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "image-row-fff237cf-6787-47f8-b5e9-9855bf490c17",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "Multi-direction Exploration",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "image-row-item-83c701e4-4f05-4d16-a878-2428902ccf03",
+                "alt": {
+                  "zh": "AI生成方向探索",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "展示同一需求下不同 Prompt 或视觉约束产生的多方向结果。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "Prompt / Direction A / Direction B / Direction C",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 2,
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-2f1fa1ea-4f38-4db9-b748-a34e3605b4f1",
+                "alt": {
+                  "zh": "筛选与判断过程",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "展示哪些视觉特征被保留、哪些被舍弃，以及选择某一方向继续深化的原因。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "Selection / Keep / Reject / Refine",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 2,
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-98910ba4-038a-4bc1-b8c3-2b2fe24978f9",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "04",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "人工收敛",
+              "en": ""
+            },
+            "statement": {
+              "zh": "生成结果只有经过筛选、重绘与界面适配之后，才真正成为 GUI 设计的一部分。",
+              "en": ""
+            },
+            "body": {
+              "zh": "AI 输出通常无法直接满足游戏界面对信息层级、尺寸、可读性与品牌一致性的要求。因此我会先进行人工筛选，再针对构图、形状、材质细节和局部表现进行修正与重绘，并将结果重新放回实际 GUI 场景中判断。项目反馈也会继续反向进入下一轮 Prompt 与视觉约束，使探索从开放发散逐步收敛到可被项目接受的方向。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "direction-compare-d7fd3bac-4f61-4793-b505-53daa96e3eb6",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "From Generation to GUI Integration",
+              "en": ""
+            },
+            "leftLabel": {
+              "zh": "AI Output",
+              "en": ""
+            },
+            "rightLabel": {
+              "zh": "Designer-led Refinement",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "开放探索",
+              "en": ""
+            },
+            "rightTitle": {
+              "zh": "项目收敛",
+              "en": ""
+            },
+            "leftDescription": {
+              "zh": "用于快速探索材质、构图和视觉氛围，但不直接作为最终 GUI 使用。",
+              "en": ""
+            },
+            "rightDescription": {
+              "zh": "通过人工选择、重绘、层级调整与实际界面适配，使视觉结果重新符合游戏既有体系与使用需求。",
+              "en": ""
+            },
+            "leftImage": null,
+            "rightImage": null,
+            "direction": "left-to-right"
+          }
+        },
+        {
+          "instanceId": "statement-longform-b1a4db79-6794-4d96-a371-e9c06b44378d",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "05",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "工作流沉淀",
+              "en": ""
+            },
+            "statement": {
+              "zh": "Style Deconstruction → Prompt → Multi-direction Generation → Human Selection → Refinement → UI Integration",
+              "en": ""
+            },
+            "body": {
+              "zh": "这段经历让我更明确地理解了生成式 AI 在商业 GUI 中的位置：它适合快速扩展方向、提供视觉变量和缩短探索时间，但不能替代设计师对品牌语言、信息层级和实际使用场景的判断。我的工作重点因此逐渐从“生成一张图”转向建立 Human-in-the-loop Workflow，让 AI 负责扩展可能性，由设计师负责定义边界、筛选质量并完成最终收敛。",
+              "en": ""
+            }
+          }
+        }
+      ],
+      "updatedAt": "2026-09-19T04:02:49.743Z"
+    },
     "project-1op4ad7": {
       "version": 1,
       "templateInstances": [
@@ -1470,473 +1937,6 @@
       ],
       "updatedAt": "2026-09-19T01:20:58.101Z"
     },
-    "eli-early-stage-product-design-internship-1fk25s": {
-      "version": 1,
-      "templateInstances": [
-        {
-          "instanceId": "statement-longform-ae87b6f3-aec1-4e57-8f27-974869b1d3d1",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "01",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "产品背景",
-              "en": ""
-            },
-            "statement": {
-              "zh": "这是我第一次在真实互联网产品中理解：设计并不止发生在某一个页面里。",
-              "en": ""
-            },
-            "body": {
-              "zh": "实习期间，我进入正在研发中的 eli 项目。产品围绕恋爱心理内容展开，并包含社区、Vlog 分享与关系分析等方向。由于团队规模较小，我从早期 App 页面设计开始，逐渐接触开发协作、内容呈现、分享传播与上线运营。相比一个深度单点项目，这段经历更像是我第一次完整看到一个数字产品如何由不同触点共同组成。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-06062d32-2ed9-4097-8d17-f60e7e0d50c8",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "02",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "页面设计与迭代",
-              "en": ""
-            },
-            "statement": {
-              "zh": "从表达自己的设计风格，转向理解产品需要怎样保持一致。",
-              "en": ""
-            },
-            "body": {
-              "zh": "前期主要使用 Figma 参与 App 页面设计。设计经过多轮评审后，我开始意识到商业产品与课程练习最大的差异：页面不能只追求单张效果，而需要同时考虑产品内容、色彩体系、字体规范、间距和整体一致性。我通过分析已上线产品和设计案例不断调整方案，也逐渐形成了最早的 Design Consistency 意识。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "image-row-f55fce84-0d3b-4535-8969-a8ae05ae54c6",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "Early Product Interface Work",
-              "en": ""
-            },
-            "items": [
-              {
-                "id": "image-row-item-5a20bb71-de5b-4265-a974-e07b5d601b81",
-                "alt": {
-                  "zh": "eli 核心产品页面",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "展示课程、心理内容或关系分析等实际参与设计的产品页面。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "核心页面 / 内容模块 / 交互状态",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 2,
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "none"
-              },
-              {
-                "id": "image-row-item-3cba898d-948f-46fc-a066-b0ab4ee439bd",
-                "alt": {
-                  "zh": "页面规范与视觉迭代",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "展示评审后在字体、色彩、间距和页面一致性上的调整。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "Iteration / Typography / Spacing / Visual Consistency",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 2,
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "none"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-bde9b1c0-8b27-4323-8fde-845b09577485",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "03",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "产品触点",
-              "en": ""
-            },
-            "statement": {
-              "zh": "随着产品逐渐完整，我的工作也从核心界面延伸到了用户接触产品的其他位置。",
-              "en": ""
-            },
-            "body": {
-              "zh": "页面逻辑逐渐稳定后，我开始参与 Banner、内容页、分享文案与分享落地页，同时接触更多与技术实现相关的协作。后续还参与了宣传视频的后期、配音与字幕，以及内部测试阶段的体验反馈。这让我第一次意识到 Product Experience 不只由核心功能组成：用户从看到内容、打开分享链接，到真正进入产品和持续使用，中间的每一个 Touchpoint 都会影响对产品的理解。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "image-row-327d50d1-3002-447d-aa54-39dc1ddb7bdd",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "From Interface to Product Touchpoints",
-              "en": ""
-            },
-            "items": [
-              {
-                "id": "image-row-item-78df9349-6b11-4fa5-9f14-51aba7d2bcff",
-                "alt": {
-                  "zh": "产品内内容与宣传设计",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "Banner 与内容模块逐渐成为连接产品内容、视觉表达与用户注意力的重要触点。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "Banner / Content Page / Product Promotion",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 2,
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "none"
-              },
-              {
-                "id": "image-row-item-82a623d2-6ccc-478e-a0fe-13b5d5429359",
-                "alt": {
-                  "zh": "分享与传播触点",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "分享文案、链接落地页与视频内容让我开始从产品内部界面之外理解完整用户接触路径。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "Share Copy / Landing Page / Video",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 2,
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "none"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-87c843ad-1ded-490d-a715-c5c5697c49bd",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "04",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "内容与运营",
-              "en": ""
-            },
-            "statement": {
-              "zh": "产品进入上线阶段后，设计之外的内容质量和持续维护同样成为体验的一部分。",
-              "en": ""
-            },
-            "body": {
-              "zh": "后期随着 App 内容不断增加，我开始参与外文内容整理与翻译、文章编辑和发布，累计上传 300+ 篇内容，同时协助传播素材与上线支持。这部分工作本身并不是复杂的 UX 设计，但让我更早接触到产品上线后的 Content Operations，也让我理解到一个数字产品需要在设计、内容、品牌表达和长期运营之间持续保持一致。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-6e419b09-f6d1-4bdf-8ac5-72d4f2bd0a75",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "05",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "早期产品经验",
-              "en": ""
-            },
-            "statement": {
-              "zh": "This was my first experience seeing a digital product beyond individual screens.",
-              "en": ""
-            },
-            "body": {
-              "zh": "这段实习没有形成一个独立而深入的 UX Case，但它成为了我进入商业产品设计的起点。从页面设计、多轮评审、技术协作，到分享、内容、测试与运营，我第一次理解设计师需要融入产品本身，而不是只留下个人风格。它也让我在进入游戏行业之前，就已经接触到真实数字产品从研发到上线的基本工作方式。",
-              "en": ""
-            }
-          }
-        }
-      ],
-      "updatedAt": "2026-09-19T03:57:44.459Z"
-    },
-    "ai-assisted-gui-design-generative-visual-e-16j0qnx": {
-      "version": 1,
-      "templateInstances": [
-        {
-          "instanceId": "statement-longform-89174622-3153-4df9-8d00-c0c59b3bc9bb",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "01",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "项目背景",
-              "en": ""
-            },
-            "statement": {
-              "zh": "生成式 AI 可以快速扩大视觉探索范围，但成熟游戏的 GUI 不能因此失去已有的品牌与美术语言。",
-              "en": ""
-            },
-            "body": {
-              "zh": "在《非人学园》相关设计工作中，我参与生成式 AI 辅助的 GUI 视觉探索。项目并不是从空白风格开始，而是在已经建立的游戏视觉体系中寻找新的表现方向。因此核心问题不是“AI 能生成什么”，而是如何让 AI 输出受到既有 Style Language、构图逻辑和界面使用场景的约束，并最终进入可用的 GUI 设计。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-0daee479-24be-42cf-b422-f06ae2516db5",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "02",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "风格拆解",
-              "en": ""
-            },
-            "statement": {
-              "zh": "在开始生成之前，我先把“像这个游戏”拆成可以被描述和约束的视觉特征。",
-              "en": ""
-            },
-            "body": {
-              "zh": "我从现有 GUI 中整理色彩、材质、形状、装饰语言、构图密度与视觉重心等 Style Attributes，并区分哪些元素属于稳定的品牌识别，哪些部分可以被重新探索。这个过程帮助我把模糊的“保持原风格”转化为更具体的 Prompt 与 Visual Constraints，也降低了生成结果只追求表面风格相似、却无法真正进入界面的风险。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "universal-media-565e03b7-a967-42b7-9aa8-fc85a08fc504",
-          "templateId": "universal-media",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "Style Deconstruction",
-              "en": ""
-            },
-            "media": {
-              "type": "image",
-              "image": {}
-            },
-            "caption": {
-              "zh": "建议展示现有 GUI 的风格拆解：色彩、材质、形状、装饰元素、构图与可保留 / 可探索的视觉边界。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-b895cff4-db14-4b6b-8bdb-4a88f787121c",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "03",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "生成式探索",
-              "en": ""
-            },
-            "statement": {
-              "zh": "AI 的价值首先是扩大 Design Space，而不是一次生成最终答案。",
-              "en": ""
-            },
-            "body": {
-              "zh": "在明确视觉约束后，我通过 Prompt 与多轮生成快速探索多个方向，并有意识地控制材质、色彩、装饰密度、构图和氛围等变量。相比只追求一张“好看”的结果，我更关注不同方向之间为什么成立、哪些元素能够继续发展，以及哪些结果虽然视觉新鲜，但已经偏离游戏原有的 GUI 语言。生成阶段因此更接近快速 Visual Exploration，而不是直接生产最终素材。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "image-row-fff237cf-6787-47f8-b5e9-9855bf490c17",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "Multi-direction Exploration",
-              "en": ""
-            },
-            "items": [
-              {
-                "id": "image-row-item-83c701e4-4f05-4d16-a878-2428902ccf03",
-                "alt": {
-                  "zh": "AI生成方向探索",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "展示同一需求下不同 Prompt 或视觉约束产生的多方向结果。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "Prompt / Direction A / Direction B / Direction C",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 2,
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "none"
-              },
-              {
-                "id": "image-row-item-2f1fa1ea-4f38-4db9-b748-a34e3605b4f1",
-                "alt": {
-                  "zh": "筛选与判断过程",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "展示哪些视觉特征被保留、哪些被舍弃，以及选择某一方向继续深化的原因。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "Selection / Keep / Reject / Refine",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 2,
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "none"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-98910ba4-038a-4bc1-b8c3-2b2fe24978f9",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "04",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "人工收敛",
-              "en": ""
-            },
-            "statement": {
-              "zh": "生成结果只有经过筛选、重绘与界面适配之后，才真正成为 GUI 设计的一部分。",
-              "en": ""
-            },
-            "body": {
-              "zh": "AI 输出通常无法直接满足游戏界面对信息层级、尺寸、可读性与品牌一致性的要求。因此我会先进行人工筛选，再针对构图、形状、材质细节和局部表现进行修正与重绘，并将结果重新放回实际 GUI 场景中判断。项目反馈也会继续反向进入下一轮 Prompt 与视觉约束，使探索从开放发散逐步收敛到可被项目接受的方向。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "direction-compare-d7fd3bac-4f61-4793-b505-53daa96e3eb6",
-          "templateId": "direction-compare",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "From Generation to GUI Integration",
-              "en": ""
-            },
-            "leftLabel": {
-              "zh": "AI Output",
-              "en": ""
-            },
-            "rightLabel": {
-              "zh": "Designer-led Refinement",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "开放探索",
-              "en": ""
-            },
-            "rightTitle": {
-              "zh": "项目收敛",
-              "en": ""
-            },
-            "leftDescription": {
-              "zh": "用于快速探索材质、构图和视觉氛围，但不直接作为最终 GUI 使用。",
-              "en": ""
-            },
-            "rightDescription": {
-              "zh": "通过人工选择、重绘、层级调整与实际界面适配，使视觉结果重新符合游戏既有体系与使用需求。",
-              "en": ""
-            },
-            "leftImage": null,
-            "rightImage": null,
-            "direction": "left-to-right"
-          }
-        },
-        {
-          "instanceId": "statement-longform-b1a4db79-6794-4d96-a371-e9c06b44378d",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "05",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "工作流沉淀",
-              "en": ""
-            },
-            "statement": {
-              "zh": "Style Deconstruction → Prompt → Multi-direction Generation → Human Selection → Refinement → UI Integration",
-              "en": ""
-            },
-            "body": {
-              "zh": "这段经历让我更明确地理解了生成式 AI 在商业 GUI 中的位置：它适合快速扩展方向、提供视觉变量和缩短探索时间，但不能替代设计师对品牌语言、信息层级和实际使用场景的判断。我的工作重点因此逐渐从“生成一张图”转向建立 Human-in-the-loop Workflow，让 AI 负责扩展可能性，由设计师负责定义边界、筛选质量并完成最终收敛。",
-              "en": ""
-            }
-          }
-        }
-      ],
-      "updatedAt": "2026-09-19T04:02:49.743Z"
-    },
     "case-odvwa3": {
       "version": 1,
       "templateInstances": [
@@ -2421,7 +2421,7 @@
       "updatedAt": "2026-09-20T15:37:06.463Z",
       "titleLine1Zh": "",
       "titleLine2Zh": "",
-      "lastPublishedAt": "2026-09-20T15:13:12.902Z",
+      "lastPublishedAt": "2026-09-20T15:48:18.398Z",
       "portfolioTrack": "ux-ui"
     },
     "googo-ai-pt5mwd": {
@@ -2455,7 +2455,7 @@
       ],
       "coverImage": "",
       "updatedAt": "2026-09-20T15:37:08.724Z",
-      "lastPublishedAt": "2026-09-20T15:13:12.902Z",
+      "lastPublishedAt": "2026-09-20T15:48:18.398Z",
       "portfolioTrack": "game-design"
     },
     "eli-early-stage-product-design-internship-1fk25s": {
@@ -2544,7 +2544,7 @@
       "updatedAt": "2026-09-20T15:37:14.268Z",
       "titleLine1Zh": "",
       "titleLine2Zh": "",
-      "lastPublishedAt": "2026-09-20T15:13:12.902Z",
+      "lastPublishedAt": "2026-09-20T15:48:18.398Z",
       "portfolioTrack": "ai-product"
     }
   },
@@ -4474,7 +4474,10 @@
   "covers": {
     "project-1ua2677": "/images/published/covers/project-1ua2677.png",
     "project-1ied3i": "/images/published/covers/project-1ied3i.png",
-    "project-e51ezw": "/images/published/covers/project-e51ezw.png"
+    "project-e51ezw": "/images/published/covers/project-e51ezw.png",
+    "project-1op4ad7": "/images/published/covers/project-1op4ad7.png",
+    "googo-ai-pt5mwd": "/images/published/covers/googo-ai-pt5mwd.png",
+    "case-odvwa3": "/images/published/covers/case-odvwa3.png"
   },
   "assets": [
     {
@@ -5246,6 +5249,27 @@
       "sourceStore": "",
       "sourceId": "public/images/published/covers/project-e51ezw.png",
       "publicPath": "/images/published/covers/project-e51ezw.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/covers/project-1op4ad7.png",
+      "publicPath": "/images/published/covers/project-1op4ad7.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/covers/googo-ai-pt5mwd.png",
+      "publicPath": "/images/published/covers/googo-ai-pt5mwd.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/covers/case-odvwa3.png",
+      "publicPath": "/images/published/covers/case-odvwa3.png"
     }
   ]
 }

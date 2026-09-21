@@ -1,0 +1,44 @@
+/* Whole-page viewport-edge atmosphere (2026-09-21) -- see TopViewportBlur.tsx.
+   A single backdrop-filter pass over everything scrolling underneath it
+   (text, covers, point field, background), NOT a per-project shader effect.
+   No background-color of its own -- the mask-image is what fades the
+   backdrop-filter's own visible effect from full strength at the very top
+   edge to fully transparent partway down, so there is never a visible
+   panel, only a short blurred/clear transition. Confined to a short
+   navigation-height band; the existing bottom progressive image blur
+   (coverShaders.ts) is a separate, unrelated effect and is untouched. */
+.home-top-viewport-blur {
+  /* position:fixed + its own z-index, mounted OUTSIDE HomeFixedLayer
+     (HomePage.tsx) -- .home-fixed-layer itself has z-index:auto, which
+     stacks BELOW .home-scroll-container's explicit z-index:1 (confirmed
+     empirically: scrolled Hero text painted over both the canvas AND the
+     nav). Nesting this layer inside home-fixed-layer would make it
+     invisible under scrolled content instead of blurring it. Same fix
+     HomeIntroTransition already uses for the identical reason -- see
+     home-intro.css. */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(72px, 9vh, 100px);
+  z-index: 30;
+  pointer-events: none;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.85) 20%,
+    rgba(0, 0, 0, 0.4) 45%,
+    rgba(0, 0, 0, 0.08) 75%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.85) 20%,
+    rgba(0, 0, 0, 0.4) 45%,
+    rgba(0, 0, 0, 0.08) 75%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
