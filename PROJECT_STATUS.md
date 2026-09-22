@@ -6,6 +6,16 @@ _Read this file, `CLAUDE.md`, the relevant `skills/*/SKILL.md`, and `TASKS.md` b
 
 Dilida Duman's personal Game UX / Interaction Design portfolio. React 19 + TypeScript + Vite + Tailwind + Framer Motion + react-router-dom, deployed to Vercel from `origin/main`.
 
+## Homepage self-hosted fonts (local verification, 2026-09-22)
+
+- The Google Fonts CSS `@import` was the local cold-load blocker: its failed external request held module execution for about 3.05s. `src/main.tsx` now includes local `src/font-faces.css`; `src/styles.css` retains the existing family/fallback stacks without a remote import. Four OFL-licensed families are served as WOFF2 Unicode shards from `public/fonts/self-hosted/`, with licenses beside the assets. No package or system dependency was added.
+- Under the same fresh, cache-disabled, throttled local production-preview audit, Hero DOM mount moved from 4444ms to 993ms; Hero text became readable at 2183ms, first three covers decoded at 2266ms, first-cover WebGL takeover at 2876ms, and Topolines mounted at 3055ms. These are local measurements, not online acceptance. `font-display: swap` kept Hero text available when font requests were deliberately blocked. One Inter Latin preload was tested but not adopted: first contentful paint regressed from 1280ms to 1328ms in that probe.
+
+## Homepage first-load substrate (local verification, 2026-09-21)
+
+- The production build now paints `#F7F6ED` on `html`, `body`, and `#root` from `index.html` before external CSS or JavaScript; `src/styles.css` keeps the same root fallback. Home's wrapper and opening overlay also use `#F7F6ED`.
+- In fresh, cache-disabled Chromium under network throttling, blocking external CSS, blocking JavaScript, and delaying JavaScript all left the uncovered viewport cream. The Home route does not mount the legacy blue/green `AmbientLightBackground`; its WebGL canvas clears with alpha zero, so its uncovered pixels reveal the cream parent. No blue/green substrate was reproduced in the local production preview. The user's observed cold-visit source remains unproven; this is not an online acceptance claim.
+
 ## Portfolio 2.0 template cutover (2026-09-20)
 
 - Active template IDs are exactly `statement-longform`, `supporting-note`, `image-row`, `universal-media`, and `direction-compare`, sourced from `src/data/activePortfolioTemplateIds.json`.

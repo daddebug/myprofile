@@ -74,6 +74,21 @@ export function isProjectCoverReady(id: string): boolean {
   return readyState.get(id) ?? false;
 }
 
+export function isFirstProjectCoverReady(): boolean {
+  const firstId = entries.keys().next().value;
+  return firstId !== undefined && isProjectCoverReady(firstId);
+}
+
+export function subscribeFirstProjectCoverReady(listener: () => void): () => void {
+  const notify = () => listener();
+  membershipListeners.add(notify);
+  readyListeners.add(notify);
+  return () => {
+    membershipListeners.delete(notify);
+    readyListeners.delete(notify);
+  };
+}
+
 export function useProjectCoverReady(id: string): boolean {
   return useSyncExternalStore(
     (callback) => {

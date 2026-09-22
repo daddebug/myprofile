@@ -1,6 +1,6 @@
 # Tasks
 
-Last reviewed: 2026-09-21
+Last reviewed: 2026-09-22
 
 Only unresolved work belongs here. Historical implementation and verification evidence lives in `CHANGELOG.md` and `PROJECT_STATUS.md`.
 
@@ -11,6 +11,8 @@ Only unresolved work belongs here. Historical implementation and verification ev
 - Make each card footprint art-directed and independent of the source image's aspect ratio; square covers must not automatically become huge or full-row.
 - Preserve paired/two-column compositions on mobile instead of flattening every project into a single-column feed.
 - Finish the Hero shell first; defer complex 3D work. Improve above-the-fold cover loading and performance as part of the Homepage completion pass.
+- After a separately approved publish, verify self-hosted font loading and cold-load timing in the real production browser/network. The local production preview removed the blocking Google Fonts request, but this is not yet an online performance acceptance.
+- Verify the reported old blue/green first-load substrate in the user's actual cold browser/online environment after a separately approved publish. The local production preview now has cream `html`/`body`/`#root` before CSS or JS and did not reproduce the old color; do not claim its historical source was identified.
 
 ## Publishing
 

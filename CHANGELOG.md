@@ -1,6 +1,11 @@
 # Changelog
 
-Last reviewed: 2026-09-21
+Last reviewed: 2026-09-22
+
+## 2026-09-22 - Homepage font critical-path removal (local verification)
+
+- Removed the remote Google Fonts CSS import that blocked module execution for about 3.05s when access failed. Self-hosted the four licensed font families as WOFF2 Unicode shards with their OFL texts; original font stacks and `font-display: swap` remain. No router, image, WebGL, Topolines, project-content, or publishing change was made.
+- In a fresh cache-disabled, throttled local production preview, Hero DOM mount improved from 4444ms to 993ms. First three covers decoded at 2266ms, WebGL took over the first cover at 2876ms, and Topolines mounted at 3055ms. Forced local-font failure still showed fallback Hero text. A one-file Inter preload did not improve first contentful paint, so no preload was added. `pnpm typecheck`, `pnpm build`, and production privacy verification passed. No publish/deploy occurred.
 
 ## 2026-09-20/21 - Portfolio runtime & publishing stabilization
 

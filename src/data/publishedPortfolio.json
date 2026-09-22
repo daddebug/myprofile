@@ -1,274 +1,7 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-21T10:25:01.123Z",
+  "generatedAt": "2026-09-22T03:02:31.744Z",
   "drafts": {
-    "project-1ua2677": {
-      "version": 1,
-      "templateInstances": [
-        {
-          "instanceId": "statement-longform-233060d1-59d6-49e4-ae61-734a794856af",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "01",
-              "en": "01"
-            },
-            "leftTitle": {
-              "zh": "问题背景",
-              "en": "Problem Context"
-            },
-            "statement": {
-              "zh": "当UI同时承担信息、任务引导和高频操作时，3D角色很容易退回成界面的背景。",
-              "en": "When UI simultaneously carries information, task guidance, and high-frequency operations, the 3D character can easily become background decoration."
-            },
-            "body": {
-              "zh": "成熟养成手游长期依赖文字、数字、资源入口和任务跳转组织玩家行为，这种结构能够高效承载复杂系统，但也容易让界面持续抢占注意力。随着项目希望把更多表现空间交给3D角色和场景，我开始重新审视一个问题：哪些信息必须即时出现，哪些操作需要稳定路径，哪些成长反馈应该重新让位给角色本身。",
-              "en": "Mature progression-based mobile games often organize player behavior through text, numbers, resource entry points, and task redirects. This structure efficiently supports complex systems, but it can also keep the interface in constant control of attention. As the project aimed to give more expressive space to 3D characters and environments, I began reconsidering which information truly needed to remain immediate, which operations required stable paths, and which progression feedback should give space back to the character."
-            }
-          }
-        },
-        {
-          "instanceId": "circle-summary-a2b1adc5-5ada-44f9-a3b5-b37dc9902e9d",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "",
-              "en": ""
-            },
-            "statement": {
-              "zh": "我最终聚焦的三个体验问题",
-              "en": "Three Experience Problems I Focused On"
-            },
-            "body": {
-              "zh": "- 成长操作长期占据角色区域\n- 装备合成依赖连续弹窗和玩家记忆\n- 竞技场承担验证养成结果的价值",
-              "en": "- Progression controls continuously occupy the character area, improving efficiency while weakening the character's own growth feedback.\n- Equipment synthesis relies on chained pop-ups and player memory, making it difficult to understand one's position in the full progression path.\n- The arena is meant to validate progression outcomes, yet its early presentation remained dominated by 2D information and pop-ups, weakening the sense of the player's team."
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-aa127d1a-9542-4b9d-9327-ee8bc02b50fa",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "02",
-              "en": "02"
-            },
-            "leftTitle": {
-              "zh": "交互判断",
-              "en": "Interaction Principle"
-            },
-            "statement": {
-              "zh": "目标不是减少UI，而是重新区分信息效率、连续操作与成长反馈的优先级。",
-              "en": "The goal was not to simply reduce UI, but to separate the priorities of information efficiency, continuous operations, and progression feedback."
-            },
-            "body": {
-              "zh": "高频资源判断和可升级状态仍然需要快速读取；升级、装备合成等连续操作需要稳定的位置和清晰路径；角色升级、队伍展示和关键成长结果则需要获得独立的表现空间。后续设计因此不再把所有内容继续集中到首屏，而是根据玩家当下要完成的任务重新分配界面权重和反馈节奏。",
-              "en": "High-frequency resource checks and upgrade states still needed to remain quickly readable. Continuous actions such as upgrading and equipment synthesis needed stable locations and clear paths. Character growth, team presentation, and key progression outcomes needed their own expressive space. The redesign therefore stopped treating the first screen as the place for everything and instead redistributed interface weight and feedback rhythm around the player's immediate task."
-            }
-          }
-        },
-        {
-          "instanceId": "figma-prototype-94c23e92-a1de-4391-a2dd-7ce817183066",
-          "templateId": "universal-media",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "早期交互原型",
-              "en": "Early Interaction Prototype"
-            },
-            "caption": {
-              "zh": "部分交互方向在后续研发中进入实际项目。",
-              "en": "Some of these interaction directions were later implemented in the production project."
-            },
-            "media": {
-              "type": "figma",
-              "figmaUrl": "https://www.figma.com/proto/CtcXJQyA7C5y40lJbsgoqn/Untitled?node-id=0-1&p=f&t=A5YjFYkxOQ7n3GQD-0&scaling=scale-down&content-scaling=fixed&starting-point-node-id=2%3A4",
-              "fallbackImage": {
-                "localImageId": "image-1d2a11cd-c23e-4ba2-a165-a616066258e0",
-                "publicPath": "/images/published/project-body/project-1ua2677/image-1d2a11cd-c23e-4ba2-a165-a616066258e0.png"
-              }
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-22c40df5-8327-4c56-8ee6-ba9eb3111d65",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "03",
-              "en": "03"
-            },
-            "leftTitle": {
-              "zh": "重点系统迭代",
-              "en": "Focused System Iterations"
-            },
-            "statement": {
-              "zh": "根据一测期间收集到的交互问题，我选择三个高频系统继续验证前面的判断。",
-              "en": "Based on interaction issues collected during the first test, I selected three high-frequency systems to further validate these principles."
-            },
-            "body": {
-              "zh": "升级升阶、装备合成与竞技场分别对应三个不同的问题：角色区域被操作占据、路径关系依赖记忆，以及玩法价值与界面表现不匹配。三个系统都经历了多版本调整，其中部分交互最终进入上线版本；竞技场的3D队伍方案则因实际版本限制没有完整采用。",
-              "en": "Level and star progression, equipment synthesis, and the arena each represented a different problem: controls occupying character space, path relationships relying on memory, and interface presentation failing to match the gameplay value of the system. All three went through multiple iterations. Some interactions were implemented in the shipped version, while the arena's 3D team presentation was not fully adopted due to production constraints."
-            }
-          }
-        },
-        {
-          "instanceId": "direction-compare-f5de4e51-ddc9-40c2-804c-7f64ccf7b130",
-          "templateId": "direction-compare",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "升级 / 升星：让操作退出角色表现区",
-              "en": "Level / Star Progression: Moving Controls Out of Character Space"
-            },
-            "leftLabel": {
-              "zh": "早期",
-              "en": "Early"
-            },
-            "rightLabel": {
-              "zh": "迭代后",
-              "en": "After Iteration"
-            },
-            "leftTitle": {
-              "zh": "成长入口分散在角色下方",
-              "en": "Progression Controls Scattered Below the Character"
-            },
-            "rightTitle": {
-              "zh": "统一至右侧稳定操作区",
-              "en": "Unified into a Stable Right-Side Action Area"
-            },
-            "leftDescription": {
-              "zh": "升级与进阶入口分散在角色附近，长期占据模型展示区域，也增加了后续适配的实现压力。角色虽然是养成对象，却被大量操作控件持续覆盖。",
-              "en": "Upgrade and advancement controls were scattered around the character, continuously occupying model presentation space and increasing adaptation pressure during implementation. The character was the object of progression, yet remained covered by operational UI."
-            },
-            "rightDescription": {
-              "zh": "将主要成长操作集中到右侧稳定区域，使可升级状态更容易读取，也减少对角色区域的持续占用，为3D角色与成长反馈留出更多空间。",
-              "en": "Moving major progression actions into a stable right-side area made upgrade availability easier to read while reducing persistent UI occupation of the character area and creating more space for 3D presentation and progression feedback."
-            },
-            "leftImage": {
-              "imageId": "image-716b6e4b-037c-4879-a46b-c2956207515c",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-716b6e4b-037c-4879-a46b-c2956207515c.png",
-              "hoverPreviewMode": "none"
-            },
-            "rightImage": {
-              "imageId": "image-adf54a95-1cef-4260-875a-f4a8eed9fccc",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-adf54a95-1cef-4260-875a-f4a8eed9fccc.png",
-              "hoverPreviewMode": "none"
-            },
-            "direction": "left-to-right"
-          }
-        },
-        {
-          "instanceId": "direction-compare-06597f24-9cca-4a57-8de1-37ebbb88d767",
-          "templateId": "direction-compare",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "装备合成：把依赖记忆的路径变成可见关系",
-              "en": "Equipment Synthesis: Making a Memory-Dependent Path Visible"
-            },
-            "leftLabel": {
-              "zh": "早期",
-              "en": "Early"
-            },
-            "rightLabel": {
-              "zh": "迭代后",
-              "en": "After Iteration"
-            },
-            "leftTitle": {
-              "zh": "单一路径与连续弹窗",
-              "en": "Single Paths and Chained Pop-Ups"
-            },
-            "rightTitle": {
-              "zh": "展开完整合成路径",
-              "en": "Expanded Full Synthesis Path"
-            },
-            "leftDescription": {
-              "zh": "早期方案主要通过弹窗展示单一装备路径。虽然装备图标可以继续点击，但返回和比较成本较高，玩家需要依赖记忆判断自己位于整条合成链的什么位置。",
-              "en": "The early version mainly used pop-ups to show one equipment path at a time. Although equipment icons could be opened further, returning and comparing were cumbersome, forcing players to rely on memory to understand where they were in the full synthesis chain."
-            },
-            "rightDescription": {
-              "zh": "与程序协作梳理装备关系，并参考市场上的合成类玩法，将完整路径平铺展示，使玩家能够直接看到当前位置、前置材料与后续方向，减少在弹窗之间反复确认。",
-              "en": "Working with engineering, I consolidated equipment relationships and referenced synthesis systems in existing games, presenting the full path in a flat structure so players could directly understand their current position, prerequisite materials, and next steps without repeatedly checking pop-ups."
-            },
-            "leftImage": {
-              "imageId": "image-d09c61b7-cb2a-476d-99cf-4a8e14784932",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-d09c61b7-cb2a-476d-99cf-4a8e14784932.png",
-              "hoverPreviewMode": "none"
-            },
-            "rightImage": {
-              "imageId": "image-fea47f73-5aca-4095-94e6-c51927adb342",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-fea47f73-5aca-4095-94e6-c51927adb342.png",
-              "hoverPreviewMode": "none"
-            },
-            "direction": "left-to-right"
-          }
-        },
-        {
-          "instanceId": "direction-compare-bc673ce9-0d01-4b5b-97f0-d28ce804d241",
-          "templateId": "direction-compare",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "竞技场：尝试让养成结果回到队伍本身",
-              "en": "Arena: Bringing Progression Results Back to the Team"
-            },
-            "leftLabel": {
-              "zh": "早期",
-              "en": "Early"
-            },
-            "rightLabel": {
-              "zh": "探索方案",
-              "en": "Explored Direction"
-            },
-            "leftTitle": {
-              "zh": "主要依赖二维信息与弹窗",
-              "en": "Primarily Driven by 2D Information and Pop-Ups"
-            },
-            "rightTitle": {
-              "zh": "尝试以3D队伍承载战前表现",
-              "en": "Exploring 3D Team Presentation Before Battle"
-            },
-            "leftDescription": {
-              "zh": "竞技场是玩家验证养成结果的重要系统，但早期仍主要依赖二维信息与弹窗承载，信息密度较高，队伍自身的存在感较弱。",
-              "en": "The arena is an important system for validating player progression, yet the early version still relied largely on dense 2D information and pop-ups, leaving the team itself with limited presence."
-            },
-            "rightDescription": {
-              "zh": "我尝试将3D队伍直接放入场景，并把刷新、挑战等高频操作集中到右侧。最终版本没有采用完整的3D队伍展示，而改为左侧头像方案。这次迭代让我更清楚地看到，体验提升仍需要在表现价值、实现成本与既有系统边界之间取舍。",
-              "en": "I explored placing the 3D team directly in the scene while concentrating high-frequency actions such as refresh and challenge on the right. The final version did not adopt the full 3D team presentation and instead used player portraits on the left. This iteration clarified that experience improvements still need to balance presentation value, implementation cost, and existing system constraints."
-            },
-            "leftImage": {
-              "imageId": "image-23b662af-c3d9-458b-8ed9-249097c7c89c",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-23b662af-c3d9-458b-8ed9-249097c7c89c.png",
-              "hoverPreviewMode": "none"
-            },
-            "rightImage": {
-              "imageId": "image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0",
-              "publicPath": "/images/published/template-images/project-1ua2677/image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0.png",
-              "hoverPreviewMode": "none"
-            },
-            "direction": "left-to-right"
-          }
-        }
-      ],
-      "updatedAt": "2026-09-20T14:36:36.759Z"
-    },
     "project-1ied3i": {
       "version": 1,
       "templateInstances": [
@@ -345,898 +78,6 @@
         }
       ],
       "updatedAt": "2026-09-06T13:36:58.849Z"
-    },
-    "project-e51ezw": {
-      "version": 1,
-      "templateInstances": [
-        {
-          "instanceId": "statement-longform-64ad4c06-061a-407e-88b0-de52ddd194c4",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "01",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "项目背景",
-              "en": ""
-            },
-            "statement": {
-              "zh": "跨平台重构真正需要回答的，不是“如何把手游做轻”，而是“如何让不同深度的玩家进入、理解并持续投入同一个产品”。",
-              "en": ""
-            },
-            "body": {
-              "zh": "项目基于一款长期运营的成熟手游展开，并尝试将核心体验延伸到更轻量的平台环境，其中目标载体之一为微信小程序。原产品已经拥有复杂的成长、抽取、资源和商业化系统，也存在大量已经形成稳定习惯的老玩家。新的平台环境带来的并不只是尺寸、包体或性能差异，更重要的是用户进入产品的门槛、使用时长和体验预期发生变化。因此，我没有把项目理解为一次简单的界面适配，而是重新研究：玩家为什么进入一款游戏、为什么留下、什么时候开始理解系统，以及不同阶段的价值感知如何进一步转化为投入和付费。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-2179b407-ddb6-4e39-846b-ae0127851c52",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "02",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "深度体验研究",
-              "en": ""
-            },
-            "statement": {
-              "zh": "我关注的不是竞品有哪些功能，而是玩家如何从“被内容吸引”逐渐进入“理解系统、形成投入并建立长期关系”。",
-              "en": ""
-            },
-            "body": {
-              "zh": "我对两款轻量化游戏进行了较长时间的体验拆解，记录新手阶段的目标设置、系统解锁、资源循环、角色成长、抽取、活动、付费入口以及社交关系的出现时机。分析重点不是做 Feature List，也不是比较 UI 风格，而是追踪玩家在不同阶段能够感知到什么价值、需要理解多少系统、为什么继续游玩，以及商业化如何逐渐进入玩家的决策。这个过程让我发现，仅用“轻度 / 中度 / 重度玩家”或“低氪 / 中氪 / 重氪”描述用户并不足以解释真实体验，因为对系统的理解程度与消费强度并不总是同步增长。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "universal-media-9a92b181-a1b7-4867-98e9-19b3b971ae6a",
-          "templateId": "universal-media",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "Player Journey & Monetization Observation",
-              "en": ""
-            },
-            "media": {
-              "type": "image",
-              "image": {}
-            },
-            "caption": {
-              "zh": "建议放两款竞品的阶段性体验时间线：当前目标、系统解锁、角色成长、商业化入口、社交关系与玩家行为变化。重点展示“价值感知如何变化”，而不是普通竞品截图。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-fc9ef27d-4e2e-413b-9560-f95488f47161",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "03",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "核心观察",
-              "en": ""
-            },
-            "statement": {
-              "zh": "Spending Intensity 与 System Mastery 是两条不同的轴：花得更多，并不一定代表对游戏理解得更深。",
-              "en": ""
-            },
-            "body": {
-              "zh": "传统分层很容易把玩家想象成一条单向路径：越投入时间，就越懂游戏，也越愿意付费。但实际体验并不总是如此。一部分用户因为角色、美术、IP 或即时反馈进入游戏，在尚未理解完整数值体系时就已经愿意为外观或角色内容付费；另一部分用户会通过长期游玩、社区信息、Build、角色搭配和高难内容形成更深的 System Mastery，但他们并不一定成为最高消费用户；还有一部分用户的消费更多受到竞争优势、稀有度、排名、社群地位或身份展示驱动，即使本人对系统理解并没有同比例增加，也可能保持很高的 Spending Intensity。这个差异成为后续模型的起点。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "direction-compare-03eecdc3-bd9f-42ad-86ea-304ba96b3293",
-          "templateId": "direction-compare",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "从静态用户分层到动态价值路径",
-              "en": ""
-            },
-            "leftLabel": {
-              "zh": "传统分层",
-              "en": ""
-            },
-            "rightLabel": {
-              "zh": "我的观察",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "Casual → Core → Whale",
-              "en": ""
-            },
-            "rightTitle": {
-              "zh": "Multiple Value Pathways",
-              "en": ""
-            },
-            "leftDescription": {
-              "zh": "将游戏理解、投入时间与付费强度默认看成同方向增长，容易忽略不同玩家进入商业化的真实原因。",
-              "en": ""
-            },
-            "rightDescription": {
-              "zh": "玩家可能因审美、角色依恋、系统掌握、竞争、身份或社交地位进入不同付费路径，并在长期体验中发生迁移。",
-              "en": ""
-            },
-            "leftImage": null,
-            "rightImage": null,
-            "direction": "left-to-right"
-          }
-        },
-        {
-          "instanceId": "statement-longform-22bdb546-0d86-4dce-83c4-d71d4cbcbe90",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "04",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "玩家价值演化模型",
-              "en": ""
-            },
-            "statement": {
-              "zh": "我将观察到的体验归纳为三种主要价值模式：Attraction-led Entry、Mastery-led Engagement 与 Status / Power-led Monetization。",
-              "en": ""
-            },
-            "body": {
-              "zh": "这三种模式不是固定 Persona，也不是所有玩家都必须依次经过的三个等级，而是玩家与产品建立关系时可能出现的主要价值状态。Attraction-led Entry 主要由角色、美术、IP、即时奖励或可见内容驱动，玩家对底层系统的理解有限，但可以快速形成情绪价值与低门槛付费。Mastery-led Engagement 发生在玩家开始主动理解 Build、数值、角色组合、资源效率和高难目标之后，价值来源从“拥有内容”进一步转向“掌握系统并完成挑战”。Status / Power-led Monetization 则更多由领先优势、稀有度、排名、社群身份或可见地位驱动，高消费并不必然意味着更高的系统理解。玩家可以在这些状态之间迁移，也可能直接从 Attraction-led 进入高消费的 Status / Power 路径。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "universal-media-5761b6f3-63e0-4455-8d88-eb7b86fc862e",
-          "templateId": "universal-media",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "Player Value Evolution Model",
-              "en": ""
-            },
-            "media": {
-              "type": "image",
-              "image": {}
-            },
-            "caption": {
-              "zh": "建议画二维模型：X 轴为 System Mastery / Game Literacy，Y 轴为 Spending Intensity；再用颜色或标记表达 Social Embeddedness / Status Investment。用箭头表达玩家可能的迁移路径，不画成正态分布，也不暗示所有用户必须线性升级。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-5e7d0fa5-92ed-435e-9e7e-6f0264e939ba",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "05",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "三种价值模式",
-              "en": ""
-            },
-            "statement": {
-              "zh": "不同阶段真正变化的不是“用户等级”，而是玩家判断游戏价值的依据。",
-              "en": ""
-            },
-            "body": {
-              "zh": "Attraction-led Entry：价值首先来自最容易被感知的内容，例如角色、美术、皮肤、IP、即时奖励与情绪反馈。此时系统理解较浅，任务和短期目标仍然承担主要引导作用，付费也更容易围绕可见内容发生。Mastery-led Engagement：玩家开始理解角色 Build、数值关系、抽取规划、资源分配和高难目标，并通过社区、攻略和长期实践提高 System Mastery。此时消费更可能围绕角色强度、资源效率、阵容完整性或计划性抽取展开。Status / Power-led Monetization：价值进一步转向领先、稀有、排名、社交影响力和身份展示。此时厂商需要维持的不只是数值优势，还包括“投入能够持续被看见”的社会反馈；部分高消费用户甚至会通过代练、托管或账号外包维持竞争状态，因此其 Spending Intensity 与实际游玩深度可能再次脱钩。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-b4245b67-a177-4040-92dd-fd5d729a0149",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "06",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "产品机会",
-              "en": ""
-            },
-            "statement": {
-              "zh": "Lightweight does not mean shallow：真正的机会是降低玩家进入深度体验的成本，同时保留向长期投入迁移的路径。",
-              "en": ""
-            },
-            "body": {
-              "zh": "这让我重新理解跨平台“轻量化”。如果只是删除系统、减少页面或降低信息密度，产品可能同时失去真正支撑长期留存和商业价值的深度。更合理的策略不是把产品做浅，而是让不同价值模式的玩家都能找到适合自己的进入方式：让 Attraction-led 玩家快速感知角色与即时价值；让愿意深入的玩家逐渐建立对 Build、资源与目标的理解；同时保留竞争、身份与社交价值，为更高投入的玩家提供持续可见的长期目标。产品需要控制的不是最终能有多复杂，而是玩家在什么阶段接触到哪一种复杂度。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-2c4dbdbd-bbad-4d4a-aa2a-4a0b0c392c36",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "07",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "体验策略",
-              "en": ""
-            },
-            "statement": {
-              "zh": "Lower Entry Cost · Build System Literacy · Preserve Long-term Investment",
-              "en": ""
-            },
-            "body": {
-              "zh": "Lower Entry Cost：前期优先呈现最容易理解的目标、角色价值和即时反馈，不要求用户一开始就理解完整系统。Build System Literacy：随着玩家继续游玩，逐步暴露资源关系、成长路径、角色组合与长期目标，让复杂度与玩家能力同步增长。Preserve Long-term Investment：当玩家已经形成更高的系统理解、竞争动机或社交身份后，产品继续提供可规划、可积累、可比较和可被他人感知的长期投入空间。这个策略同时影响 Feature Exposure、Progression Pacing、Monetization Surface 与 Social Feedback。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-dc07783e-954c-4bd7-82f4-f42c1e272548",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "08",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "从策略到交互",
-              "en": ""
-            },
-            "statement": {
-              "zh": "Progressive Disclosure 只是实现手段之一；真正的交互目标是让产品暴露的复杂度与玩家当前价值状态相匹配。",
-              "en": ""
-            },
-            "body": {
-              "zh": "前面的 Player Value Model 最终需要转化为具体的产品与交互决策。Feature Exposure 决定一个阶段应该让玩家看到多少系统；Information Architecture 决定哪些信息属于同一个当前目标；Task Continuity 减少玩家在尚未建立 System Literacy 时频繁跨系统切换；Interaction Container 则根据任务复杂度选择 System Page、Persistent Detail、Contextual Panel 或 Modal。商业化入口同样需要与当前价值来源一致：外观与角色内容更容易服务 Attraction-led Entry，角色强度、资源与抽取规划更接近 Mastery-led Engagement，而竞争优势、稀有度与社交可见性则与 Status / Power-led Monetization 联系更强。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "image-row-befa583c-ff2d-4fb3-8b9b-e4c27b1beb12",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "From Player Value to Product Decisions",
-              "en": ""
-            },
-            "items": [
-              {
-                "id": "image-row-item-9ee2c148-b0ac-4e64-b5e2-cb786875c370",
-                "alt": {
-                  "zh": "价值模式到系统暴露的设计决策",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "建议放一个代表性系统，展示玩家当前价值状态如何影响 Feature Exposure、Information Priority 与主要 Action，而不是只展示最终 UI。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "案例一：Value State → Product Decision → Interaction Change",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 2,
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "none"
-              },
-              {
-                "id": "image-row-item-81d146f0-7c03-4eb6-8f84-ae0d76b25373",
-                "alt": {
-                  "zh": "价值模式到商业化体验的设计决策",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "建议放一个涉及角色成长、抽取、活动或商业化的真实案例，说明不同价值来源如何改变信息组织、目标提示与付费入口的优先级。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "案例二：Value State → Monetization Surface → Interaction Change",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 2,
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "none"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-05530572-e6d2-4662-bd97-340e5bd40796",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "09",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "代表性系统",
-              "en": ""
-            },
-            "statement": {
-              "zh": "具体系统的作用，是证明这套价值模型如何影响真实产品决策，而不是补一组“改版后的页面”。",
-              "en": ""
-            },
-            "body": {
-              "zh": "这一部分建议只选 2–3 个最能体现策略变化的真实系统展开。一个案例可以体现如何降低首次接触复杂系统的理解门槛；一个案例体现玩家形成 System Mastery 后，信息结构如何支持规划、比较和长期目标；另一个案例体现竞争、商业化或社交场景中，如何让投入、优势与身份变得可感知。每个案例统一使用 Player State → Existing Behaviour → Friction → Product Decision → Interaction Change → Constraint 的结构。这样系统设计就成为前面模型的验证，而不是独立的 UI Case。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-dc25d29d-a839-486b-8f82-bc4376a50388",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "10",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "经验沉淀",
-              "en": ""
-            },
-            "statement": {
-              "zh": "最终沉淀的不是一套“轻量化 UI 规范”，而是一套从 Player Value 判断产品暴露与交互复杂度的方法。",
-              "en": ""
-            },
-            "body": {
-              "zh": "经过竞品研究与实际系统重构后，我将判断过程整理为一条更可复用的链路：Player Value State → Current Goal → Required System Literacy → Feature Exposure → Information Priority → Task Flow → Interaction Pattern → Feedback / Monetization Surface。它帮助我在面对成熟游戏时，不再首先问“页面应该怎么改”，而是先判断当前玩家为什么在这里、他现在理解什么、下一步需要建立什么认知，以及产品希望他继续形成什么样的长期关系。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-12cdb41c-c19b-419c-ac86-642c28162b4e",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "11",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "验证与边界",
-              "en": ""
-            },
-            "statement": {
-              "zh": "这是一个基于深度竞品观察与商业项目经验形成的 Working Model，而不是经过大规模行为数据验证的用户分群结论。",
-              "en": ""
-            },
-            "body": {
-              "zh": "目前模型主要来自两款轻量化产品的深度体验拆解，以及我在成熟商业手游项目中的长期观察，因此更适合被视为用于指导设计判断的 synthesis，而不是统计意义上的市场分布。它能够解释多个我在项目中反复观察到的现象，但仍需要更大样本的行为数据、付费数据、玩家访谈或长期 cohort analysis 才能验证不同路径出现的比例、迁移条件与商业贡献。因此作品集中不会将三种模式写成固定用户占比，也不会声称所有玩家都遵循同一条演化路线。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-bf12c5d7-e27b-489e-b99f-f8b9f3684f1f",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "12",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "设计结论",
-              "en": ""
-            },
-            "statement": {
-              "zh": "跨平台体验的核心不是把复杂产品压缩成简单产品，而是为不同深度的玩家建立一条可以逐渐进入复杂度、形成理解并持续投入的路径。",
-              "en": ""
-            },
-            "body": {
-              "zh": "这个项目最终让我把“手游到轻量平台”的问题，从界面适配提升为 Player Value 与 Product Strategy 的问题。玩家可以因为最表层的角色、美术或即时内容进入，也可以因为系统掌握、挑战、竞争或社交身份继续留下；设计需要做的，是让这些不同价值来源之间存在可理解、可迁移的路径。对于成熟游戏而言，真正需要被降低的是进入深度的成本，而不是深度本身。",
-              "en": ""
-            }
-          }
-        }
-      ],
-      "updatedAt": "2026-09-19T00:49:58.306Z"
-    },
-    "eli-early-stage-product-design-internship-1fk25s": {
-      "version": 1,
-      "templateInstances": [
-        {
-          "instanceId": "statement-longform-ae87b6f3-aec1-4e57-8f27-974869b1d3d1",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "01",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "产品背景",
-              "en": ""
-            },
-            "statement": {
-              "zh": "这是我第一次在真实互联网产品中理解：设计并不止发生在某一个页面里。",
-              "en": ""
-            },
-            "body": {
-              "zh": "实习期间，我进入正在研发中的 eli 项目。产品围绕恋爱心理内容展开，并包含社区、Vlog 分享与关系分析等方向。由于团队规模较小，我从早期 App 页面设计开始，逐渐接触开发协作、内容呈现、分享传播与上线运营。相比一个深度单点项目，这段经历更像是我第一次完整看到一个数字产品如何由不同触点共同组成。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-06062d32-2ed9-4097-8d17-f60e7e0d50c8",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "02",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "页面设计与迭代",
-              "en": ""
-            },
-            "statement": {
-              "zh": "从表达自己的设计风格，转向理解产品需要怎样保持一致。",
-              "en": ""
-            },
-            "body": {
-              "zh": "前期主要使用 Figma 参与 App 页面设计。设计经过多轮评审后，我开始意识到商业产品与课程练习最大的差异：页面不能只追求单张效果，而需要同时考虑产品内容、色彩体系、字体规范、间距和整体一致性。我通过分析已上线产品和设计案例不断调整方案，也逐渐形成了最早的 Design Consistency 意识。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "image-row-f55fce84-0d3b-4535-8969-a8ae05ae54c6",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "Early Product Interface Work",
-              "en": ""
-            },
-            "items": [
-              {
-                "id": "image-row-item-5a20bb71-de5b-4265-a974-e07b5d601b81",
-                "alt": {
-                  "zh": "eli 核心产品页面",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "展示课程、心理内容或关系分析等实际参与设计的产品页面。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "核心页面 / 内容模块 / 交互状态",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 2,
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "none"
-              },
-              {
-                "id": "image-row-item-3cba898d-948f-46fc-a066-b0ab4ee439bd",
-                "alt": {
-                  "zh": "页面规范与视觉迭代",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "展示评审后在字体、色彩、间距和页面一致性上的调整。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "Iteration / Typography / Spacing / Visual Consistency",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 2,
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "none"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-bde9b1c0-8b27-4323-8fde-845b09577485",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "03",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "产品触点",
-              "en": ""
-            },
-            "statement": {
-              "zh": "随着产品逐渐完整，我的工作也从核心界面延伸到了用户接触产品的其他位置。",
-              "en": ""
-            },
-            "body": {
-              "zh": "页面逻辑逐渐稳定后，我开始参与 Banner、内容页、分享文案与分享落地页，同时接触更多与技术实现相关的协作。后续还参与了宣传视频的后期、配音与字幕，以及内部测试阶段的体验反馈。这让我第一次意识到 Product Experience 不只由核心功能组成：用户从看到内容、打开分享链接，到真正进入产品和持续使用，中间的每一个 Touchpoint 都会影响对产品的理解。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "image-row-327d50d1-3002-447d-aa54-39dc1ddb7bdd",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "From Interface to Product Touchpoints",
-              "en": ""
-            },
-            "items": [
-              {
-                "id": "image-row-item-78df9349-6b11-4fa5-9f14-51aba7d2bcff",
-                "alt": {
-                  "zh": "产品内内容与宣传设计",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "Banner 与内容模块逐渐成为连接产品内容、视觉表达与用户注意力的重要触点。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "Banner / Content Page / Product Promotion",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 2,
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "none"
-              },
-              {
-                "id": "image-row-item-82a623d2-6ccc-478e-a0fe-13b5d5429359",
-                "alt": {
-                  "zh": "分享与传播触点",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "分享文案、链接落地页与视频内容让我开始从产品内部界面之外理解完整用户接触路径。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "Share Copy / Landing Page / Video",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 2,
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "none"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-87c843ad-1ded-490d-a715-c5c5697c49bd",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "04",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "内容与运营",
-              "en": ""
-            },
-            "statement": {
-              "zh": "产品进入上线阶段后，设计之外的内容质量和持续维护同样成为体验的一部分。",
-              "en": ""
-            },
-            "body": {
-              "zh": "后期随着 App 内容不断增加，我开始参与外文内容整理与翻译、文章编辑和发布，累计上传 300+ 篇内容，同时协助传播素材与上线支持。这部分工作本身并不是复杂的 UX 设计，但让我更早接触到产品上线后的 Content Operations，也让我理解到一个数字产品需要在设计、内容、品牌表达和长期运营之间持续保持一致。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-6e419b09-f6d1-4bdf-8ac5-72d4f2bd0a75",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "05",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "早期产品经验",
-              "en": ""
-            },
-            "statement": {
-              "zh": "This was my first experience seeing a digital product beyond individual screens.",
-              "en": ""
-            },
-            "body": {
-              "zh": "这段实习没有形成一个独立而深入的 UX Case，但它成为了我进入商业产品设计的起点。从页面设计、多轮评审、技术协作，到分享、内容、测试与运营，我第一次理解设计师需要融入产品本身，而不是只留下个人风格。它也让我在进入游戏行业之前，就已经接触到真实数字产品从研发到上线的基本工作方式。",
-              "en": ""
-            }
-          }
-        }
-      ],
-      "updatedAt": "2026-09-19T03:57:44.459Z"
-    },
-    "ai-assisted-gui-design-generative-visual-e-16j0qnx": {
-      "version": 1,
-      "templateInstances": [
-        {
-          "instanceId": "statement-longform-89174622-3153-4df9-8d00-c0c59b3bc9bb",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "01",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "项目背景",
-              "en": ""
-            },
-            "statement": {
-              "zh": "生成式 AI 可以快速扩大视觉探索范围，但成熟游戏的 GUI 不能因此失去已有的品牌与美术语言。",
-              "en": ""
-            },
-            "body": {
-              "zh": "在《非人学园》相关设计工作中，我参与生成式 AI 辅助的 GUI 视觉探索。项目并不是从空白风格开始，而是在已经建立的游戏视觉体系中寻找新的表现方向。因此核心问题不是“AI 能生成什么”，而是如何让 AI 输出受到既有 Style Language、构图逻辑和界面使用场景的约束，并最终进入可用的 GUI 设计。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-0daee479-24be-42cf-b422-f06ae2516db5",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "02",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "风格拆解",
-              "en": ""
-            },
-            "statement": {
-              "zh": "在开始生成之前，我先把“像这个游戏”拆成可以被描述和约束的视觉特征。",
-              "en": ""
-            },
-            "body": {
-              "zh": "我从现有 GUI 中整理色彩、材质、形状、装饰语言、构图密度与视觉重心等 Style Attributes，并区分哪些元素属于稳定的品牌识别，哪些部分可以被重新探索。这个过程帮助我把模糊的“保持原风格”转化为更具体的 Prompt 与 Visual Constraints，也降低了生成结果只追求表面风格相似、却无法真正进入界面的风险。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "universal-media-565e03b7-a967-42b7-9aa8-fc85a08fc504",
-          "templateId": "universal-media",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "Style Deconstruction",
-              "en": ""
-            },
-            "media": {
-              "type": "image",
-              "image": {}
-            },
-            "caption": {
-              "zh": "建议展示现有 GUI 的风格拆解：色彩、材质、形状、装饰元素、构图与可保留 / 可探索的视觉边界。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "statement-longform-b895cff4-db14-4b6b-8bdb-4a88f787121c",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "03",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "生成式探索",
-              "en": ""
-            },
-            "statement": {
-              "zh": "AI 的价值首先是扩大 Design Space，而不是一次生成最终答案。",
-              "en": ""
-            },
-            "body": {
-              "zh": "在明确视觉约束后，我通过 Prompt 与多轮生成快速探索多个方向，并有意识地控制材质、色彩、装饰密度、构图和氛围等变量。相比只追求一张“好看”的结果，我更关注不同方向之间为什么成立、哪些元素能够继续发展，以及哪些结果虽然视觉新鲜，但已经偏离游戏原有的 GUI 语言。生成阶段因此更接近快速 Visual Exploration，而不是直接生产最终素材。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "image-row-fff237cf-6787-47f8-b5e9-9855bf490c17",
-          "templateId": "image-row",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "Multi-direction Exploration",
-              "en": ""
-            },
-            "items": [
-              {
-                "id": "image-row-item-83c701e4-4f05-4d16-a878-2428902ccf03",
-                "alt": {
-                  "zh": "AI生成方向探索",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "展示同一需求下不同 Prompt 或视觉约束产生的多方向结果。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "Prompt / Direction A / Direction B / Direction C",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 2,
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "none"
-              },
-              {
-                "id": "image-row-item-2f1fa1ea-4f38-4db9-b748-a34e3605b4f1",
-                "alt": {
-                  "zh": "筛选与判断过程",
-                  "en": ""
-                },
-                "caption": {
-                  "zh": "展示哪些视觉特征被保留、哪些被舍弃，以及选择某一方向继续深化的原因。",
-                  "en": ""
-                },
-                "placeholder": {
-                  "zh": "Selection / Keep / Reject / Refine",
-                  "en": ""
-                },
-                "suggestedAspectRatio": "",
-                "suggestedImageCount": 2,
-                "imageDisplayMode": "natural",
-                "hoverPreviewMode": "none"
-              }
-            ]
-          }
-        },
-        {
-          "instanceId": "statement-longform-98910ba4-038a-4bc1-b8c3-2b2fe24978f9",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "04",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "人工收敛",
-              "en": ""
-            },
-            "statement": {
-              "zh": "生成结果只有经过筛选、重绘与界面适配之后，才真正成为 GUI 设计的一部分。",
-              "en": ""
-            },
-            "body": {
-              "zh": "AI 输出通常无法直接满足游戏界面对信息层级、尺寸、可读性与品牌一致性的要求。因此我会先进行人工筛选，再针对构图、形状、材质细节和局部表现进行修正与重绘，并将结果重新放回实际 GUI 场景中判断。项目反馈也会继续反向进入下一轮 Prompt 与视觉约束，使探索从开放发散逐步收敛到可被项目接受的方向。",
-              "en": ""
-            }
-          }
-        },
-        {
-          "instanceId": "direction-compare-d7fd3bac-4f61-4793-b505-53daa96e3eb6",
-          "templateId": "direction-compare",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "heading": {
-              "zh": "From Generation to GUI Integration",
-              "en": ""
-            },
-            "leftLabel": {
-              "zh": "AI Output",
-              "en": ""
-            },
-            "rightLabel": {
-              "zh": "Designer-led Refinement",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "开放探索",
-              "en": ""
-            },
-            "rightTitle": {
-              "zh": "项目收敛",
-              "en": ""
-            },
-            "leftDescription": {
-              "zh": "用于快速探索材质、构图和视觉氛围，但不直接作为最终 GUI 使用。",
-              "en": ""
-            },
-            "rightDescription": {
-              "zh": "通过人工选择、重绘、层级调整与实际界面适配，使视觉结果重新符合游戏既有体系与使用需求。",
-              "en": ""
-            },
-            "leftImage": null,
-            "rightImage": null,
-            "direction": "left-to-right"
-          }
-        },
-        {
-          "instanceId": "statement-longform-b1a4db79-6794-4d96-a371-e9c06b44378d",
-          "templateId": "statement-longform",
-          "regionId": "content",
-          "anchorId": "__end__",
-          "content": {
-            "sectionNumber": {
-              "zh": "05",
-              "en": ""
-            },
-            "leftTitle": {
-              "zh": "工作流沉淀",
-              "en": ""
-            },
-            "statement": {
-              "zh": "Style Deconstruction → Prompt → Multi-direction Generation → Human Selection → Refinement → UI Integration",
-              "en": ""
-            },
-            "body": {
-              "zh": "这段经历让我更明确地理解了生成式 AI 在商业 GUI 中的位置：它适合快速扩展方向、提供视觉变量和缩短探索时间，但不能替代设计师对品牌语言、信息层级和实际使用场景的判断。我的工作重点因此逐渐从“生成一张图”转向建立 Human-in-the-loop Workflow，让 AI 负责扩展可能性，由设计师负责定义边界、筛选质量并完成最终收敛。",
-              "en": ""
-            }
-          }
-        }
-      ],
-      "updatedAt": "2026-09-19T04:02:49.743Z"
     },
     "project-1op4ad7": {
       "version": 1,
@@ -2293,6 +1134,1179 @@
         }
       ],
       "updatedAt": "2026-09-19T04:15:35.686Z"
+    },
+    "project-1ua2677": {
+      "version": 1,
+      "templateInstances": [
+        {
+          "instanceId": "statement-longform-233060d1-59d6-49e4-ae61-734a794856af",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "01",
+              "en": "01"
+            },
+            "leftTitle": {
+              "zh": "问题背景",
+              "en": "Problem Context"
+            },
+            "statement": {
+              "zh": "当UI同时承担信息、任务引导和高频操作时，3D角色很容易退回成界面的背景。",
+              "en": "When UI simultaneously carries information, task guidance, and high-frequency operations, the 3D character can easily become background decoration."
+            },
+            "body": {
+              "zh": "成熟养成手游长期依赖文字、数字、资源入口和任务跳转组织玩家行为，这种结构能够高效承载复杂系统，但也容易让界面持续抢占注意力。随着项目希望把更多表现空间交给3D角色和场景，我开始重新审视一个问题：哪些信息必须即时出现，哪些操作需要稳定路径，哪些成长反馈应该重新让位给角色本身。",
+              "en": "Mature progression-based mobile games often organize player behavior through text, numbers, resource entry points, and task redirects. This structure efficiently supports complex systems, but it can also keep the interface in constant control of attention. As the project aimed to give more expressive space to 3D characters and environments, I began reconsidering which information truly needed to remain immediate, which operations required stable paths, and which progression feedback should give space back to the character."
+            }
+          }
+        },
+        {
+          "instanceId": "universal-media-7032a980-049d-4616-bca6-247c9aec0e5b",
+          "templateId": "universal-media",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "",
+              "en": "Universal Media"
+            },
+            "media": {
+              "type": "image",
+              "image": {
+                "imageId": "image-51c835b3-fa7c-4eea-be4c-4301a213f294",
+                "publicPath": "/images/published/template-images/project-1ua2677/image-51c835b3-fa7c-4eea-be4c-4301a213f294.png"
+              }
+            },
+            "caption": {
+              "zh": "",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "circle-summary-a2b1adc5-5ada-44f9-a3b5-b37dc9902e9d",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "",
+              "en": ""
+            },
+            "statement": {
+              "zh": "我最终聚焦的三个体验问题",
+              "en": "Three Experience Problems I Focused On"
+            },
+            "body": {
+              "zh": "- 成长操作长期占据角色区域\n- 装备合成依赖连续弹窗和玩家记忆\n- 竞技场承担验证养成结果的价值",
+              "en": "- Progression controls continuously occupy the character area, improving efficiency while weakening the character's own growth feedback.\n- Equipment synthesis relies on chained pop-ups and player memory, making it difficult to understand one's position in the full progression path.\n- The arena is meant to validate progression outcomes, yet its early presentation remained dominated by 2D information and pop-ups, weakening the sense of the player's team."
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-aa127d1a-9542-4b9d-9327-ee8bc02b50fa",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "02",
+              "en": "02"
+            },
+            "leftTitle": {
+              "zh": "交互判断",
+              "en": "Interaction Principle"
+            },
+            "statement": {
+              "zh": "目标不是减少UI，而是重新区分信息效率、连续操作与成长反馈的优先级。",
+              "en": "The goal was not to simply reduce UI, but to separate the priorities of information efficiency, continuous operations, and progression feedback."
+            },
+            "body": {
+              "zh": "高频资源判断和可升级状态仍然需要快速读取；升级、装备合成等连续操作需要稳定的位置和清晰路径；角色升级、队伍展示和关键成长结果则需要获得独立的表现空间。后续设计因此不再把所有内容继续集中到首屏，而是根据玩家当下要完成的任务重新分配界面权重和反馈节奏。",
+              "en": "High-frequency resource checks and upgrade states still needed to remain quickly readable. Continuous actions such as upgrading and equipment synthesis needed stable locations and clear paths. Character growth, team presentation, and key progression outcomes needed their own expressive space. The redesign therefore stopped treating the first screen as the place for everything and instead redistributed interface weight and feedback rhythm around the player's immediate task."
+            }
+          }
+        },
+        {
+          "instanceId": "figma-prototype-94c23e92-a1de-4391-a2dd-7ce817183066",
+          "templateId": "universal-media",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "早期交互原型",
+              "en": "Early Interaction Prototype"
+            },
+            "caption": {
+              "zh": "部分交互方向在后续研发中进入实际项目。",
+              "en": "Some of these interaction directions were later implemented in the production project."
+            },
+            "media": {
+              "type": "figma",
+              "figmaUrl": "https://www.figma.com/proto/CtcXJQyA7C5y40lJbsgoqn/Untitled?node-id=0-1&p=f&t=A5YjFYkxOQ7n3GQD-0&scaling=scale-down&content-scaling=fixed&starting-point-node-id=2%3A4",
+              "fallbackImage": {
+                "localImageId": "image-1d2a11cd-c23e-4ba2-a165-a616066258e0",
+                "publicPath": "/images/published/project-body/project-1ua2677/image-1d2a11cd-c23e-4ba2-a165-a616066258e0.png"
+              }
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-22c40df5-8327-4c56-8ee6-ba9eb3111d65",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "03",
+              "en": "03"
+            },
+            "leftTitle": {
+              "zh": "重点系统迭代",
+              "en": "Focused System Iterations"
+            },
+            "statement": {
+              "zh": "根据一测期间收集到的交互问题，我选择三个高频系统继续验证前面的判断。",
+              "en": "Based on interaction issues collected during the first test, I selected three high-frequency systems to further validate these principles."
+            },
+            "body": {
+              "zh": "升级升阶、装备合成与竞技场分别对应三个不同的问题：角色区域被操作占据、路径关系依赖记忆，以及玩法价值与界面表现不匹配。三个系统都经历了多版本调整，其中部分交互最终进入上线版本；竞技场的3D队伍方案则因实际版本限制没有完整采用。",
+              "en": "Level and star progression, equipment synthesis, and the arena each represented a different problem: controls occupying character space, path relationships relying on memory, and interface presentation failing to match the gameplay value of the system. All three went through multiple iterations. Some interactions were implemented in the shipped version, while the arena's 3D team presentation was not fully adopted due to production constraints."
+            }
+          }
+        },
+        {
+          "instanceId": "direction-compare-f5de4e51-ddc9-40c2-804c-7f64ccf7b130",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "升级 / 升星：让操作退出角色表现区",
+              "en": "Level / Star Progression: Moving Controls Out of Character Space"
+            },
+            "leftLabel": {
+              "zh": "早期",
+              "en": "Early"
+            },
+            "rightLabel": {
+              "zh": "迭代后",
+              "en": "After Iteration"
+            },
+            "leftTitle": {
+              "zh": "成长入口分散在角色下方",
+              "en": "Progression Controls Scattered Below the Character"
+            },
+            "rightTitle": {
+              "zh": "统一至右侧稳定操作区",
+              "en": "Unified into a Stable Right-Side Action Area"
+            },
+            "leftDescription": {
+              "zh": "升级与进阶入口分散在角色附近，长期占据模型展示区域，也增加了后续适配的实现压力。角色虽然是养成对象，却被大量操作控件持续覆盖。",
+              "en": "Upgrade and advancement controls were scattered around the character, continuously occupying model presentation space and increasing adaptation pressure during implementation. The character was the object of progression, yet remained covered by operational UI."
+            },
+            "rightDescription": {
+              "zh": "将主要成长操作集中到右侧稳定区域，使可升级状态更容易读取，也减少对角色区域的持续占用，为3D角色与成长反馈留出更多空间。",
+              "en": "Moving major progression actions into a stable right-side area made upgrade availability easier to read while reducing persistent UI occupation of the character area and creating more space for 3D presentation and progression feedback."
+            },
+            "leftImage": {
+              "imageId": "image-716b6e4b-037c-4879-a46b-c2956207515c",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-716b6e4b-037c-4879-a46b-c2956207515c.png",
+              "hoverPreviewMode": "none"
+            },
+            "rightImage": {
+              "imageId": "image-adf54a95-1cef-4260-875a-f4a8eed9fccc",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-adf54a95-1cef-4260-875a-f4a8eed9fccc.png",
+              "hoverPreviewMode": "none"
+            },
+            "direction": "left-to-right"
+          }
+        },
+        {
+          "instanceId": "direction-compare-06597f24-9cca-4a57-8de1-37ebbb88d767",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "装备合成：把依赖记忆的路径变成可见关系",
+              "en": "Equipment Synthesis: Making a Memory-Dependent Path Visible"
+            },
+            "leftLabel": {
+              "zh": "早期",
+              "en": "Early"
+            },
+            "rightLabel": {
+              "zh": "迭代后",
+              "en": "After Iteration"
+            },
+            "leftTitle": {
+              "zh": "单一路径与连续弹窗",
+              "en": "Single Paths and Chained Pop-Ups"
+            },
+            "rightTitle": {
+              "zh": "展开完整合成路径",
+              "en": "Expanded Full Synthesis Path"
+            },
+            "leftDescription": {
+              "zh": "早期方案主要通过弹窗展示单一装备路径。虽然装备图标可以继续点击，但返回和比较成本较高，玩家需要依赖记忆判断自己位于整条合成链的什么位置。",
+              "en": "The early version mainly used pop-ups to show one equipment path at a time. Although equipment icons could be opened further, returning and comparing were cumbersome, forcing players to rely on memory to understand where they were in the full synthesis chain."
+            },
+            "rightDescription": {
+              "zh": "与程序协作梳理装备关系，并参考市场上的合成类玩法，将完整路径平铺展示，使玩家能够直接看到当前位置、前置材料与后续方向，减少在弹窗之间反复确认。",
+              "en": "Working with engineering, I consolidated equipment relationships and referenced synthesis systems in existing games, presenting the full path in a flat structure so players could directly understand their current position, prerequisite materials, and next steps without repeatedly checking pop-ups."
+            },
+            "leftImage": {
+              "imageId": "image-d09c61b7-cb2a-476d-99cf-4a8e14784932",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-d09c61b7-cb2a-476d-99cf-4a8e14784932.png",
+              "hoverPreviewMode": "none"
+            },
+            "rightImage": {
+              "imageId": "image-fea47f73-5aca-4095-94e6-c51927adb342",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-fea47f73-5aca-4095-94e6-c51927adb342.png",
+              "hoverPreviewMode": "none"
+            },
+            "direction": "left-to-right"
+          }
+        },
+        {
+          "instanceId": "direction-compare-bc673ce9-0d01-4b5b-97f0-d28ce804d241",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "竞技场：尝试让养成结果回到队伍本身",
+              "en": "Arena: Bringing Progression Results Back to the Team"
+            },
+            "leftLabel": {
+              "zh": "早期",
+              "en": "Early"
+            },
+            "rightLabel": {
+              "zh": "探索方案",
+              "en": "Explored Direction"
+            },
+            "leftTitle": {
+              "zh": "主要依赖二维信息与弹窗",
+              "en": "Primarily Driven by 2D Information and Pop-Ups"
+            },
+            "rightTitle": {
+              "zh": "尝试以3D队伍承载战前表现",
+              "en": "Exploring 3D Team Presentation Before Battle"
+            },
+            "leftDescription": {
+              "zh": "竞技场是玩家验证养成结果的重要系统，但早期仍主要依赖二维信息与弹窗承载，信息密度较高，队伍自身的存在感较弱。",
+              "en": "The arena is an important system for validating player progression, yet the early version still relied largely on dense 2D information and pop-ups, leaving the team itself with limited presence."
+            },
+            "rightDescription": {
+              "zh": "我尝试将3D队伍直接放入场景，并把刷新、挑战等高频操作集中到右侧。最终版本没有采用完整的3D队伍展示，而改为左侧头像方案。这次迭代让我更清楚地看到，体验提升仍需要在表现价值、实现成本与既有系统边界之间取舍。",
+              "en": "I explored placing the 3D team directly in the scene while concentrating high-frequency actions such as refresh and challenge on the right. The final version did not adopt the full 3D team presentation and instead used player portraits on the left. This iteration clarified that experience improvements still need to balance presentation value, implementation cost, and existing system constraints."
+            },
+            "leftImage": {
+              "imageId": "image-23b662af-c3d9-458b-8ed9-249097c7c89c",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-23b662af-c3d9-458b-8ed9-249097c7c89c.png",
+              "hoverPreviewMode": "none"
+            },
+            "rightImage": {
+              "imageId": "image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0",
+              "publicPath": "/images/published/template-images/project-1ua2677/image-f8dc749e-683a-4a98-82fa-1e1a78fdeda0.png",
+              "hoverPreviewMode": "none"
+            },
+            "direction": "left-to-right"
+          }
+        }
+      ],
+      "updatedAt": "2026-09-21T13:38:40.732Z"
+    },
+    "project-e51ezw": {
+      "version": 1,
+      "templateInstances": [
+        {
+          "instanceId": "statement-longform-64ad4c06-061a-407e-88b0-de52ddd194c4",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "01",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "项目背景",
+              "en": ""
+            },
+            "statement": {
+              "zh": "跨平台重构真正需要回答的，不是“如何把手游做轻”，而是“如何让不同深度的玩家进入、理解并持续投入同一个产品”。",
+              "en": ""
+            },
+            "body": {
+              "zh": "项目基于一款长期运营的成熟手游展开，并尝试将核心体验延伸到更轻量的平台环境，其中目标载体之一为微信小程序。原产品已经拥有复杂的成长、抽取、资源和商业化系统，也存在大量已经形成稳定习惯的老玩家。新的平台环境带来的并不只是尺寸、包体或性能差异，更重要的是用户进入产品的门槛、使用时长和体验预期发生变化。因此，我没有把项目理解为一次简单的界面适配，而是重新研究：玩家为什么进入一款游戏、为什么留下、什么时候开始理解系统，以及不同阶段的价值感知如何进一步转化为投入和付费。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-2179b407-ddb6-4e39-846b-ae0127851c52",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "02",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "深度体验研究",
+              "en": ""
+            },
+            "statement": {
+              "zh": "我关注的不是竞品有哪些功能，而是玩家如何从“被内容吸引”逐渐进入“理解系统、形成投入并建立长期关系”。",
+              "en": ""
+            },
+            "body": {
+              "zh": "我对两款轻量化游戏进行了较长时间的体验拆解，记录新手阶段的目标设置、系统解锁、资源循环、角色成长、抽取、活动、付费入口以及社交关系的出现时机。分析重点不是做 Feature List，也不是比较 UI 风格，而是追踪玩家在不同阶段能够感知到什么价值、需要理解多少系统、为什么继续游玩，以及商业化如何逐渐进入玩家的决策。这个过程让我发现，仅用“轻度 / 中度 / 重度玩家”或“低氪 / 中氪 / 重氪”描述用户并不足以解释真实体验，因为对系统的理解程度与消费强度并不总是同步增长。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "universal-media-9a92b181-a1b7-4867-98e9-19b3b971ae6a",
+          "templateId": "universal-media",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "Player Journey & Monetization Observation",
+              "en": ""
+            },
+            "media": {
+              "type": "image",
+              "image": {
+                "imageId": "image-c9dbb815-f528-488e-94ad-f32bf16556b6",
+                "publicPath": "/images/published/template-images/project-e51ezw/image-c9dbb815-f528-488e-94ad-f32bf16556b6.png"
+              }
+            },
+            "caption": {
+              "zh": "建议放两款竞品的阶段性体验时间线：当前目标、系统解锁、角色成长、商业化入口、社交关系与玩家行为变化。重点展示“价值感知如何变化”，而不是普通竞品截图。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-fc9ef27d-4e2e-413b-9560-f95488f47161",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "03",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "核心观察",
+              "en": ""
+            },
+            "statement": {
+              "zh": "Spending Intensity 与 System Mastery 是两条不同的轴：花得更多，并不一定代表对游戏理解得更深。",
+              "en": ""
+            },
+            "body": {
+              "zh": "传统分层很容易把玩家想象成一条单向路径：越投入时间，就越懂游戏，也越愿意付费。但实际体验并不总是如此。一部分用户因为角色、美术、IP 或即时反馈进入游戏，在尚未理解完整数值体系时就已经愿意为外观或角色内容付费；另一部分用户会通过长期游玩、社区信息、Build、角色搭配和高难内容形成更深的 System Mastery，但他们并不一定成为最高消费用户；还有一部分用户的消费更多受到竞争优势、稀有度、排名、社群地位或身份展示驱动，即使本人对系统理解并没有同比例增加，也可能保持很高的 Spending Intensity。这个差异成为后续模型的起点。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "direction-compare-03eecdc3-bd9f-42ad-86ea-304ba96b3293",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "从静态用户分层到动态价值路径",
+              "en": ""
+            },
+            "leftLabel": {
+              "zh": "传统分层",
+              "en": ""
+            },
+            "rightLabel": {
+              "zh": "我的观察",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "Casual → Core → Whale",
+              "en": ""
+            },
+            "rightTitle": {
+              "zh": "Multiple Value Pathways",
+              "en": ""
+            },
+            "leftDescription": {
+              "zh": "将游戏理解、投入时间与付费强度默认看成同方向增长，容易忽略不同玩家进入商业化的真实原因。",
+              "en": ""
+            },
+            "rightDescription": {
+              "zh": "玩家可能因审美、角色依恋、系统掌握、竞争、身份或社交地位进入不同付费路径，并在长期体验中发生迁移。",
+              "en": ""
+            },
+            "leftImage": {
+              "imageId": "image-5c208fa5-04b2-4da8-8519-c02b6a3cff3b",
+              "publicPath": "/images/published/template-images/project-e51ezw/image-5c208fa5-04b2-4da8-8519-c02b6a3cff3b.png",
+              "hoverPreviewMode": "none"
+            },
+            "rightImage": {
+              "imageId": "image-ad68fd10-4bad-4cd2-b72b-2f6253a423dd",
+              "publicPath": "/images/published/template-images/project-e51ezw/image-ad68fd10-4bad-4cd2-b72b-2f6253a423dd.png",
+              "hoverPreviewMode": "none"
+            },
+            "direction": "left-to-right"
+          }
+        },
+        {
+          "instanceId": "statement-longform-22bdb546-0d86-4dce-83c4-d71d4cbcbe90",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "04",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "玩家价值演化模型",
+              "en": ""
+            },
+            "statement": {
+              "zh": "我将观察到的体验归纳为三种主要价值模式：Attraction-led Entry、Mastery-led Engagement 与 Status / Power-led Monetization。",
+              "en": ""
+            },
+            "body": {
+              "zh": "这三种模式不是固定 Persona，也不是所有玩家都必须依次经过的三个等级，而是玩家与产品建立关系时可能出现的主要价值状态。Attraction-led Entry 主要由角色、美术、IP、即时奖励或可见内容驱动，玩家对底层系统的理解有限，但可以快速形成情绪价值与低门槛付费。Mastery-led Engagement 发生在玩家开始主动理解 Build、数值、角色组合、资源效率和高难目标之后，价值来源从“拥有内容”进一步转向“掌握系统并完成挑战”。Status / Power-led Monetization 则更多由领先优势、稀有度、排名、社群身份或可见地位驱动，高消费并不必然意味着更高的系统理解。玩家可以在这些状态之间迁移，也可能直接从 Attraction-led 进入高消费的 Status / Power 路径。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-5e7d0fa5-92ed-435e-9e7e-6f0264e939ba",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "05",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "三种价值模式",
+              "en": ""
+            },
+            "statement": {
+              "zh": "不同阶段真正变化的不是“用户等级”，而是玩家判断游戏价值的依据。",
+              "en": ""
+            },
+            "body": {
+              "zh": "Attraction-led Entry：价值首先来自最容易被感知的内容，例如角色、美术、皮肤、IP、即时奖励与情绪反馈。此时系统理解较浅，任务和短期目标仍然承担主要引导作用，付费也更容易围绕可见内容发生。Mastery-led Engagement：玩家开始理解角色 Build、数值关系、抽取规划、资源分配和高难目标，并通过社区、攻略和长期实践提高 System Mastery。此时消费更可能围绕角色强度、资源效率、阵容完整性或计划性抽取展开。Status / Power-led Monetization：价值进一步转向领先、稀有、排名、社交影响力和身份展示。此时厂商需要维持的不只是数值优势，还包括“投入能够持续被看见”的社会反馈；部分高消费用户甚至会通过代练、托管或账号外包维持竞争状态，因此其 Spending Intensity 与实际游玩深度可能再次脱钩。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-b4245b67-a177-4040-92dd-fd5d729a0149",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "06",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "产品机会",
+              "en": ""
+            },
+            "statement": {
+              "zh": "Lightweight does not mean shallow：真正的机会是降低玩家进入深度体验的成本，同时保留向长期投入迁移的路径。",
+              "en": ""
+            },
+            "body": {
+              "zh": "这让我重新理解跨平台“轻量化”。如果只是删除系统、减少页面或降低信息密度，产品可能同时失去真正支撑长期留存和商业价值的深度。更合理的策略不是把产品做浅，而是让不同价值模式的玩家都能找到适合自己的进入方式：让 Attraction-led 玩家快速感知角色与即时价值；让愿意深入的玩家逐渐建立对 Build、资源与目标的理解；同时保留竞争、身份与社交价值，为更高投入的玩家提供持续可见的长期目标。产品需要控制的不是最终能有多复杂，而是玩家在什么阶段接触到哪一种复杂度。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-2c4dbdbd-bbad-4d4a-aa2a-4a0b0c392c36",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "07",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "体验策略",
+              "en": ""
+            },
+            "statement": {
+              "zh": "Lower Entry Cost · Build System Literacy · Preserve Long-term Investment",
+              "en": ""
+            },
+            "body": {
+              "zh": "Lower Entry Cost：前期优先呈现最容易理解的目标、角色价值和即时反馈，不要求用户一开始就理解完整系统。Build System Literacy：随着玩家继续游玩，逐步暴露资源关系、成长路径、角色组合与长期目标，让复杂度与玩家能力同步增长。Preserve Long-term Investment：当玩家已经形成更高的系统理解、竞争动机或社交身份后，产品继续提供可规划、可积累、可比较和可被他人感知的长期投入空间。这个策略同时影响 Feature Exposure、Progression Pacing、Monetization Surface 与 Social Feedback。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-dc07783e-954c-4bd7-82f4-f42c1e272548",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "08",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "从策略到交互",
+              "en": ""
+            },
+            "statement": {
+              "zh": "Progressive Disclosure 只是实现手段之一；真正的交互目标是让产品暴露的复杂度与玩家当前价值状态相匹配。",
+              "en": ""
+            },
+            "body": {
+              "zh": "前面的 Player Value Model 最终需要转化为具体的产品与交互决策。Feature Exposure 决定一个阶段应该让玩家看到多少系统；Information Architecture 决定哪些信息属于同一个当前目标；Task Continuity 减少玩家在尚未建立 System Literacy 时频繁跨系统切换；Interaction Container 则根据任务复杂度选择 System Page、Persistent Detail、Contextual Panel 或 Modal。商业化入口同样需要与当前价值来源一致：外观与角色内容更容易服务 Attraction-led Entry，角色强度、资源与抽取规划更接近 Mastery-led Engagement，而竞争优势、稀有度与社交可见性则与 Status / Power-led Monetization 联系更强。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "image-row-befa583c-ff2d-4fb3-8b9b-e4c27b1beb12",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "From Player Value to Product Decisions",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "image-row-item-9ee2c148-b0ac-4e64-b5e2-cb786875c370",
+                "alt": {
+                  "zh": "价值模式到系统暴露的设计决策",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "建议放一个代表性系统，展示玩家当前价值状态如何影响 Feature Exposure、Information Priority 与主要 Action，而不是只展示最终 UI。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "案例一：Value State → Product Decision → Interaction Change",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 2,
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-81d146f0-7c03-4eb6-8f84-ae0d76b25373",
+                "alt": {
+                  "zh": "价值模式到商业化体验的设计决策",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "建议放一个涉及角色成长、抽取、活动或商业化的真实案例，说明不同价值来源如何改变信息组织、目标提示与付费入口的优先级。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "案例二：Value State → Monetization Surface → Interaction Change",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 2,
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-05530572-e6d2-4662-bd97-340e5bd40796",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "09",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "代表性系统",
+              "en": ""
+            },
+            "statement": {
+              "zh": "具体系统的作用，是证明这套价值模型如何影响真实产品决策，而不是补一组“改版后的页面”。",
+              "en": ""
+            },
+            "body": {
+              "zh": "这一部分建议只选 2–3 个最能体现策略变化的真实系统展开。一个案例可以体现如何降低首次接触复杂系统的理解门槛；一个案例体现玩家形成 System Mastery 后，信息结构如何支持规划、比较和长期目标；另一个案例体现竞争、商业化或社交场景中，如何让投入、优势与身份变得可感知。每个案例统一使用 Player State → Existing Behaviour → Friction → Product Decision → Interaction Change → Constraint 的结构。这样系统设计就成为前面模型的验证，而不是独立的 UI Case。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-dc25d29d-a839-486b-8f82-bc4376a50388",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "10",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "经验沉淀",
+              "en": ""
+            },
+            "statement": {
+              "zh": "最终沉淀的不是一套“轻量化 UI 规范”，而是一套从 Player Value 判断产品暴露与交互复杂度的方法。",
+              "en": ""
+            },
+            "body": {
+              "zh": "经过竞品研究与实际系统重构后，我将判断过程整理为一条更可复用的链路：Player Value State → Current Goal → Required System Literacy → Feature Exposure → Information Priority → Task Flow → Interaction Pattern → Feedback / Monetization Surface。它帮助我在面对成熟游戏时，不再首先问“页面应该怎么改”，而是先判断当前玩家为什么在这里、他现在理解什么、下一步需要建立什么认知，以及产品希望他继续形成什么样的长期关系。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-12cdb41c-c19b-419c-ac86-642c28162b4e",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "11",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "验证与边界",
+              "en": ""
+            },
+            "statement": {
+              "zh": "这是一个基于深度竞品观察与商业项目经验形成的 Working Model，而不是经过大规模行为数据验证的用户分群结论。",
+              "en": ""
+            },
+            "body": {
+              "zh": "目前模型主要来自两款轻量化产品的深度体验拆解，以及我在成熟商业手游项目中的长期观察，因此更适合被视为用于指导设计判断的 synthesis，而不是统计意义上的市场分布。它能够解释多个我在项目中反复观察到的现象，但仍需要更大样本的行为数据、付费数据、玩家访谈或长期 cohort analysis 才能验证不同路径出现的比例、迁移条件与商业贡献。因此作品集中不会将三种模式写成固定用户占比，也不会声称所有玩家都遵循同一条演化路线。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-bf12c5d7-e27b-489e-b99f-f8b9f3684f1f",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "12",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "设计结论",
+              "en": ""
+            },
+            "statement": {
+              "zh": "跨平台体验的核心不是把复杂产品压缩成简单产品，而是为不同深度的玩家建立一条可以逐渐进入复杂度、形成理解并持续投入的路径。",
+              "en": ""
+            },
+            "body": {
+              "zh": "这个项目最终让我把“手游到轻量平台”的问题，从界面适配提升为 Player Value 与 Product Strategy 的问题。玩家可以因为最表层的角色、美术或即时内容进入，也可以因为系统掌握、挑战、竞争或社交身份继续留下；设计需要做的，是让这些不同价值来源之间存在可理解、可迁移的路径。对于成熟游戏而言，真正需要被降低的是进入深度的成本，而不是深度本身。",
+              "en": ""
+            }
+          }
+        }
+      ],
+      "updatedAt": "2026-09-22T02:44:14.174Z"
+    },
+    "eli-early-stage-product-design-internship-1fk25s": {
+      "version": 1,
+      "templateInstances": [
+        {
+          "instanceId": "statement-longform-ae87b6f3-aec1-4e57-8f27-974869b1d3d1",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "01",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "产品背景",
+              "en": ""
+            },
+            "statement": {
+              "zh": "这是我第一次在真实互联网产品中理解：设计并不止发生在某一个页面里。",
+              "en": ""
+            },
+            "body": {
+              "zh": "实习期间，我进入正在研发中的 eli 项目。产品围绕恋爱心理内容展开，并包含社区、Vlog 分享与关系分析等方向。由于团队规模较小，我从早期 App 页面设计开始，逐渐接触开发协作、内容呈现、分享传播与上线运营。相比一个深度单点项目，这段经历更像是我第一次完整看到一个数字产品如何由不同触点共同组成。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-06062d32-2ed9-4097-8d17-f60e7e0d50c8",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "02",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "页面设计与迭代",
+              "en": ""
+            },
+            "statement": {
+              "zh": "从表达自己的设计风格，转向理解产品需要怎样保持一致。",
+              "en": ""
+            },
+            "body": {
+              "zh": "前期主要使用 Figma 参与 App 页面设计。设计经过多轮评审后，我开始意识到商业产品与课程练习最大的差异：页面不能只追求单张效果，而需要同时考虑产品内容、色彩体系、字体规范、间距和整体一致性。我通过分析已上线产品和设计案例不断调整方案，也逐渐形成了最早的 Design Consistency 意识。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "image-row-f55fce84-0d3b-4535-8969-a8ae05ae54c6",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "Early Product Interface Work",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "image-row-item-5a20bb71-de5b-4265-a974-e07b5d601b81",
+                "alt": {
+                  "zh": "eli 核心产品页面",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "展示课程、心理内容或关系分析等实际参与设计的产品页面。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "核心页面 / 内容模块 / 交互状态",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 2,
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-3cba898d-948f-46fc-a066-b0ab4ee439bd",
+                "alt": {
+                  "zh": "页面规范与视觉迭代",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "展示评审后在字体、色彩、间距和页面一致性上的调整。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "Iteration / Typography / Spacing / Visual Consistency",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 2,
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-bde9b1c0-8b27-4323-8fde-845b09577485",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "03",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "产品触点",
+              "en": ""
+            },
+            "statement": {
+              "zh": "随着产品逐渐完整，我的工作也从核心界面延伸到了用户接触产品的其他位置。",
+              "en": ""
+            },
+            "body": {
+              "zh": "页面逻辑逐渐稳定后，我开始参与 Banner、内容页、分享文案与分享落地页，同时接触更多与技术实现相关的协作。后续还参与了宣传视频的后期、配音与字幕，以及内部测试阶段的体验反馈。这让我第一次意识到 Product Experience 不只由核心功能组成：用户从看到内容、打开分享链接，到真正进入产品和持续使用，中间的每一个 Touchpoint 都会影响对产品的理解。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "image-row-327d50d1-3002-447d-aa54-39dc1ddb7bdd",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "From Interface to Product Touchpoints",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "image-row-item-78df9349-6b11-4fa5-9f14-51aba7d2bcff",
+                "alt": {
+                  "zh": "产品内内容与宣传设计",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "Banner 与内容模块逐渐成为连接产品内容、视觉表达与用户注意力的重要触点。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "Banner / Content Page / Product Promotion",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 2,
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-82a623d2-6ccc-478e-a0fe-13b5d5429359",
+                "alt": {
+                  "zh": "分享与传播触点",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "分享文案、链接落地页与视频内容让我开始从产品内部界面之外理解完整用户接触路径。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "Share Copy / Landing Page / Video",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 2,
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-87c843ad-1ded-490d-a715-c5c5697c49bd",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "04",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "内容与运营",
+              "en": ""
+            },
+            "statement": {
+              "zh": "产品进入上线阶段后，设计之外的内容质量和持续维护同样成为体验的一部分。",
+              "en": ""
+            },
+            "body": {
+              "zh": "后期随着 App 内容不断增加，我开始参与外文内容整理与翻译、文章编辑和发布，累计上传 300+ 篇内容，同时协助传播素材与上线支持。这部分工作本身并不是复杂的 UX 设计，但让我更早接触到产品上线后的 Content Operations，也让我理解到一个数字产品需要在设计、内容、品牌表达和长期运营之间持续保持一致。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-6e419b09-f6d1-4bdf-8ac5-72d4f2bd0a75",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "05",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "早期产品经验",
+              "en": ""
+            },
+            "statement": {
+              "zh": "This was my first experience seeing a digital product beyond individual screens.",
+              "en": ""
+            },
+            "body": {
+              "zh": "这段实习没有形成一个独立而深入的 UX Case，但它成为了我进入商业产品设计的起点。从页面设计、多轮评审、技术协作，到分享、内容、测试与运营，我第一次理解设计师需要融入产品本身，而不是只留下个人风格。它也让我在进入游戏行业之前，就已经接触到真实数字产品从研发到上线的基本工作方式。",
+              "en": ""
+            }
+          }
+        }
+      ],
+      "updatedAt": "2026-09-19T03:57:44.459Z"
+    },
+    "ai-assisted-gui-design-generative-visual-e-16j0qnx": {
+      "version": 1,
+      "templateInstances": [
+        {
+          "instanceId": "statement-longform-89174622-3153-4df9-8d00-c0c59b3bc9bb",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "01",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "项目背景",
+              "en": ""
+            },
+            "statement": {
+              "zh": "生成式 AI 可以快速扩大视觉探索范围，但成熟游戏的 GUI 不能因此失去已有的品牌与美术语言。",
+              "en": ""
+            },
+            "body": {
+              "zh": "在《非人学园》相关设计工作中，我参与生成式 AI 辅助的 GUI 视觉探索。项目并不是从空白风格开始，而是在已经建立的游戏视觉体系中寻找新的表现方向。因此核心问题不是“AI 能生成什么”，而是如何让 AI 输出受到既有 Style Language、构图逻辑和界面使用场景的约束，并最终进入可用的 GUI 设计。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-0daee479-24be-42cf-b422-f06ae2516db5",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "02",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "风格拆解",
+              "en": ""
+            },
+            "statement": {
+              "zh": "在开始生成之前，我先把“像这个游戏”拆成可以被描述和约束的视觉特征。",
+              "en": ""
+            },
+            "body": {
+              "zh": "我从现有 GUI 中整理色彩、材质、形状、装饰语言、构图密度与视觉重心等 Style Attributes，并区分哪些元素属于稳定的品牌识别，哪些部分可以被重新探索。这个过程帮助我把模糊的“保持原风格”转化为更具体的 Prompt 与 Visual Constraints，也降低了生成结果只追求表面风格相似、却无法真正进入界面的风险。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "universal-media-565e03b7-a967-42b7-9aa8-fc85a08fc504",
+          "templateId": "universal-media",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "Style Deconstruction",
+              "en": ""
+            },
+            "media": {
+              "type": "image",
+              "image": {}
+            },
+            "caption": {
+              "zh": "建议展示现有 GUI 的风格拆解：色彩、材质、形状、装饰元素、构图与可保留 / 可探索的视觉边界。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "statement-longform-b895cff4-db14-4b6b-8bdb-4a88f787121c",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "03",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "生成式探索",
+              "en": ""
+            },
+            "statement": {
+              "zh": "AI 的价值首先是扩大 Design Space，而不是一次生成最终答案。",
+              "en": ""
+            },
+            "body": {
+              "zh": "在明确视觉约束后，我通过 Prompt 与多轮生成快速探索多个方向，并有意识地控制材质、色彩、装饰密度、构图和氛围等变量。相比只追求一张“好看”的结果，我更关注不同方向之间为什么成立、哪些元素能够继续发展，以及哪些结果虽然视觉新鲜，但已经偏离游戏原有的 GUI 语言。生成阶段因此更接近快速 Visual Exploration，而不是直接生产最终素材。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "image-row-fff237cf-6787-47f8-b5e9-9855bf490c17",
+          "templateId": "image-row",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "Multi-direction Exploration",
+              "en": ""
+            },
+            "items": [
+              {
+                "id": "image-row-item-83c701e4-4f05-4d16-a878-2428902ccf03",
+                "alt": {
+                  "zh": "AI生成方向探索",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "展示同一需求下不同 Prompt 或视觉约束产生的多方向结果。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "Prompt / Direction A / Direction B / Direction C",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 2,
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "none"
+              },
+              {
+                "id": "image-row-item-2f1fa1ea-4f38-4db9-b748-a34e3605b4f1",
+                "alt": {
+                  "zh": "筛选与判断过程",
+                  "en": ""
+                },
+                "caption": {
+                  "zh": "展示哪些视觉特征被保留、哪些被舍弃，以及选择某一方向继续深化的原因。",
+                  "en": ""
+                },
+                "placeholder": {
+                  "zh": "Selection / Keep / Reject / Refine",
+                  "en": ""
+                },
+                "suggestedAspectRatio": "",
+                "suggestedImageCount": 2,
+                "imageDisplayMode": "natural",
+                "hoverPreviewMode": "none"
+              }
+            ]
+          }
+        },
+        {
+          "instanceId": "statement-longform-98910ba4-038a-4bc1-b8c3-2b2fe24978f9",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "04",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "人工收敛",
+              "en": ""
+            },
+            "statement": {
+              "zh": "生成结果只有经过筛选、重绘与界面适配之后，才真正成为 GUI 设计的一部分。",
+              "en": ""
+            },
+            "body": {
+              "zh": "AI 输出通常无法直接满足游戏界面对信息层级、尺寸、可读性与品牌一致性的要求。因此我会先进行人工筛选，再针对构图、形状、材质细节和局部表现进行修正与重绘，并将结果重新放回实际 GUI 场景中判断。项目反馈也会继续反向进入下一轮 Prompt 与视觉约束，使探索从开放发散逐步收敛到可被项目接受的方向。",
+              "en": ""
+            }
+          }
+        },
+        {
+          "instanceId": "direction-compare-d7fd3bac-4f61-4793-b505-53daa96e3eb6",
+          "templateId": "direction-compare",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "heading": {
+              "zh": "From Generation to GUI Integration",
+              "en": ""
+            },
+            "leftLabel": {
+              "zh": "AI Output",
+              "en": ""
+            },
+            "rightLabel": {
+              "zh": "Designer-led Refinement",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "开放探索",
+              "en": ""
+            },
+            "rightTitle": {
+              "zh": "项目收敛",
+              "en": ""
+            },
+            "leftDescription": {
+              "zh": "用于快速探索材质、构图和视觉氛围，但不直接作为最终 GUI 使用。",
+              "en": ""
+            },
+            "rightDescription": {
+              "zh": "通过人工选择、重绘、层级调整与实际界面适配，使视觉结果重新符合游戏既有体系与使用需求。",
+              "en": ""
+            },
+            "leftImage": null,
+            "rightImage": null,
+            "direction": "left-to-right"
+          }
+        },
+        {
+          "instanceId": "statement-longform-b1a4db79-6794-4d96-a371-e9c06b44378d",
+          "templateId": "statement-longform",
+          "regionId": "content",
+          "anchorId": "__end__",
+          "content": {
+            "sectionNumber": {
+              "zh": "05",
+              "en": ""
+            },
+            "leftTitle": {
+              "zh": "工作流沉淀",
+              "en": ""
+            },
+            "statement": {
+              "zh": "Style Deconstruction → Prompt → Multi-direction Generation → Human Selection → Refinement → UI Integration",
+              "en": ""
+            },
+            "body": {
+              "zh": "这段经历让我更明确地理解了生成式 AI 在商业 GUI 中的位置：它适合快速扩展方向、提供视觉变量和缩短探索时间，但不能替代设计师对品牌语言、信息层级和实际使用场景的判断。我的工作重点因此逐渐从“生成一张图”转向建立 Human-in-the-loop Workflow，让 AI 负责扩展可能性，由设计师负责定义边界、筛选质量并完成最终收敛。",
+              "en": ""
+            }
+          }
+        }
+      ],
+      "updatedAt": "2026-09-19T04:02:49.743Z"
     }
   },
   "projectCatalog": {
@@ -2300,10 +2314,10 @@
       "isDynamic": true,
       "slug": "project-1ua2677",
       "route": "/work/project-1ua2677",
-      "titleZh": "从中心弹窗到分布式交互 3D时代的旧交互体系重构",
+      "titleZh": "从中心弹窗到分布式交互 3D时代任务型游戏的交互重构",
       "titleEn": "",
-      "summaryZh": "在保留成熟玩家操作习惯的前提下，重新审视以中心弹窗为核心的旧交互模式，使信息组织、操作路径与3D角色及场景表现形成更连续的体验。",
-      "summaryEn": "Modernising a mature modal-heavy interaction model while preserving learned player behaviours, redistributing information, and maintaining stronger continuity with 3D characters and environments.",
+      "summaryZh": "保留玩家对任务型游戏的快速操作的认知，迎合3D时代内容型游戏的交互迭代",
+      "summaryEn": "dd",
       "tagsZh": [],
       "tagsEn": [],
       "categoryZh": "商业项目 / Game UX / 交互体系重构",
@@ -2319,14 +2333,14 @@
       "collaborators": [],
       "tools": [],
       "coverImage": "",
-      "updatedAt": "2026-09-20T15:37:01.053Z",
+      "updatedAt": "2026-09-22T02:46:52.558Z",
       "portfolioTrack": "ux-ui",
       "titleLine1Zh": "从中心弹窗到分布式交互",
       "titleLine1En": "",
-      "titleLine2Zh": "3D时代的旧交互体系重构",
+      "titleLine2Zh": "3D时代任务型游戏的交互重构",
       "titleLine2En": "",
       "projectThemeColor": "#9FCB98",
-      "lastPublishedAt": "2026-09-20T15:13:12.902Z"
+      "lastPublishedAt": "2026-09-21T10:25:01.123Z"
     },
     "project-1ied3i": {
       "isDynamic": true,
@@ -2393,7 +2407,7 @@
       "titleLine2En": "",
       "portfolioTrack": "ux-ui",
       "projectThemeColor": "#9FCB98",
-      "lastPublishedAt": "2026-09-20T15:13:12.902Z"
+      "lastPublishedAt": "2026-09-21T10:25:01.123Z"
     },
     "project-1op4ad7": {
       "isDynamic": true,
@@ -2486,7 +2500,7 @@
       "updatedAt": "2026-09-20T15:37:10.178Z",
       "titleLine1Zh": "",
       "titleLine2Zh": "",
-      "lastPublishedAt": "2026-09-20T15:13:12.902Z",
+      "lastPublishedAt": "2026-09-21T10:25:01.123Z",
       "portfolioTrack": "ue"
     },
     "ai-assisted-gui-design-generative-visual-e-16j0qnx": {
@@ -2515,7 +2529,7 @@
       "updatedAt": "2026-09-20T15:37:12.178Z",
       "titleLine1Zh": "",
       "titleLine2Zh": "",
-      "lastPublishedAt": "2026-09-20T15:13:12.902Z",
+      "lastPublishedAt": "2026-09-21T10:25:01.123Z",
       "portfolioTrack": "ux-ui"
     },
     "case-odvwa3": {
@@ -4477,7 +4491,9 @@
     "project-e51ezw": "/images/published/covers/project-e51ezw.png",
     "project-1op4ad7": "/images/published/covers/project-1op4ad7.png",
     "googo-ai-pt5mwd": "/images/published/covers/googo-ai-pt5mwd.png",
-    "case-odvwa3": "/images/published/covers/case-odvwa3.png"
+    "case-odvwa3": "/images/published/covers/case-odvwa3.png",
+    "eli-early-stage-product-design-internship-1fk25s": "/images/published/covers/eli-early-stage-product-design-internship-1fk25s.png",
+    "ai-assisted-gui-design-generative-visual-e-16j0qnx": "/images/published/covers/ai-assisted-gui-design-generative-visual-e-16j0qnx.png"
   },
   "assets": [
     {
@@ -5270,6 +5286,48 @@
       "sourceStore": "",
       "sourceId": "public/images/published/covers/case-odvwa3.png",
       "publicPath": "/images/published/covers/case-odvwa3.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-1ua2677/image-51c835b3-fa7c-4eea-be4c-4301a213f294.png",
+      "publicPath": "/images/published/template-images/project-1ua2677/image-51c835b3-fa7c-4eea-be4c-4301a213f294.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-e51ezw/image-c9dbb815-f528-488e-94ad-f32bf16556b6.png",
+      "publicPath": "/images/published/template-images/project-e51ezw/image-c9dbb815-f528-488e-94ad-f32bf16556b6.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-e51ezw/image-5c208fa5-04b2-4da8-8519-c02b6a3cff3b.png",
+      "publicPath": "/images/published/template-images/project-e51ezw/image-5c208fa5-04b2-4da8-8519-c02b6a3cff3b.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/template-images/project-e51ezw/image-ad68fd10-4bad-4cd2-b72b-2f6253a423dd.png",
+      "publicPath": "/images/published/template-images/project-e51ezw/image-ad68fd10-4bad-4cd2-b72b-2f6253a423dd.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/covers/eli-early-stage-product-design-internship-1fk25s.png",
+      "publicPath": "/images/published/covers/eli-early-stage-product-design-internship-1fk25s.png"
+    },
+    {
+      "sourceAdapterId": "publish-plan-writeset",
+      "sourceDatabase": "",
+      "sourceStore": "",
+      "sourceId": "public/images/published/covers/ai-assisted-gui-design-generative-visual-e-16j0qnx.png",
+      "publicPath": "/images/published/covers/ai-assisted-gui-design-generative-visual-e-16j0qnx.png"
     }
   ]
 }

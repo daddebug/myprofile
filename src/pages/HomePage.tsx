@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { PageTransition } from "../components/PageTransition";
 import { InlineLayoutTextField } from "../components/template-tools/InlineLayoutTextField";
 import { useOwnerMode } from "../hooks/useOwnerMode";
@@ -11,14 +11,13 @@ import { getPublishedGeneratedAt } from "../lib/publishedPortfolio";
 import { HomeIntroTransition } from "./HomeIntroTransition";
 import { HomeHero } from "./HomeHero";
 import { HomeProjectFlow } from "./HomeProjectFlow";
-import { HomeContourBackground } from "./home-background/HomeContourBackground";
 import { HomeScrollIndicator } from "./HomeScrollIndicator";
 import { HomeScrollContainer } from "./HomeScrollContainer";
 import { HomeFixedLayer } from "./HomeFixedLayer";
 import { HomeFixedNav } from "./HomeFixedNav";
 import { TopViewportBlur } from "./TopViewportBlur";
-import { HomeProjectCanvas } from "./HomeProjectCanvas";
 import { isWebglSupported } from "./home-webgl/isWebglSupported";
+import { isFirstProjectCoverReady, subscribeFirstProjectCoverReady } from "./home-webgl/homeProjectCanvasRegistry";
 import "../project-presentation/portfolio2-layout.css";
 import "../project-presentation/project-end-sections.css";
 import "./home-v2.css";
@@ -28,6 +27,13 @@ import "./home-v2.css";
 // not touched this round) -- no longer used by this component itself,
 // which has no carousel.
 export const VISIBLE_COUNT = 3;
+
+const HomeContourBackground = lazy(() =>
+  import("./home-background/HomeContourBackground").then((module) => ({ default: module.HomeContourBackground })),
+);
+const HomeProjectCanvas = lazy(() =>
+  import("./HomeProjectCanvas").then((module) => ({ default: module.HomeProjectCanvas })),
+);
 
 export function HomePage() {
   const { locale, pathFor } = useLocale();
@@ -52,12 +58,24 @@ export function HomePage() {
   const scrollContentRef = useRef<HTMLDivElement | null>(null);
   const { scroll, progress: scrollProgress, velocity } = useLenisScroll(scrollWrapperRef, scrollContentRef);
 
-  // Phase 3: checked once, not per-frame -- if WebGL genuinely isn't
-  // available, HomeProjectCanvas is never mounted at all, no project's
-  // registry entry is ever marked ready, and every HomeProjectCard's DOM
-  // <img> simply stays visible at its default opacity (see
-  // homeProjectCanvasRegistry.ts's own comment on setProjectCoverReady).
-  const webglSupported = useMemo(() => isWebglSupported(), []);
+  // Keep the DOM images as the first-paint path; WebGL capability detection
+  // and the cover renderer can wait until after the page has painted.
+  const [webglSupported, setWebglSupported] = useState<boolean | null>(null);
+  const firstCoverReady = useSyncExternalStore(subscribeFirstProjectCoverReady, isFirstProjectCoverReady, () => false);
+  useEffect(() => {
+    let idleId: number | undefined;
+    const timerId = window.setTimeout(() => {
+      if ("requestIdleCallback" in window) {
+        idleId = window.requestIdleCallback(() => setWebglSupported(isWebglSupported()), { timeout: 800 });
+      } else {
+        setWebglSupported(isWebglSupported());
+      }
+    }, 100);
+    return () => {
+      window.clearTimeout(timerId);
+      if (idleId !== undefined) window.cancelIdleCallback(idleId);
+    };
+  }, []);
 
   const scrollToProjects = () => {
     // Lenis owns this container's scroll position via its own per-frame
@@ -80,6 +98,31 @@ export function HomePage() {
   // never happens hidden behind an already-gone overlay or, worse, before
   // one still covering it.
   const [revealed, setRevealed] = useState(false);
+  const [showContour, setShowContour] = useState(false);
+  const [webglWaitExpired, setWebglWaitExpired] = useState(false);
+
+  useEffect(() => {
+    if (!webglSupported || firstCoverReady) return undefined;
+    const timerId = window.setTimeout(() => setWebglWaitExpired(true), 5000);
+    return () => window.clearTimeout(timerId);
+  }, [webglSupported, firstCoverReady]);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !revealed || webglSupported === null
+      || (webglSupported && !firstCoverReady && !webglWaitExpired)) return undefined;
+    let idleId: number | undefined;
+    const timerId = window.setTimeout(() => {
+      if ("requestIdleCallback" in window) {
+        idleId = window.requestIdleCallback(() => setShowContour(true), { timeout: 1200 });
+      } else {
+        setShowContour(true);
+      }
+    }, 0);
+    return () => {
+      window.clearTimeout(timerId);
+      if (idleId !== undefined) window.cancelIdleCallback(idleId);
+    };
+  }, [revealed, webglSupported, firstCoverReady, webglWaitExpired]);
 
   // Every editable field is a LocalizedText -- edits always write into the
   // CURRENT viewing locale's slot, leaving the other locale's value
@@ -124,7 +167,7 @@ export function HomePage() {
         <TopViewportBlur />
 
         <HomeFixedLayer>
-          {webglSupported ? <HomeProjectCanvas scroll={scroll} velocity={velocity} /> : null}
+          {webglSupported ? <Suspense fallback={null}><HomeProjectCanvas scroll={scroll} velocity={velocity} /></Suspense> : null}
           <HomeFixedNav onWorkClick={scrollToProjects} />
           <HomeScrollIndicator progress={scrollProgress} />
         </HomeFixedLayer>
@@ -142,7 +185,7 @@ export function HomePage() {
                 HomeProjectFlow/the long-form section all carry their own
                 position:relative + z-index:1) without needing a
                 dedicated wrapper of its own. */}
-            <HomeContourBackground />
+            {showContour ? <Suspense fallback={null}><HomeContourBackground /></Suspense> : null}
 
             <HomeHero
               nameText={nameText}

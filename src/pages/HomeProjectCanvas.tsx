@@ -307,39 +307,22 @@ function HomeProjectCanvasScene({ scroll, velocity }: { scroll: number; velocity
       const isHardSkip = rectBottom < -(2 * size.height) || rect.top > 3 * size.height;
       (material.uniforms.uRectPixelSize.value as THREE.Vector2).set(rect.width, rect.height);
 
-      // Texture load / cover-replacement -- keyed on the registry's own
-      // coverUrl, checked every frame against what this material last
-      // loaded rather than via a React effect dependency, since the
-      // registry is a plain external store, not React state. A guard
-      // (`userData.loading`) stops a second load from starting while one
-      // for the same URL is already in flight.
-      if (material.userData.loadedCoverUrl !== entry.coverUrl && material.userData.loading !== entry.coverUrl) {
-        material.userData.loading = entry.coverUrl;
-        if (!entry.coverUrl) {
-          material.userData.loading = null;
-        } else {
-          const loader = new THREE.TextureLoader();
-          loader.load(
-            entry.coverUrl,
-            (texture) => {
-              texture.colorSpace = THREE.SRGBColorSpace;
-              const previousTexture = material.uniforms.uMap.value as THREE.Texture | null;
-              material.uniforms.uMap.value = texture;
-              material.userData.loadedCoverUrl = entry.coverUrl;
-              material.userData.loading = null;
-              material.userData.textureAspect = texture.image.width / texture.image.height;
-              material.userData.textureLoaded = true;
-              previousTexture?.dispose();
-            },
-            undefined,
-            () => {
-              // Load failed -- never marked ready below, so this
-              // project's DOM cover stays visible (the fallback is the
-              // absence of a "ready" flag, not a special branch).
-              material.userData.loading = null;
-            },
-          );
-        }
+      // Reuse the DOM fallback's decoded image so canvas takeover does
+      // not download the same cover a second time.
+      const shouldLoadCover = rectBottom > -size.height * 0.5 && rect.top < size.height * 1.5;
+      const fallbackImage = entry.element.querySelector("img");
+      const textureUrl = fallbackImage?.currentSrc ?? "";
+      if (shouldLoadCover && fallbackImage?.complete && fallbackImage.naturalWidth > 0 && textureUrl
+        && material.userData.loadedCoverUrl !== textureUrl) {
+        const texture = new THREE.Texture(fallbackImage);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.needsUpdate = true;
+        const previousTexture = material.uniforms.uMap.value as THREE.Texture | null;
+        material.uniforms.uMap.value = texture;
+        material.userData.loadedCoverUrl = textureUrl;
+        material.userData.textureAspect = fallbackImage.naturalWidth / fallbackImage.naturalHeight;
+        material.userData.textureLoaded = true;
+        previousTexture?.dispose();
       }
 
       // Section B: the hover texture loads unconditionally as soon as the
@@ -347,7 +330,7 @@ function HomeProjectCanvasScene({ scroll, velocity }: { scroll: number; velocity
       // textures when the card registers", so the very first hover on a
       // fresh page load already has a resolved texture to cross-fade to.
       material.uniforms.uHasHoverMap.value = material.userData.loadedHoverUrl && material.userData.loadedHoverUrl === entry.hoverUrl ? 1 : 0;
-      if (material.userData.loadedHoverUrl !== entry.hoverUrl && material.userData.loadingHover !== entry.hoverUrl) {
+      if ((isVisible || isProjectHovered(id)) && material.userData.loadedHoverUrl !== entry.hoverUrl && material.userData.loadingHover !== entry.hoverUrl) {
         material.userData.loadingHover = entry.hoverUrl;
         if (!entry.hoverUrl) {
           material.userData.loadingHover = null;
@@ -397,13 +380,7 @@ function HomeProjectCanvasScene({ scroll, velocity }: { scroll: number; velocity
         const textureAspect = (material.userData.textureAspect as number) ?? entry.ratio;
         applyCoverScale(material, rect.width, rect.height, textureAspect);
         mesh.visible = isVisible && !isHardSkip;
-        // "Ready" (DOM cover safe to hide) is about texture+geometry
-        // being synced, not current on-screen visibility -- fires once,
-        // regardless of culling, exactly as before this round.
-        if (!notifiedReady.current.has(id)) {
-          notifiedReady.current.add(id);
-          setProjectCoverReady(id, true);
-        }
+        // Keep the DOM image until the plane has actually drawn once.
       } else {
         mesh.visible = false;
       }
@@ -411,7 +388,15 @@ function HomeProjectCanvasScene({ scroll, velocity }: { scroll: number; velocity
   });
 
   const registerMesh = (id: string, record: MeshRecord | null) => {
-    if (record) meshRecords.current.set(id, record);
+    if (record) {
+      record.mesh.onAfterRender = () => {
+        if (record.material.userData.textureLoaded && !notifiedReady.current.has(id)) {
+          notifiedReady.current.add(id);
+          setProjectCoverReady(id, true);
+        }
+      };
+      meshRecords.current.set(id, record);
+    }
     else meshRecords.current.delete(id);
   };
 

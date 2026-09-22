@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ImageUp, Loader2 } from "lucide-react";
 import { ACCEPTED_COVER_TYPES, MAX_COVER_FILE_SIZE } from "../components/ProjectCoverEditor";
@@ -15,6 +15,7 @@ import {
   useProjectCoverReady,
 } from "./home-webgl/homeProjectCanvasRegistry";
 import { buildHoverPlaceholder } from "./home-webgl/homeHoverPlaceholder";
+import { optimizedHomeCoverUrl } from "./home-webgl/optimizedHomeCover";
 import "./home-project-flow.css";
 
 // Homepage 3.0, Haoqi-track Phase 1: the DOM layout system only. No WebGL
@@ -287,7 +288,7 @@ function computeDesktopLayout(
 function useElementWidth() {
   const ref = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return undefined;
     setWidth(el.getBoundingClientRect().width);
@@ -370,6 +371,7 @@ function HomeProjectCard({
   project,
   index,
   position,
+  measuredWidth,
   pathFor,
   isOwner,
   isEditingUI,
@@ -380,6 +382,7 @@ function HomeProjectCard({
   project: ResolvedProjectMetadata;
   index: number;
   position: Position | null;
+  measuredWidth: number;
   pathFor: (path: string) => string;
   isOwner: boolean;
   isEditingUI: boolean;
@@ -446,12 +449,15 @@ function HomeProjectCard({
   // WebGL leaves this false forever and the DOM <img> below just stays
   // visible, which is the whole fallback, not a special-cased branch.
   const webglReady = useProjectCoverReady(project.id);
+  const displayImageUrl = measuredWidth > 0
+    ? optimizedHomeCoverUrl(cover.image, position?.width ?? measuredWidth)
+    : "";
 
   const inner = (
     <>
-      {cover.image ? (
+      {displayImageUrl ? (
         <img
-          src={cover.image}
+          src={displayImageUrl}
           alt=""
           loading="lazy"
           style={{ opacity: webglReady ? 0 : 1 }}
@@ -582,6 +588,7 @@ export function HomeProjectFlow({
             project={project}
             index={index}
             position={layout?.positions.get(project.id) ?? null}
+            measuredWidth={containerWidth}
             pathFor={pathFor}
             isOwner={isOwner}
             isEditingUI={isEditingUI}
